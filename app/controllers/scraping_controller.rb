@@ -11,9 +11,23 @@ class ScrapingController < ApplicationController
 
   def scrape
     @id = params[:id]
-    @product = BestBuyApi.product_search(@id)
-    @product_for_display = PP.pp(@product, "")
-    render :layout => false
+    @raw_info = BestBuyApi.search_product(@id)
+    @product_for_display = PP.pp(@raw_info, "")
+    @scraped_features = {}
+    unless @raw_info.nil?
+      rules = ScrapingRules.find_all_by_product_type(Session.product_type)
+      rules.each do |r|
+        #Find content based on . seperated hierarchical description
+        i = r.remote_featurename.split(".")
+        c = @raw_info
+        i.each {|ii| c = c[ii] unless c.nil?}
+        if c
+          #Here we would apply Regex
+          @scraped_features[r.local_featurename] = c
+        end
+      end
+    end
+#    render :layout => false
   end
 
 end

@@ -1,3 +1,11 @@
 <h4>Product <%= @id %></h4>
-Raw JSON:
-<pre><%= @product_for_display %></pre>
+<div class="scraped_features">
+<% @scraped_features.each_pair do |k,v| %>
+	<div><label><%= k %></label><%= v %></div>
+<% end %>
+</div>
+
+<div class="raw_features">
+    Raw JSON:
+    <pre><%= @product_for_display %></pre>
+</div>
