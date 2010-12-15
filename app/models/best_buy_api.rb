@@ -1,44 +1,11 @@
-#--
-# Copyright (c) 2009 Jan Ulrich, Optemo Technologies
-# Copyright (c) 2006 Herryanto Siatono, Pluit Solutions
-#
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#++
-
 require 'net/http'
 require 'json'
-#require 'cgi'
 
-module BestBuy
+class BestBuyApi
   class RequestError < StandardError; end
-  
-  class Remix
+  class << self
     BESTBUY_URL = "http://www.bestbuy.ca/en-CA/api"
-    
-    attr_writer :debug # debug flag
-    attr_writer :options # search options
-    
-    def initialize
-      @debug = false
-      @options = {}
-    end
+    DEBUG = false
     
     #Find BestBuy products
     def product_search(id)
@@ -74,8 +41,7 @@ module BestBuy
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
     def send_request(type,opts,page=1)
-      @options[:page] = page
-      request_url = prepare_url(type,@options,opts)
+      request_url = prepare_url(type,{:page => page},opts)
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
       unless res.kind_of? Net::HTTPSuccess
@@ -84,9 +50,9 @@ module BestBuy
       JSON.parse(res.body)
     end
     
-  #  protected
+    protected
       def log(s)
-        return unless @debug
+        return unless DEBUG
         if defined? Rails.logger
           Rails.logger.error(s)
         elsif defined? LOGGER
@@ -96,7 +62,7 @@ module BestBuy
         end
       end
       
-   # private 
+    private 
       def prepare_url(type, opts, filters)
         qs = '' #options
         qf = '' #filters
@@ -115,6 +81,5 @@ module BestBuy
             "#{BESTBUY_URL}/#{type}/#{filters[:id]}.aspx"
         end
       end
-  end
-
+   end
 end
