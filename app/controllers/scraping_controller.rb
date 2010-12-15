@@ -6,10 +6,11 @@ class ScrapingController < ApplicationController
     else
       @category_id = 20218 # This is hard-coded to be digital cameras from Best Buy's feed
     end
-    @product_skus = Scraper.getSKUs(@category_id)
+    @product_skus = BestBuyApi.category_ids(@category_id)
   end
 
   def scrape
+    
   end
 
 end
