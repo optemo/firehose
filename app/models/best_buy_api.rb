@@ -9,7 +9,7 @@ class BestBuyApi
     
     #Find BestBuy products
     def product_search(id)
-      send_request('product',{:id => id})
+      send_request('product',{:id => id})["product"]
     end
     
     #Search through the  Categories

@@ -1,2 +1,9 @@
-<h1>Scraping#scrape</h1>
-<p>Find me in app/views/scraping/scrape.html.erb</p>
+<div class="scraped_features">
+<% @scraped_features.each_pair do |k,v| %>
+	<div><label><%= k %></label><%= v %></div>
+<% end %>
+</div>
+
+<div class="raw_features">
+<%= pp @raw_info %>
+</div>
