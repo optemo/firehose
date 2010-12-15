@@ -31,6 +31,7 @@ class BestBuyApi
         totalpages = res["totalPages"]
         ids += res["products"].map{|p|p["sku"]}
         page += 1
+        sleep 1
       end
       ids
     end
