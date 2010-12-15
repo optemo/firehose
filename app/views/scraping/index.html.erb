@@ -1,5 +1,7 @@
-<h2>Producing SKUs for category id <%= @category_id %></h2>
-<%= content_tag(:div, {:class => "strong", :id => "num_skus_found"}) %>
-<% @product_skus.each |s| do %>
+<%= content_tag(:div, content_tag(:h2, "Producing SKUs for category id #{@category_id}"), {:id => "header"}) %>
+<div id="content">
+<%= content_tag(:div, "Total of #{@product_skus.length} SKUs found", {:class => "strong", :id => "num_skus_found"}) %>
+<% @product_skus.each do |s| %>
     <%= content_tag(:div, "Data for sku #{s} still loading", {:class => "skus_to_fetch"}) %>
 <% end %>
+</div>

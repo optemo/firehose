@@ -1,0 +1,27 @@
+h2 {
+    text-align:center;
+}
+
+#header {
+    width: 100%;
+    background: #b6c4c5;
+    padding: 12px;
+    margin: 0;
+}
+
+#content {
+    width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.skus_to_fetch {
+    -moz-border-radius: 8px 8px 8px 8px;
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    width: 800px;
+    margin: 5px;
+}
