@@ -12,7 +12,7 @@ class ScrapingController < ApplicationController
   def scrape
     @id = params[:id]
     @raw_info = BestBuyApi.product_search(@id)
-    @product_for_display = PP.pretty_print(@raw_info, "")
+    @product_for_display = PP.pp(@raw_info, "")
     @scraped_features = {}
     unless @raw_info.nil?
       rules = ScrapingRule.find_all_by_product_type(Session.product_type)
