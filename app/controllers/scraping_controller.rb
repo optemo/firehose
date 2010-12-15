@@ -10,7 +10,10 @@ class ScrapingController < ApplicationController
   end
 
   def scrape
-    
+    @id = params[:id]
+    @product = BestBuyApi.product_search(@id)
+    @product_for_display = PP.pp(@product, "")
+    render :layout => false
   end
 
 end
