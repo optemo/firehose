@@ -45,7 +45,7 @@ class BestBuyApi
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
       unless res.kind_of? Net::HTTPSuccess
-        raise BestBuy::RequestError, "HTTP Response: #{res.code} #{res.message}"
+        raise BestBuyApi::RequestError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
       end
       JSON.parse(res.body)
     end
