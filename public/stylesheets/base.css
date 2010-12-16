@@ -62,3 +62,6 @@ a.title_link {
 	background: url("/images/demo-spindown-open.gif") no-repeat left center;
 	padding-left: 13px;
 }
+.label {
+	font-weight: bold;
+}

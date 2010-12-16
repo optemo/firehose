@@ -1,18 +1,21 @@
 <%= link_to "Product " + @id, "#", :class => "closed" %>
-<div>
-	<div class="scraped_features">
-	<% @scraped_features.each_pair do |k,v| %>
-		<div><label><%= k %></label><%= v[0] %> from: <%= v[1] %></div>
-	<% end %>
+<div style="margin-left: 10px;">
+	<div class="scraped_features togglable">
+		<%= link_to "Scraped Results", "#", :class => "open" %>
+		<div>
+		<% @scraped_features.each_pair do |k,v| %>
+			<div><span class="label"><%= k %> </span><%= v[0] %> from: <%= v[1] %> using: <%= v[2] %></div>
+		<% end %>
+		</div>
 	</div>
 	
-	<div class="available_features">
-	    Available Features
-	    <%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %>
+	<div class="available_features togglable">
+	    <%= link_to "Available Features", "#", :class => "closed" %>
+	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>
 	</div>
 	
 	
-	<div class="raw_features">
+	<div class="raw_features togglable">
 	    <%= link_to "Raw JSON:", "#" , :class => "closed" %>
 	    <div><pre><%= @product_for_display %></pre></div>
 	</div>

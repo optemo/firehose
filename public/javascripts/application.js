@@ -28,15 +28,14 @@ var js_activator = (function() {
         $('.skus_to_fetch').each(function () {
             if (flag == 0) {
                 var id = $(this).attr('data-id');
-				function toggle_function(item) {
-					item.find("> a").click(function() {
-						$(this).toggleClass("closed").toggleClass("open").next().toggle();
-						return false;
-					}).end().find("> div").hide();
-				}
 				$(this).load("/scrape/" + id, function(){
-					toggle_function($(this));
-					toggle_function($(this).find(".raw_features"));
+					$(this).find('.togglable').andSelf().each(function(){
+						var closed = $(this).find("> a").click(function() {
+							$(this).toggleClass("closed").toggleClass("open").next().toggle();
+							return false;
+						}).hasClass("closed");
+						if (closed) {$(this).find("> div").hide();}
+					});
 				});
 				
             }

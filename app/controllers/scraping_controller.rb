@@ -24,9 +24,9 @@ class ScrapingController < ApplicationController
         if c
           #Here we split the Regex
           regex = Regexp.new(r.regex)
-          res = regex.match(c)
+          res = regex.match(c.to_s)
           #Save the cleaned result
-          @scraped_features[r.local_featurename] = [res,c] if res
+          @scraped_features[r.local_featurename] = [res,c,r.regex] if res
         end
       end
     end
