@@ -110,3 +110,13 @@ div#silkscreen {
 	-moz-border-radius: 0 0 5px 5px;
 	-webkit-border-radius: 0 0 5px 5px;
 }
+
+.closed {
+	background: url("/images/demo-spindown-closed.gif") no-repeat left center;
+	padding-left: 13px;
+}
+
+.open {
+	background: url("/images/demo-spindown-open.gif") no-repeat left center;
+	padding-left: 13px;
+}

@@ -21,18 +21,23 @@ var js_activator = (function() {
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
             applySilkScreen();
-            rule_adder_div.load("/makerule?rule=" + escape($(this).html()));
+            rule_adder_div.load("/scraping_rules/new" + escape($(this).html()));
+            return false;
         });
 
         // Get the SKUs for each one from the category list
         $('.skus_to_fetch').each(function () {
             if (flag == 0) {
                 var id = $(this).attr('data-id');
-				$(this).load("/scrape/" + id, function() {
-					$(this).find("> a").click(function() {
-						$(this).toggleClass("source-closed").toggleClass("source-open").next().toggle();
+				function toggle_function(item) {
+					item.find("> a").click(function() {
+						$(this).toggleClass("closed").toggleClass("open").next().toggle();
 						return false;
 					}).end().find("> div").hide();
+				}
+				$(this).load("/scrape/" + id, function(){
+					toggle_function($(this));
+					toggle_function($(this).find(".raw_features"));
 				});
 				
             }

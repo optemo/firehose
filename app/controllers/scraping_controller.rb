@@ -22,32 +22,14 @@ class ScrapingController < ApplicationController
         c = @raw_info
         i.each {|ii| c = c[ii] unless c.nil?}
         if c
-          #Here we would apply Regex
-          @scraped_features[r.local_featurename] = c
+          #Here we split the Regex
+          regex = Regexp.new(r.regex)
+          res = regex.match(c)
+          #Save the cleaned result
+          @scraped_features[r.local_featurename] = [res,c] if res
         end
       end
     end
     render :layout => false
-  end
-
-  def makerule
-    @scraping_rule = ScrapingRule.new
-    @remote_rule_pair = {}
-    if params[:rule]
-      @remote_rule_pair = params[:rule].split("--").map(&:strip)
-    end
-    render :layout => false
-  end
-
-  def create
-    # Creates a new scraping rule.
-    # There are three kinds of rules, continuous, binary, and categorical.
-    @scraping_rule = ScrapingRule.new(params[:rule])
-    @scraping_rule.product_type = Session.product_type
-    if @scraping_rule.valid?
-      @scraping_rule.save
-    else
-      # error
-    end
   end
 end
