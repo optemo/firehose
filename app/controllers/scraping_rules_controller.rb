@@ -2,6 +2,11 @@ class ScrapingRulesController < ApplicationController
   layout false
   def new
     @scraping_rule = ScrapingRule.new
+    @remote_rule_pair = {}
+    if params[:rule]
+      @remote_rule_pair = params[:rule].split("--").map(&:strip)
+    end
+    render :layout => false
   end
   
   def edit
