@@ -27,13 +27,15 @@ h2 {
 }
 
 a.title_link {
-    color: #999;
     text-decoration:none;
 }
 
-a:hover.title_link {
-    color: #980905;
-    text-decoration: none;
+.featurehash li, a.title_link {
+	color: #4F3333;
+}
+
+.featurehash li:hover, a.title_link:hover {
+    color: #B50A05;
 }
 
 #rule_adder_div {
