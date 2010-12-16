@@ -20,7 +20,7 @@ var js_activator = (function() {
             var rule_adder_div = $('<div></div>');
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
-            rule_adder_div.load("/makerule");
+            rule_adder_div.load("/scraping_rules/new");
 			return false;
         });
 
