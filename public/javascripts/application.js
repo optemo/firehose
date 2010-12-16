@@ -20,7 +20,8 @@ var js_activator = (function() {
             var rule_adder_div = $('<div></div>');
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
-            rule_adder_div.load("/makerule");
+            applySilkScreen();
+            rule_adder_div.load("/makerule?rule=" + escape($(this).html()));
         });
 
         // Get the SKUs for each one from the category list
@@ -36,8 +37,30 @@ var js_activator = (function() {
 				
             }
             flag = 1;
-        });  
-
-      	
+        });
+        
+        $('#silkscreen').click(function () {removeSilkScreen();});
     });
 });
+
+function removeSilkScreen() {
+    $('#silkscreen').css({'display' : 'none', 'top' : '', 'left' : '', 'width' : ''}).fadeTo(0, 0).hide();
+    // outsidecontainer in the other project is the pop-up window. it's rule_adder_div in this project
+    $('#rule_adder_div').remove(); //css({'display' : 'none'});
+//    $('#rule_adder_div').unbind('click');
+}
+
+function applySilkScreen() {
+    /* This is used to get the document height for doing layout properly. */
+    /*http://james.padolsey.com/javascript/get-document-height-cross-browser/*/
+    current_height = (function() {
+        var D = document;
+        return Math.max(
+            Math.max(D.body.scrollHeight, D.documentElement.scrollHeight),
+            Math.max(D.body.offsetHeight, D.documentElement.offsetHeight),
+            Math.max(D.body.clientHeight, D.documentElement.clientHeight)
+        );
+    })();
+        	
+	$('#silkscreen').css({'height' : current_height+'px', 'display' : 'inline'}).fadeTo(0, 0.5);
+}

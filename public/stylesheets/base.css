@@ -1,11 +1,14 @@
 h2 {
     text-align:center;
 }
-
+html, body {
+    padding: 0;
+    margin: 0;
+}
 #header {
     width: 100%;
     background: #b6c4c5;
-    padding: 12px;
+    padding: 12px 0 12px;
     margin: 0;
 }
 
@@ -51,4 +54,59 @@ a.title_link {
     top:100px;
     left: 0;
     right: 0;
+    z-index: 4;
+}
+
+#rule_adder_div h4 {
+    margin-bottom:10px;
+}
+#rule_creation_key_value_display {
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid black;
+    margin: 5px;
+    padding: 3px;
+}
+
+/* New Scraping Rule Pop-up */
+#new_scraping_rule {
+    margin-top:5px;
+}
+
+#new_scraping_rule label
+{
+width: 130px;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block;
+}
+
+#new_scraping_rule input {
+    border: 1px solid #000;
+}
+#new_scraping_rule fieldset {
+    border: 1px solid #781351;
+    width: 380px;
+}
+
+#new_scraping_rule legend {
+border: 1px solid #000;
+padding: 2px 6px
+}
+
+/* Silkscreen from main application */
+div#silkscreen {
+	background-color: black;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 5000px;
+	z-index: 3;
+	opacity: 0.50;
+	filter: alpha(opacity = 50);
+	display: none;
+	border-radius: 0 0 5px 5px;
+	-moz-border-radius: 0 0 5px 5px;
+	-webkit-border-radius: 0 0 5px 5px;
 }

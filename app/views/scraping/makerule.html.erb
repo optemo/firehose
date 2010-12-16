@@ -1,14 +1,20 @@
 <h3>Create New Rule</h3>
-
+<h4>For key/value pair:</h4>
+<div id="rule_creation_key_value_display">
+    <%= @remote_rule_pair[0] %> : <%= @remote_rule_pair[1] %>
+</div>
 <%= form_for @scraping_rule, :remote => true do |f| %>
-  Type (Cont/Cat/Bin): <%= radio_button(:rule, :rule_type, "Cont") %> 
-  <%= radio_button(:rule, :rule_type, "Cat") %> 
-  <%= radio_button(:rule, :rule_type, "Bin") %><br/>  
-  Remote Name: <%= text_field(:rule, :remote_featurename, :size => 20) %><br/>
-  Local Name: <%= text_field(:rule, :local_featurename, :size => 20) %><br/>
-  Regex: <%= text_field(:rule, :regex, :size => 20) %><br/>
-  Min: <%= text_field(:rule, :min, :size => 20) %><br/>
-  Max: <%= text_field(:rule, :max, :size => 20) %><br/>
-  Valid Inputs (comma separate): <%= text_field(:rule, :valid_inputs, :size => 20) %><br/>
+<fieldset style="width: 380px;">
+  <legend><b>Enter New Rule</b></legend>
+  <%= label :rule, :rule_type, "Type" %> Cont <%= radio_button(:rule, :rule_type, "Cont") %> 
+  Cat <%= radio_button(:rule, :rule_type, "Cat") %> 
+  Bin <%= radio_button(:rule, :rule_type, "Bin") %><br/>  
+  <%= label :rule, :remote_featurename, "Remote Feature" %> <%= text_field(:rule, :remote_featurename, :size => 20) %><br/>
+  <%= label :rule, :local_featurename, "Local Feature" %> <%= text_field(:rule, :local_featurename, :size => 20) %><br/>
+  <%= label :rule, :regex, "Regular Expression" %> <%= text_field(:rule, :regex, :size => 20) %><br/>
+  <%= label :rule, :min, "Min" %> <%= text_field(:rule, :min, :size => 20) %><br/>
+  <%= label :rule, :max, "Max" %> <%= text_field(:rule, :max, :size => 20) %><br/>
+  <%= label :rule, :valid_inputs, "Valid Inputs (comma separate)" %> <%= text_field(:rule, :valid_inputs, :size => 20) %><br/>
   <%= f.submit "Create Rule" %>
+  </fieldset>
 <% end %>
