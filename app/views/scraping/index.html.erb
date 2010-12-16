@@ -2,6 +2,6 @@
 <div id="content">
 <%= content_tag(:div, "Total of #{@product_skus.length} SKUs found", {:class => "strong", :id => "num_skus_found"}) %>
 <% @product_skus.each do |s| %>
-    <%= content_tag(:div, "Data for sku #{s} still loading", {:class => "skus_to_fetch", :"data-id" => s}) %>
+    <%= content_tag(:div, "Data for sku #{s} is still loading", {:class => "skus_to_fetch", :"data-id" => s}) %>
 <% end %>
 </div>

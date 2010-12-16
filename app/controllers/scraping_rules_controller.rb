@@ -1,4 +1,5 @@
 class ScrapingRulesController < ApplicationController
+  layout false
   def new
     @scraping_rule = ScrapingRule.new
   end
