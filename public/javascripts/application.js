@@ -26,11 +26,18 @@ var js_activator = (function() {
         // Get the SKUs for each one from the category list
         $('.skus_to_fetch').each(function () {
             if (flag == 0) {
-                var result_div = $('<div></div>'), id = $(this).attr('data-id');
-                result_div.load("/scrape/" + id);
-                $(this).append(result_div);
+                var id = $(this).attr('data-id');
+				$(this).load("/scrape/" + id, function() {
+					$(this).find("> a").click(function() {
+						$(this).toggleClass("source-closed").toggleClass("source-open").next().toggle();
+						return false;
+					}).end().find("> div").hide();
+				});
+				
             }
             flag = 1;
-        });        
+        });  
+
+      	
     });
 });
