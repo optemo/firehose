@@ -1,4 +1,8 @@
 <h4>Product <%= @id %></h4>
+<div class="available_features">
+    Available Features
+    <%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info} %>
+</div>
 <div class="scraped_features">
 <% @scraped_features.each_pair do |k,v| %>
 	<div><label><%= k %></label><%= v %></div>

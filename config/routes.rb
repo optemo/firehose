@@ -1,7 +1,7 @@
 Firehose::Application.routes.draw do
-  get "scraping/index"
+#  get "scraping/index"
 
-  get "scraping/scrape"
+#  get "scraping/scrape"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -59,6 +59,12 @@ Firehose::Application.routes.draw do
   # This is a legacy wild controller route that's not recommended for RESTful applications.
   # Note: This route will make all actions in every controller accessible via GET requests.
   # match ':controller(/:action(/:id(.:format)))'
+
+  #resources :scraping
+  resources :scraping, :only => [:create], :as => "scraping_rules"
+  
+  match 'makerule' => 'scraping#makerule'
+  match 'create' => 'scraping#create'
   match 'scrape/:id' => 'scraping#scrape'
   root :to => "scraping#index"
 end

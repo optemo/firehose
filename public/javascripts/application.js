@@ -14,6 +14,16 @@ document.getElementsByTagName("head")[0].appendChild(script);
 var js_activator = (function() {
     $(document).ready(function(){
         flag = 0;
+        // Turn on overlay links for adding rules
+        $('.title_link').live('click', function() {
+            // Pop up the "rule adder" in the body
+            var rule_adder_div = $('<div></div>');
+            rule_adder_div.attr("id", "rule_adder_div");
+            $('body').append(rule_adder_div);
+            rule_adder_div.load("/makerule");
+        });
+
+        // Get the SKUs for each one from the category list
         $('.skus_to_fetch').each(function () {
             if (flag == 0) {
                 var result_div = $('<div></div>'), id = $(this).attr('data-id');
@@ -21,6 +31,6 @@ var js_activator = (function() {
                 $(this).append(result_div);
             }
             flag = 1;
-        });
+        });        
     });
 });

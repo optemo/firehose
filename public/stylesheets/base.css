@@ -25,3 +25,28 @@ h2 {
     width: 800px;
     margin: 5px;
 }
+
+a.title_link {
+    color: #999;
+    text-decoration:none;
+}
+
+a:hover.title_link {
+    color: #980905;
+    text-decoration: none;
+}
+
+#rule_adder_div {
+    position: absolute;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 400px;
+    background: #FFF;
+    padding: 5px;
+    -moz-border-radius: 8px;
+    border: 1px solid black;
+    top:100px;
+    left: 0;
+    right: 0;
+}

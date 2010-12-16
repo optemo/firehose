@@ -30,4 +30,8 @@ class ScrapingController < ApplicationController
     render :layout => false
   end
 
+  def makerule
+    @scraping_rule = ScrapingRule.new
+  end
+
 end

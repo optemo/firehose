@@ -1,0 +1,10 @@
+<ul class="featurehash">
+<% featurehash.each do |k,v| %>
+    <% unless v.class == Hash %>
+        <%= link_to raw("<li>#{k} -- #{v}"), "#", {:class => "title_link", :title => "Click for overlay"} %>
+    <% else %>
+        <%= render :partial => 'raw_features', :locals => {:featurehash => v} %>
+    <% end %>
+    
+<% end %>
+</ul>

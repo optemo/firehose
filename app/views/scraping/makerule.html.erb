@@ -1,0 +1,8 @@
+<h3>Create New Rule</h3>
+
+<%= form_for @scraping_rule, :remote => true do |f| %>
+  Type: <%= text_field(:rule, :type, :size => 20) %><br/>
+  Local Name: <%= text_field(:rule, :name, :size => 20) %><br/>
+  Regex: <%= text_field(:rule, :regex, :size => 20) %><br/>
+  <%= f.submit "Create Rule" %>
+<% end %>
