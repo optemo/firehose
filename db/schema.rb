@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101215000701) do
+ActiveRecord::Schema.define(:version => 20101216201247) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(:version => 20101215000701) do
     t.float  "min"
     t.float  "max"
     t.text   "valid_inputs"
+    t.string "rule_type"
   end
 
 end

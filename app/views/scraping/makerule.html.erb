@@ -1,8 +1,14 @@
 <h3>Create New Rule</h3>
 
 <%= form_for @scraping_rule, :remote => true do |f| %>
-  Type: <%= text_field(:rule, :type, :size => 20) %><br/>
-  Local Name: <%= text_field(:rule, :name, :size => 20) %><br/>
+  Type (Cont/Cat/Bin): <%= radio_button(:rule, :rule_type, "Cont") %> 
+  <%= radio_button(:rule, :rule_type, "Cat") %> 
+  <%= radio_button(:rule, :rule_type, "Bin") %><br/>  
+  Remote Name: <%= text_field(:rule, :remote_featurename, :size => 20) %><br/>
+  Local Name: <%= text_field(:rule, :local_featurename, :size => 20) %><br/>
   Regex: <%= text_field(:rule, :regex, :size => 20) %><br/>
+  Min: <%= text_field(:rule, :min, :size => 20) %><br/>
+  Max: <%= text_field(:rule, :max, :size => 20) %><br/>
+  Valid Inputs (comma separate): <%= text_field(:rule, :valid_inputs, :size => 20) %><br/>
   <%= f.submit "Create Rule" %>
 <% end %>
