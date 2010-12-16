@@ -27,11 +27,15 @@ var js_activator = (function() {
         $('.skus_to_fetch').each(function () {
             if (flag == 0) {
                 var id = $(this).attr('data-id');
-				$(this).load("/scrape/" + id, function() {
-					$(this).find("> a").click(function() {
-						$(this).toggleClass("source-closed").toggleClass("source-open").next().toggle();
+				function toggle_function(item) {
+					item.find("> a").click(function() {
+						$(this).toggleClass("closed").toggleClass("open").next().toggle();
 						return false;
 					}).end().find("> div").hide();
+				}
+				$(this).load("/scrape/" + id, function(){
+					toggle_function($(this));
+					toggle_function($(this).find(".raw_features"));
 				});
 				
             }

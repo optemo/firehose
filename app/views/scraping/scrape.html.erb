@@ -1,4 +1,4 @@
-<%= link_to "Product " + @id, "#" %>
+<%= link_to "Product " + @id, "#", :class => "closed" %>
 <div>
 	<div class="available_features">
 	    Available Features
@@ -11,7 +11,7 @@
 	</div>
 	
 	<div class="raw_features">
-	    Raw JSON:
-	    <pre><%= @product_for_display %></pre>
+	    <%= link_to "Raw JSON:", "#" , :class => "closed" %>
+	    <div><pre><%= @product_for_display %></pre></div>
 	</div>
 </div>

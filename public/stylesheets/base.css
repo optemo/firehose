@@ -52,3 +52,13 @@ a.title_link {
     left: 0;
     right: 0;
 }
+
+.closed {
+	background: url("/images/demo-spindown-closed.gif") no-repeat left center;
+	padding-left: 13px;
+}
+
+.open {
+	background: url("/images/demo-spindown-open.gif") no-repeat left center;
+	padding-left: 13px;
+}
