@@ -21,6 +21,7 @@ var js_activator = (function() {
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
             rule_adder_div.load("/makerule");
+			return false;
         });
 
         // Get the SKUs for each one from the category list

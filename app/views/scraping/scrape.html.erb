@@ -1,14 +1,16 @@
 <%= link_to "Product " + @id, "#", :class => "closed" %>
 <div>
+	<div class="scraped_features">
+	<% @scraped_features.each_pair do |k,v| %>
+		<div><label><%= k %></label><%= v[0] %> from: <%= v[1] %></div>
+	<% end %>
+	</div>
+	
 	<div class="available_features">
 	    Available Features
 	    <%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %>
 	</div>
-	<div class="scraped_features">
-	<% @scraped_features.each_pair do |k,v| %>
-		<div><label><%= k %></label><%= v %></div>
-	<% end %>
-	</div>
+	
 	
 	<div class="raw_features">
 	    <%= link_to "Raw JSON:", "#" , :class => "closed" %>

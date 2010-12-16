@@ -22,8 +22,11 @@ class ScrapingController < ApplicationController
         c = @raw_info
         i.each {|ii| c = c[ii] unless c.nil?}
         if c
-          #Here we would apply Regex
-          @scraped_features[r.local_featurename] = c
+          #Here we split the Regex
+          regex = Regexp.new(r.regex)
+          res = regex.match(c)
+          #Save the cleaned result
+          @scraped_features[r.local_featurename] = [res,c] if res
         end
       end
     end
