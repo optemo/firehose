@@ -1,11 +1,12 @@
 <div class="togglable">
 	<a href="#" class="closed">
-		<%= rule.local_featurename %> <%= rule.rule_type %>
-		<%= rule.min if rule.rule_type == "cont" %>
-		<%= rule.max if rule.rule_type == "cont" %>
-		<%= rule.valid_inputs if rule.rule_type == "cat" %>
+		<% r = rule[0] %>
+		<%= r.local_featurename %> <%= r.rule_type %>
+		<%= r.min if r.rule_type == "cont" %>
+		<%= r.max if r.rule_type == "cont" %>
+		<%= r.valid_inputs if r.rule_type == "cat" %>
 		25/25
 	</a>
-	<div>Content</div>
+	<div class="contentholder"><%= render :partial => 'r', :collection => rule %></div>
 </div>
 	
