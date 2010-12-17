@@ -25,7 +25,6 @@ var js_activator = (function() {
                // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
                // html attribute triggers written out in views/scraping_rules/new.html.erb.
                 $.validator.addMethod('regexp', function (possible_regexp) {
-                    var re = new RegExp(possible_regexp);
                     try {
                         g = new RegExp(possible_regexp);
                         return (Object.prototype.toString.call(g) === "[object RegExp]");
@@ -81,7 +80,7 @@ var js_activator = (function() {
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
 
-        $('#scraping_rule_submit').click(function() {
+/*        $('#scraping_rule_submit').click(function() {
            $.ajax({
                url: "/scraping_rules/create", 
                data: $('#new_scraping_rule').serialize(), 
@@ -90,7 +89,7 @@ var js_activator = (function() {
              }
            });
            return false; 
-        });
+        }); */
 
     });
 });
