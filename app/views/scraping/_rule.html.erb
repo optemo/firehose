@@ -1,0 +1,11 @@
+<div class="togglable">
+	<a href="#" class="closed">
+		<%= rule.local_featurename %> <%= rule.rule_type %>
+		<%= rule.min if rule.rule_type == "cont" %>
+		<%= rule.max if rule.rule_type == "cont" %>
+		<%= rule.valid_inputs if rule.rule_type == "cat" %>
+		25/25
+	</a>
+	<div>Content</div>
+</div>
+	

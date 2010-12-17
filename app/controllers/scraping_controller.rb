@@ -32,4 +32,10 @@ class ScrapingController < ApplicationController
     end
     render :layout => false
   end
+  
+  def rules
+    @category_id = 29171
+    @product_count = BestBuyApi.listing(@category_id)["total"]
+    @rules = ScrapingRule.find_all_by_product_type(Session.product_type)
+  end
 end

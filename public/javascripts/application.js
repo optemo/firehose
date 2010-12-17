@@ -30,19 +30,21 @@ var js_activator = (function() {
             if (flag == 0) {
                 var id = $(this).attr('data-id');
 				$(this).load("/scrape/" + id, function(){
-					$(this).find('.togglable').andSelf().each(function(){
-						var closed = $(this).find("> a").click(function() {
-							$(this).toggleClass("closed").toggleClass("open").next().toggle();
-							return false;
-						}).hasClass("closed");
-						if (closed) {$(this).find("> div").hide();}
-					});
+					$(this).find('.togglable').andSelf().each(function(){addtoggle($(this));});
 				});
 				
             }
             flag = 1;
         });
 
+        function addtoggle(item){
+			var closed = item.find("> a").click(function() {
+				$(this).toggleClass("closed").toggleClass("open").next().toggle();
+				return false;
+			}).hasClass("closed");
+			if (closed) {item.find("> div").hide();}
+		}
+		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
     });
 });

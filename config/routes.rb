@@ -66,5 +66,6 @@ Firehose::Application.routes.draw do
   
   #match 'makerule' => 'scraping#makerule'
   match 'scrape/:id' => 'scraping#scrape'
+  match "rules" => "scraping#rules"
   root :to => "scraping#index"
 end
