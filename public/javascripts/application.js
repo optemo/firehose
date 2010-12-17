@@ -21,7 +21,41 @@ var js_activator = (function() {
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
             applySilkScreen();
-            rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')));
+            rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')), (function () {
+               // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
+               // html attribute triggers written out in views/scraping_rules/new.html.erb.
+                $.validator.addMethod('regexp', function (possible_regexp) {
+                    var re = new RegExp(possible_regexp);
+                    try {
+                        g = new RegExp(possible_regexp);
+                        return (Object.prototype.toString.call(g) === "[object RegExp]");
+                    } catch (err) { // Not a valid regexp
+                        return false;
+                    }
+                }, 'Please enter a valid regular expression.');
+
+               /*
+               $.validator.addMethod("email", function(value, element)
+               {
+                   return this.optional(element) || /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z.]{2,5}$/i.test(value);
+               }, "Please enter a valid email address.");
+
+               $.validator.addMethod("username",function(value,element)
+               {
+                   return this.optional(element) || /^[a-zA-Z0-9._-]{3,16}$/i.test(value);
+               },"Username are 3-15 characters");
+
+               $.validator.addMethod("password",function(value,element)
+               {
+                   return this.optional(element) || /^[A-Za-z0-9!@#$%^&*()_]{6,16}$/i.test(value);
+               },"Passwords are 6-16 characters"); */
+
+               $('#new_scraping_rule').validate({
+                   rules: {
+                       regexp: "regexp",
+                   }
+               });               
+            }));
             return false;
         });
 
@@ -46,6 +80,17 @@ var js_activator = (function() {
 		}
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
+
+        $('#scraping_rule_submit').click(function() {
+           $.ajax(
+               url: "/scraping_rules/create", 
+               data: $('#new_scraping_rule').serialize(), 
+               success: function() {
+               alert("hooray");
+           });
+           return false; 
+        });
+
     });
 });
 

@@ -86,7 +86,7 @@ display: block;
 }
 #new_scraping_rule fieldset {
     border: 1px solid #781351;
-    width: 380px;
+    width: 450px;
 }
 
 #new_scraping_rule legend {
@@ -120,8 +120,20 @@ div#silkscreen {
 	background: url("/images/demo-spindown-open.gif") no-repeat left center;
 	padding-left: 13px;
 }
-.label {
+#new_scraping_rule.label {
 	font-weight: bold;
+	float:left;
+	
+}
+#new_scraping_rule label.error { 
+    float: none; 
+    color: red; 
+    padding-left: .5em; 
+    vertical-align: top;     
+    display: inline;
+    position: absolute;
+    right: 130px;
+    width: 150px;
 }
 .contentholder {
 	margin-left: 10px;
