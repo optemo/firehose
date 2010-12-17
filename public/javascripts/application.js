@@ -25,7 +25,6 @@ var js_activator = (function() {
                // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
                // html attribute triggers written out in views/scraping_rules/new.html.erb.
                 $.validator.addMethod('regexp', function (possible_regexp) {
-                    var re = new RegExp(possible_regexp);
                     try {
                         g = new RegExp(possible_regexp);
                         return (Object.prototype.toString.call(g) === "[object RegExp]");
@@ -89,7 +88,10 @@ var js_activator = (function() {
 				    data: $(this).parent().serialize(), 
 					type: "POST",
 				    success: function() {
-				    alert("hooray");
+				    window.location = "/rules";
+				  },
+					error: function() {
+				    alert("There is an error in the regular expression");
 				  }
 				});
 			}
