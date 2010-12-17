@@ -73,7 +73,7 @@ var js_activator = (function() {
 
         function addtoggle(item){
 			var closed = item.find("> a").click(function() {
-				$(this).toggleClass("closed").toggleClass("open").next().toggle();
+				$(this).toggleClass("closed").toggleClass("open").siblings('div').toggle();
 				return false;
 			}).hasClass("closed");
 			if (closed) {item.find("> div").hide();}

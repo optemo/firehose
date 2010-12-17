@@ -6,5 +6,21 @@
     Total of <%=@product_count%> SKUs found
 </div>
 <h3>Rules</h3>
-<%= render :partial => "rule", :collection => @rules.values %>
+<% @rules.each_pair do |feature,d| %>
+	<% save = "" %>
+	<% r = nil %>
+	<% d.each_pair do |rf,e| %>
+		<% save = render :partial => "remote_features", :locals => {:rf => rf, :data => e} %>
+		<%# Get the rule out of the hash %>
+		<% r = e["rule"] if r.nil? %>
+	<% end %>
+	<div class="togglable">
+		<a href="#" class="open title_link">
+			Feature: <span class="bold"><%= r.local_featurename %></span>&nbsp;&nbsp;&nbsp;
+			Type: <span class="bold"><%= r.rule_type %></span>&nbsp;&nbsp;&nbsp;
+			Restrictions: <%= restrictions(r) %>
+		</a>
+		<%= save %>
+	</div>
+<% end %>
 </div>

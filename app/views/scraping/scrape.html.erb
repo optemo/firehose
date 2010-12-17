@@ -3,9 +3,13 @@
 	<div class="scraped_features togglable">
 		<%= link_to "Scraped Results", "#", :class => "open" %>
 		<div>
-		<% @scraped_features.each_pair do |k,v| %>
-			<div><span class="label"><%= k %> </span><%= v[0] %> from: <%= v[1] %> using: <%= v[2] %></div>
-		<% end %>
+			<% @scraped_features.each_pair do |k,v| %>
+				<div class="contentholder"><span class="bold"><%= k %> </span>
+					<% v.each_pair do |l,w| %>
+						<%= w["products"][0][1] %> from: <%= w["products"][0][2] %> using: <%= w["rule"].regex %>
+					<% end %>
+				</div>
+			<% end %>
 		</div>
 	</div>
 	
@@ -14,9 +18,8 @@
 	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>
 	</div>
 	
-	
 	<div class="raw_features togglable">
 	    <%= link_to "Raw JSON:", "#" , :class => "closed" %>
-	    <div><pre><%= @product_for_display %></pre></div>
+	    <div><pre><%= PP.pp(@raw_info, "") %></pre></div>
 	</div>
 </div>

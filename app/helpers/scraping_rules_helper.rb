@@ -1,0 +1,2 @@
+module ScrapingRulesHelper
+end

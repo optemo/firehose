@@ -11,31 +11,16 @@ class ScrapingController < ApplicationController
 
   def scrape
     @id = params[:id]
-    @raw_info = BestBuyApi.product_search(@id)
-    @product_for_display = PP.pp(@raw_info, "")
-    @scraped_features = {}
-    unless @raw_info.nil?
-      rules = ScrapingRule.find_all_by_product_type(Session.product_type)
-      rules.each do |r|
-        #Find content based on . seperated hierarchical description
-        i = r.remote_featurename.split(".")
-        c = @raw_info
-        i.each {|ii| c = c[ii] unless c.nil?}
-        if c
-          #Here we split the Regex
-          regex = Regexp.new(r.regex)
-          res = regex.match(c.to_s)
-          #Save the cleaned result
-          @scraped_features[r.local_featurename] = [res,c,r.regex] if res
-        end
-      end
-    end
+    @scraped_features = ScrapingRule.scrape(@id, true)
+    @raw_info = @scraped_features.delete("RAW-JSON")
     render :layout => false
   end
   
   def rules
     @category_id = 29171
-    @product_count = BestBuyApi.listing(@category_id)["total"]
-    @rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    products = BestBuyApi.listing(@category_id)
+    @product_count = products["total"]
+    @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
+    #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
   end
 end

@@ -120,10 +120,10 @@ div#silkscreen {
 	background: url("/images/demo-spindown-open.gif") no-repeat left center;
 	padding-left: 13px;
 }
-#new_scraping_rule.label {
+#new_scraping_rule.label, .bold {
+{
 	font-weight: bold;
 	float:left;
-	
 }
 #new_scraping_rule label.error { 
     float: none; 
@@ -137,4 +137,7 @@ div#silkscreen {
 }
 .contentholder {
 	margin-left: 10px;
+}
+.edit_scraping_rule {
+	display: inline;
 }
