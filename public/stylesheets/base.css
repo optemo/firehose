@@ -120,7 +120,7 @@ div#silkscreen {
 	background: url("/images/demo-spindown-open.gif") no-repeat left center;
 	padding-left: 13px;
 }
-.label {
+.bold {
 	font-weight: bold;
 }
 .contentholder {

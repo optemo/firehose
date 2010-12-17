@@ -4,7 +4,7 @@
 		<%= link_to "Scraped Results", "#", :class => "open" %>
 		<div>
 			<% @scraped_features.each_pair do |k,v| %>
-				<div class="contentholder"><span class="label"><%= k %> </span>
+				<div class="contentholder"><span class="bold"><%= k %> </span>
 					<% v.each_pair do |l,w| %>
 						<%= w["products"][0][1] %> from: <%= w["products"][0][2] %> using: <%= w["rule"].regex %>
 					<% end %>
