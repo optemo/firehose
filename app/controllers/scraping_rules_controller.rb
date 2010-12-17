@@ -26,7 +26,17 @@ class ScrapingRulesController < ApplicationController
   end
   
   def update
-    
+    @scraping_rule = ScrapingRule.find(params[:id])
+
+    respond_to do |format|
+      if @scraping_rule.update_attributes(params[:scraping_rule])
+        format.html { render :nothing }
+        format.xml  { head :ok }
+      else
+        format.html { render :action => "edit" }
+        format.xml  { render :xml => @scraping_rule.errors, :status => :unprocessable_entity }
+      end
+    end
   end
   
   def delete

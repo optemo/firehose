@@ -3,7 +3,7 @@
 		Remote Feature: <span class="bold"><%= rf %></span>&nbsp;&nbsp;&nbsp;
 		Coverage: <span class="bold"><%= covered(data["products"].map{|e|e[1]}) %>/<%= data["products"].count %></span>&nbsp;&nbsp;&nbsp;
 	</a>
-		Regex: <%= form_for(data["rule"]) do |f|%> <%= f.text_field :regex%> <%= f.submit "Update" %> <% end %>
+		Regex: <%= form_for(data["rule"], :remote => true) do |f|%> <%= f.text_field :regex%> <%= f.submit "Update" %> <% end %>
 	
 	<div class="contentholder"><%= render :partial => 'product', :collection => data["products"] %></div>
 </div>
