@@ -82,11 +82,12 @@ var js_activator = (function() {
         $('#silkscreen').click(function () {removeSilkScreen();});
 
         $('#scraping_rule_submit').click(function() {
-           $.ajax(
+           $.ajax({
                url: "/scraping_rules/create", 
                data: $('#new_scraping_rule').serialize(), 
                success: function() {
                alert("hooray");
+             }
            });
            return false; 
         });
