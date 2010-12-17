@@ -1,5 +1,10 @@
 class ScrapingRule < ActiveRecord::Base
   #Validation for remote_featurename, local_featurename
+  validates :local_featurename,  :presence => true
+  validates :remote_featurename, :presence => true
+  validates :regex, :presence => true
+  validates :product_type, :presence => true
+  validates :rule_type, :presence => true
   
   def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
     #Return type: [local_featurename][remote_featurename]["products"] = [product_id,parsed,raw]

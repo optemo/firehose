@@ -126,3 +126,6 @@ div#silkscreen {
 .contentholder {
 	margin-left: 10px;
 }
+.edit_scraping_rule {
+	display: inline;
+}
