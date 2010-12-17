@@ -21,7 +21,7 @@ var js_activator = (function() {
             rule_adder_div.attr("id", "rule_adder_div");
             $('body').append(rule_adder_div);
             applySilkScreen();
-            rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).html()));
+            rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')));
             return false;
         });
 
@@ -36,6 +36,7 @@ var js_activator = (function() {
             }
             flag = 1;
         });
+
         function addtoggle(item){
 			var closed = item.find("> a").click(function() {
 				$(this).toggleClass("closed").toggleClass("open").next().toggle();

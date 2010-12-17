@@ -4,12 +4,12 @@
     <%= @remote_rule_pair[0] %> : <%= @remote_rule_pair[1] %>
 </div>
 <%= form_for @scraping_rule, :remote => true do |f| %>
-<fieldset style="width: 380px;">
+<fieldset>
   <legend><b>Enter New Rule</b></legend>
   <%= label :rule, :rule_type, "Type" %> <%= radio_button(:rule, :rule_type, "Cont") %> Cont
   <%= radio_button(:rule, :rule_type, "Cat") %> Cat 
   <%= radio_button(:rule, :rule_type, "Bin") %> Bin<br/>  
-  <%= label :rule, :remote_featurename, "Remote Feature" %> <%= text_field(:rule, :remote_featurename, :size => 20) %><br/>
+  <%= label :rule, :remote_featurename, "Remote Feature" %> <%= text_field(:rule, :remote_featurename, :size => 20, :value => @remote_rule_pair[0]) %><br/>
   <%= label :rule, :local_featurename, "Local Feature" %> <%= text_field(:rule, :local_featurename, :size => 20) %><br/>
   <%= label :rule, :regex, "Regular Expression" %> <%= text_field(:rule, :regex, :size => 20) %><br/>
   <%= label :rule, :min, "Min" %> <%= text_field(:rule, :min, :size => 20) %><br/>

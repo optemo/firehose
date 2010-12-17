@@ -1,7 +1,7 @@
 <ul class="featurehash">
 <% featurehash.each_pair do |k,v| %>
     <% unless v.class == Hash %>
-        <li><%= link_to "#{k} -- #{v}", "#", {:class => "title_link", :title => "Click for overlay", :'data-location' => (prefix + [k]).join(".")} %></li>
+        <li><%= link_to "#{k} -- #{v}", "#", {:class => "title_link", :title => "Click for overlay", :'data-location' => (prefix + [k]).join("."), :'data-spec' => v} %></li>
     <% else %>
 		<li><%= k %></li>
         <%= render :partial => 'raw_features', :locals => {:featurehash => v, :prefix => prefix + [k]} %>
