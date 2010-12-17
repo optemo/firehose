@@ -72,16 +72,32 @@ var js_activator = (function() {
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
 
-/*        $('#scraping_rule_submit').click(function() {
-           $.ajax({
-               url: "/scraping_rules/create", 
-               data: $('#new_scraping_rule').serialize(), 
-               success: function() {
-               alert("hooray");
-             }
-           });
+        $('#scraping_rule_submit').click(function() {
+			if ($(this).attr('Value') == "Update")
+			{
+				$.ajax({
+				    url: $(this).parent().attr("action"), 
+				    data: $(this).parent().serialize(), 
+					type: "POST",
+				    success: function() {
+				    window.location = "/rules";
+				  },
+					error: function() {
+				    alert("There is an error in the regular expression");
+				  }
+				});
+			}
+			else
+				$.ajax({
+				    url: "/scraping_rules/create", 
+				    data: $('#new_scraping_rule').serialize(), 
+					type: "POST",
+				    success: function() {
+				    alert("hooray");
+				  }
+				});
            return false; 
-        }); */
+        });
 
     });
 });

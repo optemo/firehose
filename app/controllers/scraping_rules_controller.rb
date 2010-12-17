@@ -30,7 +30,7 @@ class ScrapingRulesController < ApplicationController
 
     respond_to do |format|
       if @scraping_rule.update_attributes(params[:scraping_rule])
-        format.html { render :nothing }
+        format.html { render :nothing => true }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }

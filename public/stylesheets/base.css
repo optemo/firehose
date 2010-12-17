@@ -124,7 +124,6 @@ div#silkscreen {
 .bold
 {
 	font-weight: bold;
-	float:left;
 }
 #new_scraping_rule label.error { 
     float: none; 
