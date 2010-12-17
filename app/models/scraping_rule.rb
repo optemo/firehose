@@ -2,9 +2,10 @@ class ScrapingRule < ActiveRecord::Base
   #Validation for remote_featurename, local_featurename
   
   def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
-    #Return type: [local_featurename][remote_featurename][product_id] = [parsed,raw,rule]
+    #Return type: [local_featurename][remote_featurename]["products"] = [product_id,parsed,raw]
+    #             [local_featurename][remote_featurename]["rule"] = ScrapingRule
     #Three layer return type
-    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new{|j,m| j[m] = []}}}
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
       sleep 0.5 if defined? looped
@@ -21,7 +22,8 @@ class ScrapingRule < ActiveRecord::Base
             regex = Regexp.new(r.regex)
             parsed = regex.match(raw.to_s)
             #Save the cleaned result
-            data[r.local_featurename][r.remote_featurename][id] = [parsed.to_s,raw.to_s,r] if parsed
+            data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s] if parsed
+            data[r.local_featurename][r.remote_featurename]["rule"] = r
           end
         end
         #Include raw json for other functionality

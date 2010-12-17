@@ -6,7 +6,7 @@
 			<% @scraped_features.each_pair do |k,v| %>
 				<div class="contentholder"><span class="label"><%= k %> </span>
 					<% v.each_pair do |l,w| %>
-						<%= w[@id][0] %> from: <%= w[@id][1] %> using: <%= w[@id][2].regex %>
+						<%= w["products"][0][1] %> from: <%= w["products"][0][2] %> using: <%= w["rule"].regex %>
 					<% end %>
 				</div>
 			<% end %>

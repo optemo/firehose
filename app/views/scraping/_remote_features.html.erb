@@ -1,0 +1,8 @@
+<div class="togglable contentholder">
+	<a href="#" class="closed">
+		<%= rf %> <%= data["rule"].regex %>
+		Coverage: <%= covered(data["products"].map{|e|e[1]}) %>/<%= data["products"].count %>
+	</a>
+	<div class="contentholder"><%= render :partial => 'product', :collection => data["products"] %></div>
+</div>
+	

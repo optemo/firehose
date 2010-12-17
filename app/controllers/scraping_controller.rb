@@ -18,7 +18,9 @@ class ScrapingController < ApplicationController
   
   def rules
     @category_id = 29171
-    @product_count = BestBuyApi.listing(@category_id)["total"]
-    @rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    products = BestBuyApi.listing(@category_id)
+    @product_count = products["total"]
+    @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
+    #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
   end
 end
