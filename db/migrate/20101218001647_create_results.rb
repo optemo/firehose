@@ -4,6 +4,8 @@ class CreateResults < ActiveRecord::Migration
       t.integer :total
       t.integer :errors
       t.integer :warnings
+      t.string :product_type
+      t.string :category
 
       t.timestamps
     end

@@ -1,4 +1,6 @@
 Firehose::Application.routes.draw do
+  resources :results
+
 #  get "scraping/index"
 
 #  get "scraping/scrape"
