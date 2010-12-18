@@ -7,9 +7,9 @@ module ScrapingHelper
   def restrictions(rule)
     case rule.rule_type
     when "cont"
-      r.min + " - " + r.max
+      rule.min.to_s + " - " + rule.max.to_s
     when "cat"
-		  r.valid_inputs
+		  rule.valid_inputs
 		else
 		  "None"
 	  end

@@ -13,7 +13,22 @@ document.getElementsByTagName("head")[0].appendChild(script);
 
 var js_activator = (function() {
     $(document).ready(function(){
-        flag = 0;
+        $.validator.addMethod('regexp', function (possible_regexp, element) {
+            try {
+                g = new RegExp(possible_regexp);
+                return (Object.prototype.toString.call(g) === "[object RegExp]");
+            } catch (err) { // Not a valid regexp
+                return false;
+            }
+        }, 'Invalid regular expression.');
+
+        $.validator.addMethod('ifcont', function (value, element) {
+            if ($('#rule_rule_type_cont:checked').length)
+                return /[-+]?[0-9]*\.?[0-9]+/.test(value);
+            else
+                return true;
+        }, 'Min / Max needed');
+
         // Turn on overlay links for adding rules
         $('.title_link').live('click', function() {
             // Pop up the "rule adder" in the body
@@ -24,22 +39,6 @@ var js_activator = (function() {
             rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')), (function () {
                 // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
                 // html attribute triggers written out in views/scraping_rules/new.html.erb.
-                $.validator.addMethod('regexp', function (possible_regexp, element) {
-                    try {
-                        g = new RegExp(possible_regexp);
-                        return (Object.prototype.toString.call(g) === "[object RegExp]");
-                    } catch (err) { // Not a valid regexp
-                        return false;
-                    }
-                }, 'Please enter a valid regular expression.');
-
-                $.validator.addMethod('ifcont', function (value, element) {
-                    if ($('#rule_rule_type_cont:checked').length)
-                        return /[-+]?[0-9]*\.?[0-9]+/.test(value);
-                    else
-                        return true;
-                }, 'Min / Max needed');
-
                 $('#new_scraping_rule').validate({
                     rules: {
                         regexp: "regexp",
@@ -49,17 +48,29 @@ var js_activator = (function() {
             }));
             return false;
         });
+        
+        $('.edit_scraping_rule').each(function() {
+            $(this).validate({
+                rules: {
+                    regexp: "regexp"
+                },
+                errorPlacement: function(error, element){
+                    error.appendTo( element.parent());
+                }
+            }); 
+        });
 
+        run_for_one_sku_flag = 0;
         // Get the SKUs for each one from the category list
         $('.skus_to_fetch').each(function () {
-            if (flag == 0) {
+            if (run_for_one_sku_flag == 0) {
                 var id = $(this).attr('data-id');
 				$(this).load("/scrape/" + id, function(){
 					$(this).find('.togglable').andSelf().each(function(){addtoggle($(this));});
 				});
 				
             }
-            flag = 1;
+            run_for_one_sku_flag = 1; // Just run this once for the time being, on the first SKU
         });
 
         function addtoggle(item){
@@ -75,17 +86,19 @@ var js_activator = (function() {
         $('#scraping_rule_submit').click(function() {
 			if ($(this).attr('Value') == "Update")
 			{
-				$.ajax({
-				    url: $(this).parent().attr("action"), 
-				    data: $(this).parent().serialize(), 
-					type: "POST",
-				    success: function() {
-				    window.location = "/rules";
-				  },
-					error: function() {
-				    alert("There is an error in the regular expression");
-				  }
-				});
+                if ($(this).parent().validate().valid()) { // Make sure the form is valid.
+    				$.ajax({
+    				    url: $(this).parent().attr("action"), 
+    				    data: $(this).parent().serialize(), 
+    					type: "POST",
+    				    success: function() {
+    				    window.location = "/rules";
+    				  },
+    					error: function() {
+    				    alert("There is an error in the regular expression");
+    				  }
+    				});
+				}
 			}
 			else
 				$.ajax({
