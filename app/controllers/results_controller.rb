@@ -18,7 +18,7 @@ class ResultsController < ApplicationController
     @category_id = @result.category
     @product_count = @result.total
     @rules =  Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
-    delinquents.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
+    @result.delinquents.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
       d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
         @rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
         @rules[local_featurename][remote_featurename]["rule"] = d.first[2]
@@ -26,7 +26,7 @@ class ResultsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html { render "scraping#rules"}
+      format.html # show.html.erb
       format.xml  { render :xml => @result }
     end
   end

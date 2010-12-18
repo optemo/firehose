@@ -1,7 +1,7 @@
 module ScrapingHelper
-  def covered(array)
+  def notcovered(array)
     #Used to calculate feed coverage
-    array.inject(0){|res,elem| res += 1 if !elem.blank?}
+    array.inject(0){|res,elem| res += 1 if elem.blank?} || 0
   end
   
   def restrictions(rule)

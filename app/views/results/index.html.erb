@@ -13,8 +13,8 @@
 <% @results.each do |result| %>
   <tr>
     <td><%= result.total %></td>
-    <td><%= result.errors %></td>
-    <td><%= result.warnings %></td>
+    <td><%= result.error_count %></td>
+    <td><%= result.warning_count %></td>
     <td><%= link_to 'Show', result %></td>
     <td><%= link_to 'Edit', edit_result_path(result) %></td>
     <td><%= link_to 'Destroy', result, :confirm => 'Are you sure?', :method => :delete %></td>

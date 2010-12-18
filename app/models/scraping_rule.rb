@@ -28,7 +28,7 @@ class ScrapingRule < ActiveRecord::Base
             regex = Regexp.new(r.regex)
             parsed = regex.match(raw.to_s)
             #Save the cleaned result
-            data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s] if parsed
+            data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s]
             data[r.local_featurename][r.remote_featurename]["rule"] = r
           end
         end
