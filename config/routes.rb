@@ -63,6 +63,7 @@ Firehose::Application.routes.draw do
   #resources :scraping
   #resources :scraping, :only => [:create], :as => "scraping_rules"
   resources :scraping_rules, :except => [:show, :index]
+  resources :results
   
   #match 'makerule' => 'scraping#makerule'
   match 'scrape/:id' => 'scraping#scrape'

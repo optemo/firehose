@@ -23,4 +23,5 @@ class ScrapingController < ApplicationController
     @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
     #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
   end
+
 end
