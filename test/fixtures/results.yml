@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  total: 1
+  errors: 1
+  warnings: 1
+
+two:
+  total: 1
+  errors: 1
+  warnings: 1
