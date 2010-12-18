@@ -2,8 +2,8 @@ class CreateResults < ActiveRecord::Migration
   def self.up
     create_table :results do |t|
       t.integer :total
-      t.integer :errors
-      t.integer :warnings
+      t.integer :error_count
+      t.integer :warning_count
       t.string :product_type
       t.string :category
 

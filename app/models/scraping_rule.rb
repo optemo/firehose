@@ -5,6 +5,7 @@ class ScrapingRule < ActiveRecord::Base
   validates :regex, :presence => true
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
+  has_many :delinquents
   
   def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
     #Return type: [local_featurename][remote_featurename]["products"] = [product_id,parsed,raw]

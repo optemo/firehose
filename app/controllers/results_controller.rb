@@ -14,9 +14,19 @@ class ResultsController < ApplicationController
   # GET /results/1.xml
   def show
     @result = Result.find(params[:id])
+    
+    @category_id = @result.category
+    @product_count = @result.total
+    @rules =  Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    delinquents.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
+      d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
+        @rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
+        @rules[local_featurename][remote_featurename]["rule"] = d.first[2]
+      end
+    end
 
     respond_to do |format|
-      format.html # show.html.erb
+      format.html { render "scraping#rules"}
       format.xml  { render :xml => @result }
     end
   end
@@ -41,7 +51,29 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-
+    
+    product_skus = BestBuyApi.category_ids(@result.category)
+    @result.total = product_skus.count
+    @result.save
+    errors = 0
+    warnings = 0
+    product_skus.each do |sku|
+      res = ScrapingRule.scrape(sku)
+      res.each_pair do |local_feature, i|
+        i.each_pair do |remote_feature, ii|
+          parsed = ii["products"].first[1]
+          raw = ii["products"].first[2]
+          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH")
+            #This is a missing value
+            Delinquent.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id)
+            errors += 1
+          end
+        end
+      end
+    end
+    @result.update_attribute(:error_count, errors)
+    
+    
     respond_to do |format|
       if @result.save
         format.html { redirect_to(@result, :notice => 'Result was successfully created.') }

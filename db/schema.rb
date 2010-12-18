@@ -71,8 +71,8 @@ ActiveRecord::Schema.define(:version => 20101218001647) do
 
   create_table "results", :force => true do |t|
     t.integer  "total"
-    t.integer  "errors"
-    t.integer  "warnings"
+    t.integer  "error_count"
+    t.integer  "warning_count"
     t.string   "product_type"
     t.string   "category"
     t.datetime "created_at"
