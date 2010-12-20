@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101218001647) do
+ActiveRecord::Schema.define(:version => 20101220225143) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -22,6 +22,16 @@ ActiveRecord::Schema.define(:version => 20101218001647) do
   end
 
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
+
+  create_table "candidates", :force => true do |t|
+    t.integer  "scraping_rule_id"
+    t.integer  "result_id"
+    t.integer  "product_id"
+    t.string   "parsed"
+    t.string   "raw"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "cat_specs", :force => true do |t|
     t.integer  "product_id"
@@ -79,6 +89,11 @@ ActiveRecord::Schema.define(:version => 20101218001647) do
     t.datetime "updated_at"
   end
 
+  create_table "results_scraping_rules", :id => false, :force => true do |t|
+    t.integer "result_id"
+    t.integer "scraping_rule_id"
+  end
+
   create_table "scraping_corrections", :force => true do |t|
     t.string "sku"
     t.string "product_type"
@@ -88,14 +103,15 @@ ActiveRecord::Schema.define(:version => 20101218001647) do
   end
 
   create_table "scraping_rules", :force => true do |t|
-    t.string "local_featurename"
-    t.string "remote_featurename"
-    t.text   "regex"
-    t.string "product_type"
-    t.float  "min"
-    t.float  "max"
-    t.text   "valid_inputs"
-    t.string "rule_type"
+    t.string  "local_featurename"
+    t.string  "remote_featurename"
+    t.text    "regex"
+    t.string  "product_type"
+    t.float   "min"
+    t.float   "max"
+    t.text    "valid_inputs"
+    t.string  "rule_type"
+    t.boolean "active",             :default => true
   end
 
 end

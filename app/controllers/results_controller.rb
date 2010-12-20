@@ -17,11 +17,19 @@ class ResultsController < ApplicationController
     
     @category_id = @result.category
     @product_count = @result.total
-    @rules =  Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @candidate_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @result.candidates.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
+      d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
+        @candidate_rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
+        @candidate_rules[local_featurename][remote_featurename]["rule"] = d.first[2]
+      end
+    end
+    
     @result.delinquents.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
       d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
-        @rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
-        @rules[local_featurename][remote_featurename]["rule"] = d.first[2]
+        @delinquent_rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
+        @delinquent_rules[local_featurename][remote_featurename]["rule"] = d.first[2]
       end
     end
 
@@ -51,12 +59,16 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
+    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true).uniq # There are multiples in the table for some reason...
     
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.total = product_skus.count
     @result.save
     errors = 0
     warnings = 0
+    active_rules = ScrapingRule.find_all_by_active(true)
+    # Make sure each rule knows which results it is part of
+    active_rules.each {|r| r.results.push(@result); r.save}
     product_skus.each do |sku|
       res = ScrapingRule.scrape(sku)
       res.each_pair do |local_feature, i|
@@ -65,9 +77,12 @@ class ResultsController < ApplicationController
           raw = ii["products"].first[2]
           if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH")
             #This is a missing value
-            Delinquent.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id)
+            which_class = Delinquent
             errors += 1
+          else # Rule processed fine. This is a candidate for product creation stage
+            which_class = Candidate
           end
+          which_class.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id)
         end
       end
     end

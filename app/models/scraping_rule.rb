@@ -6,6 +6,8 @@ class ScrapingRule < ActiveRecord::Base
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
   has_many :delinquents
+  has_many :candidates
+  has_and_belongs_to_many :results
   
   def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
     #Return type: [local_featurename][remote_featurename]["products"] = [product_id,parsed,raw]
@@ -17,7 +19,7 @@ class ScrapingRule < ActiveRecord::Base
       sleep 0.5 if defined? looped
       raw_info = BestBuyApi.product_search(id)
       unless raw_info.nil?
-        rules = ScrapingRule.find_all_by_product_type(Session.product_type)
+        rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
           #Find content based on . seperated hierarchical description
           identifiers = r.remote_featurename.split(".")
