@@ -84,8 +84,7 @@ var js_activator = (function() {
         $('#silkscreen').click(function () {removeSilkScreen();});
 
         $('#scraping_rule_submit').click(function() {
-			if ($(this).attr('Value') == "Update")
-			{
+			if ($(this).attr('Value') == "Update") {
                 if ($(this).parent().validate().valid()) { // Make sure the form is valid.
     				$.ajax({
     				    url: $(this).parent().attr("action"), 
@@ -99,8 +98,7 @@ var js_activator = (function() {
     				  }
     				});
 				}
-			}
-			else
+			} else {
 				$.ajax({
 				    url: "/scraping_rules/create", 
 				    data: $('#new_scraping_rule').serialize(), 
@@ -109,7 +107,8 @@ var js_activator = (function() {
 				    alert("hooray");
 				  }
 				});
-           return false; 
+           }
+           return false;
         });
 
     });
