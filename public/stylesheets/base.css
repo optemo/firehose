@@ -137,10 +137,16 @@ div#silkscreen {
 .contentholder {
 	margin-left: 10px;
 }
-.edit_scraping_rule {
+.edit_scraping_rule, .new_scraping_correction, .edit_scraping_correction {
 	display: inline;
 }
 .rule_type_button {
     float: left;
     padding: 0 2px 0 2px;
+}
+.corrected {
+	color: #B00C35;
+}
+.correction_field, .correction_submit {
+	display: none;
 }

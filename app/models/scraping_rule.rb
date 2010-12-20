@@ -19,6 +19,7 @@ class ScrapingRule < ActiveRecord::Base
       sleep 0.5 if defined? looped
       raw_info = BestBuyApi.product_search(id)
       unless raw_info.nil?
+        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
         rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
           #Find content based on . seperated hierarchical description
@@ -27,10 +28,15 @@ class ScrapingRule < ActiveRecord::Base
           #Traverse the hash hierarchy
           identifiers.each {|i| raw = raw[i] unless raw.nil?}
           if raw
-            regex = Regexp.new(r.regex)
-            parsed = regex.match(raw.to_s)
+            corr = corrections.select{|c|c.remote_featurename == r.remote_featurename && c.raw == raw.to_s}.first
+            if corr
+              parsed = corr.corrected
+            else
+              regex = Regexp.new(r.regex)
+              parsed = regex.match(raw.to_s)
+            end
             #Save the cleaned result
-            data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s]
+            data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
             data[r.local_featurename][r.remote_featurename]["rule"] = r
           end
         end

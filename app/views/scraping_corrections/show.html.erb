@@ -1,0 +1,30 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Product:</b>
+  <%= @scraping_correction.product_id %>
+</p>
+
+<p>
+  <b>Product type:</b>
+  <%= @scraping_correction.product_type %>
+</p>
+
+<p>
+  <b>Raw:</b>
+  <%= @scraping_correction.raw %>
+</p>
+
+<p>
+  <b>Corrected:</b>
+  <%= @scraping_correction.corrected %>
+</p>
+
+<p>
+  <b>Remote featurename:</b>
+  <%= @scraping_correction.remote_featurename %>
+</p>
+
+
+<%= link_to 'Edit', edit_scraping_correction_path(@scraping_correction) %> |
+<%= link_to 'Back', scraping_corrections_path %>

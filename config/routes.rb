@@ -1,4 +1,5 @@
 Firehose::Application.routes.draw do
+  
 #  get "scraping/index"
 
 #  get "scraping/scrape"
@@ -63,7 +64,7 @@ Firehose::Application.routes.draw do
   #resources :scraping
   #resources :scraping, :only => [:create], :as => "scraping_rules"
   resources :scraping_rules, :except => [:show, :index]
-  resources :results
+  resources :results, :scraping_corrections
   
   #match 'makerule' => 'scraping#makerule'
   match 'scrape/:id' => 'scraping#scrape'
