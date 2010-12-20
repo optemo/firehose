@@ -10,6 +10,8 @@ class CreateScrapingCorrections < ActiveRecord::Migration
 
       t.timestamps
     end
+    add_index :scraping_corrections, :product_id
+    add_index :scraping_corrections, :product_type
   end
 
   def self.down

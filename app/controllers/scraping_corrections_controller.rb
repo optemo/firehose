@@ -60,7 +60,7 @@ class ScrapingCorrectionsController < ApplicationController
 
     respond_to do |format|
       if @scraping_correction.update_attributes(params[:scraping_correction])
-        format.html { redirect_to(@scraping_correction, :notice => 'Scraping correction was successfully updated.') }
+        format.html { render :text => "You have successfully updated a correction" }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -76,7 +76,7 @@ class ScrapingCorrectionsController < ApplicationController
     @scraping_correction.destroy
 
     respond_to do |format|
-      format.html { redirect_to(scraping_corrections_url) }
+      format.html { head :ok }
       format.xml  { head :ok }
     end
   end

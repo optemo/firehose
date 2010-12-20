@@ -83,36 +83,57 @@ var js_activator = (function() {
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
 
-        $('#scraping_rule_submit').click(function() {
-			if ($(this).attr('Value') == "Update") {
-                if ($(this).parent().validate().valid()) { // Make sure the form is valid.
-    				$.ajax({
-    				    url: $(this).parent().attr("action"), 
-    				    data: $(this).parent().serialize(), 
-    					type: "POST",
-    				    success: function() {
-    				    window.location = "/rules";
-    				  },
-    					error: function() {
-    				    alert("There is an error in the regular expression");
-    				  }
-    				});
-				}
-			} else {
-				$.ajax({
-				    url: "/scraping_rules/create", 
-				    data: $('#new_scraping_rule').serialize(), 
-					type: "POST",
-				    success: function() {
-				    alert("hooray");
-				  }
-				});
-           }
-           return false;
+        $('#scraping_rule_submit, .correction_submit').click(function() {
+			form = $(this).parents("form");
+			value = $(this).attr('Value');
+            if (form.validate().valid()) { // Make sure the form is valid.
+    			$.ajax({
+    			    url: form.attr("action"), 
+    			    data: form.serialize(), 
+    				type: "POST",
+    			    success: function() {
+					switch(value) {
+    			    	case "Update":
+							window.location = "/rules";
+							break;
+						case "Correct":
+							alert("Added correction");
+							break;
+						default:
+							alert("hooray");
+					}
+    			  },
+    				error: function() {
+    			    alert("There is an error in the fields");
+    			  }
+    			});
+			}
+           	return false;
         });
-		$('#scraping_correction_submit').click(function() {
-			alert("Hi");
-			$(this).parents("form").hide();
+		
+		$("a").live('click',function(){
+			t = $(this);
+			if (t.attr('data-method') == "delete")
+			{
+				$.ajax({
+					url: t.attr("href"),
+					type: "DELETE",
+					success: function() {
+						alert("Record has been removed.");
+					},
+					error: function() {
+						alert("Error in processing the request.");
+					}
+				});
+				return false;
+			} else {
+				return true;
+			}
+			
+		});
+		
+		$('.correction').live("click", function(){
+			$(this).parents("form").find('.value').toggle().end().find('.correction_field').toggle().end().find('.correction_submit').toggle().end().find('.correction').toggle();
 			return false;
 		});
     });
