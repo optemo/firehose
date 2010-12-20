@@ -111,7 +111,11 @@ var js_activator = (function() {
 				});
            return false; 
         });
-
+		$('#scraping_correction_submit').click(function() {
+			alert("Hi");
+			$(this).parents("form").hide();
+			return false;
+		});
     });
 });
 

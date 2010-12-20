@@ -137,7 +137,7 @@ div#silkscreen {
 .contentholder {
 	margin-left: 10px;
 }
-.edit_scraping_rule {
+.edit_scraping_rule, .new_scraping_correction {
 	display: inline;
 }
 .rule_type_button {

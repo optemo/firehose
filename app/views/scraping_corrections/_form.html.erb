@@ -1,0 +1,37 @@
+<%= form_for(@scraping_correction) do |f| %>
+  <% if @scraping_correction.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@scraping_correction.errors.count, "error") %> prohibited this scraping_correction from being saved:</h2>
+
+      <ul>
+      <% @scraping_correction.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :product_id %><br />
+    <%= f.text_field :product_id %>
+  </div>
+  <div class="field">
+    <%= f.label :product_type %><br />
+    <%= f.text_field :product_type %>
+  </div>
+  <div class="field">
+    <%= f.label :raw %><br />
+    <%= f.text_field :raw %>
+  </div>
+  <div class="field">
+    <%= f.label :corrected %><br />
+    <%= f.text_field :corrected %>
+  </div>
+  <div class="field">
+    <%= f.label :remote_featurename %><br />
+    <%= f.text_field :remote_featurename %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

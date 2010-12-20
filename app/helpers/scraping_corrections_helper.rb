@@ -1,0 +1,2 @@
+module ScrapingCorrectionsHelper
+end

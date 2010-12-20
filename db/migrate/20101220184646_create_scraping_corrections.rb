@@ -1,14 +1,14 @@
-# Scraped corrections is the table for individual corrections on a per-sku basis.
-# General rules go in scraping_rules.
 class CreateScrapingCorrections < ActiveRecord::Migration
   def self.up
     create_table :scraping_corrections do |t|
       t.primary_key :id
-      t.string :sku
+      t.string :product_id
       t.string :product_type
       t.string :raw
       t.string :corrected
-      t.string :feature
+      t.string :remote_featurename
+
+      t.timestamps
     end
   end
 
