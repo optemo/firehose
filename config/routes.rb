@@ -66,9 +66,9 @@ Firehose::Application.routes.draw do
   resources :scraping_rules, :except => [:show, :index]
   resources :results, :scraping_corrections
   
-  #match 'makerule' => 'scraping#makerule'
   match 'results/commit/:id' => 'results#commit'
   match 'scrape/:id' => 'scraping#scrape'
   match "rules" => "scraping#rules"
+  match "datafeed" => "scraping#datafeed"
   root :to => "scraping#index"
 end

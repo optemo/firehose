@@ -1,5 +1,9 @@
 class ScrapingController < ApplicationController
   def index
+    @category_id = 29171
+  end
+  
+  def datafeed
     # This function shows the application frame and shows a list of the products for a given category.
     if params[:category_id]
       @category_id = params[:category_id]

@@ -1,13 +1,6 @@
-<div id="header">
-    <h2>Producing SKUs for category id <%=@category_id%></h2>
-</div>
-<div id="content">
-<div class="strong" id="num_skus_found">
-    Total of <%=@product_skus.length%> SKUs found
-</div>
-<% @product_skus.each do |s| %>
-    <div class="skus_to_fetch" data-id=<%=s%>>
-        Data for sku <%=s%> still loading
-    </div>
-<% end %>
-</div>
+<blockquote><h3>Overview</h3>
+<h4>Current category id is <%= @category_id %></h4>
+<%= link_to "datafeed", "/datafeed" %> - See the feed and define rules.<br>
+<%= link_to "rules", "/rules" %> - See rule coverage, edit rules.<br>
+<%= link_to "results", "/results" %> - Make new result set, push into product &amp; spec tables
+</blockquote>
