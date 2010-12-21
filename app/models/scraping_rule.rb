@@ -5,7 +5,6 @@ class ScrapingRule < ActiveRecord::Base
   validates :regex, :presence => true
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
-  has_many :delinquents
   has_many :candidates
   has_and_belongs_to_many :results
   
