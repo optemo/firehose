@@ -4,7 +4,7 @@
 		Coverage: <span class="bold"><%= @product_count - notcovered(data["products"].map{|e|e[1]}) %>/<%= @product_count %></span>
 	</a>&nbsp;&nbsp;&nbsp;
 		Regex: <%= form_for(data["rule"]) do |f|%> <%= f.text_field :regex, :class => "regexp" %> <%= f.submit "Update" %> <% end %>
-	
+	<%= link_to "Destroy", data["rule"], :method => :delete %>
 	<div class="contentholder"><%= render :partial => 'product', :collection => data["products"], :locals => {:rf => rf} %></div>
 </div>
 	

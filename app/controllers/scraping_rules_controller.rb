@@ -48,7 +48,13 @@ class ScrapingRulesController < ApplicationController
     end
   end
   
-  def delete
-    
+  def destroy
+    @sr = ScrapingRule.find(params[:id])
+    @sr.destroy
+
+    respond_to do |format|
+      format.html { head :ok }
+      format.xml  { head :ok }
+    end
   end
 end

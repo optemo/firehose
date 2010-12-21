@@ -77,7 +77,7 @@ class ResultsController < ApplicationController
           raw = ii["products"].first[2]
           corr = ii["products"].first[3]
           corr = corr.id if corr
-          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") #This is a missing value
+          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")#This is a missing value
             errors += 1
             delinquent = true
           else

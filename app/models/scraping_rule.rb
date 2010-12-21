@@ -33,17 +33,21 @@ class ScrapingRule < ActiveRecord::Base
             else
               regexstr = r.regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
               replace_i = regexstr.index(/[^\\]\//)
-              if replace_i
-                #Replacement part of the regex
-                parsed = raw.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
-              else
-                #Just match, not replacement
-                parsed = Regexp.new(regexstr).match(raw.to_s)
+              begin
+                if replace_i
+                  #Replacement part of the regex
+                  parsed = raw.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
+                else
+                  #Just match, not replacement
+                  parsed = Regexp.new(regexstr).match(raw.to_s)
+                end
+                #Test for min / max
+                parsed = "**LOW" if r.min && parsed.to_s.to_f < r.min
+                parsed = "**HIGH" if r.max && parsed.to_s.to_f > r.max
+                
+              rescue RegexpError
+                parsed = "**Regex Error"
               end
-              #got to catch RegexpError
-              #Test for min / max
-              parsed = "**LOW" if r.min && parsed.to_s.to_f < r.min
-              parsed = "**HIGH" if r.max && parsed.to_s.to_f > r.max
             end
             #Save the cleaned result
             data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
