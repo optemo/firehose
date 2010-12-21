@@ -66,7 +66,7 @@ var js_activator = (function() {
             if (run_for_one_sku_flag == 0) {
                 var id = $(this).attr('data-id');
 				$(this).load("/scrape/" + id, function(){
-					$(this).find('.togglable').andSelf().each(function(){addtoggle($(this));});
+					$(this).find('.togglable').each(function(){addtoggle($(this));});
 				});
 				
             }
@@ -74,11 +74,11 @@ var js_activator = (function() {
         });
 
         function addtoggle(item){
-			var closed = item.find("> a").click(function() {
+			var closed = item.click(function() {
 				$(this).toggleClass("closed").toggleClass("open").siblings('div').toggle();
 				return false;
 			}).hasClass("closed");
-			if (closed) {item.find("> div").hide();}
+			if (closed) {item.siblings('div').hide();}
 		}
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});

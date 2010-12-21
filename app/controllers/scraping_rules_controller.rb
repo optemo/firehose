@@ -48,7 +48,17 @@ class ScrapingRulesController < ApplicationController
     end
   end
   
-  def delete
+  def destroy
+    if(Candidate.find_by_scraping_rule_id(params[:id]))
+      #We have found a dependancy on the rule, so we'll just make it inactive
+      ScrapingRule.find(params[:id]).update_attribute("active",false)
+    else
+      ScrapingRule.find(params[:id]).destroy
+    end
     
+    respond_to do |format|
+      format.html { head :ok }
+      format.xml  { head :ok }
+    end
   end
 end
