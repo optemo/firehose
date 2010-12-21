@@ -1,7 +1,7 @@
-<%= link_to "Product " + @id, "#", :class => "closed" %>
+<%= link_to "Product " + @id, "#", :class => "closed togglable" %>
 <div class = "contentholder">
-	<div class="scraped_features togglable">
-		<%= link_to "Scraped Results", "#", :class => "open" %>
+	<div class="scraped_features">
+		<%= link_to "Scraped Results", "#", :class => "open togglable" %>
 		<div>
 			<% @scraped_features.each_pair do |k,v| %>
 				<div class="contentholder"><span class="bold"><%= k %> </span>
@@ -13,13 +13,13 @@
 		</div>
 	</div>
 	
-	<div class="available_features togglable">
-	    <%= link_to "Available Features", "#", :class => "closed" %>
+	<div class="available_features">
+	    <%= link_to "Available Features", "#", :class => "closed togglable" %>
 	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>
 	</div>
 	
-	<div class="raw_features togglable">
-	    <%= link_to "Raw JSON:", "#" , :class => "closed" %>
+	<div class="raw_features">
+	    <%= link_to "Raw JSON:", "#" , :class => "closed togglable" %>
 	    <div><pre><%= PP.pp(@raw_info, "") %></pre></div>
 	</div>
 </div>
