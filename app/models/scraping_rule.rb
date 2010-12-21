@@ -31,8 +31,16 @@ class ScrapingRule < ActiveRecord::Base
             if corr
               parsed = corr.corrected
             else
-              regex = Regexp.new(r.regex)
-              parsed = regex.match(raw.to_s)
+              regexstr = r.regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
+              replace_i = regexstr.index(/[^\\]\//)
+              if replace_i
+                #Replacement part of the regex
+                parsed = raw.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
+              else
+                #Just match, not replacement
+                parsed = Regexp.new(regexstr).match(raw.to_s)
+              end
+              #got to catch RegexpError
               #Test for min / max
               parsed = "**LOW" if r.min && parsed.to_s.to_f < r.min
               parsed = "**HIGH" if r.max && parsed.to_s.to_f > r.max
