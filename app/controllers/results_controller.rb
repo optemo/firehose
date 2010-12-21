@@ -17,22 +17,22 @@ class ResultsController < ApplicationController
     
     @category_id = @result.category
     @product_count = @result.total
-    @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @candidate_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
-    @result.candidates.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
-      d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
-        @candidate_rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
-        @candidate_rules[local_featurename][remote_featurename]["rule"] = d.first[2]
+    @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
+      c.group_by{|c|c[1]}.each_pair do |remote_featurename, c|
+        c.group_by{|c|c[6]}.each_pair do |delinquent, c|
+          if delinquent
+            whichclass = @delinquent_rules
+          else
+            whichclass = @candidate_rules
+          end
+          whichclass[local_featurename][remote_featurename]["products"] = c.map{|cc|[cc[3],cc[4],cc[5]]}
+          whichclass[local_featurename][remote_featurename]["rule"] = c.first[2]
+        end
       end
     end
     
-    @result.delinquents.map{|d|[d.scraping_rule.local_featurename, d.scraping_rule.remote_featurename, d.scraping_rule, d.product_id, d.parsed, d.raw]}.group_by{|d|d[0]}.each_pair do |local_featurename,d|
-      d.group_by{|d|d[1]}.each_pair do |remote_featurename, d|
-        @delinquent_rules[local_featurename][remote_featurename]["products"] = d.map{|dd|[dd[3],dd[4],dd[5]]}
-        @delinquent_rules[local_featurename][remote_featurename]["rule"] = d.first[2]
-      end
-    end
-
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @result }
@@ -75,14 +75,13 @@ class ResultsController < ApplicationController
         i.each_pair do |remote_feature, ii|
           parsed = ii["products"].first[1]
           raw = ii["products"].first[2]
-          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH")
-            #This is a missing value
-            which_class = Delinquent
+          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") #This is a missing value
             errors += 1
-          else # Rule processed fine. This is a candidate for product creation stage
-            which_class = Candidate
+            delinquent = true
+          else
+            delinquent = false
           end
-          which_class.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id)
+          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent)
         end
       end
     end
@@ -126,5 +125,12 @@ class ResultsController < ApplicationController
       format.html { redirect_to(results_url) }
       format.xml  { head :ok }
     end
+  end
+  
+  # POST /results/commit/1
+  # POST /results/commit/1.xml
+  def commit
+    @result = Result.find(paramd[:id])
+    Product.create_from_result(@result.id)
   end
 end

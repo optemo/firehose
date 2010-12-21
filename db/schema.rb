@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101220225143) do
+ActiveRecord::Schema.define(:version => 20101220233958) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(:version => 20101220225143) do
     t.string   "raw"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "delinquent",       :default => false
   end
 
   create_table "cat_specs", :force => true do |t|

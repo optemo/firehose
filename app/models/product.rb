@@ -109,5 +109,11 @@ class Product < ActiveRecord::Base
   def self.per_page
     9
   end
+  
+  def create_from_result(id)
+    debugger
+    products_to_create = Candidates.find_all_by_result_id(id)
+  end
+  
 end
 class ValidationError < ArgumentError; end
