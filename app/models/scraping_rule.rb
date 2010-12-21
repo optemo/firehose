@@ -33,6 +33,9 @@ class ScrapingRule < ActiveRecord::Base
             else
               regex = Regexp.new(r.regex)
               parsed = regex.match(raw.to_s)
+              #Test for min / max
+              parsed = "**LOW" if r.min && parsed.to_s.to_f < r.min
+              parsed = "**HIGH" if r.max && parsed.to_s.to_f > r.max
             end
             #Save the cleaned result
             data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
