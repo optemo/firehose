@@ -28,15 +28,22 @@ class ScrapingRulesController < ApplicationController
   end
   
   def update
-    @scraping_rule = ScrapingRule.find(params[:id])
-
+    if(Candidate.find_by_scraping_rule_id(params[:id]))
+      #We have found a dependancy on the rule
+      old_scrape = ScrapingRule.find(params[:id])
+      atts = old_scrape.attributes.merge(params[:scraping_rule])
+      atts.delete(:id)
+      succeeded = ScrapingRule.create(atts)
+      old_scrape.update_attribute("active",false) if succeeded
+    else
+      succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule])
+    end
+    
     respond_to do |format|
-      if @scraping_rule.update_attributes(params[:scraping_rule])
-        format.html { render :nothing => true }
-        format.xml  { head :ok }
+      if succeeded
+        format.html { head :ok }
       else
         format.html { render :action => "edit" }
-        format.xml  { render :xml => @scraping_rule.errors, :status => :unprocessable_entity }
       end
     end
   end

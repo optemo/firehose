@@ -19,7 +19,7 @@ class ResultsController < ApplicationController
     @product_count = @result.total
     @candidate_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
-    @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
+    @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
       c.group_by{|c|c[1]}.each_pair do |remote_featurename, c|
         c.group_by{|c|c[6]}.each_pair do |delinquent, c|
           if delinquent
@@ -27,7 +27,7 @@ class ResultsController < ApplicationController
           else
             whichclass = @candidate_rules
           end
-          whichclass[local_featurename][remote_featurename]["products"] = c.map{|cc|[cc[3],cc[4],cc[5]]}
+          whichclass[local_featurename][remote_featurename]["products"] = c.map{|cc|[cc[3],cc[4],cc[5],(cc[7].nil? ? nil : ScrapingCorrection.find(cc[7]))]}
           whichclass[local_featurename][remote_featurename]["rule"] = c.first[2]
         end
       end
@@ -75,13 +75,15 @@ class ResultsController < ApplicationController
         i.each_pair do |remote_feature, ii|
           parsed = ii["products"].first[1]
           raw = ii["products"].first[2]
+          corr = ii["products"].first[3]
+          corr = corr.id if corr
           if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") #This is a missing value
             errors += 1
             delinquent = true
           else
             delinquent = false
           end
-          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent)
+          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
         end
       end
     end
