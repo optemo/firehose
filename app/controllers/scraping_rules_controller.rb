@@ -15,7 +15,9 @@ class ScrapingRulesController < ApplicationController
 
   def create
     # Creates a new scraping rule.
-    # There are three kinds of rules, continuous, binary, and categorical.
+    # There are four kinds of rules: continuous, binary, categorical, and intrinsic.
+    # The first three kinds end up being specs bound to the product, e.g. ContSpec, 
+    # while the last kind of rule inserts values directly into the product row.
     @scraping_rule = ScrapingRule.new(params[:rule])
     @scraping_rule.product_type = Session.product_type
     if @scraping_rule.valid?

@@ -26,4 +26,7 @@
     	</div>
     <% end %>
 <% end %>
+<%= form_tag ("/results/commit/" + @result.id.to_s) do |f| %>
+    <div><%= submit_tag 'Save' %></div>
+<% end %>
 </div>

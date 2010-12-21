@@ -130,7 +130,7 @@ class ResultsController < ApplicationController
   # POST /results/commit/1
   # POST /results/commit/1.xml
   def commit
-    @result = Result.find(paramd[:id])
+    @result = Result.find(params[:id])
     Product.create_from_result(@result.id)
   end
 end

@@ -8,7 +8,8 @@
   <legend><b>Enter New Rule</b></legend>
   <%= label :rule, :rule_type, "Type" %> <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "cont", :class => "required") %> Cont</div>
   <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "cat", :class => "required") %> Cat</div>
-  <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "bin", :class => "required") %> Bin</div><br/>
+  <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "bin", :class => "required") %> Bin</div>
+  <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "intr", :class => "required") %> Intr</div><br/>
   <%= label :rule, :remote_featurename, "Remote Feature" %> <%= text_field(:rule, :remote_featurename, :size => 20, :value => @remote_rule_pair[0], :class => "required") %><br/>
   <%= label :rule, :local_featurename, "Local Feature" %> <%= text_field(:rule, :local_featurename, :size => 20, :class => "required") %><br/>
   <%= label :rule, :regex, "Regular Expression" %> <%= text_field(:rule, :regex, :size => 20, :class => "required regexp") %><br/>

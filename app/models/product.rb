@@ -4,16 +4,6 @@ class Product < ActiveRecord::Base
   has_many :cont_specs
   has_many :search_products
   
-  define_index do
-    #fields
-    indexes "LOWER(title)", :as => :title
-    indexes "product_type", :as => :product_type
-    set_property :enable_star => true
-    set_property :min_prefix_len => 2
-    ThinkingSphinx.updates_enabled = false
-    ThinkingSphinx.deltas_enabled = false
-  end
-  
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
   end
@@ -110,9 +100,36 @@ class Product < ActiveRecord::Base
     9
   end
   
-  def create_from_result(id)
-    debugger
-    products_to_create = Candidates.find_all_by_result_id(id)
+  def self.create_from_result(id)
+    candidate_rules = Candidate.find_all_by_result_id_and_delinquent(id, false).group_by{|c|c.product_id}.each do |r_id, candidate_rules|
+      # For each remote id, first figure out whether we already have a product that matches
+      unless product = Product.find_by_sku(r_id)
+        # Create a new one. The product already exists otherwise.
+        product = Product.new({:sku => r_id, :product_type => Session.product_type})
+        product.save
+      end
+      candidate_rules.each do |r|
+        rule = ScrapingRule.find(r.scraping_rule_id)
+        if rule.rule_type == "intr" # Intrinsic properties affect the product directly.
+          # No need to create anything, just save the parsed value in the appropriate place
+          product[rule.local_featurename] = r.parsed
+          product.save
+        else
+          case rule.rule_type
+          when "cat" then spec_class = CatSpec
+          when "cont" then spec_class = ContSpec
+          when "bin" then spec_class = BinSpec
+          else spec_class = CatSpec # This should never happen
+      		end
+          unless spec = spec_class.find_by_product_id_and_name(product.id, rule.local_featurename)
+            spec = spec_class.new({:product_type => Session.product_type, :product_id => product.id, :name => rule.local_featurename})
+          end
+          spec.value = r.parsed
+          spec.save
+        end
+      end
+    end
+    
   end
   
 end
