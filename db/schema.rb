@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101220233958) do
+ActiveRecord::Schema.define(:version => 20101221003027) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -31,7 +31,8 @@ ActiveRecord::Schema.define(:version => 20101220233958) do
     t.string   "raw"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean  "delinquent",       :default => false
+    t.boolean  "delinquent",             :default => false
+    t.integer  "scraping_correction_id"
   end
 
   create_table "cat_specs", :force => true do |t|
@@ -55,16 +56,6 @@ ActiveRecord::Schema.define(:version => 20101220233958) do
   end
 
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
-
-  create_table "delinquents", :force => true do |t|
-    t.integer  "scraping_rule_id"
-    t.integer  "result_id"
-    t.integer  "product_id"
-    t.string   "parsed"
-    t.string   "raw"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
 
   create_table "products", :force => true do |t|
     t.string   "sku"
