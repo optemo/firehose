@@ -1,10 +1,11 @@
 <h1>Listing results</h1>
 
-<table>
+<table cellpadding=3>
   <tr>
     <th>Total</th>
     <th>Errors</th>
-    <th>Warnings</th>
+    <th>Created At</th>
+    <th>Product Type &amp;<br> Category Id</th>
     <th></th>
     <th></th>
     <th></th>
@@ -14,7 +15,8 @@
   <tr>
     <td><%= result.total %></td>
     <td><%= result.error_count %></td>
-    <td><%= result.warning_count %></td>
+    <td><%= result.created_at %></td>
+    <td><%= result.product_type.to_s + " " + result.category.to_s %></td>
     <td><%= link_to 'Show', result %></td>
     <td><%= link_to 'Edit', edit_result_path(result) %></td>
     <td><%= link_to 'Destroy', result, :confirm => 'Are you sure?', :method => :delete %></td>

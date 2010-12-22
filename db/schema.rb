@@ -57,6 +57,16 @@ ActiveRecord::Schema.define(:version => 20101221003027) do
 
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
 
+  create_table "delinquents", :force => true do |t|
+    t.integer  "scraping_rule_id"
+    t.integer  "result_id"
+    t.integer  "product_id"
+    t.string   "parsed"
+    t.string   "raw"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "products", :force => true do |t|
     t.string   "sku"
     t.string   "product_type"
