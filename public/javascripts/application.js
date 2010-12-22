@@ -83,7 +83,7 @@ var js_activator = (function() {
 		$('.togglable').each(function(){addtoggle($(this));});
         $('#silkscreen').click(function () {removeSilkScreen();});
 
-        $('#scraping_rule_submit, .correction_submit').click(function() {
+        $('#scraping_rule_submit, .correction_submit').live("click", function() {
 			form = $(this).parents("form");
 			value = $(this).attr('Value');
             if (form.validate().valid()) { // Make sure the form is valid.
@@ -100,7 +100,7 @@ var js_activator = (function() {
 							alert("Added correction");
 							break;
 						default:
-							alert("hooray");
+							alert("Rule Created");
 					}
     			  },
     				error: function() {
@@ -129,7 +129,6 @@ var js_activator = (function() {
 			} else {
 				return true;
 			}
-			
 		});
 		
 		$('.correction').live("click", function(){

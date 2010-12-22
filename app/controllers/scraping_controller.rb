@@ -1,6 +1,6 @@
 class ScrapingController < ApplicationController
   def index
-    @category_id = 29171
+    @category_id = 20218
   end
   
   def datafeed
@@ -8,7 +8,7 @@ class ScrapingController < ApplicationController
     if params[:category_id]
       @category_id = params[:category_id]
     else
-      @category_id = 29171#20218 # This is hard-coded to be digital cameras from Best Buy's feed
+      @category_id = 20218 #29171 # This is hard-coded to be digital cameras from Best Buy's feed. 29171 is a category with very few items.
     end
     @product_skus = BestBuyApi.category_ids(@category_id)
   end
@@ -21,7 +21,7 @@ class ScrapingController < ApplicationController
   end
   
   def rules
-    @category_id = 29171
+    @category_id = 20218
     products = BestBuyApi.listing(@category_id)
     @product_count = products["total"]
     @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})

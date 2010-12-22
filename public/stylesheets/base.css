@@ -46,7 +46,7 @@ a.title_link {
     width: 600px;
     margin-left: auto;
     margin-right: auto;
-    height: 400px;
+    min-height: 400px;
     background: #FFF;
     padding: 5px;
     -moz-border-radius: 8px;
@@ -149,4 +149,8 @@ div#silkscreen {
 }
 .correction_field, .correction_submit {
 	display: none;
+}
+#actions {
+    text-align:center;
+    font-family: Arial, Helvetica, sans-serif;
 }
