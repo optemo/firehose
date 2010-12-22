@@ -67,6 +67,14 @@ ActiveRecord::Schema.define(:version => 20101221003027) do
     t.datetime "updated_at"
   end
 
+  create_table "keyword_searches", :force => true do |t|
+    t.string  "keyword"
+    t.integer "product_id"
+  end
+
+  add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
+  add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
+
   create_table "products", :force => true do |t|
     t.string   "sku"
     t.string   "product_type"
@@ -119,6 +127,69 @@ ActiveRecord::Schema.define(:version => 20101221003027) do
     t.text    "valid_inputs"
     t.string  "rule_type"
     t.boolean "active",             :default => true
+  end
+
+  create_table "search_products", :force => true do |t|
+    t.integer "search_id"
+    t.integer "product_id"
+  end
+
+  add_index "search_products", ["search_id"], :name => "index_search_products_on_search_id"
+
+  create_table "searches", :force => true do |t|
+    t.integer  "session_id"
+    t.integer  "parent_id"
+    t.boolean  "initial"
+    t.string   "keyword_search"
+    t.integer  "page"
+    t.string   "groupby"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.text     "searchpids"
+    t.string   "searchterm"
+    t.string   "sortby"
+  end
+
+  create_table "surveys", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "session_id"
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "rating"
+    t.boolean  "followup"
+    t.string   "email"
+    t.text     "experience"
+    t.text     "improvements"
+  end
+
+  create_table "userdatabins", :force => true do |t|
+    t.integer  "search_id"
+    t.string   "name"
+    t.boolean  "value"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "userdatacats", :force => true do |t|
+    t.integer  "search_id"
+    t.string   "name"
+    t.string   "value"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "userdataconts", :force => true do |t|
+    t.integer  "search_id"
+    t.string   "name"
+    t.float    "min"
+    t.float    "max"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "users", :force => true do |t|
+    t.datetime "created_at"
   end
 
 end
