@@ -17,6 +17,7 @@ class ResultsController < ApplicationController
     
     @category_id = @result.category
     @product_count = @result.total
+    @limited_products = @product_count
     @candidate_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
@@ -42,7 +43,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new
+    @result = Result.new(:product_type => Session.product_type)
 
     respond_to do |format|
       format.html # new.html.erb
