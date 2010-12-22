@@ -70,7 +70,6 @@ var js_activator = (function() {
 		});
 
         $('.expandable_sku').live("click", function () {
-            $(this).html(''); // Clear out everything in the span/div tag
 			$(this).load("/scrape/" + $(this).attr('data-id'), function(){
 				$(this).find('.togglable').each(function(){addtoggle($(this));});
 				$(this).removeClass('bold').removeClass('expandable_sku');
