@@ -41,6 +41,10 @@ a.title_link {
     color: #B50A05;
 }
 
+a.expandable_sku {
+    font-size: 0.8em;
+}
+
 #rule_adder_div {
     position: absolute;
     width: 600px;

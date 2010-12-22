@@ -1,5 +1,5 @@
 <div>
-	SKU: <span class="bold expandable_sku" data-id="<%=product[0]%>"><%= product[0] %></span>&nbsp;&nbsp;&nbsp;
+	SKU: <span class="bold"><%= product[0] %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=product[0]%>">Fetch</span>&nbsp;&nbsp;&nbsp;
 	<%= form_for product[3] || ScrapingCorrection.new(:product_id => product[0], :product_type => Session.product_type, :raw => product[2], :remote_featurename => rf) do |f| %> 
 	Data: <span class="bold value<%= ' corrected' if !product[3].nil? %>"><%= product[1] %></span>
 		<%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :product_type %> <%= f.hidden_field :raw %> <%= f.hidden_field :remote_featurename %>
