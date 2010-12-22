@@ -34,7 +34,9 @@ var js_activator = (function() {
             // Pop up the "rule adder" in the body
             var rule_adder_div = $('<div></div>');
             rule_adder_div.attr("id", "rule_adder_div");
+            
             $('body').append(rule_adder_div);
+            rule_adder_div.css("top", $(window).scrollTop() + 100);
             applySilkScreen();
             rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')), (function () {
                 // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
@@ -60,24 +62,19 @@ var js_activator = (function() {
             }); 
         });
 
-        run_for_one_sku_flag = 0;
-        // Get the SKUs for each one from the category list
-        $('.skus_to_fetch').each(function () {
-            if (run_for_one_sku_flag == 0) {
-                var id = $(this).attr('data-id');
-				$(this).load("/scrape/" + id, function(){
-					$(this).find('.togglable').each(function(){addtoggle($(this));});
-				});
-				
-            }
-            run_for_one_sku_flag = 1; // Just run this once for the time being, on the first SKU
-        });
-        
+        // Scrape the first SKU from the category list
+        var t = $('.skus_to_fetch').first();
+		t.load("/scrape/" + t.attr('data-id'), function(){
+    		$(this).find('.togglable').each(function(){addtoggle($(this));});
+    		$(this).removeClass('expandable_sku');
+		});
+
         $('.expandable_sku').live("click", function () {
-            var id = $(this).attr('data-id');
-			$(this).load("/scrape/" + id, function(){
+            $(this).html(''); // Clear out everything in the span/div tag
+			$(this).load("/scrape/" + $(this).attr('data-id'), function(){
 				$(this).find('.togglable').each(function(){addtoggle($(this));});
 				$(this).removeClass('bold').removeClass('expandable_sku');
+				
 			});
         });
 
