@@ -72,6 +72,14 @@ var js_activator = (function() {
             }
             run_for_one_sku_flag = 1; // Just run this once for the time being, on the first SKU
         });
+        
+        $('.expandable_sku').live("click", function () {
+            var id = $(this).attr('data-id');
+			$(this).load("/scrape/" + id, function(){
+				$(this).find('.togglable').each(function(){addtoggle($(this));});
+				$(this).removeClass('bold').removeClass('expandable_sku');
+			});
+        });
 
         function addtoggle(item){
 			var closed = item.click(function() {
