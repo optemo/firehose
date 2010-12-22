@@ -7,7 +7,7 @@
 	<% save = "" %>
 	<% r = nil %>
 	<% d.each_pair do |rf,e| %>
-		<% save = render :partial => "remote_features", :locals => {:rf => rf, :data => e} %>
+		<% save += render :partial => "remote_features", :locals => {:rf => rf, :data => e} %>
 		<%# Get the rule out of the hash %>
 		<% r = e["rule"] if r.nil? %>
 	<% end %>
@@ -17,7 +17,7 @@
 			Type: <span class="bold"><%= r.rule_type %></span>&nbsp;&nbsp;&nbsp;
 			Restrictions: <%= restrictions(r) %>
 		</a>
-		<%= save %>
+		<%=raw save %>
 	</div>
 <% end %>
 <%= form_tag ("/results/commit/" + @result.id.to_s) do |f| %>
