@@ -42,8 +42,8 @@ class ScrapingRule < ActiveRecord::Base
                   parsed = Regexp.new(regexstr).match(raw.to_s)
                 end
                 #Test for min / max
-                parsed = "**LOW" if r.min && parsed.to_s.to_f < r.min
-                parsed = "**HIGH" if r.max && parsed.to_s.to_f > r.max
+                parsed = "**LOW" if r.min && parsed && parsed.to_s.to_f < r.min
+                parsed = "**HIGH" if r.max && parsed && parsed.to_s.to_f > r.max
                 
               rescue RegexpError
                 parsed = "**Regex Error"
