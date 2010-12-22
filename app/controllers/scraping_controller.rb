@@ -24,7 +24,7 @@ class ScrapingController < ApplicationController
     @category_id = 20218
     products = BestBuyApi.listing(@category_id)
     @product_count = products["total"]
-    @limited_products = min(20,@product_count)
+    @limited_products = [20,@product_count].min
     @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
     #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
   end

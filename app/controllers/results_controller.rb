@@ -18,19 +18,11 @@ class ResultsController < ApplicationController
     @category_id = @result.category
     @product_count = @result.total
     @limited_products = @product_count
-    @candidate_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
-    @delinquent_rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @candidates = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
       c.group_by{|c|c[1]}.each_pair do |remote_featurename, c|
-        c.group_by{|c|c[6]}.each_pair do |delinquent, c|
-          if delinquent
-            whichclass = @delinquent_rules
-          else
-            whichclass = @candidate_rules
-          end
-          whichclass[local_featurename][remote_featurename]["products"] = c.map{|cc|[cc[3],cc[4],cc[5],(cc[7].nil? ? nil : ScrapingCorrection.find(cc[7]))]}
-          whichclass[local_featurename][remote_featurename]["rule"] = c.first[2]
-        end
+        @candidates[local_featurename][remote_featurename]["products"] = c.sort{|a,b|(b[6] ? 2 : b[7] ? 1 : 0) <=> (a[6] ? 2 : a[7] ? 1 : 0)}.map{|cc|[cc[3],cc[4],cc[5],(cc[7].nil? ? nil : ScrapingCorrection.find(cc[7]))]}
+        @candidates[local_featurename][remote_featurename]["rule"] = c.first[2]
       end
     end
     
@@ -71,8 +63,7 @@ class ResultsController < ApplicationController
     # Make sure each rule knows which results it is part of
     active_rules.each {|r| r.results.push(@result); r.save}
     product_skus.each do |sku|
-      res = ScrapingRule.scrape(sku)
-      res.each_pair do |local_feature, i|
+      ScrapingRule.scrape(sku).each_pair do |local_feature, i|
         i.each_pair do |remote_feature, ii|
           parsed = ii["products"].first[1]
           raw = ii["products"].first[2]
