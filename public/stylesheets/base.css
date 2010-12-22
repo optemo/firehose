@@ -33,11 +33,11 @@ a.title_link {
     text-decoration:none;
 }
 
-.featurehash li, a.title_link {
+.featurehash li, a.title_link, .expandable_sku {
 	color: #4F3333;
 }
 
-.featurehash li:hover, a.title_link:hover {
+.featurehash li:hover, a.title_link:hover, .expandable_sku:hover {
     color: #B50A05;
 }
 
