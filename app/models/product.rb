@@ -111,7 +111,7 @@ class Product < ActiveRecord::Base
       end
       product.instock = true
       product.save
-      candidate_rules.each do |r|
+      candidate_rules.sort{|a,b| a.scraping_correction_id.to_i <=> b.scraping_correction_id.to_i}.each do |r|
         rule = ScrapingRule.find(r.scraping_rule_id)
         if rule.rule_type == "intr" # Intrinsic properties affect the product directly.
           # No need to create anything, just save the parsed value in the appropriate place
