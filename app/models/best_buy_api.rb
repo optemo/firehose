@@ -31,7 +31,7 @@ class BestBuyApi
         page += 1
         sleep 1
       end
-      ids
+      ids.uniq
     end
     
     def search(string,page=1)
