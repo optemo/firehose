@@ -101,13 +101,16 @@ class Product < ActiveRecord::Base
   end
   
   def self.create_from_result(id)
+    result = Result.find(id)
+    Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; p.save }
     candidate_rules = Candidate.find_all_by_result_id_and_delinquent(id, false).group_by{|c|c.product_id}.each do |r_id, candidate_rules|
       # For each remote id, first figure out whether we already have a product that matches
       unless product = Product.find_by_sku(r_id)
         # Create a new one. The product already exists otherwise.
         product = Product.new({:sku => r_id, :product_type => Session.product_type})
-        product.save
       end
+      product.instock = true
+      product.save
       candidate_rules.each do |r|
         rule = ScrapingRule.find(r.scraping_rule_id)
         if rule.rule_type == "intr" # Intrinsic properties affect the product directly.
@@ -129,8 +132,6 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    
   end
-  
 end
 class ValidationError < ArgumentError; end
