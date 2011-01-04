@@ -19,7 +19,7 @@ $(document).ready(function(){
     }, 'Min / Max needed');
 
     // Turn on overlay links for adding rules
-    $('.title_link').live('click', function() {
+    $('.title_link, .edit_scraping_rule_form').live('click', function() {
         // Pop up the "rule adder" in the body
         var rule_adder_div = $('<div></div>');
         rule_adder_div.attr("id", "rule_adder_div");
@@ -27,10 +27,20 @@ $(document).ready(function(){
         $('body').append(rule_adder_div);
         rule_adder_div.css("top", $(window).scrollTop() + 100);
         applySilkScreen();
-        rule_adder_div.load("/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec')), (function () {
+        if ($(this).hasClass('title_link')) {
+            myurl = "/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec'));
+        } else { // It's an editing link
+            // The edit button is a slightly different case than just clicking the regexp
+            if ($(this).attr('data-id'))
+                myurl = "/scraping_rules/" + $(this).attr('data-id') + "/edit";
+            else
+                myurl = "/scraping_rules/" + $(this).parent().attr('data-id') + "/edit";
+        }
+        
+        rule_adder_div.load(myurl, (function () {
             // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
             // html attribute triggers written out in views/scraping_rules/new.html.erb.
-            $('#new_scraping_rule').validate({
+            $(this).find('form').validate({
                 rules: {
                     regexp: "regexp",
                     ifcont: "ifcont"
@@ -39,6 +49,31 @@ $(document).ready(function(){
         }));
         return false;
     });
+    
+    var dropdown_function = function() {
+        var t = $(this);
+        var el_to_insert_after = t.next(); // The "destroy" link
+        $.ajax({
+            url: "/scraping_rules/"+t.attr('data-id')+"/edit", // Get the form
+		    data: null, 
+			type: "GET",
+		    success: function(data) {
+                // Insert the editing fields directly below
+		        el_to_insert_after.after(data);
+			},
+			error: function() {
+		        alert_substitute(t, "There is an error in fetching the form");
+		    }
+        });
+        t.text('Hide Rule').unbind('click').click(function() {
+            t.text('Edit Rule');
+            el_to_insert_after.next().remove();
+            t.unbind('click').click(dropdown_function);
+        });
+        return false;
+    };
+    
+    $('.edit_rule_dropdown').click(dropdown_function);
     
     $('.edit_scraping_rule').each(function() {
         $(this).validate({
@@ -77,8 +112,9 @@ $(document).ready(function(){
     $('#silkscreen').click(function () {removeSilkScreen();});
 
     $('#scraping_rule_submit, .correction_submit').live("click", function() {
-		form = $(this).parents("form");
-		value = $(this).attr('Value');
+        var t = $(this);
+		form = t.parents("form");
+		value = t.attr('Value');
         if (form.validate().valid()) { // Make sure the form is valid.
 			$.ajax({
 			    url: form.attr("action"), 
@@ -86,23 +122,33 @@ $(document).ready(function(){
 				type: "POST",
 			    success: function() {
 				switch(value) {
-			    	case "Update":
-						window.location = "/rules";
-						break;
 					case "Correct":
-						alert("Added correction");
+					    removeSilkScreen();
+                        alert_substitute(t, "Correction Created");
 						break;
+					case "Update Rule":
+					    alert_substitute(t, "Rule Updated");
+					    break;
 					default:
-						alert("Rule Created");
+    				    removeSilkScreen();
+					    alert_substitute(t, "Rule Created");
 				}
 			  },
 				error: function() {
-			    alert("There is an error in the fields");
-			  }
+				    removeSilkScreen();
+			        alert_substitute(t, "There is an error in the fields");
+			    }
 			});
 		}
        	return false;
     });
+	
+	function alert_substitute(el, msg) {
+		var div_to_add = $("<div class='global_popup'>" + msg + "</div>");
+		div_to_add.css("top", el.position().top - 50);
+		$("body").append(div_to_add);
+		div_to_add.delay(2000).fadeOut(1000);  
+    }
 	
 	$("a").live('click',function(){
 		t = $(this);
@@ -112,10 +158,10 @@ $(document).ready(function(){
 				url: t.attr("href"),
 				type: "DELETE",
 				success: function() {
-					alert("Record has been removed.");
+				    alert_substitute(t, "Record has been removed.");
 				},
 				error: function() {
-					alert("Error in processing the request.");
+					alert_substitute(t, "Error in processing the request.");
 				}
 			});
 			return false;

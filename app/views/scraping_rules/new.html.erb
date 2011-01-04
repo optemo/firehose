@@ -3,7 +3,7 @@
 <div id="rule_creation_key_value_display">
     <%= @remote_rule_pair[0] %> : <%= @remote_rule_pair[1] %>
 </div>
-<%= form_for @scraping_rule, :remote => true do |f| %>
+<%= form_for @scraping_rule, :remote => true, :html => { :class => "edit_scraping_rule" } do |f| %>
 <fieldset>
   <legend><b>Enter New Rule</b></legend>
   <%= label :rule, :rule_type, "Type" %> <div class="rule_type_button"><%= radio_button(:rule, :rule_type, "cont", :class => "required") %> Cont</div>

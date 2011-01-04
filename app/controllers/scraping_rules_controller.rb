@@ -11,6 +11,7 @@ class ScrapingRulesController < ApplicationController
   
   def edit
     @scraping_rule = ScrapingRule.find(params[:id])
+    @remote_rule_pair = {}
   end
 
   def create
@@ -20,6 +21,12 @@ class ScrapingRulesController < ApplicationController
     # while the last kind of rule inserts values directly into the product row.
     @scraping_rule = ScrapingRule.new(params[:rule])
     @scraping_rule.product_type = Session.product_type
+    # For priority, find all the scraping rules that share that local featurename (for that product type)
+    potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.product_type)
+    # If there are any, get the highest priority and increment it for the new rule.
+    unless potential_previous_scraping_rules.empty?
+      @scraping_rule.priority = (potential_previous_scraping_rules.max{|r| r.priority} + 1)
+    end
     if @scraping_rule.valid?
       @scraping_rule.save
     else
@@ -31,19 +38,19 @@ class ScrapingRulesController < ApplicationController
     if(Candidate.find_by_scraping_rule_id(params[:id]))
       #We have found a dependancy on the rule
       old_scrape = ScrapingRule.find(params[:id])
-      atts = old_scrape.attributes.merge(params[:scraping_rule])
-      atts.delete(:id)
+      atts = old_scrape.attributes.merge(params[:scraping_rule].reject{|k,v|v.blank?})
+      atts.delete("id")
       succeeded = ScrapingRule.create(atts)
       old_scrape.update_attribute("active",false) if succeeded
     else
-      succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule])
+      succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule].reject{|k,v|v.blank?})
     end
     
     respond_to do |format|
       if succeeded
         format.html { head :ok }
       else
-        format.html { render :action => "edit" }
+        format.html { render :text => "Error: Couldn't update record id " + params[:id] }
       end
     end
   end

@@ -17,7 +17,6 @@ class ResultsController < ApplicationController
     
     @category_id = @result.category
     @product_count = @result.total
-    @limited_products = @product_count
     @candidates = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
       c.group_by{|c|c[1]}.each_pair do |remote_featurename, c|
