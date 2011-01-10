@@ -30,4 +30,6 @@ gem 'ruby-debug19'
 #   gem 'webrat'
 # end
 
+# In firehose, use this in development mode too
+gem "memcache-client"
 gem 'json'

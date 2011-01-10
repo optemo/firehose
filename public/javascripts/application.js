@@ -75,6 +75,22 @@ $(document).ready(function(){
     
     $('.edit_rule_dropdown').click(dropdown_function);
     
+    $('.raise_rule_priority').click(function() {
+        var t = $(this), form = t.parents("form");
+        $.ajax({
+    		url: "/scraping_rules/raisepriority?id=" + t.attr("data-id"),
+    		data: form.serialize(),
+    		type: "POST",
+    		success: function() {
+    		    alert_substitute(t, "Rule priority raised.");
+    		},
+    		error: function() {
+    			alert_substitute(t, "Error in processing the rule raise request.");
+    		}
+        });
+        return false;
+    });
+    
     $('.edit_scraping_rule').each(function() {
         $(this).validate({
             rules: {
@@ -112,9 +128,7 @@ $(document).ready(function(){
     $('#silkscreen').click(function () {removeSilkScreen();});
 
     $('#scraping_rule_submit, .correction_submit').live("click", function() {
-        var t = $(this);
-		form = t.parents("form");
-		value = t.attr('Value');
+        var t = $(this), form = t.parents("form"), value = t.attr('Value');
         if (form.validate().valid()) { // Make sure the form is valid.
 			$.ajax({
 			    url: form.attr("action"), 
@@ -130,8 +144,8 @@ $(document).ready(function(){
 					    alert_substitute(t, "Rule Updated");
 					    break;
 					default:
-    				    removeSilkScreen();
 					    alert_substitute(t, "Rule Created");
+    				    removeSilkScreen();
 				}
 			  },
 				error: function() {
@@ -145,17 +159,18 @@ $(document).ready(function(){
 	
 	function alert_substitute(el, msg) {
 		var div_to_add = $("<div class='global_popup'>" + msg + "</div>");
-		div_to_add.css("top", el.position().top - 50);
+		div_to_add.css({top : el.position().top - 50, "z-index" : 199});
 		$("body").append(div_to_add);
 		div_to_add.delay(2000).fadeOut(1000);  
     }
 	
 	$("a").live('click',function(){
-		t = $(this);
+		t = $(this), form = t.parents("form");
 		if (t.attr('data-method') == "delete")
 		{
 			$.ajax({
 				url: t.attr("href"),
+				data: form.serialize(),
 				type: "DELETE",
 				success: function() {
 				    alert_substitute(t, "Record has been removed.");

@@ -7,17 +7,17 @@ class BestBuyApi
     
     #Find BestBuy products
     def product_search(id)
-      send_request('product',{:id => id})["product"]
+      cached_request('product',{:id => id})["product"]
     end
     
     #Search through the  Categories
     def category_search(id)
-      send_request('category',{:id => id})
+      cached_request('category',{:id => id})
     end
     
     #Find all the products in a category
     def listing(id,page=1)
-      send_request('search',{:'categoryPath.id' => id},page)
+      cached_request('search',{:'categoryPath.id' => id},page)
     end
     
     def category_ids(id)
@@ -25,7 +25,7 @@ class BestBuyApi
       page = 1
       totalpages = 1
       while (page <= totalpages)
-        res = send_request('search',{:'categoryPath.id' => id},page)
+        res = cached_request('search',{:'categoryPath.id' => id},page)
         totalpages = res["totalPages"]
         ids += res["products"].map{|p|p["sku"]}
         page += 1
@@ -35,7 +35,13 @@ class BestBuyApi
     end
     
     def search(string,page=1)
-      send_request('search',{:name => string},page)
+      cached_request('search',{:name => string},page)
+    end
+
+    def cached_request(type, opts, page=1)
+      CachingMemcached.cache_lookup(type + opts.to_s + page.to_s) do
+        send_request(type, opts, page)
+      end
     end
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.

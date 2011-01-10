@@ -43,6 +43,7 @@ GEM
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
+    memcache-client (1.8.5)
     mime-types (1.16)
     mysql2 (0.2.6)
     polyglot (0.3.1)
@@ -85,6 +86,7 @@ PLATFORMS
 
 DEPENDENCIES
   json
+  memcache-client
   mysql2
   rails (= 3.0.3)
   ruby-debug19

@@ -35,8 +35,8 @@ class ScrapingRule < ActiveRecord::Base
             replace_i = regexstr.index(/[^\\]\//)
             begin
               if replace_i
-                #Replacement part of the regex
-                parsed = raw.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
+                #Replacement part of the regex (do a match first, since it's a two-part operation)
+                parsed = Regexp.new(regexstr[0..replace_i]).match(raw.to_s).to_s.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
               else
                 #Just match, not replacement
                 parsed = Regexp.new(regexstr).match(raw.to_s)
@@ -60,4 +60,10 @@ class ScrapingRule < ActiveRecord::Base
     end
     data
   end
+  
+  def self.rules_by_priority(data)
+    # This function checks the data passed in to see if there are multiple remote features being put into a single remote feature.
+    data.to_a.sort{|a,b| a[1]["rule"].priority <=> b[1]["rule"].priority}
+  end
+  
 end
