@@ -107,7 +107,7 @@ class Product < ActiveRecord::Base
       # For each remote id, first figure out whether we already have a product that matches
       unless product = Product.find_by_sku(r_id)
         # Create a new one. The product already exists otherwise.
-        product = Product.new({:sku => r_id, :product_type => Session.product_type})
+        product = Product.new({:sku => r_id, :product_type => Session.current.product_type})
       end
       product.instock = true
       product.save
@@ -125,7 +125,7 @@ class Product < ActiveRecord::Base
           else spec_class = CatSpec # This should never happen
       		end
           unless spec = spec_class.find_by_product_id_and_name(product.id, rule.local_featurename)
-            spec = spec_class.new({:product_type => Session.product_type, :product_id => product.id, :name => rule.local_featurename})
+            spec = spec_class.new({:product_type => Session.current.product_type, :product_id => product.id, :name => rule.local_featurename})
           end
           spec.value = r.parsed
           spec.save

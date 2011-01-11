@@ -1,0 +1,30 @@
+# c = continuous
+# cat = categorical
+# b = boolean
+# boost = boostexter feature for labels
+# show = this causes display in CompareController#show
+# showList = for direct view, this causes display in .itemfeatures
+
+####Spaces are required between elements in an array
+
+bestbuy:
+    product_type: camera_bestbuy
+    layout: assist
+    price:
+        feature_type: Continuous
+        used_for: [filter, cluster, show]
+        prefdir: -1
+        min: 1
+        max: 10000
+    maxresolution: 
+        feature_type: Continuous
+        used_for: [desc, filter, cluster, show]
+    screensize:
+        feature_type: Continuous
+        used_for: [desc, filter, cluster, show]
+    opticalzoom:
+        feature_type: Continuous
+        used_for: [desc, filter, cluster, show]
+    brand:
+        feature_type: Categorical
+        used_for: [filter, show]

@@ -34,7 +34,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new(:product_type => Session.product_type)
+    @result = Result.new(:product_type => Session.current.product_type)
 
     respond_to do |format|
       format.html # new.html.erb
@@ -51,7 +51,7 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true).uniq # There are multiples in the table for some reason...
+    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true).uniq # There are multiples in the table for some reason...
     
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.total = product_skus.count

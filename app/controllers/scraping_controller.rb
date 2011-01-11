@@ -40,6 +40,6 @@ class ScrapingController < ApplicationController
       # Put the coverage in a variable that we can get out in the view.
       @rules[n]["coverage"] = sku_hash.keys.length
     end
-    #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    #@rules = ScrapingRule.find_all_by_product_type(Session.current.product_type).group_by(&:local_featurename)
   end
 end
