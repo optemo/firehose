@@ -31,23 +31,32 @@ class ScrapingRule < ActiveRecord::Base
           if corr
             parsed = corr.corrected
           else
-            regexstr = r.regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
-            replace_i = regexstr.index(/[^\\]\//)
-            begin
-              if replace_i
-                #Replacement part of the regex (do a match first, since it's a two-part operation)
-                parsed = Regexp.new(regexstr[0..replace_i]).match(raw.to_s).to_s.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
-              else
-                #Just match, not replacement
-                parsed = Regexp.new(regexstr).match(raw.to_s)
+            #We can handle multiple passes of regular expressions with ^^
+            current_text = raw.to_s
+            firstregex = true
+            r.regex.split("^^").each do |current_regex|
+              regexstr = current_regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
+              replace_i = regexstr.index(/[^\\]\//)
+              begin
+                if replace_i
+                  #Replacement part of the regex (do a match first, since it's a two-part operation)
+                  parsed = Regexp.new(regexstr[0..replace_i]).match(current_text).to_s.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
+                else
+                  #Just match, not replacement
+                  parsed = Regexp.new(regexstr).match(current_text)
+                end
+                #Test for min / max
+                parsed = "**LOW" if r.min && parsed && parsed.to_s.to_f < r.min
+                parsed = "**HIGH" if r.max && parsed && parsed.to_s.to_f > r.max
+                
+              rescue RegexpError
+                parsed = "**Regex Error"
               end
-              #Test for min / max
-              parsed = "**LOW" if r.min && parsed && parsed.to_s.to_f < r.min
-              parsed = "**HIGH" if r.max && parsed && parsed.to_s.to_f > r.max
-              
-            rescue RegexpError
-              parsed = "**Regex Error"
+              #If it fails the first Regex, it should return nothing
+              current_text = parsed.to_s if !parsed.to_s.blank? || firstregex
+              firstregex = false
             end
+            parsed = current_text
           end
           #Save the cleaned result
           data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
