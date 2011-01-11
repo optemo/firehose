@@ -40,26 +40,26 @@ class ScrapingRule < ActiveRecord::Base
               begin
                 if replace_i
                   #Replacement part of the regex (do a match first, since it's a two-part operation)
-                  parsed = Regexp.new(regexstr[0..replace_i]).match(current_text).to_s.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
+                  parsed = current_text[Regexp.new(regexstr[0..replace_i])].gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
                 else
                   #Just match, not replacement
-                  parsed = Regexp.new(regexstr).match(current_text)
+                  parsed = current_text[Regexp.new(regexstr)]
                 end
                 #Test for min / max
-                parsed = "**LOW" if r.min && parsed && parsed.to_s.to_f < r.min
-                parsed = "**HIGH" if r.max && parsed && parsed.to_s.to_f > r.max
+                parsed = "**LOW" if r.min && parsed && parsed.to_f < r.min
+                parsed = "**HIGH" if r.max && parsed && parsed.to_f > r.max
                 
               rescue RegexpError
                 parsed = "**Regex Error"
               end
               #If it fails the first Regex, it should return nothing
-              current_text = parsed.to_s if !parsed.to_s.blank? || firstregex
+              current_text = parsed if !parsed.nil? || firstregex
               firstregex = false
             end
             parsed = current_text
           end
           #Save the cleaned result
-          data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
+          data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed,raw.to_s,corr]
           data[r.local_featurename][r.remote_featurename]["rule"] = r
         end
         #Include raw json for other functionality
