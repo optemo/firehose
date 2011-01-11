@@ -12,6 +12,6 @@
   <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 20, :class => "ifcont") %><br/>
   <%= f.label :valid_inputs, "Valid Inputs (comma separate)" %> <%= f.text_field(:valid_inputs, :size => 20) %><br/>
   <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id %>
-  <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions.</p>
+  <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
   </fieldset>
 <% end %>
