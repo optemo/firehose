@@ -1,15 +1,13 @@
 class ScrapingController < ApplicationController
-  cattr_accessor :category_id
-  
   def index
   end
   
   def datafeed
     # This function shows the application frame and shows a list of the products for a given category.
     if params[:category_id]
-      @@category_id = params[:category_id]
+      Session.category_id = params[:category_id]
     end
-    @product_skus = BestBuyApi.category_ids(@@category_id)
+    @product_skus = BestBuyApi.category_ids(Session.category_id)
   end
 
   def scrape
@@ -20,7 +18,7 @@ class ScrapingController < ApplicationController
   end
   
   def rules
-    products = BestBuyApi.listing(@@category_id)
+    products = BestBuyApi.listing(Session.category_id)
     @product_count = products["total"]
     @limited_products = [20,@product_count].min
     @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
@@ -32,13 +30,13 @@ class ScrapingController < ApplicationController
       r.each_pair do |rf, data_arr|
         # data_arr is now an array with hashes in priority order.
         data_arr.each do |data|
-          data["products"].each{|p|sku_hash[p[0]] = 1}
+          data["products"].each{|p|sku_hash[p[0]] = 1 unless p[1].blank?}
           data["products"] = data["products"].sort # so that blanks come out on top?
         end
       end
       # Put the coverage in a variable that we can get out in the view.
       @rules[n]["coverage"] = sku_hash.keys.length
     end
-    #@rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    #@rules = ScrapingRule.find_all_by_product_type(Session.current.product_type).group_by(&:local_featurename)
   end
 end

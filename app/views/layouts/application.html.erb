@@ -10,7 +10,7 @@
 </head>
 <body>
     <div id="header">
-        <h2>SKUs in category id <%= ScrapingController.category_id %></h2>
+        <h2>SKUs in category id <%= Session.category_id %></h2>
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
         <%= link_to "results", "/results" %> - Make new result set, push into product &amp; spec tables</div>

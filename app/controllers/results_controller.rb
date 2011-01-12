@@ -15,7 +15,7 @@ class ResultsController < ApplicationController
   def show
     @result = Result.find(params[:id])
     
-    ScrapingController.category_id = @result.category
+    Session.category_id = @result.category
     @product_count = @result.total
     @candidates = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
@@ -34,7 +34,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new(:product_type => Session.product_type)
+    @result = Result.new(:product_type => Session.current.product_type)
 
     respond_to do |format|
       format.html # new.html.erb
@@ -51,7 +51,7 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true).uniq # There are multiples in the table for some reason...
+    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true).uniq # There are multiples in the table for some reason...
     
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.total = product_skus.count

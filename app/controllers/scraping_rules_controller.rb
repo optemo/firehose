@@ -43,9 +43,9 @@ class ScrapingRulesController < ApplicationController
     # The first three kinds end up being specs bound to the product, e.g. ContSpec, 
     # while the last kind of rule inserts values directly into the product row.
     @scraping_rule = ScrapingRule.new(params[:rule])
-    @scraping_rule.product_type = Session.product_type
+    @scraping_rule.product_type = Session.current.product_type
     # For priority, find all the scraping rules that share that local featurename (for that product type)
-    potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.product_type)
+    potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.current.product_type)
     # If there are any, get the highest priority and increment it for the new rule.
     # This gives all new rules a lower priority (lower priority number means higher priority).
     unless potential_previous_scraping_rules.empty?

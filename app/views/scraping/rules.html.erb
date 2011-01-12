@@ -18,7 +18,7 @@
 			Feature: <span class="bold"><%= r.local_featurename %></span>&nbsp;&nbsp;&nbsp;
 			Type: <span class="bold"><%= r.rule_type %></span>&nbsp;&nbsp;&nbsp;
 			<span>Restrictions: <%= restrictions(r) %></span>&nbsp;&nbsp;&nbsp;
-			Coverage: <span class="bold"><%= d["coverage"].to_s + " / " + @limited_products.to_s %></span>
+			Coverage: <span class="bold"><%= d["coverage"].to_s + "/" + @limited_products.to_s %></span>
 		</a>
 	    <%=raw save %>
 	</div>

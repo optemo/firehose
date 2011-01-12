@@ -18,8 +18,8 @@ class ScrapingRule < ActiveRecord::Base
       sleep 0.5 if defined? looped
       raw_info = BestBuyApi.product_search(id)
       unless raw_info.nil?
-        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
-        rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.current.product_type)
+        rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
         rules.each do |r|
           #Find content based on . seperated hierarchical description
           identifiers = r.remote_featurename.split(".")
@@ -31,29 +31,39 @@ class ScrapingRule < ActiveRecord::Base
           if corr
             parsed = corr.corrected
           else
-            regexstr = r.regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
-            replace_i = regexstr.index(/[^\\]\//)
-            begin
-              if replace_i
-                #Replacement part of the regex (do a match first, since it's a two-part operation)
-                parsed = Regexp.new(regexstr[0..replace_i]).match(raw.to_s).to_s.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1])
-              else
-                #Just match, not replacement
-                parsed = Regexp.new(regexstr).match(raw.to_s)
+            #We can handle multiple passes of regular expressions with ^^
+            current_text = raw.to_s
+            firstregex = true
+            r.regex.split("^^").each do |current_regex|
+              regexstr = current_regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
+              replace_i = regexstr.index(/[^\\]\//)
+              begin
+                if replace_i
+                  #Replacement part of the regex (do a match first, since it's a two-part operation)
+                  parsed = current_text[Regexp.new(regexstr[0..replace_i])]
+                  parsed = parsed.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1]) if parsed
+                else
+                  #Just match, not replacement
+                  parsed = current_text[Regexp.new(regexstr)]
+                end
+                #Test for min / max
+                parsed = "**LOW" if r.min && parsed && parsed.to_f < r.min
+                parsed = "**HIGH" if r.max && parsed && parsed.to_f > r.max
+                
+              rescue RegexpError
+                parsed = "**Regex Error"
               end
-              #Test for min / max
-              parsed = "**LOW" if r.min && parsed && parsed.to_s.to_f < r.min
-              parsed = "**HIGH" if r.max && parsed && parsed.to_s.to_f > r.max
-              
-            rescue RegexpError
-              parsed = "**Regex Error"
+              #If it fails the first Regex, it should return nothing
+              current_text = parsed if !parsed.nil? || firstregex
+              firstregex = false
             end
+            parsed = current_text
           end
           #Save the cleaned result
           dd = data[r.local_featurename][r.remote_featurename]
           dd[r.priority] = Hash.new unless dd[r.priority]
           dd[r.priority]["products"] = Array.new unless dd[r.priority]["products"]
-          dd[r.priority]["products"] << [id,parsed.to_s,raw.to_s,corr]
+          dd[r.priority]["products"] << [id,parsed,raw.to_s,corr]
           dd[r.priority]["rule"] = r
         end
         #Include raw json for other functionality
