@@ -64,20 +64,18 @@ class ResultsController < ApplicationController
     product_skus.each do |sku|
       ScrapingRule.scrape(sku).each_pair do |local_feature, i|
         # Now sorted, we want to take a rule that actually applies. To do this, run through them in priority order until one works.
-        i.each_pair do |lf, data_arr|
-          data_arr.each do |data|
-            parsed = data["products"].first[1]
-            raw = data["products"].first[2]
-            corr = data["products"].first[3]
-            corr = corr.id if corr
-            if (!corr && (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error"))#This is a missing value
-              errors += 1
-              delinquent = true
-            else
-              delinquent = false
-            end          
-            Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => data["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
-          end
+        i.each_pair do |lf, data|
+          parsed = data.products.first.first.parsed
+          raw = data.products.first.first.raw
+          corr = data.products.first.first.corrected
+          corr = corr.id if corr
+          if (!corr && (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error"))#This is a missing value
+            errors += 1
+            delinquent = true
+          else
+            delinquent = false
+          end          
+          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => data.rules.first.id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
         end
       end
     end

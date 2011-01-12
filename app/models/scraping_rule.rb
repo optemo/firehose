@@ -12,14 +12,14 @@ class ScrapingRule < ActiveRecord::Base
     #Return type: [local_featurename][remote_featurename][]["products"] = [product_id,parsed,raw]
     #             [local_featurename][remote_featurename][]["rule"] = ScrapingRule
     #Four layer return type
-    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Array.new}}
+    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = ScrapedResult.new}}
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
       sleep 0.5 if defined? looped
       raw_info = BestBuyApi.product_search(id)
       unless raw_info.nil?
         corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.current.product_type)
-        rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
+        rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true, :order => 'priority')
         rules.each do |r|
           #Find content based on . seperated hierarchical description
           identifiers = r.remote_featurename.split(".")
@@ -60,17 +60,14 @@ class ScrapingRule < ActiveRecord::Base
             parsed = current_text
           end
           #Save the cleaned result
-          dd = data[r.local_featurename][r.remote_featurename]
-          dd[r.priority] = Hash.new unless dd[r.priority]
-          dd[r.priority]["products"] = Array.new unless dd[r.priority]["products"]
-          dd[r.priority]["products"] << [id,parsed,raw.to_s,corr]
-          dd[r.priority]["rule"] = r
+          data[r.local_featurename][r.remote_featurename].add(r,ScrapedProduct.new(:id => id, :parsed => parsed, :raw => raw.to_s, :corrected => corr))
         end
         #Include raw json for other functionality
         data["RAW-JSON"] = raw_info if inc_raw
       end
       looped = true
     end
+    data.each{|k,v|v.each{|l,m|data[k][l].compact} unless k == "RAW-JSON"} #Remove nils from the arrays
     data
   end
   

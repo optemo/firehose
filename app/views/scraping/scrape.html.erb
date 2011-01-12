@@ -5,9 +5,9 @@
 		<div>
 			<% @scraped_features.each_pair do |k,v| %>
 				<div class="contentholder"><span class="bold"><%= k %> </span>
-					<% v.each_pair do |l,w_arr| %>
-					    <% w_arr.each do |w| %>
-						    <%= w["products"][0][1] %> from: <%= w["products"][0][2] %> using: <%= w["rule"].regex %> on <span class="bold"><%= w["rule"]["remote_featurename"] %></span>
+					<% v.each_pair do |l,scraped_result| %>
+						<% scraped_result.rules.each_with_index do |r, i| %>
+						    <%= scraped_result.products[i][0].parsed %> from: <%= scraped_result.products[i][0].raw %> using: <%= r.regex %> on <span class="bold"><%= r.remote_featurename %></span>
 					    <% end %>
 					<% end %>
 				</div>
