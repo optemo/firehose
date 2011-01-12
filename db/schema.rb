@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101224190750) do
+ActiveRecord::Schema.define(:version => 20110112233349) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -164,6 +164,17 @@ ActiveRecord::Schema.define(:version => 20101224190750) do
     t.text     "experience"
     t.text     "improvements"
   end
+
+  create_table "text_specs", :force => true do |t|
+    t.integer  "product_id"
+    t.string   "name"
+    t.text     "value"
+    t.string   "product_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "text_specs", ["product_id"], :name => "index_text_specs_on_product_id"
 
   create_table "userdatabins", :force => true do |t|
     t.integer  "search_id"

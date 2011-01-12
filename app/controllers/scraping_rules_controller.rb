@@ -1,17 +1,17 @@
 class ScrapingRulesController < ApplicationController
   layout false
   def new
-    @scraping_rule = ScrapingRule.new
-    @remote_rule_pair = {}
     if params[:rule]
       @remote_rule_pair = params[:rule].split("--").map(&:strip)
+    else
+      @remote_rule_pair = []
     end
+    @scraping_rule = ScrapingRule.new({:remote_featurename => @remote_rule_pair[0]})
     render :layout => false
   end
   
   def edit
     @scraping_rule = ScrapingRule.find(params[:id])
-    @remote_rule_pair = {}
   end
 
   def raisepriority
