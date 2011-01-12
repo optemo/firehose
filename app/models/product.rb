@@ -111,6 +111,11 @@ class Product < ActiveRecord::Base
       end
       product.instock = true
       product.save
+
+      # Group rules by local feature name
+      # For each local feature name, get the candidates in priority order and choose the first one (lowest number)
+      # If there is a correction, ignore all the rules
+
       candidate_rules.sort{|a,b| a.scraping_correction_id.to_i <=> b.scraping_correction_id.to_i}.each do |r|
         rule = ScrapingRule.find(r.scraping_rule_id)
         if rule.rule_type == "intr" # Intrinsic properties affect the product directly.

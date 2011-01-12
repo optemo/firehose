@@ -69,6 +69,7 @@ $(document).ready(function(){
             t.text('Edit Rule');
             el_to_insert_after.next().remove();
             t.unbind('click').click(dropdown_function);
+            return false;
         });
         return false;
     };

@@ -9,10 +9,10 @@ class ScrapingRule < ActiveRecord::Base
   has_and_belongs_to_many :results
   
   def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
-    #Return type: [local_featurename][remote_featurename]["products"] = [product_id,parsed,raw]
-    #             [local_featurename][remote_featurename]["rule"] = ScrapingRule
-    #Three layer return type
-    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new{|j,m| j[m] = []}}}
+    #Return type: [local_featurename][remote_featurename][]["products"] = [product_id,parsed,raw]
+    #             [local_featurename][remote_featurename][]["rule"] = ScrapingRule
+    #Four layer return type
+    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Array.new}}
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
       sleep 0.5 if defined? looped
@@ -50,8 +50,11 @@ class ScrapingRule < ActiveRecord::Base
             end
           end
           #Save the cleaned result
-          data[r.local_featurename][r.remote_featurename]["products"] << [id,parsed.to_s,raw.to_s,corr]
-          data[r.local_featurename][r.remote_featurename]["rule"] = r
+          dd = data[r.local_featurename][r.remote_featurename]
+          dd[r.priority] = Hash.new unless dd[r.priority]
+          dd[r.priority]["products"] = Array.new unless dd[r.priority]["products"]
+          dd[r.priority]["products"] << [id,parsed.to_s,raw.to_s,corr]
+          dd[r.priority]["rule"] = r
         end
         #Include raw json for other functionality
         data["RAW-JSON"] = raw_info if inc_raw

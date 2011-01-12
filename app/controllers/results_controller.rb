@@ -15,7 +15,7 @@ class ResultsController < ApplicationController
   def show
     @result = Result.find(params[:id])
     
-    @category_id = @result.category
+    ScrapingController.category_id = @result.category
     @product_count = @result.total
     @candidates = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
@@ -64,21 +64,20 @@ class ResultsController < ApplicationController
     product_skus.each do |sku|
       ScrapingRule.scrape(sku).each_pair do |local_feature, i|
         # Now sorted, we want to take a rule that actually applies. To do this, run through them in priority order until one works.
-        relevant_rules = ScrapingRule.rules_by_priority(i) # Usually each_pair is only going to get a single rule.
-        relevant_rules.each_pair do |remote_feature, ii|
-          if (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")#This is a missing value
-            errors += 1
-            next # Try the next rule if this one didn't work. 
-            # Though, this skips the creation of a rule with these values, and it's possible that no candidate rules are created for this SKU.
-          else
-            delinquent = false
-          end          
-          parsed = ii["products"].first[1]
-          raw = ii["products"].first[2]
-          corr = ii["products"].first[3]
-          corr = corr.id if corr
-          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => ii["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
-          break # Don't process any more rules if we got this far.
+        i.each_pair do |lf, data_arr|
+          data_arr.each do |data|
+            parsed = data["products"].first[1]
+            raw = data["products"].first[2]
+            corr = data["products"].first[3]
+            corr = corr.id if corr
+            if (!corr && (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error"))#This is a missing value
+              errors += 1
+              delinquent = true
+            else
+              delinquent = false
+            end          
+            Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => data["rule"].id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
+          end
         end
       end
     end
