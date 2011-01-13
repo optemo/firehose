@@ -60,14 +60,17 @@ class ScrapingRule < ActiveRecord::Base
             parsed = current_text
           end
           #Save the cleaned result
-          data[r.local_featurename][r.remote_featurename].add(r,ScrapedProduct.new(:id => id, :parsed => parsed, :raw => raw.to_s, :corrected => corr))
+          data[r.local_featurename][r.id].add(r,ScrapedProduct.new(:id => id, :parsed => parsed, :raw => raw.to_s, :corrected => corr))
         end
         #Include raw json for other functionality
         data["RAW-JSON"] = raw_info if inc_raw
       end
       looped = true
     end
-    data.each{|k,v|v.each{|l,m|data[k][l].compact} unless k == "RAW-JSON"} #Remove nils from the arrays
+    #Convert to local_feature,remote_feature
+    data.each do |lf,rules|
+      data[lf] = rules.values.sort{|a,b|a.rule.priority <=> b.rule.priority} unless lf == "RAW-JSON"
+    end
     data
   end
   

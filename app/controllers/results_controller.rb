@@ -17,14 +17,24 @@ class ResultsController < ApplicationController
     
     Session.category_id = @result.category
     @product_count = @result.total
-    @candidates = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = Hash.new}}
+    @rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = ScrapedResult.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
-      c.group_by{|c|c[1]}.each_pair do |remote_featurename, c|
-        @candidates[local_featurename][remote_featurename]["products"] = c.sort{|a,b|(b[6] ? 2 : b[7] ? 1 : 0) <=> (a[6] ? 2 : a[7] ? 1 : 0)}.map{|cc|[cc[3],cc[4],cc[5],(cc[7].nil? ? nil : ScrapingCorrection.find(cc[7]))]}
-        @candidates[local_featurename][remote_featurename]["rule"] = c.first[2]
-      end
+      c.each{|c|@rules[local_featurename][c[2].id].add(c[2],ScrapedProduct.new(:id => c[3], :parsed => c[4], :raw => c[5], :corrected => (c[7].nil? ? nil : ScrapingCorrection.find(c[7]))))}
     end
-    
+    @rules.each do |lf,rules|
+      @rules[lf] = rules.values.sort{|a,b|a.rule.priority <=> b.rule.priority}
+    end
+    @rules.each do |n,r| # n is the rule name, r is a hash with remote_featurename => {products => ..., rule => ...}
+      # For each local feature, we want to build up a list of products that are touched by one or more rules.
+      # This becomes the overall coverage, with the 
+      # One easy way to do this is with a hash whose keys are the skus.
+      sku_hash = {}
+      r.each do |scraped_result|
+        scraped_result.products.each{|p|sku_hash[p.id] = 1 unless p.parsed.blank?}
+      end
+      # Put the coverage in a variable that we can get out in the view.
+      @rules[n].unshift sku_hash.keys.length
+    end
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @result }

@@ -1,22 +1,8 @@
 class ScrapedResult
-  attr_reader :rules, :products
-  def initialize
-    @products = []
-    @rules = []
-  end
-  
-  def rule(priority)
-    @rules[priority]
-  end
+  attr_reader :rule, :products
   
   def add(rule,scraped_result)
-    priority = rule.priority
-    @rules[priority] = rule
-    @products[priority].kind_of?(Array) ? @products[priority] << scraped_result : @products[priority] = [scraped_result]
-  end
-  
-  def compact
-    @rules.compact!
-    @products.compact!
+    @rule = rule
+    @products.kind_of?(Array) ? @products << scraped_result : @products = [scraped_result]
   end
 end
