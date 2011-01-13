@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110112233349) do
+ActiveRecord::Schema.define(:version => 20110113194311) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -110,9 +110,9 @@ ActiveRecord::Schema.define(:version => 20110112233349) do
     t.string   "product_type"
     t.string   "raw"
     t.string   "corrected"
-    t.string   "remote_featurename"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "scraping_rule_id"
   end
 
   add_index "scraping_corrections", ["product_id"], :name => "index_scraping_corrections_on_product_id"

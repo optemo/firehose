@@ -13,7 +13,7 @@
 			Coverage: <span class="bold"><%= d.shift.to_s + "/" + (@product_count.kind_of?(Array) ? @product_count[0] : @product_count).to_s %></span>
 		</a>
 		<% d.group_by{|a|a.rule.remote_featurename}.each_pair do |remote_feature, data | %>
-	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:rf => remote_feature, :pc => (@product_count.kind_of?(Array) ? @product_count[0] : @product_count)} %>
+	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => (@product_count.kind_of?(Array) ? @product_count[0] : @product_count)} %>
 		<% end %>
 	</div>
 <% end %>
