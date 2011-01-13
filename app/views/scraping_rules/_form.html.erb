@@ -6,12 +6,12 @@
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "bin", :class => "required") %> Bin</div>
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "text", :class => "required") %> Text</div>
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "intr", :class => "required") %> Intr</div><br/>
-  <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 20, :class => "required") %><br/>
-  <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 20, :class => "required") %><br/>
-  <%= f.label :regex, "Regular Expression" %> <%= f.text_field(:regex, :size => 20, :class => "required regexp") %><br/>
-  <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 20, :class => "ifcont") %><br/>
-  <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 20, :class => "ifcont") %><br/>
-  <%= f.label :valid_inputs, "Valid Inputs (comma separate)" %> <%= f.text_field(:valid_inputs, :size => 20) %><br/>
+  <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %><br/>
+  <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %><br/>
+  <%= f.label :regex, "Regular Expression" %> <%= f.text_field(:regex, :size => 35, :class => "required regexp") %><br/>
+  <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %><br/>
+  <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %><br/>
+  <%= f.label :valid_inputs, "Valid Inputs (comma separate)" %> <%= f.text_field(:valid_inputs, :size => 35) %><br/>
   <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id %>
   <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
   </fieldset>
