@@ -27,7 +27,7 @@ class ScrapingRule < ActiveRecord::Base
           #Traverse the hash hierarchy
           identifiers.each {|i| raw = raw[i] unless raw.nil?}
           raw = "" unless raw
-          corr = corrections.select{|c|c.remote_featurename == r.remote_featurename && c.raw == raw.to_s}.first
+          corr = corrections.select{|c|c.id == r.id && c.raw == raw.to_s}.first
           if corr
             parsed = corr.corrected
           else
