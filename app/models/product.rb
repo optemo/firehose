@@ -127,6 +127,7 @@ class Product < ActiveRecord::Base
           when "cat" then spec_class = CatSpec
           when "cont" then spec_class = ContSpec
           when "bin" then spec_class = BinSpec
+          when "text" then spec_class = TextSpec
           else spec_class = CatSpec # This should never happen
       		end
           unless spec = spec_class.find_by_product_id_and_name(product.id, rule.local_featurename)

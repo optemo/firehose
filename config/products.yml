@@ -29,7 +29,7 @@ bestbuy:
         feature_type: Categorical
         used_for: [filter, show]
         
-bestbuy_tv:
+besttv:
     product_type: tv_bestbuy
     layout: assist
     price:
