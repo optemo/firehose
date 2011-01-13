@@ -19,23 +19,18 @@ class ScrapingController < ApplicationController
   
   def rules
     products = BestBuyApi.listing(Session.category_id)
-    @product_count = products["total"]
-    @limited_products = [20,@product_count].min
+    @product_count = [[20,products["total"]].min,products["total"]]
     @rules = ScrapingRule.scrape(products["products"].map{|p|p["sku"]})
     @rules.each do |n,r| # n is the rule name, r is a hash with remote_featurename => {products => ..., rule => ...}
       # For each local feature, we want to build up a list of products that are touched by one or more rules.
       # This becomes the overall coverage, with the 
       # One easy way to do this is with a hash whose keys are the skus.
       sku_hash = {}
-      r.each_pair do |rf, data|
-        # data_arr is now an array with hashes in priority order.
-        data.products.each do |products|
-          products.each{|p|sku_hash[p.id] = 1 unless p.parsed.blank?}
-        end
+      r.each do |scraped_result|
+        scraped_result.products.each{|p|sku_hash[p.id] = 1 unless p.parsed.blank?}
       end
       # Put the coverage in a variable that we can get out in the view.
-      @rules[n]["coverage"] = sku_hash.keys.length
+      @rules[n].unshift sku_hash.keys.length
     end
-    #@rules = ScrapingRule.find_all_by_product_type(Session.current.product_type).group_by(&:local_featurename)
   end
 end

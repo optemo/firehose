@@ -3,12 +3,12 @@
 	<div class="scraped_features">
 		<%= link_to "Scraped Results", "#", :class => "open togglable" %>
 		<div>
-			<% @scraped_features.each_pair do |k,v| %>
-				<div class="contentholder"><span class="bold"><%= k %> </span>
-					<% v.each_pair do |l,scraped_result| %>
-						<% scraped_result.rules.each_with_index do |r, i| %>
-						    <%= scraped_result.products[i][0].parsed %> from: <%= scraped_result.products[i][0].raw %> using: <%= r.regex %> on <span class="bold"><%= r.remote_featurename %></span>
-					    <% end %>
+			<% @scraped_features.each_pair do |lf,scraped_results| %>
+				<div class="contentholder"><span class="bold"><%= lf %> </span>
+					<% scraped_results.each do |scraped_result| %>
+						<% scraped_result.products.each do |product| %>
+						    <%= product.parsed %> from: <%= product.raw %> using: <%= scraped_result.rule.regex %> on <span class="bold"><%= scraped_result.rule.remote_featurename %></span>
+						<% end %>
 					<% end %>
 				</div>
 			<% end %>

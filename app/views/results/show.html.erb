@@ -1,29 +1,5 @@
 <div id="content">
-<div class="strong" id="num_skus_found">
-    Total of <%=@product_count%> SKUs found
-</div>
-<h3>Rules</h3>
-<% @candidates.each_pair do |feature,d| %>
-	<% save = "" %>
-	<% r = nil %>
-	<% d.each_pair do |rf, data_arr| %>
-    	<% next if data_arr.class == Fixnum # This is because of the "coverage" variable. %>
-    	<% data_arr.each do |data| %>
-			<% save += render :partial => "remote_features", :locals => {:rf => rf, :data => data, :pc => @product_count.to_i} %>
-    		<%# Get the rule out of the hash %>
-    		<% r = data["rule"] if r.nil? %>
-		<% end %>
-	<% end %>
-	<div style="margin-bottom: 1em;">
-		<a href="#" class="togglable open title_link">
-			Feature: <span class="bold"><%= r.local_featurename %></span>&nbsp;&nbsp;&nbsp;
-			Type: <span class="bold"><%= r.rule_type %></span>&nbsp;&nbsp;&nbsp;
-			<span>Restrictions: <%= restrictions(r) %></span>&nbsp;&nbsp;&nbsp;
-			Coverage: <span class="bold"><%= d["coverage"].to_s + "/" + @limited_products.to_s %></span>
-		</a>
-		<%=raw save %>
-	</div>
-<% end %>
+<%= render :partial => "rules" %>
 <%= form_tag ("/results/commit/" + @result.id.to_s) do |f| %>
     <div><%= submit_tag 'Save' %></div>
 <% end %>
