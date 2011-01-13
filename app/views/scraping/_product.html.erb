@@ -1,14 +1,14 @@
 <div>
-	SKU: <span class="bold"><%= product[0] %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=product[0]%>">Fetch</span>&nbsp;&nbsp;&nbsp;
-	<%= form_for product[3] || ScrapingCorrection.new(:product_id => product[0], :product_type => Session.current.product_type, :raw => product[2], :remote_featurename => rf) do |f| %> 
-	Data: <span class="bold value<%= ' corrected' if !product[3].nil? %>"><%= product[1] %></span>
+	SKU: <span class="bold"><%= product.id %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=product.id%>">Fetch</span>&nbsp;&nbsp;&nbsp;
+	<%= form_for product.corrected || ScrapingCorrection.new(:product_id => product.id, :product_type => Session.current.product_type, :raw => product.raw, :remote_featurename => rf) do |f| %> 
+	Data: <span class="bold value<%= ' corrected' if !product.corrected.nil? %>"><%= product.id %></span>
 		<%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :product_type %> <%= f.hidden_field :raw %> <%= f.hidden_field :remote_featurename %>
-	&nbsp;&nbsp;&nbsp; from:&nbsp;&nbsp;&nbsp; <%= product[2] %>&nbsp;&nbsp;&nbsp;
-	<% if product[3] #Is there a correction? %>
+	&nbsp;&nbsp;&nbsp; from:&nbsp;&nbsp;&nbsp; <%= product.raw %>&nbsp;&nbsp;&nbsp;
+	<% if product.corrected #Is there a correction? %>
 		<%= link_to "Update Correction", "#", :class => "correction" %>
 	<% else %>
 		<%= link_to "Correction", "#", :class => "correction" %>
 	<% end %>
 	<%= f.submit "Correct", :class => "correction_submit" %> <% end %>
-	<%= link_to "Remove correction", product[3], :method => :delete if product[3] %>
+	<%= link_to "Remove correction", product.corrected, :method => :delete if product.corrected %>
 </div>

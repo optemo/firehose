@@ -1,12 +1,6 @@
 <div class="contentholder">
 	<a href="#" class="togglable closed title_link">
-		Remote Feature: <span class="bold"><%= rf %></span>&nbsp;&nbsp;&nbsp;
-		Coverage: <span class="bold"><%= pc - notcovered(data["products"].map{|e|e[1]}) %>/<%= pc %></span>
-	</a>&nbsp;&nbsp;&nbsp;
-	<%= form_tag do %>
-		<%= data["rule"].regex %> <%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => data["rule"].id %>
-	<%= link_to "Destroy", data["rule"], :method => :delete %>
-	<%= link_to "Raise Priority", "#", :class => "raise_rule_priority", :"data-id" => data["rule"].id %>
-	<% end %>
-	<div class="contentholder"><%= render :partial => 'product', :collection => data["products"], :locals => {:rf => rf} %></div>
+		Remote Feature: <span class="bold"><%= rf %></span>
+	</a>
+	<%= render :partial => 'rules_features', :collection => data.products.zip(data.rules), :locals => {:rf => rf, :pc => pc} %>
 </div>

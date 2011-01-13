@@ -27,11 +27,10 @@ class ScrapingController < ApplicationController
       # This becomes the overall coverage, with the 
       # One easy way to do this is with a hash whose keys are the skus.
       sku_hash = {}
-      r.each_pair do |rf, data_arr|
+      r.each_pair do |rf, data|
         # data_arr is now an array with hashes in priority order.
-        data_arr.each do |data|
-          data["products"].each{|p|sku_hash[p[0]] = 1 unless p[1].blank?}
-          data["products"] = data["products"].sort # so that blanks come out on top?
+        data.products.each do |products|
+          products.each{|p|sku_hash[p.id] = 1 unless p.parsed.blank?}
         end
       end
       # Put the coverage in a variable that we can get out in the view.

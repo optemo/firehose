@@ -1,0 +1,12 @@
+<% products = rules_features[0] %>
+<% rule = rules_features[1] %>
+<div class="contentholder">
+	<a href="#" class="togglable closed title_link">
+		Rule: <%= rule.regex %>&nbsp;&nbsp;&nbsp;
+		Coverage: <span class="bold"><%= pc - notcovered(products.map{|e|e.parsed}) %>/<%= pc %></span>
+	</a>&nbsp;&nbsp;&nbsp;
+	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id %>
+	<%= link_to "Destroy", rule, :method => :delete %>
+	<%= link_to "Raise Priority", "#", :class => "raise_rule_priority", :"data-id" => rule.id %>
+	<div class="contentholder"><%= render :partial => 'product', :collection => products, :locals => {:rf => rf} %></div>
+</div>
