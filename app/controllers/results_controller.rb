@@ -19,7 +19,7 @@ class ResultsController < ApplicationController
     @product_count = @result.total
     @rules = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = ScrapedResult.new}}
     @result.candidates.map{|c|[c.scraping_rule.local_featurename, c.scraping_rule.remote_featurename, c.scraping_rule, c.product_id, c.parsed, c.raw, c.delinquent, c.scraping_correction_id]}.group_by{|c|c[0]}.each_pair do |local_featurename,c|
-      c.each{|c|@rules[local_featurename][c[2].id].add(c[2],ScrapedProduct.new(:id => c[3], :parsed => c[4], :raw => c[5], :corrected => (c[7].nil? ? nil : ScrapingCorrection.find(c[7]))))}
+      c.sort{|a,b|(b[6] ? 2 : b[7] ? 1 : 0) <=> (a[6] ? 2 : a[7] ? 1 : 0)}.each{|c|@rules[local_featurename][c[2].id].add(c[2],ScrapedProduct.new(:id => c[3], :parsed => c[4], :raw => c[5], :corrected => (c[7].nil? ? nil : ScrapingCorrection.find(c[7]))))}
     end
     @rules.each do |lf,rules|
       @rules[lf] = rules.values.sort{|a,b|a.rule.priority <=> b.rule.priority}
