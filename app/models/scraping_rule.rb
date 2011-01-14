@@ -16,6 +16,7 @@ class ScrapingRule < ActiveRecord::Base
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
       sleep 0.5 if defined? looped
+      next if (id.to_i == 10131226)
       raw_info = BestBuyApi.product_search(id)
       unless raw_info.nil?
         corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.current.product_type)

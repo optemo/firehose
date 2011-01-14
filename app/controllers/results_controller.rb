@@ -71,13 +71,14 @@ class ResultsController < ApplicationController
     active_rules = ScrapingRule.find_all_by_active(true)
     # Make sure each rule knows which results it is part of
     active_rules.each {|r| r.results.push(@result); r.save}
+    candidate_records = []
     product_skus.each do |sku|
       ScrapingRule.scrape(sku).each_pair do |local_feature, i|
         # Now sorted, we want to take a rule that actually applies. To do this, run through them in priority order until one works.
-        i.each_pair do |lf, data|
-          parsed = data.products.first.first.parsed
-          raw = data.products.first.first.raw
-          corr = data.products.first.first.corrected
+        i.each do |sr|
+          parsed = sr.products.first.parsed
+          raw = sr.products.first.raw
+          corr = sr.products.first.corrected
           corr = corr.id if corr
           if (!corr && (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error"))#This is a missing value
             errors += 1
@@ -85,9 +86,12 @@ class ResultsController < ApplicationController
           else
             delinquent = false
           end          
-          Candidate.create(:parsed => parsed, :raw => raw, :scraping_rule_id => data.rules.first.id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr)
+          candidate_records.push(Candidate.new({:parsed => parsed, :raw => raw, :scraping_rule_id => sr.rule.id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr}))
         end
       end
+    end
+    Candidate.transaction do
+      candidate_records.each(&:save)
     end
     @result.update_attribute(:error_count, errors)
     
