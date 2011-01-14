@@ -161,13 +161,10 @@ div#silkscreen {
 .global_popup {
     background: #FFFFFF;
     border: 2px solid black;
-    display: inline;
-    position: absolute;
-    left: 0;
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
+    position: fixed;
     padding: 5px;
-    top: 100px;
-    width: 100px;
+    width: 200px;
+	top: 100px;
+	left: 50%;
+	margin-left: -100px;
 }

@@ -62,7 +62,7 @@ $(document).ready(function(){
 		        el_to_insert_after.after(data);
 			},
 			error: function() {
-		        alert_substitute(t, "There is an error in fetching the form");
+		        alert_substitute("There is an error in fetching the form");
 		    }
         });
         t.text('Hide Rule').unbind('click').click(function() {
@@ -83,10 +83,10 @@ $(document).ready(function(){
     		data: form.serialize(),
     		type: "POST",
     		success: function() {
-    		    alert_substitute(t, "Rule priority raised.");
+    		    alert_substitute("Rule priority raised.");
     		},
     		error: function() {
-    			alert_substitute(t, "Error in processing the rule raise request.");
+    			alert_substitute("Error in processing the rule raise request.");
     		}
         });
         return false;
@@ -136,31 +136,31 @@ $(document).ready(function(){
 			    data: form.serialize(), 
 				type: "POST",
 			    success: function() {
-				switch(value) {
-					case "Correct":
-					    removeSilkScreen();
-                        alert_substitute(t, "Correction Created");
-						break;
-					case "Update Rule":
-					    alert_substitute(t, "Rule Updated");
-					    break;
-					default:
-					    alert_substitute(t, "Rule Created");
-    				    removeSilkScreen();
-				}
-			  },
+					switch(value) {
+						case "Correct":
+						    removeSilkScreen();
+                	        alert_substitute("Correction Created");
+							break;
+						case "Update Rule":
+							removeSilkScreen();
+						    alert_substitute("Rule Updated");
+						    break;
+						default:
+						    alert_substitute("Rule Created");
+    					    removeSilkScreen();
+					}
+			  	},
 				error: function() {
 				    removeSilkScreen();
-			        alert_substitute(t, "There is an error in the fields");
+			        alert_substitute("There is an error in the fields");
 			    }
 			});
 		}
        	return false;
     });
 	
-	function alert_substitute(el, msg) {
+	function alert_substitute(msg) {
 		var div_to_add = $("<div class='global_popup'>" + msg + "</div>");
-		div_to_add.css({top : el.position().top - 50, "z-index" : 199});
 		$("body").append(div_to_add);
 		div_to_add.delay(2000).fadeOut(1000);  
     }
@@ -174,10 +174,10 @@ $(document).ready(function(){
 				data: form.serialize(),
 				type: "DELETE",
 				success: function() {
-				    alert_substitute(t, "Record has been removed.");
+				    alert_substitute("Record has been removed.");
 				},
 				error: function() {
-					alert_substitute(t, "Error in processing the request.");
+					alert_substitute("Error in processing the request.");
 				}
 			});
 			return false;

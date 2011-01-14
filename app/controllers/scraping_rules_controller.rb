@@ -42,7 +42,7 @@ class ScrapingRulesController < ApplicationController
     # There are four kinds of rules: continuous, binary, categorical, and intrinsic.
     # The first three kinds end up being specs bound to the product, e.g. ContSpec, 
     # while the last kind of rule inserts values directly into the product row.
-    @scraping_rule = ScrapingRule.new(params[:rule])
+    @scraping_rule = ScrapingRule.new(params[:scraping_rule])
     @scraping_rule.product_type = Session.current.product_type
     # For priority, find all the scraping rules that share that local featurename (for that product type)
     potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.current.product_type)
@@ -51,10 +51,13 @@ class ScrapingRulesController < ApplicationController
     unless potential_previous_scraping_rules.empty?
       @scraping_rule.priority = (potential_previous_scraping_rules.max{|r| r.priority}.priority + 1)
     end
-    if @scraping_rule.valid?
-      @scraping_rule.save
-    else
-      # error
+    
+    respond_to do |format|
+      if @scraping_rule.save
+        format.html { head :ok }
+      else
+        format.html { head 412 }
+      end
     end
   end
   
@@ -74,7 +77,7 @@ class ScrapingRulesController < ApplicationController
       if succeeded
         format.html { head :ok }
       else
-        format.html { render :text => "Error: Couldn't update record id " + params[:id] }
+        format.html { head 412 }
       end
     end
   end
