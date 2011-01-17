@@ -1,13 +1,8 @@
 class ScrapingRulesController < ApplicationController
   layout false
   def new
-    if params[:rule]
-      @remote_rule_pair = params[:rule].split("--").map(&:strip)
-    else
-      @remote_rule_pair = []
-    end
-    @scraping_rule = ScrapingRule.new({:remote_featurename => @remote_rule_pair[0]})
-    render :layout => false
+    @raw = params[:raw]
+    @scraping_rule = ScrapingRule.new(params[:rule])
   end
   
   def edit

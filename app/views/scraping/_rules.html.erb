@@ -12,6 +12,7 @@
 			Feature: <span class="bold"><%= feature %></span>&nbsp;&nbsp;&nbsp;
 			Coverage: <span class="bold"><%= d.shift.to_s + "/" + (@product_count.kind_of?(Array) ? @product_count[0] : @product_count).to_s %></span>
 		</a>
+		<%= link_to "New Rule", "#", :class => "new_rule", :'data-lf' => feature %>
 		<% d.group_by{|a|a.rule.remote_featurename}.each_pair do |remote_feature, data | %>
 	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => (@product_count.kind_of?(Array) ? @product_count[0] : @product_count)} %>
 		<% end %>

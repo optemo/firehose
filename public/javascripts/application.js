@@ -19,7 +19,7 @@ $(document).ready(function(){
     }, 'Min / Max needed');
 
     // Turn on overlay links for adding rules
-    $('.title_link, .edit_scraping_rule_form').live('click', function() {
+    $('.title_link, .new_rule').live('click', function() {
         // Pop up the "rule adder" in the body
         var rule_adder_div = $('<div></div>');
         rule_adder_div.attr("id", "rule_adder_div");
@@ -27,16 +27,19 @@ $(document).ready(function(){
         $('body').append(rule_adder_div);
         rule_adder_div.css("top", $(window).scrollTop() + 100);
         applySilkScreen();
-        if ($(this).hasClass('title_link')) {
-            myurl = "/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec'));
-        } else { // It's an editing link
-            // The edit button is a slightly different case than just clicking the regexp
-            if ($(this).attr('data-id'))
-                myurl = "/scraping_rules/" + $(this).attr('data-id') + "/edit";
-            else
-                myurl = "/scraping_rules/" + $(this).parent().attr('data-id') + "/edit";
-        }
-        
+
+		myparams = [];
+		params = {"rule[remote_featurename]" : $(this).attr('data-rf'),
+			"rule[local_featurename]" : $(this).attr('data-lf'),
+			"raw" : $(this).attr('data-spec')};
+		for (i in params)
+		{
+			if (params[i] !== undefined) {
+				myparams.push(escape(i)+"="+escape(params[i]));
+			}
+		}
+        myurl = "/scraping_rules/new?" + myparams.join('&');
+
         rule_adder_div.load(myurl, (function () {
             // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
             // html attribute triggers written out in views/scraping_rules/new.html.erb.
