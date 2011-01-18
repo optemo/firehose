@@ -10,11 +10,21 @@
 	<div style="margin-bottom: 1em;">
 		<a href="#" class="togglable open title_link">
 			Feature: <span class="bold"><%= feature %></span>&nbsp;&nbsp;&nbsp;
-			Coverage: <span class="bold"><%= d.shift.to_s + "/" + (@product_count.kind_of?(Array) ? @product_count[0] : @product_count).to_s %></span>
+			Coverage: <span class="bold"><%= covered((@products[feature]||d.first.products).map{|e|e.parsed}) %>/<%= (@product_count.kind_of?(Array) ? @product_count[0] : @product_count) %></span>
 		</a>
 		<%= link_to "New Rule", "#", :class => "new_rule", :'data-lf' => feature %>
 		<% d.group_by{|a|a.rule.remote_featurename}.each_pair do |remote_feature, data | %>
 	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => (@product_count.kind_of?(Array) ? @product_count[0] : @product_count)} %>
+		<% end %>
+		
+		<% if @products[feature] %>
+		<div class="contentholder">
+			<a href="#" class="togglable closed title_link">Applying All Rules</a>
+			<%# debugger %>
+			<div class="contentholder">
+				<%= render :partial => 'product', :collection => @products[feature] %>
+			</div>	
+		</div>
 		<% end %>
 	</div>
 <% end %>

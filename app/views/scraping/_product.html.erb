@@ -1,9 +1,14 @@
 <div>
-	SKU: <span class="bold"><%= product.id %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=product.id%>">Fetch</span>&nbsp;&nbsp;&nbsp;
-	<%= form_for product.corrected || ScrapingCorrection.new(:product_id => product.id, :product_type => Session.current.product_type, :raw => product.raw, :scraping_rule_id => rule.id) do |f| %> 
-	Data: <span class="bold value<%= ' corrected' if !product.corrected.nil? %>"><%= product.parsed %></span>
+	<% myrule = product.rule || rule %>
+	<span class="bold"><%= product.id %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=product.id%>">Fetch</span>&nbsp;&nbsp;&nbsp;
+	<%= form_for product.corrected || ScrapingCorrection.new(:product_id => product.id, :product_type => Session.current.product_type, :raw => product.raw, :scraping_rule_id => myrule.id) do |f| %>
+	<% debugger if @colors[myrule.local_featurename].nil? %>
+	Data: <span class="bold value<%= ' corrected' if !product.corrected.nil? %>" style="color: <%= @colors[myrule.local_featurename][myrule.id] %>"><%= product.parsed %></span>
 		<%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :product_type %> <%= f.hidden_field :raw %> <%= f.hidden_field :scraping_rule_id %>
-	&nbsp;&nbsp;&nbsp; from:&nbsp;&nbsp;&nbsp; <%= product.raw %>&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;
+	<% if product.raw %>
+		<=&nbsp;&nbsp; <%= product.raw %>&nbsp;&nbsp;&nbsp;
+	<% end %>
 	<% if product.corrected #Is there a correction? %>
 		<%= link_to "Update Correction", "#", :class => "correction" %>
 	<% else %>

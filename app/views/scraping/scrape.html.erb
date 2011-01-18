@@ -7,7 +7,7 @@
 				<div class="contentholder"><span class="bold"><%= lf %> </span>
 					<% scraped_results.each do |scraped_result| %>
 						<% scraped_result.products.each do |product| %>
-						    <%= product.parsed %> from: <%= product.raw %> using: <%= scraped_result.rule.regex %> on <span class="bold"><%= scraped_result.rule.remote_featurename %></span>
+						    <%= product.parsed %>
 						<% end %>
 					<% end %>
 				</div>
