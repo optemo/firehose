@@ -17,32 +17,7 @@ class ResultsController < ApplicationController
     
     Session.category_id = @result.category
     @product_count = @result.total
-    @rules = Hash.new{|h,k| h[k] = Hash.new} #Each of the rules that will be displayed
-    @multirules = Hash.new{|h,k| h[k] = Hash.new} #Which rule was used for a product when multiple rules are available
-    @colors = Hash.new #A specific color for each rule
-    @result.candidates.group_by{|c|c.scraping_rule.local_featurename}.each_pair do |local_featurename,c| 
-      c.group_by{|c|c.scraping_rule.id}.each_pair do |scraping_rule_id,c|
-        #Sort the products so that delinquents and corrected products show up first
-        @rules[local_featurename][scraping_rule_id] = c.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
-        c.each do |c|
-          @multirules[local_featurename][c.product_id] = c unless @multirules[local_featurename][c.product_id] && (c.delinquent || (!@multirules[local_featurename][c.product_id].delinquent && @multirules[local_featurename][c.product_id].scraping_rule.priority < c.scraping_rule.priority))
-        end
-      end
-    end
-    @rules.each do |local_featurename, rule_id|
-      if rule_id.keys.count <= 1
-        @multirules[local_featurename] = nil
-      else
-        #Resort products as there are multiple rules here
-        @multirules[local_featurename] = @multirules[local_featurename].values.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
-      end
-      @colors[local_featurename] = Hash[*rule_id.keys.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
-    end
-    
-    #Order rules by priority for display
-    @rules.each do |lf,rules|
-      @rules[lf] = rules.values.sort{|a,b|a.first.scraping_rule.priority <=> b.first.scraping_rule.priority}.group_by{|a| a.first.scraping_rule.remote_featurename}
-    end
+    @rules, @multirules, @colors = Candidate.organize(@result.candidates)
     
     respond_to do |format|
       format.html # show.html.erb
@@ -70,39 +45,18 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true).uniq # There are multiples in the table for some reason...
+    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
     
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.total = product_skus.count
     @result.save
-    errors = 0
-    warnings = 0
-    active_rules = ScrapingRule.find_all_by_active(true)
+    
     # Make sure each rule knows which results it is part of
-    active_rules.each {|r| r.results.push(@result); r.save}
-    candidate_records = []
-    product_skus.each do |sku|
-      ScrapingRule.scrape(sku).each_pair do |local_feature, i|
-        # Now sorted, we want to take a rule that actually applies. To do this, run through them in priority order until one works.
-        i.each do |sr|
-          parsed = sr.products.first.parsed
-          raw = sr.products.first.raw
-          corr = sr.products.first.corrected
-          corr = corr.id if corr
-          if (!corr && (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error"))#This is a missing value
-            errors += 1
-            delinquent = true
-          else
-            delinquent = false
-          end          
-          candidate_records.push(Candidate.new({:parsed => parsed, :raw => raw, :scraping_rule_id => sr.rule.id, :product_id => sku, :result_id => @result.id, :delinquent => delinquent, :scraping_correction_id => corr}))
-        end
-      end
-    end
+    ScrapingRule.find_all_by_active(true).each {|r| r.results.push(@result); r.save}
+    candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = @result.id}
     Candidate.transaction do
       candidate_records.each(&:save)
     end
-    @result.update_attribute(:error_count, errors)
     
     respond_to do |format|
       if @result.save

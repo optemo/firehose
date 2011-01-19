@@ -5,9 +5,9 @@
 		<div>
 			<% @scraped_features.each_pair do |lf,scraped_results| %>
 				<div class="contentholder"><span class="bold"><%= lf %> </span>
-					<% scraped_results.each do |scraped_result| %>
-						<% scraped_result.products.each do |product| %>
-						    <%= product.parsed %>
+					<% scraped_results.each_pair do |rf, scraped_result| %>
+						<% scraped_result.each do |rule| %>
+						    <%= rule.first.parsed %>
 						<% end %>
 					<% end %>
 				</div>
