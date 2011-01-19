@@ -19,7 +19,7 @@ $(document).ready(function(){
     }, 'Min / Max needed');
 
     // Turn on overlay links for adding rules
-    $('.title_link, .edit_scraping_rule_form').live('click', function() {
+    $('.title_link, .new_rule').live('click', function() {
         // Pop up the "rule adder" in the body
         var rule_adder_div = $('<div></div>');
         rule_adder_div.attr("id", "rule_adder_div");
@@ -27,16 +27,19 @@ $(document).ready(function(){
         $('body').append(rule_adder_div);
         rule_adder_div.css("top", $(window).scrollTop() + 100);
         applySilkScreen();
-        if ($(this).hasClass('title_link')) {
-            myurl = "/scraping_rules/new?rule=" + escape($(this).attr('data-location') + " -- " + $(this).attr('data-spec'));
-        } else { // It's an editing link
-            // The edit button is a slightly different case than just clicking the regexp
-            if ($(this).attr('data-id'))
-                myurl = "/scraping_rules/" + $(this).attr('data-id') + "/edit";
-            else
-                myurl = "/scraping_rules/" + $(this).parent().attr('data-id') + "/edit";
-        }
-        
+
+		myparams = [];
+		params = {"rule[remote_featurename]" : $(this).attr('data-rf'),
+			"rule[local_featurename]" : $(this).attr('data-lf'),
+			"raw" : $(this).attr('data-spec')};
+		for (i in params)
+		{
+			if (params[i] !== undefined) {
+				myparams.push(escape(i)+"="+escape(params[i]));
+			}
+		}
+        myurl = "/scraping_rules/new?" + myparams.join('&');
+
         rule_adder_div.load(myurl, (function () {
             // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
             // html attribute triggers written out in views/scraping_rules/new.html.erb.
@@ -62,7 +65,7 @@ $(document).ready(function(){
 		        el_to_insert_after.after(data);
 			},
 			error: function() {
-		        alert_substitute(t, "There is an error in fetching the form");
+		        alert_substitute("There is an error in fetching the form");
 		    }
         });
         t.text('Hide Rule').unbind('click').click(function() {
@@ -83,10 +86,10 @@ $(document).ready(function(){
     		data: form.serialize(),
     		type: "POST",
     		success: function() {
-    		    alert_substitute(t, "Rule priority raised.");
+    		    alert_substitute("Rule priority raised.");
     		},
     		error: function() {
-    			alert_substitute(t, "Error in processing the rule raise request.");
+    			alert_substitute("Error in processing the rule raise request.");
     		}
         });
         return false;
@@ -136,31 +139,31 @@ $(document).ready(function(){
 			    data: form.serialize(), 
 				type: "POST",
 			    success: function() {
-				switch(value) {
-					case "Correct":
-					    removeSilkScreen();
-                        alert_substitute(t, "Correction Created");
-						break;
-					case "Update Rule":
-					    alert_substitute(t, "Rule Updated");
-					    break;
-					default:
-					    alert_substitute(t, "Rule Created");
-    				    removeSilkScreen();
-				}
-			  },
+					switch(value) {
+						case "Correct":
+						    removeSilkScreen();
+                	        alert_substitute("Correction Created");
+							break;
+						case "Update Rule":
+							removeSilkScreen();
+						    alert_substitute("Rule Updated");
+						    break;
+						default:
+						    alert_substitute("Rule Created");
+    					    removeSilkScreen();
+					}
+			  	},
 				error: function() {
 				    removeSilkScreen();
-			        alert_substitute(t, "There is an error in the fields");
+			        alert_substitute("There is an error in the fields");
 			    }
 			});
 		}
        	return false;
     });
 	
-	function alert_substitute(el, msg) {
+	function alert_substitute(msg) {
 		var div_to_add = $("<div class='global_popup'>" + msg + "</div>");
-		div_to_add.css({top : el.position().top - 50, "z-index" : 199});
 		$("body").append(div_to_add);
 		div_to_add.delay(2000).fadeOut(1000);  
     }
@@ -174,10 +177,10 @@ $(document).ready(function(){
 				data: form.serialize(),
 				type: "DELETE",
 				success: function() {
-				    alert_substitute(t, "Record has been removed.");
+				    alert_substitute("Record has been removed.");
 				},
 				error: function() {
-					alert_substitute(t, "Error in processing the request.");
+					alert_substitute("Error in processing the request.");
 				}
 			});
 			return false;

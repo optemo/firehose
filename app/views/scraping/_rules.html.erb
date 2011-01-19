@@ -1,6 +1,6 @@
 <div class="strong" id="num_skus_found">
-	<% if @product_count.kind_of?(Array) %>
-    	Showing <%= @product_count[0] %> of <%=@product_count[1] %> SKUs in this category
+	<% if defined? @exists_count %>
+    	Showing <%= @product_count %> of <%= @exists_count %> SKUs in this category
 	<% else %>
 		<%= @product_count %> SKUs in this category
 	<% end %>
@@ -10,10 +10,21 @@
 	<div style="margin-bottom: 1em;">
 		<a href="#" class="togglable open title_link">
 			Feature: <span class="bold"><%= feature %></span>&nbsp;&nbsp;&nbsp;
-			Coverage: <span class="bold"><%= d.shift.to_s + "/" + (@product_count.kind_of?(Array) ? @product_count[0] : @product_count).to_s %></span>
+			Coverage: <span class="bold"><%= covered((@multirules[feature]||d.values.first.first).map{|c|c.parsed}) %>/<%= @product_count %></span>
 		</a>
-		<% d.group_by{|a|a.rule.remote_featurename}.each_pair do |remote_feature, data | %>
-	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => (@product_count.kind_of?(Array) ? @product_count[0] : @product_count)} %>
+		<%= link_to "New Rule", "#", :class => "new_rule", :'data-lf' => feature %>
+		<% d.each_pair do |remote_feature, data | %>
+	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => @product_count} %>
+		<% end %>
+		
+		<% if @multirules[feature] %>
+		<div class="contentholder">
+			<a href="#" class="togglable closed title_link">Applying All Rules</a>
+			<%# debugger %>
+			<div class="contentholder">
+				<%= render :partial => 'candidate', :collection => @multirules[feature] %>
+			</div>	
+		</div>
 		<% end %>
 	</div>
 <% end %>

@@ -1,0 +1,17 @@
+<div>
+	<span class="bold"><%= candidate.id %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=candidate.id%>">Fetch</span>&nbsp;&nbsp;&nbsp;
+	<%= form_for candidate.scraping_correction || ScrapingCorrection.new(:product_id => candidate.id, :product_type => Session.current.product_type, :raw => candidate.raw, :scraping_rule_id => candidate.scraping_rule.id) do |f| %>
+	Data: <span class="bold value<%= ' corrected' if !candidate.scraping_correction.nil? %>" style="color: <%= @colors[candidate.scraping_rule.local_featurename][candidate.scraping_rule.id] %>"><%= candidate.parsed %></span>
+		<%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :product_type %> <%= f.hidden_field :raw %> <%= f.hidden_field :scraping_rule_id %>
+	&nbsp;&nbsp;
+	<% if candidate.raw %>
+		<=&nbsp;&nbsp; <%= candidate.raw %>&nbsp;&nbsp;&nbsp;
+	<% end %>
+	<% if candidate.scraping_correction #Is there a correction? %>
+		<%= link_to "Update Correction", "#", :class => "correction" %>
+	<% else %>
+		<%= link_to "Correction", "#", :class => "correction" %>
+	<% end %>
+	<%= f.submit "Correct", :class => "correction_submit" %> <% end %>
+	<%= link_to "Remove correction", candidate.scraping_correction, :method => :delete if candidate.scraping_correction %>
+</div>

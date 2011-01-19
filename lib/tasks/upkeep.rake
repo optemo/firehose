@@ -33,12 +33,19 @@ task :calculate_factors => :environment do
     #Add the static calculated utility
     cont_activerecords.push ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility", :value => utility.sum})
   end
-  
+
   ContSpec.delete_all(["name = 'utility' and product_type = ?", s.product_type])
   s.continuous["filter"].each{|f| ContSpec.delete_all(["name = ? and product_type = ?", f+"_factor", s.product_type])} # ContSpec records do not have a version number, so we have to wipe out the old ones.  
   # Do all record saving at the end for efficiency
   ContSpec.transaction do
     cont_activerecords.each(&:save)
+  end
+  
+  #Clear the search_product cache in the database
+  initial_products_id = Product.initial
+  SearchProduct.delete_all(["search_id = ?",initial_products_id])
+  SearchProduct.transaction do
+    Product.valid.instock.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
   end
 end
 

@@ -1,6 +1,8 @@
 <h3>Create New Rule</h3>
+<% if @raw %>
 <h4>For key/value pair:</h4>
 <div id="rule_creation_key_value_display">
-    <%= @remote_rule_pair[0] %> : <%= @remote_rule_pair[1] %>
+    <%= @scraping_rule.remote_featurename %> : <%= @raw %>
 </div>
+<% end %>
 <%= render 'form' %>

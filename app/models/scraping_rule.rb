@@ -8,11 +8,9 @@ class ScrapingRule < ActiveRecord::Base
   has_many :candidates
   has_and_belongs_to_many :results
   
-  def self.scrape(ids, inc_raw = false) #Can accept both one or more ids
-    #Return type: [local_featurename][remote_featurename][]["products"] = [product_id,parsed,raw]
-    #             [local_featurename][remote_featurename][]["rule"] = ScrapingRule
-    #Four layer return type
-    data = Hash.new{|h,k| h[k] = Hash.new{|i,l| i[l] = ScrapedResult.new}}
+  def self.scrape(ids,ret_raw = false) #Can accept both one or more ids, whether to return the raw json
+    #Return type: Array of candidates
+    candidates = []
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
       sleep 0.5 if defined? looped
@@ -28,9 +26,10 @@ class ScrapingRule < ActiveRecord::Base
           #Traverse the hash hierarchy
           identifiers.each {|i| raw = raw[i] unless raw.nil?}
           raw = "" unless raw
-          corr = corrections.select{|c|c.id == r.id && c.raw == raw.to_s}.first
+          corr = corrections.select{|c|c.scraping_rule_id == r.id && c.raw == raw.to_s}.first
           if corr
             parsed = corr.corrected
+            delinquent = false
           else
             #We can handle multiple passes of regular expressions with ^^
             current_text = raw.to_s
@@ -59,20 +58,20 @@ class ScrapingRule < ActiveRecord::Base
               firstregex = false
             end
             parsed = current_text
+            delinquent = (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")
           end
-          #Save the cleaned result
-          data[r.local_featurename][r.id].add(r,ScrapedProduct.new(:id => id, :parsed => parsed, :raw => raw.to_s, :corrected => corr))
+          #Save the new candidate
+          candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => corr)
         end
-        #Include raw json for other functionality
-        data["RAW-JSON"] = raw_info if inc_raw
       end
       looped = true
+      ret_raw = raw_info if ret_raw == true
     end
-    #Convert to local_feature,remote_feature
-    data.each do |lf,rules|
-      data[lf] = rules.values.sort{|a,b|a.rule.priority <=> b.rule.priority} unless lf == "RAW-JSON"
+    if ret_raw
+      [candidates,ret_raw]
+    else
+      candidates
     end
-    data
   end
   
   def self.rules_by_priority(data)

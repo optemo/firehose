@@ -1,11 +1,12 @@
+<% rule = remote_feature.first.scraping_rule %>
 <div class="contentholder">
 	<a href="#" class="togglable closed title_link">
-		Remote Feature: <span class="bold"><%= remote_feature.rule.remote_featurename %></span>&nbsp;&nbsp;&nbsp;
-		Rule: <%= remote_feature.rule.regex %>&nbsp;&nbsp;&nbsp;
-		Coverage: <span class="bold"><%= pc - notcovered(remote_feature.products.map{|e|e.parsed}) %>/<%= pc %></span>
+		Remote Feature: <span class="bold"><%= rule.remote_featurename %></span>&nbsp;&nbsp;&nbsp;
+		<span style="color: <%= @colors[rule.local_featurename][rule.id] %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
+		Coverage: <span class="bold"><%= covered(remote_feature.map{|c|c.parsed}) %>/<%= pc %></span>
 	</a>&nbsp;&nbsp;&nbsp;
-	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => remote_feature.rule.id %>
-	<%= link_to "Destroy", remote_feature.rule, :method => :delete %>
-	<%= link_to "Raise Priority", "#", :class => "raise_rule_priority", :"data-id" => remote_feature.rule.id %>
-	<div class="contentholder"><%= render :partial => 'product', :collection => remote_feature.products, :locals => {:rule => remote_feature.rule} %></div>
+	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id %>
+	<%= link_to "Destroy", rule, :method => :delete %>
+	<%= link_to "Raise Priority", "#", :class => "raise_rule_priority", :"data-id" => rule.id %>
+	<div class="contentholder"><%= render :partial => 'candidate', :collection => remote_feature %></div>
 </div>
