@@ -19,7 +19,7 @@ class Session
     # 29171  --  this is a small subset (faster scraping & lower load for testing)
     self.category_id = 21344
     
-    defaultSite = 'bestbuy_tv'
+    defaultSite = 'besttv'
     # This parameter controls whether the interface features drag-and-drop comparison or not.
     @dragAndDropEnabled = true
     # Relative descriptions, in comparison to absolute descriptions, have been the standard since late 2009, and now we use Boostexter labels also.
@@ -54,6 +54,7 @@ class Session
     end
     
     product_yml = file[url]
+    raise "Products.yml error with url" + url unless product_yml
     @product_type = product_yml["product_type"]
     # directLayout controls the presented view: Optemo Assist vs. Optemo Direct. 
     # Direct needs no clustering, showing all products in browseable pages and offering "group by" buttons.

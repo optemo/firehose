@@ -7,7 +7,13 @@ class BestBuyApi
     
     #Find BestBuy products
     def product_search(id)
-      cached_request('product',{:id => id})["product"]
+      cached_request('product',{:id => id, :Include => "media"})["product"] 
+      # From the BestBuy API documentation, use &Include=media and/or any of the following: 
+      # relations,description,availability,all (in comma-separated format as a URL parameter)
+    end
+    
+    def product_reviews(id)
+      cached_request('reviews',{:id=>id})
     end
     
     #Search through the  Categories
@@ -87,7 +93,9 @@ class BestBuyApi
         if type == "search"
             "#{BESTBUY_URL}/search/products(#{qf})?#{qs}" #Search for products in certain stores
         else
-            "#{BESTBUY_URL}/#{type}/#{filters[:id]}.aspx"
+            return_url = "#{BESTBUY_URL}/#{type}/#{filters[:id]}.aspx"
+            return_url << "?Include=#{filters[:Include]}" if filters[:Include]
+            return_url
         end
       end
    end
