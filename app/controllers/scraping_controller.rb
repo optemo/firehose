@@ -22,5 +22,9 @@ class ScrapingController < ApplicationController
     @exists_count = products["total"]
     @product_count = [20,@exists_count].min
     @rules, @multirules, @colors = Candidate.organize(ScrapingRule.scrape(products["products"].map{|p|p["sku"]}))
+    if (newcount = @rules.values.first.values.first.first.count) < @product_count
+      @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
+      @product_count = newcount
+    end
   end
 end

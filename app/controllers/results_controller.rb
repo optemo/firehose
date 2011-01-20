@@ -18,6 +18,11 @@ class ResultsController < ApplicationController
     Session.category_id = @result.category
     @product_count = @result.total
     @rules, @multirules, @colors = Candidate.organize(@result.candidates)
+    if (newcount = @rules.values.first.values.first.first.count) < @product_count
+      @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
+      @exists_count = @product_count
+      @product_count = newcount
+    end
     
     respond_to do |format|
       format.html # show.html.erb

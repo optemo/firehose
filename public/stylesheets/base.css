@@ -148,6 +148,9 @@ div#silkscreen {
     float: left;
     padding: 0 2px 0 2px;
 }
+.warning {
+	color: red;
+}
 
 #actions {
     text-align:center;
