@@ -142,7 +142,7 @@ $(document).ready(function(){
 					switch(value) {
 						case "Correct":
 						    removeSilkScreen();
-                	        alert_substitute("Correction Created");
+                	        alert_substitute("Correction Processed");
 							break;
 						case "Update Rule":
 							removeSilkScreen();
@@ -190,7 +190,27 @@ $(document).ready(function(){
 	});
 	
 	$('.correction').live("click", function(){
-		$(this).parents("form").find('.value').toggle().end().find('.correction_field').toggle().end().find('.correction_submit').toggle().end().find('.correction').toggle();
+		myparams = [];
+		i = $(this);
+		if (i.html() === "Update Correction") {
+			myurl = "/scraping_corrections/" + i.siblings(".parsed").attr("data-sc") + "/edit";
+		}
+		else {
+			params = {"sc[product_id]" : i.siblings(".expandable_sku").attr('data-id'),
+				"sc[product_type]" : i.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-pt"),
+				"sc[raw]" : i.siblings(".raw").html(),
+				"sc[scraping_rule_id]" : i.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-id")};
+			
+			for (i in params)
+			{
+				if (params[i] !== undefined) {
+					myparams.push(escape(i)+"="+escape(params[i]));
+				}
+			}
+        	myurl = "/scraping_corrections/new?" + myparams.join('&');
+		}
+        i.toggle().siblings(".parsed").load(myurl);
+		
 		return false;
 	});
 });

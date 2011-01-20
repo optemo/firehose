@@ -1,4 +1,5 @@
 class ScrapingCorrectionsController < ApplicationController
+  layout false
   # GET /scraping_corrections
   # GET /scraping_corrections.xml
   def index
@@ -24,7 +25,7 @@ class ScrapingCorrectionsController < ApplicationController
   # GET /scraping_corrections/new
   # GET /scraping_corrections/new.xml
   def new
-    @scraping_correction = ScrapingCorrection.new
+    @scraping_correction = ScrapingCorrection.new(params[:sc])
 
     respond_to do |format|
       format.html # new.html.erb

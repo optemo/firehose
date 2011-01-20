@@ -148,12 +148,7 @@ div#silkscreen {
     float: left;
     padding: 0 2px 0 2px;
 }
-.corrected {
-	color: #B00C35;
-}
-.correction_field, .correction_submit {
-	display: none;
-}
+
 #actions {
     text-align:center;
     font-family: Arial, Helvetica, sans-serif;
