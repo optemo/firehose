@@ -58,7 +58,7 @@ class ScrapingRule < ActiveRecord::Base
               firstregex = false
             end
             parsed = current_text
-            delinquent = (parsed.blank? && !raw.blank?) || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")
+            delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")
           end
           #Save the new candidate
           candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
