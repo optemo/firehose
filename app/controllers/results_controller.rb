@@ -2,7 +2,7 @@ class ResultsController < ApplicationController
   # GET /results
   # GET /results.xml
   def index
-    @results = Result.all
+    @results = Result.order('id DESC')
 
     respond_to do |format|
       format.html # index.html.erb
