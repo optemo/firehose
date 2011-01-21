@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110120185421) do
+ActiveRecord::Schema.define(:version => 20110121182101) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -64,6 +64,18 @@ ActiveRecord::Schema.define(:version => 20110120185421) do
 
   add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
   add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
+
+  create_table "product_siblings", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "sibling_id"
+    t.string   "name"
+    t.float    "value"
+    t.string   "product_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "product_siblings", ["product_id"], :name => "index_product_siblings_on_product_id"
 
   create_table "products", :force => true do |t|
     t.string   "sku"
