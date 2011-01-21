@@ -51,7 +51,7 @@ class ResultsController < ApplicationController
   def create
     @result = Result.new(params[:result])
     @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
-    
+    raise ValidationError unless @result.category
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.total = product_skus.count
     @result.save
