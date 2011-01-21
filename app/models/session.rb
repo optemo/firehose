@@ -9,17 +9,7 @@ class Session
   cattr_accessor :category_id
 
   def initialize (url = nil)
-    
-    # For Firehose
-    #
-    # On each request, set the class variable with the category ID to a global
-    # Eventually we will do something with products.yml, have import for multiple categories, and so on.
-    # 21344  --  This is for TVs
-    # 20218  --  this is all digital cameras
-    # 29171  --  this is a small subset (faster scraping & lower load for testing)
-    self.category_id = 21344
-    
-    defaultSite = 'besttv'
+    defaultSite = 'bestbuy'
     # This parameter controls whether the interface features drag-and-drop comparison or not.
     @dragAndDropEnabled = true
     # Relative descriptions, in comparison to absolute descriptions, have been the standard since late 2009, and now we use Boostexter labels also.
@@ -56,6 +46,7 @@ class Session
     product_yml = file[url]
     raise "Products.yml error with url" + url unless product_yml
     @product_type = product_yml["product_type"]
+    self.category_id = product_yml["category_id"]
     # directLayout controls the presented view: Optemo Assist vs. Optemo Direct. 
     # Direct needs no clustering, showing all products in browseable pages and offering "group by" buttons.
     # mobileView controls screen vs. mobile view (Optemo Mobile)
@@ -64,6 +55,7 @@ class Session
     @mobileView = product_yml["layout"] == "mobileview"
     # This block gets out the continuous, binary, and categorical features
     product_yml.each do |feature,atts|
+      next unless atts.class == Hash # Don't do this for the product_type, category_id, or layout
       case atts["feature_type"]
       when "Continuous"
         atts["used_for"].each{|flag| @continuous[flag] << feature}
