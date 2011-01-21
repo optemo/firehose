@@ -56,11 +56,11 @@ class BestBuyApi
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
       unless res.kind_of? Net::HTTPSuccess
-        if res.code == 302
-          raise BestBuyApi::FeedDownError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
-        else
+        #if res.code == 302
+        #  raise BestBuyApi::FeedDownError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
+        #else
           raise BestBuyApi::RequestError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
-        end
+        #end
       end
       JSON.parse(res.body)
     end
