@@ -44,7 +44,7 @@ class ScrapingRulesController < ApplicationController
     # If there are any, get the highest priority and increment it for the new rule.
     # This gives all new rules a lower priority (lower priority number means higher priority).
     unless potential_previous_scraping_rules.empty?
-      @scraping_rule.priority = (potential_previous_scraping_rules.max{|r| r.priority}.priority + 1)
+      @scraping_rule.priority = (potential_previous_scraping_rules.map(&:priority).max + 1)
     end
     
     respond_to do |format|

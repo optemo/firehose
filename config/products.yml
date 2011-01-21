@@ -9,6 +9,7 @@
 
 bestbuy:
     product_type: camera_bestbuy
+    category_id: 20218
     layout: assist
     price:
         feature_type: Continuous
@@ -28,9 +29,11 @@ bestbuy:
     brand:
         feature_type: Categorical
         used_for: [filter, show]
-        
+
+# 29171  --  this is a small subset of cameras, with faster scraping & lower load for testing
 besttv:
     product_type: tv_bestbuy
+    category_id: 21344
     layout: assist
     price:
         feature_type: Continuous
