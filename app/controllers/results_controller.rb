@@ -33,7 +33,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new(:product_type => Session.current.product_type)
+    @result = Result.new(:product_type => Session.current.product_type, :category => Session.category_id)
 
     respond_to do |format|
       format.html # new.html.erb
