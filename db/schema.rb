@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110121182101) do
+ActiveRecord::Schema.define(:version => 20110121224641) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -27,8 +27,8 @@ ActiveRecord::Schema.define(:version => 20110121182101) do
     t.integer  "scraping_rule_id"
     t.integer  "result_id"
     t.string   "product_id"
-    t.string   "parsed"
-    t.string   "raw"
+    t.text     "parsed"
+    t.text     "raw"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "delinquent",             :default => false
