@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110121224641) do
+ActiveRecord::Schema.define(:version => 20110122003538) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -84,9 +84,6 @@ ActiveRecord::Schema.define(:version => 20110121224641) do
     t.string   "model"
     t.string   "mpn"
     t.boolean  "instock"
-    t.string   "imgsurl"
-    t.string   "imgmurl"
-    t.string   "imglurl"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "small_title"
@@ -100,6 +97,7 @@ ActiveRecord::Schema.define(:version => 20110121224641) do
     t.string   "category"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "nonuniq"
   end
 
   create_table "results_scraping_rules", :id => false, :force => true do |t|

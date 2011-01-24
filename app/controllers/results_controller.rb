@@ -3,6 +3,7 @@ class ResultsController < ApplicationController
   # GET /results.xml
   def index
     @results = Result.order('id DESC')
+    @changes = params.include?(:changes)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -53,6 +54,8 @@ class ResultsController < ApplicationController
     @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
     raise ValidationError unless @result.category
     product_skus = BestBuyApi.category_ids(@result.category)
+    @result.nonuniq = product_skus.count
+    product_skus.uniq!
     @result.total = product_skus.count
     @result.save
     

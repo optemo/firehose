@@ -29,15 +29,15 @@ class BestBuyApi
     def category_ids(id)
       ids = []
       page = 1
-      totalpages = 1
-      while (page <= totalpages)
+      totalpages = nil
+      while (page == 1 || page <= totalpages)
         res = cached_request('search',{:'categoryPath.id' => id},page)
-        totalpages = res["totalPages"]
+        totalpages ||= res["totalPages"]
         ids += res["products"].map{|p|p["sku"]}
         page += 1
         sleep 1
       end
-      ids.uniq
+      ids
     end
     
     def search(string,page=1)
@@ -45,9 +45,9 @@ class BestBuyApi
     end
 
     def cached_request(type, opts, page=1)
-      CachingMemcached.cache_lookup(type + opts.to_s + page.to_s) do
+      #CachingMemcached.cache_lookup(type + opts.to_s + page.to_s) do
         send_request(type, opts, page)
-      end
+      #end
     end
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
