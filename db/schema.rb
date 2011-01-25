@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110121182101) do
+ActiveRecord::Schema.define(:version => 20110122003538) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -27,8 +27,8 @@ ActiveRecord::Schema.define(:version => 20110121182101) do
     t.integer  "scraping_rule_id"
     t.integer  "result_id"
     t.string   "product_id"
-    t.string   "parsed"
-    t.string   "raw"
+    t.text     "parsed"
+    t.text     "raw"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "delinquent",             :default => false
@@ -69,7 +69,7 @@ ActiveRecord::Schema.define(:version => 20110121182101) do
     t.integer  "product_id"
     t.integer  "sibling_id"
     t.string   "name"
-    t.float    "value"
+    t.string   "value"
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -84,9 +84,6 @@ ActiveRecord::Schema.define(:version => 20110121182101) do
     t.string   "model"
     t.string   "mpn"
     t.boolean  "instock"
-    t.string   "imgsurl"
-    t.string   "imgmurl"
-    t.string   "imglurl"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "small_title"
@@ -100,6 +97,7 @@ ActiveRecord::Schema.define(:version => 20110121182101) do
     t.string   "category"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "nonuniq"
   end
 
   create_table "results_scraping_rules", :id => false, :force => true do |t|

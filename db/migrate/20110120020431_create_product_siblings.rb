@@ -5,7 +5,7 @@ class CreateProductSiblings < ActiveRecord::Migration
        t.integer :product_id
        t.integer :sibling_id
        t.string :name
-       t.float :value
+       t.string :value
        t.string :product_type
     
        t.timestamps
