@@ -19,6 +19,7 @@
   <div class="field">
     <%= f.label "Category ID" %><br />
     <%= f.text_field :category, :disabled => true, :value => Session.category_id %>
+	<%= f.hidden_field :category %>
   </div>
   <div class="actions">
     <%= f.submit %>

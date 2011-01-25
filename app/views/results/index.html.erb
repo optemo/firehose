@@ -1,28 +1,38 @@
 <h1>Listing results</h1>
+<%= link_to 'New Result', new_result_path %> <%= link_to "Show changes", "?changes" %>
+<br />
 <table cellpadding=3>
   <tr>
+	<th>Id</th>
     <th>Total</th>
-    <th>Errors</th>
+    <% if @changes %><th>Actual</th><% end %>
+	<th>Non unique</th>
     <th>Created At</th>
-    <th>Product Type &amp;<br> Category Id</th>
+    <th>Product Type</th>
+	<th>Category Id</th>
     <th></th>
     <th></th>
     <th></th>
+    <% if @changes %><th>Changes</th><% end %>
   </tr>
 
 <% @results.each do |result| %>
   <tr>
+	<td><%= result.id %></td>
     <td><%= result.total %></td>
-    <td><%= result.error_count %></td>
-    <td><%= result.created_at %></td>
-    <td><%= result.product_type.to_s + " " + result.category.to_s %></td>
+    <% if @changes %><td><%= result.candidates.map(&:product_id).uniq.count %></td><% end %>
+	<td><%= result.nonuniq %></td>
+    <td><%= result.created_at.in_time_zone('Pacific Time (US & Canada)').to_s(:short) %></td>
+    <td><%= result.product_type %></td>
+	<td><%= result.category %></td>
     <td><%= link_to 'Show', result %></td>
     <td><%= link_to 'Edit', edit_result_path(result) %></td>
     <td><%= link_to 'Destroy', result, :confirm => 'Are you sure?', :method => :delete %></td>
+	<% if @changes %><th><%=raw result.changes %></td><% end %>
   </tr>
 <% end %>
 </table>
 
-<br />
 
-<%= link_to 'New Result', new_result_path %>
+
+
