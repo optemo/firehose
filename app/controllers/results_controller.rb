@@ -96,19 +96,7 @@ class ResultsController < ApplicationController
   # DELETE /results/1
   # DELETE /results/1.xml
   def destroy
-    @result = Result.find(params[:id])
-    
-    myscraping_rules = @result.scraping_rules
-    #Remove any associated candidates
-    @result.candidates.each(&:destroy)
-    #Remove any unneeded scraping rules
-    myscraping_rules.each do |sr|
-      next if sr.active
-      next unless Candidate.find_by_scraping_rule_id(sr.id).nil?
-      sr.destroy
-    end
-    #Destroy the results
-    @result.destroy
+    Result.find(params[:id]).remove
 
     respond_to do |format|
       format.html { head :ok }

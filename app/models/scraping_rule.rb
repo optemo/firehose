@@ -13,7 +13,6 @@ class ScrapingRule < ActiveRecord::Base
     candidates = []
     ids = [ids] unless ids.kind_of? Array
     ids.each do |id|
-      sleep 0.5 if defined? looped
       begin
         raw_info = BestBuyApi.product_search(id)
       rescue BestBuyApi::RequestError
@@ -67,7 +66,6 @@ class ScrapingRule < ActiveRecord::Base
           candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
         end
       end
-      looped = true
       ret_raw = raw_info if ret_raw == true
     end
     if ret_raw

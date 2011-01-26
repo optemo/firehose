@@ -35,7 +35,7 @@ class BestBuyApi
         totalpages ||= res["totalPages"]
         ids += res["products"].map{|p|p["sku"]}
         page += 1
-        sleep 1
+        #sleep 1 No need for waiting
       end
       ids
     end
