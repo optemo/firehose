@@ -11,11 +11,9 @@
 		<a href="#" class="togglable open title_link">
 			Feature: <span class="bold"><%= feature %></span>&nbsp;&nbsp;&nbsp;
 			Coverage: <span class="bold"><%= covered((@multirules[feature]||d.values.first.first).map{|c|c.parsed}) %>/<%= @product_count %></span>
-		</a>
+		</a>&nbsp;&nbsp;&nbsp;
 		<%= link_to "New Rule", "#", :class => "new_rule", :'data-lf' => feature %>
-		<% d.each_pair do |remote_feature, data | %>
-	    	<%= render :partial => "remote_feature", :collection => data, :locals => {:pc => @product_count} %>
-		<% end %>
+	    <%= render :partial => "remote_feature", :collection => d.values.flatten(1), :locals => {:pc => @product_count} %>
 		
 		<% if @multirules[feature] %>
 		<div class="contentholder">

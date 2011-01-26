@@ -1,5 +1,6 @@
 <% rule = remote_feature.first.scraping_rule %>
 <div class="contentholder">
+	<%= link_to "#", :class => "raise_rule_priority", :"data-id" => rule.id do %>&#8679;<% end if remote_feature_counter >= 1 %>
 	<a href="#" class="togglable closed title_link">
 		Remote Feature: <span class="bold"><%= rule.remote_featurename %></span>&nbsp;&nbsp;&nbsp;
 		<span style="color: <%= @colors[rule.local_featurename][rule.id] %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
@@ -7,6 +8,5 @@
 	</a>&nbsp;&nbsp;&nbsp;
 	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.current.product_type %>
 	<%= link_to "Destroy", rule, :method => :delete %>
-	<%= link_to "Raise Priority", "#", :class => "raise_rule_priority", :"data-id" => rule.id %>
 	<div class="contentholder"><%= render :partial => 'candidate', :collection => remote_feature %></div>
 </div>

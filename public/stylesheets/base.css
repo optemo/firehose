@@ -166,3 +166,8 @@ div#silkscreen {
 	left: 50%;
 	margin-left: -100px;
 }
+
+.raise_rule_priority {
+	text-decoration: none;
+	margin-left: -20px;
+}

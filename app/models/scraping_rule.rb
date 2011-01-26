@@ -57,6 +57,7 @@ class ScrapingRule < ActiveRecord::Base
               end
               #If it fails the first Regex, it should return nothing
               current_text = parsed if !parsed.nil? || firstregex
+              break if firstregex && current_text.nil?
               firstregex = false
             end
             parsed = current_text
