@@ -69,7 +69,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
     t.integer  "product_id"
     t.integer  "sibling_id"
     t.string   "name"
-    t.float    "value"
+    t.string   "value"
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"

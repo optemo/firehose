@@ -49,6 +49,50 @@ task :calculate_factors => :environment do
   end
 end
 
+
+
+desc "Process product relationships and fill up prduct siblings table"
+task :get_relations => :environment do
+  file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
+  unless ENV.include?("url") && (s = Session.new(ENV["url"])) && file[ENV["url"]]
+     raise "usage: rake calculate_factors url=? # url is a valid url from products.yml; sets product_type."
+  end
+  ProductSiblings.delete_all(["name = 'color' and product_type = ?", s.product_type])
+  all_products = Product.valid.instock
+  records = TextSpec.find(:all, :select=> 'product_id, value', :conditions => ["product_id IN (?) and name= ?", all_products, "relations"])
+  siblings_activerecords = []
+  records.each do |record|
+    unless eval(record.value).empty?
+      p_id = record.product_id
+      skus = []  
+      eval(record.value).each{|sk| skus<<sk["sku"]}
+      sibs = [] 
+      all_products.map{|p| sibs<<p.id if skus.include?(p["sku"])}
+      color = CatSpec.find(:first, :select => 'product_id, value, name', :conditions =>["product_id= (?) and name=(?)", p_id , "color"]).value
+      sibs.each{|sib_id| siblings_activerecords.push ProductSiblings.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"color", :product_type=>s.product_type, :value=> color})}
+    end  
+  end    
+
+  ProductSiblings.transaction do 
+    siblings_activerecords.each(&:save)
+  end  
+  
+  # make sure color relationship is symmetric as it should be (R(a,b) => R(b,a))
+  siblings_activerecords = []
+  product_ids_with_siblings = ProductSiblings.find(:all, :select=> 'product_id, sibling_id, value', :conditions => ["product_id IN (?) and name=(?)", all_products, "color"])
+  product_ids_with_siblings.each do |p|
+    p_id=p.product_id
+    s_id = p.sibling_id
+    color = p.value
+    unless product_ids_with_siblings.map{|sib| (sib.product_id == s_id  && sib.sibling_id==p_id) ? 1 : 0}.include?(1) 
+      siblings_activerecords.push ProductSiblings.new({:product_id => s_id, :sibling_id =>p_id, :name=>"color", :product_type=>s.product_type, :value=> color})
+    end  
+  end  
+  ProductSiblings.transaction do 
+    siblings_activerecords.each(&:save)
+  end
+end
+  
 def calculateFactor(fVal, f, contspecs)
   # Order the feature values, reversed to give the highest value to duplicates
   ordered = contspecs.values.sort
