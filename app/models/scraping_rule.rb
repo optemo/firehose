@@ -43,15 +43,11 @@ class ScrapingRule < ActiveRecord::Base
                 if replace_i
                   #Replacement part of the regex (do a match first, since it's a two-part operation)
                   parsed = current_text[Regexp.new(regexstr[0..replace_i])]
-                  parsed = parsed.gsub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1]) if parsed
+                  parsed = parsed.sub(Regexp.new(regexstr[0..replace_i]),regexstr[replace_i+2..-1]) if parsed
                 else
                   #Just match, not replacement
                   parsed = current_text[Regexp.new(regexstr)]
                 end
-                #Test for min / max
-                parsed = "**LOW" if r.min && parsed && parsed.to_f < r.min
-                parsed = "**HIGH" if r.max && parsed && parsed.to_f > r.max
-                
               rescue RegexpError
                 parsed = "**Regex Error"
               end
@@ -61,7 +57,14 @@ class ScrapingRule < ActiveRecord::Base
               firstregex = false
             end
             parsed = current_text
-            delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error")
+            
+            #Validation Tests
+            parsed = "**LOW" if r.min && parsed && parsed.to_f < r.min
+            parsed = "**HIGH" if r.max && parsed && parsed.to_f > r.max
+            #debugger if r.rule_type == "cat" && !r.valid_inputs.blank? && !r.valid_inputs.split("*").include?(parsed)
+            parsed = "**INVALID" if r.rule_type == "cat" && parsed && !r.valid_inputs.blank? && !r.valid_inputs.split("*").include?(parsed)
+            
+            delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
           end
           #Save the new candidate
           candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
