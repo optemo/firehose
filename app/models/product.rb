@@ -102,42 +102,89 @@ class Product < ActiveRecord::Base
   
   def self.create_from_result(id)
     result = Result.find(id)
+    #Reset the intock flags
     Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; p.save }
-    candidate_rules = Candidate.find_all_by_result_id_and_delinquent(id, false).group_by{|c|c.product_id}.each do |r_id, candidate_rules|
-      # For each remote id, first figure out whether we already have a product that matches
-      unless product = Product.find_by_sku(r_id)
-        # Create a new one. The product already exists otherwise.
-        product = Product.new({:sku => r_id, :product_type => Session.current.product_type})
-      end
-      product.instock = true
-      product.save
-
-      # Group rules by local feature name
-      # For each local feature name, get the candidates in priority order and choose the first one (lowest number)
-      # If there is a correction, ignore all the rules
-
-      candidate_rules.sort{|a,b| a.scraping_correction_id.to_i <=> b.scraping_correction_id.to_i}.each do |r|
-        rule = ScrapingRule.find(r.scraping_rule_id)
-        if rule.rule_type == "intr" # Intrinsic properties affect the product directly.
-          # No need to create anything, just save the parsed value in the appropriate place
-          product[rule.local_featurename] = r.parsed
-          product.save
+    rules, multirules, colors = Candidate.organize(result.candidates)
+    multirules.each_pair do |feature, candidates|
+      candidates.each do |candidate|
+        next if candidate.delinquent
+        #Create new product if necessary
+        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.current.product_type)
+        p.instock = true
+        if candidate.scraping_rule.rule_type == "intr"
+          p[feature] = candidate.parsed
+          p.save
         else
           case rule.rule_type
-          when "cat" then spec_class = CatSpec
-          when "cont" then spec_class = ContSpec
-          when "bin" then spec_class = BinSpec
-          when "text" then spec_class = TextSpec
-          else spec_class = CatSpec # This should never happen
+            when "cat" then spec_class = CatSpec
+            when "cont" then spec_class = ContSpec
+            when "bin" then spec_class = BinSpec
+            when "text" then spec_class = TextSpec
+            else spec_class = CatSpec # This should never happen
       		end
-          unless spec = spec_class.find_by_product_id_and_name(product.id, rule.local_featurename)
-            spec = spec_class.new({:product_type => Session.current.product_type, :product_id => product.id, :name => rule.local_featurename})
-          end
-          spec.value = r.parsed
-          spec.save
-        end
+      		p.save
+      		#Save the spec
+      		spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
+      		spec.product_type = Session.current.product_type
+      		spec.value = r.parsed
+      		spec.save
+    		end
       end
     end
+  end
+  
+  def self.calculate_factors
+    s = Session.current
+    cont_activerecords = []
+    #cat_activerecords =[]
+    #bin_activerecords = []
+    cont_spec_local_cache = {} # This saves doing many ContSpec lookups. It's a hash with {id => value} pairs
+    all_products = Product.valid.instock
+    all_products.each do |product|
+      utility = []
+      s.continuous["filter"].each do |f|
+        unless cont_spec_local_cache[f]
+          records = ContSpec.find(:all, :select => 'product_id, value', :conditions => ["product_id IN (?) and name = ?", all_products, f])
+          temp_hash = {}
+          records.each do |r| # Strip the records down to {id => value} pairs
+            temp_hash[r.product_id] = r.value
+          end
+          cont_spec_local_cache[f] = temp_hash
+        end
+        newFactorRow = ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => f+"_factor"})
+        fVal = cont_spec_local_cache[f][product.id]
+        debugger unless fVal # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
+        newFactorRow.value = Product.calculateFactor(fVal, f, cont_spec_local_cache[f])
+        utility << newFactorRow.value
+        cont_activerecords.push(newFactorRow)
+      end
+      #Add the static calculated utility
+      cont_activerecords.push ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility", :value => utility.sum})
+    end
+
+    ContSpec.delete_all(["name = 'utility' and product_type = ?", s.product_type])
+    s.continuous["filter"].each{|f| ContSpec.delete_all(["name = ? and product_type = ?", f+"_factor", s.product_type])} # ContSpec records do not have a version number, so we have to wipe out the old ones.  
+    # Do all record saving at the end for efficiency
+    ContSpec.transaction do
+      cont_activerecords.each(&:save)
+    end
+
+    #Clear the search_product cache in the database
+    initial_products_id = Product.initial
+    SearchProduct.delete_all(["search_id = ?",initial_products_id])
+    SearchProduct.transaction do
+      Product.valid.instock.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
+    end
+  end
+  
+  def self.calculateFactor(fVal, f, contspecs)
+    # Order the feature values, reversed to give the highest value to duplicates
+    ordered = contspecs.values.sort
+    ordered = ordered.reverse if Session.current.prefDirection[f] == 1
+    return 0 if Session.current.prefDirection[f] == 0
+    pos = ordered.index(fVal)
+    len = ordered.length
+    (len - pos)/len.to_f
   end
 end
 class ValidationError < ArgumentError; end
