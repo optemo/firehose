@@ -1,5 +1,6 @@
 class ProductSiblings < ActiveRecord::Base
-  def get_relations
+  def self.get_relations
+    s=Session.current
     ProductSiblings.delete_all(["name = 'color' and product_type = ?", s.product_type])
     all_products = Product.valid.instock
     siblings_activerecords = []
@@ -8,7 +9,7 @@ class ProductSiblings < ActiveRecord::Base
       unless !data || data.empty?
         p_id = record.product_id
         skus = []  
-        data.each{|sk| skus<<sk["sku"]}
+        data.each{|sk| skus<<sk["sku"] if sk["type"]=="Variant"}
         sibs = [] 
         #Check if the product is in our database
         all_products.map{|p| sibs<<p.id if skus.include?(p["sku"])}
@@ -17,10 +18,10 @@ class ProductSiblings < ActiveRecord::Base
       end  
     end    
     
-    # make sure color relationship is symmetric as it should be (R(a,b) => R(b,a))
+    # make sure color relationship is symmetric (R(a,b) => R(b,a))
     siblings_sym_activerecords = []
     siblings_activerecords.each do |p|
-      unless siblings_activerecords.inject(false){|res,elem| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id)}
+      unless siblings_activerecords.inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id)}
         siblings_sym_activerecords.push ProductSiblings.new({:product_id => p.sibling_id, :sibling_id =>p.product_id, :name=>"color", :product_type=>s.product_type, :value=> p.value})
       end  
     end
