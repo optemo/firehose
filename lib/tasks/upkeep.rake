@@ -31,18 +31,11 @@ task :set_performance_scores => :environment do
   ContSpec.delete_all(["name = ? and product_type = ?", "performance_factor", s.product_type])
   featured_skus = [10143747, 10140079, 10145495, 10141899, 10155221, 10154265, 10156451, 10142444, 10140149]
   featured_ids = Product.where(["sku IN (?)", featured_skus]).map(&:id)
-  puts featured_ids
-  puts 'featured_ids printed'
   all_products = Product.valid.instock.map(&:id)
   cont_specs_records = []
   all_products.each do |p_id|
-    puts p_id
-    if featured_ids.include?(p_id)
-        puts p_id
-        cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> 1, :product_type=> s.product_type})
-    else    
-        cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> 0, :product_type=> s.product_type})
-    end    
+    featured_ids.include?(p_id) ? p_factor = 1 : p_factor = 0
+    cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> p_factor, :product_type=> s.product_type})   
   end
   ContSpec.transaction do 
     cont_specs_records.each(&:save)
