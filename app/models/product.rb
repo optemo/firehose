@@ -106,7 +106,8 @@ class Product < ActiveRecord::Base
     Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; p.save }
     rules, multirules, colors = Candidate.organize(result.candidates)
     multirules.each_pair do |feature, candidates|
-      candidates.each do |candidate|
+      #An entry is only in multirules if it has more then one rule
+      (candidates||rules[feature].values.first.first).each do |candidate|
         next if candidate.delinquent
         #Create new product if necessary
         p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.current.product_type)
@@ -115,7 +116,7 @@ class Product < ActiveRecord::Base
           p[feature] = candidate.parsed
           p.save
         else
-          case rule.rule_type
+          case candidate.scraping_rule.rule_type
             when "cat" then spec_class = CatSpec
             when "cont" then spec_class = ContSpec
             when "bin" then spec_class = BinSpec
@@ -126,11 +127,15 @@ class Product < ActiveRecord::Base
       		#Save the spec
       		spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
       		spec.product_type = Session.current.product_type
-      		spec.value = r.parsed
+      		spec.value = candidate.parsed
       		spec.save
     		end
       end
     end
+    #Calculate new spec factors
+    Product.calculate_factors
+    #Get the color relationships loaded
+    ProductSiblings.get_relations
   end
   
   def self.calculate_factors
