@@ -17,14 +17,14 @@ class ContSpec < ActiveRecord::Base
   def self.featurecache(p_id, feat) 
     @@cs = {} unless defined? @@cs
     p_id = p_id.to_s
-    unless @@cs.has_key?(Session.current.product_type + p_id + feat)
-      find_all_by_product_type(Session.current.product_type).each {|f| @@cs[(Session.current.product_type + f.product_id.to_s + f.name)] = f}
+    unless @@cs.has_key?(Session.product_type + p_id + feat)
+      find_all_by_product_type(Session.product_type).each {|f| @@cs[(Session.product_type + f.product_id.to_s + f.name)] = f}
     end
-    @@cs[(Session.current.product_type + p_id + feat)]
+    @@cs[(Session.product_type + p_id + feat)]
   end
   
   def self.allMinMax(feat)
-    CachingMemcached.cache_lookup("#{Session.current.product_type}MinMax-#{feat}") do
+    CachingMemcached.cache_lookup("#{Session.product_type}MinMax-#{feat}") do
       #all = ContSpec.allspecs(feat)
       all = ContSpec.initial_specs(feat)
       [all.min,all.max]
@@ -32,14 +32,14 @@ class ContSpec < ActiveRecord::Base
   end
 
   def self.allLow(feat)
-    CachingMemcached.cache_lookup("#{Session.current.product_type}Low-#{feat}") do
-      ContSpec.initial_specs(feat).sort[Session.current.search.product_size*0.4]
+    CachingMemcached.cache_lookup("#{Session.product_type}Low-#{feat}") do
+      ContSpec.initial_specs(feat).sort[Session.search.product_size*0.4]
     end
   end
 
   def self.allHigh(feat)
-    CachingMemcached.cache_lookup("#{Session.current.product_type}High-#{feat}") do
-      ContSpec.initial_specs(feat).sort[Session.current.search.product_size*0.6]
+    CachingMemcached.cache_lookup("#{Session.product_type}High-#{feat}") do
+      ContSpec.initial_specs(feat).sort[Session.search.product_size*0.6]
     end
   end
   

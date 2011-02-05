@@ -14,7 +14,7 @@ class CatSpec < ActiveRecord::Base
     end
   end
   def self.all(feat)
-    CachingMemcached.cache_lookup("#{Session.current.product_type}Cats-#{feat}") do
+    CachingMemcached.cache_lookup("#{Session.product_type}Cats-#{feat}") do
       select("value").where("product_id IN (select product_id from search_products where search_id = ?) and name = ?", Product.initial, feat).map(&:value)
     end
   end
