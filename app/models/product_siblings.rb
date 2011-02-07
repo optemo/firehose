@@ -1,6 +1,6 @@
 class ProductSiblings < ActiveRecord::Base
   def self.get_relations
-    s=Session.current
+    s=Session
     ProductSiblings.delete_all(["name = 'imgsurl' and product_type = ?", s.product_type])
     all_products = Product.valid.instock
     siblings_activerecords = []

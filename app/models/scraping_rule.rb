@@ -19,8 +19,8 @@ class ScrapingRule < ActiveRecord::Base
         next
       end
       unless raw_info.nil?
-        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.current.product_type)
-        rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
+        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
+        rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
           #Find content based on . seperated hierarchical description
           identifiers = r.remote_featurename.split(".")

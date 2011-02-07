@@ -34,7 +34,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new(:product_type => Session.current.product_type, :category => Session.category_id)
+    @result = Result.new(:product_type => Session.product_type, :category => Session.category_id)
 
     respond_to do |format|
       format.html # new.html.erb
@@ -51,7 +51,7 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.current.product_type, true)
+    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
     raise ValidationError unless @result.category
     product_skus = BestBuyApi.category_ids(@result.category)
     @result.nonuniq = product_skus.count

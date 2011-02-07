@@ -22,16 +22,16 @@ class Product < ActiveRecord::Base
     #Algorithm for calculating id of initial products in product_searches table
     #We probably need a better algorithm to check for collisions
     chars = []
-    Session.current.product_type.each_char{|c|chars<<c.getbyte(0)*chars.size}
+    Session.product_type.each_char{|c|chars<<c.getbyte(0)*chars.size}
     chars.sum*-1
   end
   
   #Currently only does continuous but others should be added
   def self.specs(p_ids = nil)
     st = []
-    Session.current.continuous["filter"].each{|f| st << ContSpec.by_feat(f)}
+    Session.continuous["filter"].each{|f| st << ContSpec.by_feat(f)}
     #Check for 1 spec per product
-    raise ValidationError unless Session.current.search.products_size == st.first.length
+    raise ValidationError unless Session.search.products_size == st.first.length
     #Check for no nil values
     raise ValidationError unless st.first.size == st.first.compact.size
     raise ValidationError unless st.first.size > 0
@@ -40,17 +40,17 @@ class Product < ActiveRecord::Base
     raise ValidationError unless st.inject{|res,el|el.compact.size == first_size}
     
     if p_ids
-      Session.current.categorical["cluster"].each{|f|  st<<CatSpec.cachemany(p_ids, f)} 
-      Session.current.binary["cluster"].each{|f|  st << BinSpec.cachemany(p_ids, f)}
+      Session.categorical["cluster"].each{|f|  st<<CatSpec.cachemany(p_ids, f)} 
+      Session.binary["cluster"].each{|f|  st << BinSpec.cachemany(p_ids, f)}
     end
     st.transpose
   end
   
   scope :instock, :conditions => {:instock => true}
   scope :valid, lambda {
-    {:conditions => (Session.current.continuous["filter"].map{|f|"id in (select product_id from cont_specs where #{Session.current.minimum[f] ? "value > " + Session.current.minimum[f].to_s : "value > 0"}#{" and value < " + Session.current.maximum[f].to_s if Session.current.maximum[f]} and name = '#{f}' and product_type = '#{Session.current.product_type}')"}+\
-    Session.current.binary["filter"].map{|f|"id in (select product_id from bin_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.current.product_type}')"}+\
-    Session.current.categorical["filter"].map{|f|"id in (select product_id from cat_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.current.product_type}')"}).join(" and ")}
+    {:conditions => (Session.continuous["filter"].map{|f|"id in (select product_id from cont_specs where #{Session.minimum[f] ? "value > " + Session.minimum[f].to_s : "value > 0"}#{" and value < " + Session.maximum[f].to_s if Session.maximum[f]} and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
+    Session.binary["filter"].map{|f|"id in (select product_id from bin_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
+    Session.categorical["filter"].map{|f|"id in (select product_id from cat_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}).join(" and ")}
   }
     
   def brand
@@ -110,7 +110,7 @@ class Product < ActiveRecord::Base
       (candidates||rules[feature].values.first.first).each do |candidate|
         next if candidate.delinquent
         #Create new product if necessary
-        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.current.product_type)
+        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
         p.instock = true
         if candidate.scraping_rule.rule_type == "intr"
           p[feature] = candidate.parsed
@@ -126,7 +126,7 @@ class Product < ActiveRecord::Base
       		p.save
       		#Save the spec
       		spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
-      		spec.product_type = Session.current.product_type
+      		spec.product_type = Session.product_type
       		spec.value = candidate.parsed
       		spec.save
     		end
@@ -139,36 +139,34 @@ class Product < ActiveRecord::Base
   end
   
   def self.calculate_factors
-    s = Session.current
+    s = Session
     cont_activerecords = []
     #cat_activerecords =[]
     #bin_activerecords = []
-    cont_spec_local_cache = {} # This saves doing many ContSpec lookups. It's a hash with {id => value} pairs
+    records = {}
+    record_vals = {}
+    factors = {}
     all_products = Product.valid.instock
     all_products.each do |product|
       utility = []
       s.continuous["filter"].each do |f|
-        unless cont_spec_local_cache[f]
-          records = ContSpec.find(:all, :select => 'product_id, value', :conditions => ["product_id IN (?) and name = ?", all_products, f])
-          temp_hash = {}
-          records.each do |r| # Strip the records down to {id => value} pairs
-            temp_hash[r.product_id] = r.value
-          end
-          cont_spec_local_cache[f] = temp_hash
-        end
-        newFactorRow = ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => f+"_factor"})
-        fVal = cont_spec_local_cache[f][product.id]
-        debugger unless fVal # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
-        newFactorRow.value = Product.calculateFactor(fVal, f, cont_spec_local_cache[f])
-        utility << newFactorRow.value
-        cont_activerecords.push(newFactorRow)
+        records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
+        record_vals[f] ||= records[f].values.map{|i|i.first.value}
+        factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
+        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => s.product_type, :name => f+"_factor")
+        fVal = records[f][product.id].first
+        debugger unless fVal && fVal.value # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
+        factorRow.value = Product.calculateFactor(fVal.value, f, record_vals[f])
+        utility << factorRow.value
+        cont_activerecords << factorRow
       end
       #Add the static calculated utility
-      cont_activerecords.push ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility", :value => utility.sum})
+      utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility"})
+      product_utility.value = utility.sum
+      cont_activerecords << product_utility
     end
 
-    ContSpec.delete_all(["name = 'utility' and product_type = ?", s.product_type])
-    s.continuous["filter"].each{|f| ContSpec.delete_all(["name = ? and product_type = ?", f+"_factor", s.product_type])} # ContSpec records do not have a version number, so we have to wipe out the old ones.  
     # Do all record saving at the end for efficiency
     ContSpec.transaction do
       cont_activerecords.each(&:save)
@@ -182,11 +180,13 @@ class Product < ActiveRecord::Base
     end
   end
   
+  private
+  
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
-    ordered = contspecs.values.sort
-    ordered = ordered.reverse if Session.current.prefDirection[f] == 1
-    return 0 if Session.current.prefDirection[f] == 0
+    ordered = contspecs.sort
+    ordered = ordered.reverse if Session.prefDirection[f] == 1
+    return 0 if Session.prefDirection[f] == 0
     pos = ordered.index(fVal)
     len = ordered.length
     (len - pos)/len.to_f
