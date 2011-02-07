@@ -1,3 +1,4 @@
+
 #Here is where general upkeep scripts are
 desc "Calculate factors for all features of all products, and pre-calculate utility scores"
 task :calculate_factors => :environment do
@@ -28,14 +29,46 @@ task :set_performance_scores => :environment do
   unless ENV.include?("url") && (s=Session.new(ENV["url"])) && file[ENV["url"]]
      raise "usage: rake set_performance_scores url=? # url is a valid url from products.yml; sets product_type."
   end
-  ContSpec.delete_all(["name = ? and product_type = ?", "performance_factor", s.product_type])
-  featured_skus = [10143747, 10140079, 10145495, 10141899, 10155221, 10154265, 10156451, 10142444, 10140149]
-  featured_ids = Product.where(["sku IN (?)", featured_skus]).map(&:id)
+  ContSpec.delete_all(["name='performance_factor' and product_type=?", s.product_type])
+
+  begin
+    # connect to the MySQL server
+    dbh = Mysql2::Client.new({:host => "jaguar", :username => "zev", :password => "opent3xt", :database => "piwik_09"})
+  rescue Mysql2::Error => e
+    puts "Error code: #{e.errno}"
+    puts "Error message: #{e.error}"
+    puts "Error SQLSTATE: #{e.sqlstate}" if e.respond_to?("sqlstate")
+  end
+
+  # Right now (February 7th) there aren't any results due to lack of data.
+  res = dbh.query("SELECT * FROM piwik_log_preferences WHERE filter_type='addtocart' LIMIT 0,30")
+
+  popularity_hash = {}
+  total_popularity = 0
+
+  res.each do |row|
+    # We want to take each result and count how many times each product has been added to the cart.
+    popularity_hash[row["product_picked"]] ? popularity_hash[row["product_picked"]] += 1 : popularity_hash[row["product_picked"]] = 1
+  end
+
+  # Sort all products by popularity in descending order.
+  # Then, put a factor number in the popularity hash to replace the raw number.
+  popularity_array = popularity_hash.to_a
+  popularity_array.sort!{|a,b|b[1] <=> a[1]}
+  popularity_array.each_with_index do |a,i| 
+    # a[0] is the product id
+    # set popularity_hash[a[0]] to be the result of the popularity contest
+    # For example, if we have the 10th element out of 90, the factor value is 1 - 1/9 = 0.88.
+    # But, if there wasn't a single add-to-cart action, the popularity factor value should stay at 0.
+    popularity_hash[a[0]] = 1 - (i.to_f / popularity_array.length) unless popularity_hash[a[0]] == 0
+  end
+
   all_products = Product.valid.instock.map(&:id)
   cont_specs_records = []
   all_products.each do |p_id|
-    featured_ids.include?(p_id) ? p_factor = 1 : p_factor = 0
-    cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> p_factor, :product_type=> s.product_type})   
+    # If there is no value in the popularity hash, that means that it should be 0, not null.
+    # This could be handled at the database level, but if it isn't, don't introduce a bug here.
+    cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> (popularity_hash[p_id] || 0), :product_type=> s.product_type})   
   end
   ContSpec.transaction do 
     cont_specs_records.each(&:save)
