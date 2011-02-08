@@ -6,8 +6,12 @@ class BestBuyApi
     DEBUG = false
     
     #Find BestBuy products
-    def product_search(id)
-      cached_request('product',{:id => id, :Include => "all"})["product"] 
+    def product_search(id, includeall = true)
+      if includeall
+        cached_request('product',{:id => id, :Include => "all"})["product"] 
+      else
+        cached_request('product',{:id => id})["product"]
+      end
       # From the BestBuy API documentation, use &Include=media and/or any of the following: 
       # relations,description,availability,all (in comma-separated format as a URL parameter)
     end
@@ -27,6 +31,7 @@ class BestBuyApi
     end
     
     def category_ids(id)
+      #pageSize is set to 10000 results, so there should only be one page, as their pagination has some bugs in it
       ids = []
       page = 1
       totalpages = nil
@@ -91,7 +96,7 @@ class BestBuyApi
           qf = "#{k}=#{v}"
         } unless filters.nil?
         if type == "search"
-            "#{BESTBUY_URL}/search/products(#{qf})?#{qs}" #Search for products in certain stores
+            "#{BESTBUY_URL}/search/products(#{qf})?pageSize=10000#{qs}" #Search for products in certain stores
         else
             return_url = "#{BESTBUY_URL}/#{type}/#{filters[:id]}.aspx"
             return_url << "?Include=#{filters[:Include]}" if filters[:Include]

@@ -16,7 +16,12 @@ class ScrapingRule < ActiveRecord::Base
       begin
         raw_info = BestBuyApi.product_search(id)
       rescue BestBuyApi::RequestError
-        next
+        #Try the request without including extra info
+        begin
+          raw_info = BestBuyApi.product_search(id,false)
+        rescue BestBuyApi::RequestError
+          next
+        end
       end
       unless raw_info.nil?
         corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
