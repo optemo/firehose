@@ -4,10 +4,9 @@ desc "Calculate factors for all features of all products, and pre-calculate util
 task :calculate_factors => :environment do
   # Do not truncate Factor table anymore. Instead, add more factors for the given URL.
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (s = Session.new(ENV["url"])) && file[ENV["url"]]
+  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
     raise "usage: rake calculate_factors url=? # url is a valid url from products.yml; sets product_type."
   end
-  
   Product.calculate_factors
 end
 
@@ -26,14 +25,13 @@ end
 desc "Set performance factors"
 task :set_performance_scores => :environment do 
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (s=Session.new(ENV["url"])) && file[ENV["url"]]
+  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
      raise "usage: rake set_performance_scores url=? # url is a valid url from products.yml; sets product_type."
   end
-  ContSpec.delete_all(["name='performance_factor' and product_type=?", s.product_type])
 
   begin
     # connect to the MySQL server
-    dbh = Mysql2::Client.new({:host => "jaguar", :username => "zev", :password => "opent3xt", :database => "piwik_09"})
+    dbh = Mysql2::Client.new({:host => "jaguar", :username => "opt_read", :password => "literati", :database => "piwik_09"})
   rescue Mysql2::Error => e
     puts "Error code: #{e.errno}"
     puts "Error message: #{e.error}"
@@ -68,7 +66,10 @@ task :set_performance_scores => :environment do
   all_products.each do |p_id|
     # If there is no value in the popularity hash, that means that it should be 0, not null.
     # This could be handled at the database level, but if it isn't, don't introduce a bug here.
-    cont_specs_records << ContSpec.new({:product_id => p_id, :name=>"performance_factor", :value=> (popularity_hash[p_id] || 0), :product_type=> s.product_type})   
+    product = ContSpec.find_by_product_id_and_name_and_product_type(p_id,"performance_factor",Session.product_type)
+    product ||= ContSpec.new(:product_id => p_id, :name=>"performance_factor", :product_type=> Session.product_type)   
+    product.value = popularity_hash[p_id] || 0
+    cont_specs_records << product
   end
   ContSpec.transaction do 
     cont_specs_records.each(&:save)
