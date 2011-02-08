@@ -191,17 +191,17 @@ $(document).ready(function(){
 	
 	$('.correction').live("click", function(){
 		myparams = [];
-		i = $(this);
-		if (i.html() === "Update Correction") {
-			myurl = "/scraping_corrections/" + i.siblings(".parsed").attr("data-sc") + "/edit";
+		var t = $(this);
+		if (t.html() === "Update Correction") {
+			myurl = "/scraping_corrections/" + t.siblings(".parsed").attr("data-sc") + "/edit";
 		}
 		else {
-			params = {"sc[product_id]" : i.siblings(".expandable_sku").attr('data-id'),
-				"sc[product_type]" : i.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-pt"),
-				"sc[raw]" : i.siblings(".raw").html(),
-				"sc[scraping_rule_id]" : i.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-id")};
+			params = {"sc[product_id]" : t.siblings(".expandable_sku").attr('data-id'),
+				"sc[product_type]" : t.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-pt"),
+				"sc[raw]" : t.siblings(".raw").html(),
+				"sc[scraping_rule_id]" : t.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-id")};
 			
-			for (i in params)
+			for (var i in params)
 			{
 				if (params[i] !== undefined) {
 					myparams.push(escape(i)+"="+escape(params[i]));
@@ -209,7 +209,7 @@ $(document).ready(function(){
 			}
         	myurl = "/scraping_corrections/new?" + myparams.join('&');
 		}
-        i.toggle().siblings(".parsed").load(myurl);
+        t.toggle().siblings(".parsed").load(myurl);
 		
 		return false;
 	});
