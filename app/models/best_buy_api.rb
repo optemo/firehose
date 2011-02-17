@@ -36,7 +36,7 @@ class BestBuyApi
       page = 1
       totalpages = nil
       while (page == 1 || page <= totalpages)
-        res = cached_request('search',{:page => page,:categoryid => id})
+        res = cached_request('search',{:page => page,:categoryid => id, :sortby => "name"})
         totalpages ||= res["totalPages"]
         ids += res["products"].map{|p|p["sku"]}
         page += 1
