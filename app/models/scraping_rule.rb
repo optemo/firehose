@@ -27,12 +27,19 @@ class ScrapingRule < ActiveRecord::Base
         corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
         rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
-          #Find content based on . seperated hierarchical description
-          identifiers = r.remote_featurename.split(".")
-          raw = raw_info
           #Traverse the hash hierarchy
-          identifiers.each {|i| raw = raw[i] unless raw.nil?}
-          raw = "" unless raw
+          if r.remote_featurename[/specs\./]
+            identifiers = r.remote_featurename.split(".")
+            if raw_info["specs"]
+              raw = raw_info["specs"].select do |spec|
+                debugger if spec.nil? || identifiers.nil?
+                spec["group"] == identifiers[1] && spec["name"] == identifiers[2]
+              end.first
+              raw = raw["value"] unless raw.nil?
+            end
+          else
+            raw = raw_info[r.remote_featurename]
+          end
           corr = corrections.select{|c|c.scraping_rule_id == r.id && c.raw == raw.to_s}.first
           if corr
             parsed = corr.corrected

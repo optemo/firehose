@@ -1,10 +1,21 @@
 <ul class="featurehash">
 <% featurehash.each_pair do |k,v| %>
-    <% unless v.class == Hash %>
+    <% unless k == "specs" %>
         <li><%= link_to "#{k} -- #{v}", "#", {:class => "title_link", :title => "Click for overlay", :'data-rf' => (prefix + [k]).join("."), :'data-spec' => (v.to_s.length < 255 ? v : nil)} %></li>
     <% else %>
-		<li><%= k %></li>
-        <%= render :partial => 'raw_features', :locals => {:featurehash => v, :prefix => prefix + [k]} %>
+		<% currentgroup = "" %>
+		<% v.each do |hash| %>
+			<% if hash["group"] != currentgroup %>
+				<% if currentgroup != "" %>
+					</ul>
+				<% end %>
+				<li><%= hash["group"] %></li>
+				<ul class="featurehash">
+			<% end %>
+			<li><%= link_to "#{hash["name"]} -- #{hash["value"]}", "#", {:class => "title_link", :title => "Click for overlay", :'data-rf' => [k,hash["group"],hash["name"]].join("."), :'data-spec' => (hash["value"].to_s.length < 255 ? hash["value"] : nil)} %></li>
+			<% currentgroup = hash["group"] %>
+		<% end %>
+		</ul>
     <% end %>
 <% end %>
 </ul>
