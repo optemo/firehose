@@ -136,6 +136,12 @@ class Product < ActiveRecord::Base
     Product.calculate_factors
     #Get the color relationships loaded
     ProductSiblings.get_relations
+    Result.upkeep
+    begin
+      Rails.cache.clear
+    rescue Dalli::NetworkError
+      puts "Memcache not available"
+    end
   end
   
   def self.calculate_factors

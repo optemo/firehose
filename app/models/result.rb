@@ -28,4 +28,21 @@ class Result < ActiveRecord::Base
     #Destroy the results
     destroy
   end
+  
+  def self.upkeep
+    #Set onsale binary because it's not in the feed
+    binspecs = []
+    Product.valid.instock.each do |product|
+      binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
+      if ContSpec.find_by_product_id_and_name_and_product_type(product.id,"price",Session.product_type).value > ContSpec.find_by_product_id_and_name_and_product_type(product.id,"saleprice",Session.product_type).value
+        binspec.value = true
+      else
+        binspec.value = false
+      end
+      binspecs << binspec
+    end
+    BinSpec.transaction do
+      binspecs.each(&:save)
+    end
+  end
 end

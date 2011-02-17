@@ -31,5 +31,5 @@ gem 'ruby-debug19'
 # end
 
 # In firehose, use this in development mode too
-gem "memcache-client"
+gem "dalli", "1.0.2"
 gem 'json'
