@@ -109,5 +109,6 @@ class ResultsController < ApplicationController
   def commit
     @result = Result.find(params[:id])
     Product.create_from_result(@result.id)
+    redirect_to '/results'
   end
 end

@@ -108,28 +108,34 @@ class Product < ActiveRecord::Base
     multirules.each_pair do |feature, candidates|
       #An entry is only in multirules if it has more then one rule
       (candidates||rules[feature].values.first.first).each do |candidate|
-        next if candidate.delinquent
-        #Create new product if necessary
-        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
-        p.instock = true
-        if candidate.scraping_rule.rule_type == "intr"
-          p[feature] = candidate.parsed
-          p.save
+        spec_class = case candidate.scraping_rule.rule_type
+          when "cat" then CatSpec
+          when "cont" then ContSpec
+          when "bin" then BinSpec
+          when "text" then TextSpec
+          when "intr" then "intr"
+          else CatSpec # This should never happen
+		    end
+		    #Create new product if necessary
+		    p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
+        if candidate.delinquent
+          #This is a feature which was removed
+          spec = spec_class.find_by_product_id_and_name(p.id,feature)
+          spec.destroy if spec
         else
-          case candidate.scraping_rule.rule_type
-            when "cat" then spec_class = CatSpec
-            when "cont" then spec_class = ContSpec
-            when "bin" then spec_class = BinSpec
-            when "text" then spec_class = TextSpec
-            else spec_class = CatSpec # This should never happen
-      		end
-      		p.save
-      		#Save the spec
-      		spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
-      		spec.product_type = Session.product_type
-      		spec.value = candidate.parsed
-      		spec.save
-    		end
+          p.instock = true
+          if spec_class == "intr"
+            p[feature] = candidate.parsed
+            p.save
+          else
+            #This is a feature which should be added
+            p.save
+      	  	spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
+      	  	spec.product_type = Session.product_type
+      	  	spec.value = candidate.parsed
+      	  	spec.save
+    		  end
+  		  end
       end
     end
     #Calculate new spec factors
