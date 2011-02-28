@@ -28,7 +28,7 @@ class Candidate < ActiveRecord::Base
     
     #Order rules by priority for display
     rules.each do |lf,rule_ids|
-      rules[lf] = rule_ids.values.sort{|a,b|a.first.scraping_rule.priority <=> b.first.scraping_rule.priority}.group_by{|a| a.first.scraping_rule.remote_featurename}
+      rules[lf] = rule_ids.values.sort{|a,b|a.first.scraping_rule.priority <=> b.first.scraping_rule.priority}#.group_by{|a| a.first.scraping_rule.remote_featurename}
     end
     [rules,multirules,colors]
   end

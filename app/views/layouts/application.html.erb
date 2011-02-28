@@ -10,6 +10,7 @@
 </head>
 <body>
     <div id="header">
+		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
         <h2>SKUs in category id <%= Session.category_id %></h2>
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 

@@ -107,7 +107,7 @@ class Product < ActiveRecord::Base
     rules, multirules, colors = Candidate.organize(result.candidates)
     multirules.each_pair do |feature, candidates|
       #An entry is only in multirules if it has more then one rule
-      (candidates||rules[feature].values.first.first).each do |candidate|
+      (candidates||rules[feature].first).each do |candidate|
         spec_class = case candidate.scraping_rule.rule_type
           when "cat" then CatSpec
           when "cont" then ContSpec
@@ -118,7 +118,7 @@ class Product < ActiveRecord::Base
 		    end
 		    #Create new product if necessary
 		    p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
-        if candidate.delinquent
+        if candidate.delinquent && spec_class != "intr"
           #This is a feature which was removed
           spec = spec_class.find_by_product_id_and_name(p.id,feature)
           spec.destroy if spec
@@ -143,6 +143,7 @@ class Product < ActiveRecord::Base
     #Get the color relationships loaded
     ProductSiblings.get_relations
     Result.upkeep
+    #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
     rescue Dalli::NetworkError

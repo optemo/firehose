@@ -30,17 +30,33 @@ class BestBuyApi
       cached_request('search',{:page => page, :categoryid => id})
     end
     
-    def category_ids(id)
-      #pageSize is set to 10000 results, so there should only be one page, as their pagination has some bugs in it
+    def some_ids(id)
+      #This can accept an array or a single id
+      id = [id] unless id.class == Array
       ids = []
-      page = 1
-      totalpages = nil
-      while (page == 1 || page <= totalpages)
-        res = cached_request('search',{:page => page,:categoryid => id, :sortby => "name"})
-        totalpages ||= res["totalPages"]
+      total = 0
+      id.each do |my_id|
+        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
+        total += res["total"]
         ids += res["products"].map{|p|p["sku"]}
-        page += 1
-        #sleep 1 No need for waiting
+      end
+      [ids,total]
+    end
+    
+    def category_ids(id)
+      #This can accept an array or a single id
+      id = [id] unless id.class == Array
+      ids = []
+      id.each do |my_id|
+        page = 1
+        totalpages = nil
+        while (page == 1 || page <= totalpages)
+          res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
+          totalpages ||= res["totalPages"]
+          ids += res["products"].map{|p|p["sku"]}
+          page += 1
+          #sleep 1 No need for waiting
+        end
       end
       ids
     end
