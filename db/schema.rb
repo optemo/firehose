@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110122003538) do
+ActiveRecord::Schema.define(:version => 20110301210621) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "modified"
   end
 
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
@@ -42,6 +43,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "modified"
   end
 
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
@@ -53,6 +55,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "modified"
   end
 
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
@@ -172,6 +175,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
     t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "modified"
   end
 
   add_index "text_specs", ["product_id"], :name => "index_text_specs_on_product_id"
@@ -203,6 +207,7 @@ ActiveRecord::Schema.define(:version => 20110122003538) do
 
   create_table "users", :force => true do |t|
     t.datetime "created_at"
+    t.integer  "ab_testing_type", :default => 0, :null => false
   end
 
 end

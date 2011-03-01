@@ -1,24 +1,27 @@
 
 #Here is where general upkeep scripts are
-desc "Calculate factors for all features of all products, and pre-calculate utility scores"
-task :calculate_factors => :environment do
-  # Do not truncate Factor table anymore. Instead, add more factors for the given URL.
-  file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
-    raise "usage: rake calculate_factors url=? # url is a valid url from products.yml; sets product_type."
-  end
-  Product.calculate_factors
-end
-
-
-
 desc "Process product relationships and fill up prduct siblings table"
-task :get_relations => :environment do
+task :upkeep => :environment do
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
   unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
      raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
   end
+  Result.upkeep_pre
+  #Calculate new spec factors
+  Product.calculate_factors
+  #Get the color relationships loaded
   ProductSiblings.get_relations
+  Result.upkeep_post
+end
+
+#Here is where general upkeep scripts are
+desc "Process product relationships and fill up prduct siblings table"
+task :bundles => :environment do
+  file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
+  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
+     raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
+  end
+  Result.find_bundles
 end
 
 

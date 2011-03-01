@@ -121,7 +121,7 @@ class Product < ActiveRecord::Base
         if candidate.delinquent && spec_class != "intr"
           #This is a feature which was removed
           spec = spec_class.find_by_product_id_and_name(p.id,feature)
-          spec.destroy if spec
+          spec.destroy if spec && !spec.modified
         else
           p.instock = true
           if spec_class == "intr"
@@ -138,11 +138,12 @@ class Product < ActiveRecord::Base
   		  end
       end
     end
+    Result.upkeep_pre
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded
     ProductSiblings.get_relations
-    Result.upkeep
+    Result.upkeep_post
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
@@ -152,7 +153,6 @@ class Product < ActiveRecord::Base
   end
   
   def self.calculate_factors
-    s = Session
     cont_activerecords = []
     #cat_activerecords =[]
     #bin_activerecords = []
@@ -162,11 +162,11 @@ class Product < ActiveRecord::Base
     all_products = Product.valid.instock
     all_products.each do |product|
       utility = []
-      s.continuous["filter"].each do |f|
+      Session.continuous["filter"].each do |f|
         records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
         record_vals[f] ||= records[f].values.map{|i|i.first.value}
         factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => s.product_type, :name => f+"_factor")
+        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
         fVal = records[f][product.id].first
         debugger unless fVal && fVal.value # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
         factorRow.value = Product.calculateFactor(fVal.value, f, record_vals[f])
@@ -175,7 +175,7 @@ class Product < ActiveRecord::Base
       end
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility"})
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
       product_utility.value = utility.sum
       cont_activerecords << product_utility
     end

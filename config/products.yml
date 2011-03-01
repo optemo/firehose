@@ -9,7 +9,7 @@
 
 bestbuy:
     product_type: camera_bestbuy
-    category_id: [20218, 29157, 29259]
+    category_id: [20218, 29157, 29259] #Point and Shoot, DSLR, Compact Sys
     layout: assist
     price:
         feature_type: Continuous
