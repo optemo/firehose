@@ -38,7 +38,7 @@ class BestBuyApi
       id.each do |my_id|
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
         total += res["total"]
-        ids += res["products"].map{|p|p["sku"]}
+        ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
       [ids,total]
     end
@@ -53,7 +53,7 @@ class BestBuyApi
         while (page == 1 || page <= totalpages)
           res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
           totalpages ||= res["totalPages"]
-          ids += res["products"].map{|p|p["sku"]}
+          ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
           page += 1
           #sleep 1 No need for waiting
         end

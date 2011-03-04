@@ -12,19 +12,21 @@ class ScrapingRule < ActiveRecord::Base
     #Return type: Array of candidates
     candidates = []
     ids = [ids] unless ids.kind_of? Array
-    ids.each do |id|
+    ids.each do |bbproduct|
       begin
-        raw_info = BestBuyApi.product_search(id)
+        raw_info = BestBuyApi.product_search(bbproduct.id)
       rescue BestBuyApi::RequestError
         #Try the request without including extra info
         begin
-          raw_info = BestBuyApi.product_search(id,false)
+          raw_info = BestBuyApi.product_search(bbproduct.id,false)
         rescue BestBuyApi::RequestError
           next
         end
       end
       unless raw_info.nil?
-        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
+        #Insert category id spec
+        raw_info["category_id"] = bbproduct.category
+        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(bbproduct.id,Session.product_type)
         rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
           #Traverse the hash hierarchy
@@ -79,7 +81,7 @@ class ScrapingRule < ActiveRecord::Base
             delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
           end
           #Save the new candidate
-          candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
+          candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
         end
       end
       ret_raw = raw_info if ret_raw == true

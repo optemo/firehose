@@ -139,6 +139,7 @@ class Product < ActiveRecord::Base
       end
     end
     Result.upkeep_pre
+    Result.find_bundles
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded

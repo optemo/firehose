@@ -55,7 +55,7 @@ class ResultsController < ApplicationController
     raise ValidationError unless @result.category
     product_skus = BestBuyApi.category_ids(YAML.load(@result.category))
     @result.nonuniq = product_skus.count
-    product_skus.uniq!
+    product_skus.uniq!{|a|a.id}
     @result.total = product_skus.count
     @result.save
     

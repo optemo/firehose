@@ -37,7 +37,7 @@ class Result < ActiveRecord::Base
       if lensrange
         lensrange = lensrange.value
         ranges = lensrange.split("-")
-        v = ranges[1].to_f/ranges[0].to_f
+        v = (ranges[1].to_f/ranges[0].to_f).round(1) #Round to one decimal point
         ContSpec.create(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
       end
     end

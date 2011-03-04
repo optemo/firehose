@@ -12,7 +12,7 @@ class ScrapingController < ApplicationController
 
   def scrape
     @id = params[:id]
-    candidates, @raw_info = ScrapingRule.scrape(@id,true)
+    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id),true)
     @scraped_features = Candidate.organize(candidates).first
     render :layout => false
   end
