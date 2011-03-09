@@ -7,6 +7,7 @@ class CreateScrapingCorrections < ActiveRecord::Migration
       t.string :raw
       t.string :corrected
       t.string :remote_featurename
+      t.integer :scraping_rule_id
 
       t.timestamps
     end
