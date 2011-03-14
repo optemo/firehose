@@ -1,7 +1,7 @@
 class Session
   # products.yml gets parsed below, initializing these variables.
   cattr_accessor :directLayout, :mobileView  # View choice (Assist vs. Direct, mobile view vs. computer view)
-  cattr_accessor :continuous, :binary, :categorical  # Caching of features' names
+  cattr_accessor :continuous, :binary, :categorical, :prefered  # Caching of features' names
   cattr_accessor :prefDirection, :maximum, :minimum  # Stores which preferences are 'lower is better' vs. normal; used in sorting, plus some attribute globals
   cattr_accessor :dragAndDropEnabled, :relativeDescriptions, :numGroups  # These flags should probably be stripped back out of the code eventually
   cattr_accessor :product_type # Product type (camera_us, etc.), used everywhere
@@ -21,6 +21,7 @@ class Session
     self.maximum = Hash.new
     self.minimum = Hash.new
     self.continuous = Hash.new{|h,k| h[k] = []}
+    self.prefered = Hash.new{|h,k| h[k] = []}
     self.binary = Hash.new{|h,k| h[k] = []}
     self.categorical = Hash.new{|h,k| h[k] = []}
     file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
@@ -60,6 +61,7 @@ class Session
       when "Categorical"
         atts["used_for"].each{|flag| self.categorical[flag] << feature}
         self.categorical["all"] << feature #Keep track of all features
+        self.prefered[feature] = atts["prefered"] if atts["prefered"]
       end
     end
 	end

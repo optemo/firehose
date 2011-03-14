@@ -160,6 +160,18 @@ class Product < ActiveRecord::Base
         utility << factorRow.value
         cont_activerecords << factorRow
       end
+      f = "brand"
+      records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
+      record_vals[f] ||= records[f].values.map{|i|i.first.value}
+      factors[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
+      factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => s.product_type, :name => f+"_factor")
+      fVal = records[f][product.id].first
+      debugger unless fVal && fVal.value # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
+      factorRow.value = Product.calculateFactor(fVal.value, f, record_vals[f])
+      utility << factorRow.value
+      cont_activerecords << factorRow
+      
+      
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
       product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => s.product_type, :name => "utility"})
@@ -184,12 +196,21 @@ class Product < ActiveRecord::Base
   
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
-    ordered = contspecs.sort
-    ordered = ordered.reverse if Session.prefDirection[f] == 1
-    return 0 if Session.prefDirection[f] == 0
-    pos = ordered.index(fVal)
-    len = ordered.length
-    (len - pos)/len.to_f
-  end
+    if f=="brand" 
+      debugger
+     if Session.prefered[f].include?(fVal) 
+       return 1 
+     else 
+       return 0
+     end 
+    else  
+      ordered = contspecs.sort
+      ordered = ordered.reverse if Session.prefDirection[f] == 1
+      return 0 if Session.prefDirection[f] == 0
+      pos = ordered.index(fVal)
+      len = ordered.length
+      (len - pos)/len.to_f
+    end
+  end  
 end
 class ValidationError < ArgumentError; end

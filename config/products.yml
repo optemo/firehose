@@ -7,6 +7,7 @@
 
 ####Spaces are required between elements in an array
 
+
 bestbuy:
     product_type: camera_bestbuy
     category_id: 20218
@@ -29,6 +30,7 @@ bestbuy:
     brand:
         feature_type: Categorical
         used_for: [filter, show]
+        prefered: [Canon, Sony, Nikon] 
 
 # 29171  --  this is a small subset of cameras, with faster scraping & lower load for testing
 besttv:
