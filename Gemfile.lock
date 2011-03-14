@@ -32,6 +32,7 @@ GEM
     arel (2.0.6)
     builder (2.1.2)
     columnize (0.3.1)
+    dalli (1.0.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
     i18n (0.5.0)
@@ -43,7 +44,6 @@ GEM
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
-    memcache-client (1.8.5)
     mime-types (1.16)
     mysql2 (0.2.6)
     polyglot (0.3.1)
@@ -85,8 +85,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dalli (= 1.0.2)
   json
-  memcache-client
   mysql2
   rails (= 3.0.3)
   ruby-debug19

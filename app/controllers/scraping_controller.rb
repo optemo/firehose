@@ -12,17 +12,16 @@ class ScrapingController < ApplicationController
 
   def scrape
     @id = params[:id]
-    candidates, @raw_info = ScrapingRule.scrape(@id,true)
+    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id),true)
     @scraped_features = Candidate.organize(candidates).first
     render :layout => false
   end
   
   def rules
-    products = BestBuyApi.listing(Session.category_id)
-    @exists_count = products["total"]
-    @product_count = [20,@exists_count].min
-    @rules, @multirules, @colors = Candidate.organize(ScrapingRule.scrape(products["products"].map{|p|p["sku"]}))
-    if (newcount = @rules.values.first.values.first.first.count) < @product_count
+    products,@exists_count = BestBuyApi.some_ids(Session.category_id)
+    @product_count = products.count
+    @rules, @multirules, @colors = Candidate.organize(ScrapingRule.scrape(products))
+    if (newcount = @rules.values.first.first.count) < @product_count
       @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
       @product_count = newcount
     end

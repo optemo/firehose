@@ -47,7 +47,7 @@ class Session
 
     # This block gets out the continuous, binary, and categorical features
     product_yml.each do |feature,atts|
-      next if atts.class == Fixnum # This is for the site_id entry
+      next if atts.class != Hash # This is for the site_id entry
       case atts["feature_type"]
       when "Continuous"
         atts["used_for"].each{|flag| self.continuous[flag] << feature}

@@ -1,14 +1,12 @@
 <%= link_to "Product " + @id, "#", :class => "closed togglable" %>
 <div class = "contentholder">
 	<div class="scraped_features">
-		<%= link_to "Scraped Results", "#", :class => "open togglable" %>
+		<%= link_to "Scraped Results", "#", :class => "closed togglable" %>
 		<div>
 			<% @scraped_features.each_pair do |lf,scraped_results| %>
 				<div class="contentholder"><span class="bold"><%= lf %> </span>
-					<% scraped_results.each_pair do |rf, scraped_result| %>
-						<% scraped_result.each do |rule| %>
-						    <%= rule.first.parsed %>
-						<% end %>
+					<% scraped_results.each do |rule| %>
+					    <%= rule.first.parsed %>
 					<% end %>
 				</div>
 			<% end %>

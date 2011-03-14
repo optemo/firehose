@@ -63,7 +63,16 @@ class ScrapingRulesController < ApplicationController
       atts = old_scrape.attributes.merge(params[:scraping_rule].reject{|k,v|v.blank?})
       atts.delete("id")
       succeeded = ScrapingRule.create(atts)
-      old_scrape.update_attribute("active",false) if succeeded
+      if succeeded
+        old_scrape.update_attribute("active",false)
+        #Copy corrections to new rule
+        ScrapingCorrection.find_all_by_scraping_rule_id(old_scrape.id).each do |c|
+          new_c = c.dup
+          new_c.id = nil
+          new_c.scraping_rule_id = succeeded.id
+          new_c.save
+        end
+      end
     else
       succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule].reject{|k,v|v.blank?})
     end

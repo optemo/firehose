@@ -16,10 +16,10 @@ class ResultsController < ApplicationController
   def show
     @result = Result.find(params[:id])
     
-    Session.category_id = @result.category
+    Session.category_id = YAML.load(@result.category)
     @product_count = @result.total
     @rules, @multirules, @colors = Candidate.organize(@result.candidates)
-    if (newcount = @rules.values.first.values.first.first.count) < @product_count
+    if (newcount = @rules.values.first.first.count) < @product_count
       @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
       @exists_count = @product_count
       @product_count = newcount
@@ -34,7 +34,7 @@ class ResultsController < ApplicationController
   # GET /results/new
   # GET /results/new.xml
   def new
-    @result = Result.new(:product_type => Session.product_type, :category => Session.category_id)
+    @result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
 
     respond_to do |format|
       format.html # new.html.erb
@@ -53,9 +53,9 @@ class ResultsController < ApplicationController
     @result = Result.new(params[:result])
     @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
     raise ValidationError unless @result.category
-    product_skus = BestBuyApi.category_ids(@result.category)
+    product_skus = BestBuyApi.category_ids(YAML.load(@result.category))
     @result.nonuniq = product_skus.count
-    product_skus.uniq!
+    product_skus.uniq!{|a|a.id}
     @result.total = product_skus.count
     @result.save
     
@@ -109,5 +109,6 @@ class ResultsController < ApplicationController
   def commit
     @result = Result.find(params[:id])
     Product.create_from_result(@result.id)
+    redirect_to '/results'
   end
 end

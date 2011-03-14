@@ -196,10 +196,15 @@ $(document).ready(function(){
 			myurl = "/scraping_corrections/" + t.siblings(".parsed").attr("data-sc") + "/edit";
 		}
 		else {
+			elem = t.parents(".contentholder").siblings(".edit_rule_dropdown"); //Single rule definition
+			if (! elem.length > 0) {
+				//Combined for all rules, chooses the first one as id
+				elem = t.parents(".contentholder").parent().find(".edit_rule_dropdown");
+			}
 			params = {"sc[product_id]" : t.siblings(".expandable_sku").attr('data-id'),
-				"sc[product_type]" : t.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-pt"),
+				"sc[product_type]" : elem.attr("data-pt"),
 				"sc[raw]" : t.siblings(".raw").html(),
-				"sc[scraping_rule_id]" : t.parents(".contentholder").siblings(".edit_rule_dropdown").attr("data-id")};
+				"sc[scraping_rule_id]" : elem.attr("data-id")};
 			
 			for (var i in params)
 			{

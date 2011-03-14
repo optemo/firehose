@@ -4,7 +4,8 @@ Firehose::Application.configure do
   # The production environment is meant for finished, "live" apps.
   # Code is not reloaded between requests
   config.cache_classes = true
-  config.cache_store = :mem_cache_store, '127.0.0.1:11211'
+  config.cache_store = :dalli_store, '127.0.0.1:11211',
+      { :namespace => "OPTEMO_DISCOVERY", :expires_in => 86400, :compress => true, :compress_threshold => 64*1024 }
 
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false
@@ -47,4 +48,12 @@ Firehose::Application.configure do
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
+end
+
+#create a new connection to memcached for forked processes, as a forked process will by default share file descriptors with its parent
+if defined?(PhusionPassenger)
+  PhusionPassenger.on_event(:starting_worker_process) do |forked|
+    # Only works with DalliStore
+    Rails.cache.reset if forked
+  end
 end

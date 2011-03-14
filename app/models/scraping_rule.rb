@@ -12,27 +12,36 @@ class ScrapingRule < ActiveRecord::Base
     #Return type: Array of candidates
     candidates = []
     ids = [ids] unless ids.kind_of? Array
-    ids.each do |id|
+    ids.each do |bbproduct|
       begin
-        raw_info = BestBuyApi.product_search(id)
+        raw_info = BestBuyApi.product_search(bbproduct.id)
       rescue BestBuyApi::RequestError
         #Try the request without including extra info
         begin
-          raw_info = BestBuyApi.product_search(id,false)
+          raw_info = BestBuyApi.product_search(bbproduct.id,false)
         rescue BestBuyApi::RequestError
           next
         end
       end
       unless raw_info.nil?
-        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(id,Session.product_type)
+        #Insert category id spec
+        raw_info["category_id"] = bbproduct.category
+        corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(bbproduct.id,Session.product_type)
         rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
         rules.each do |r|
-          #Find content based on . seperated hierarchical description
-          identifiers = r.remote_featurename.split(".")
-          raw = raw_info
           #Traverse the hash hierarchy
-          identifiers.each {|i| raw = raw[i] unless raw.nil?}
-          raw = "" unless raw
+          if r.remote_featurename[/specs\./]
+            identifiers = r.remote_featurename.split(".")
+            if raw_info["specs"]
+              raw = raw_info["specs"].select do |spec|
+                debugger if spec.nil? || identifiers.nil?
+                spec["group"] == identifiers[1] && spec["name"] == identifiers[2]
+              end.first
+              raw = raw["value"] unless raw.nil?
+            end
+          else
+            raw = raw_info[r.remote_featurename]
+          end
           corr = corrections.select{|c|c.scraping_rule_id == r.id && c.raw == raw.to_s}.first
           if corr
             parsed = corr.corrected
@@ -72,7 +81,7 @@ class ScrapingRule < ActiveRecord::Base
             delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
           end
           #Save the new candidate
-          candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
+          candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
         end
       end
       ret_raw = raw_info if ret_raw == true

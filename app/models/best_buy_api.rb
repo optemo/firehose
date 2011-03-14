@@ -2,15 +2,15 @@ class BestBuyApi
   class RequestError < StandardError; end
   class FeedDownError < StandardError; end
   class << self
-    BESTBUY_URL = "http://www.bestbuy.ca/en-CA/api"
+    BESTBUY_URL = "http://www.bestbuy.ca/api/v2"
     DEBUG = false
     
     #Find BestBuy products
     def product_search(id, includeall = true)
       if includeall
-        cached_request('product',{:id => id, :Include => "all"})["product"] 
+        cached_request('product',{:id => id, :include => "all"})
       else
-        cached_request('product',{:id => id})["product"]
+        cached_request('product',{:id => id})
       end
       # From the BestBuy API documentation, use &Include=media and/or any of the following: 
       # relations,description,availability,all (in comma-separated format as a URL parameter)
@@ -27,37 +27,53 @@ class BestBuyApi
     
     #Find all the products in a category
     def listing(id,page=1)
-      cached_request('search',{:'categoryPath.id' => id},page)
+      cached_request('search',{:page => page, :categoryid => id})
+    end
+    
+    def some_ids(id)
+      #This can accept an array or a single id
+      id = [id] unless id.class == Array
+      ids = []
+      total = 0
+      id.each do |my_id|
+        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
+        total += res["total"]
+        ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
+      end
+      [ids,total]
     end
     
     def category_ids(id)
-      #pageSize is set to 10000 results, so there should only be one page, as their pagination has some bugs in it
+      #This can accept an array or a single id
+      id = [id] unless id.class == Array
       ids = []
-      page = 1
-      totalpages = nil
-      while (page == 1 || page <= totalpages)
-        res = cached_request('search',{:'categoryPath.id' => id},page)
-        totalpages ||= res["totalPages"]
-        ids += res["products"].map{|p|p["sku"]}
-        page += 1
-        #sleep 1 No need for waiting
+      id.each do |my_id|
+        page = 1
+        totalpages = nil
+        while (page == 1 || page <= totalpages)
+          res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
+          totalpages ||= res["totalPages"]
+          ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
+          page += 1
+          #sleep 1 No need for waiting
+        end
       end
       ids
     end
     
     def search(string,page=1)
-      cached_request('search',{:name => string},page)
+      cached_request('search',{:page => page,:name => string})
     end
 
-    def cached_request(type, opts, page=1)
-      #CachingMemcached.cache_lookup(type + opts.to_s + page.to_s) do
-        send_request(type, opts, page)
-      #end
+    def cached_request(type, params = {})
+      CachingMemcached.cache_lookup(type + params.to_s) do
+        send_request(type, params)
+      end
     end
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
-    def send_request(type,opts,page=1)
-      request_url = prepare_url(type,{:page => page},opts)
+    def send_request(type,params)
+      request_url = prepare_url(type,params)
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
       unless res.kind_of? Net::HTTPSuccess
@@ -83,24 +99,19 @@ class BestBuyApi
       end
       
     private 
-      def prepare_url(type, opts, filters)
+      def prepare_url(type, params)
         qs = '' #options
         qf = '' #filters
         sf = '' #store filters
-        opts.each {|k,v|
-          next unless v
+        params.each {|k,v|
+          next unless v && k != :id
           v = v.join(',') if v.is_a? Array
           qs << "&#{k.to_s}=#{URI.encode(v.to_s)}"
         }
-        filters.each {|k,v|
-          qf = "#{k}=#{v}"
-        } unless filters.nil?
-        if type == "search"
-            "#{BESTBUY_URL}/search/products(#{qf})?pageSize=10000#{qs}" #Search for products in certain stores
+        if params[:id]
+            "#{BESTBUY_URL}/json/#{type}/#{params[:id]}?#{qs}"
         else
-            return_url = "#{BESTBUY_URL}/#{type}/#{filters[:id]}.aspx"
-            return_url << "?Include=#{filters[:Include]}" if filters[:Include]
-            return_url
+            "#{BESTBUY_URL}/json/#{type}?#{qs}"
         end
       end
    end
