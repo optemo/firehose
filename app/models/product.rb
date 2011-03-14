@@ -210,8 +210,7 @@ class Product < ActiveRecord::Base
   
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
-    if f=="brand" 
-      debugger
+    if f=="brand"
      if Session.prefered[f].include?(fVal) 
        return 1 
      else 

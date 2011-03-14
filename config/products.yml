@@ -7,54 +7,59 @@
 
 ####Spaces are required between elements in an array
 
-
-bestbuy:
-    product_type: camera_bestbuy
+camera_bestbuy:
+    url: 
+        bestbuy: 12
     category_id: [20218] #[20218, 29157, 29259] #Point and Shoot, DSLR, Compact Sys
     layout: assist
-    price:
-        feature_type: Continuous
-        used_for: [filter, cluster, show]
-        prefdir: -1
-        min: 1
-        max: 10000
-    maxresolution: 
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    screensize:
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    opticalzoom:
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    brand:
-        feature_type: Categorical
-        used_for: [filter, show]
-        prefered: [Canon, Sony, Nikon] 
+    specs:
+        General:
+            price:
+                type: Continuous
+                used_for: [filter, cluster, show]
+                prefdir: -1
+                min: 1
+                max: 10000
+            maxresolution: 
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            screensize:
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            opticalzoom:
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            brand:
+                type: Categorical
+                used_for: [filter, show]
+                prefered: [Canon, Sony, Nikon] 
 
 # 29171  --  this is a small subset of cameras, with faster scraping & lower load for testing
-besttv:
-    product_type: tv_bestbuy
-    category_id: 21344
+tv_bestbuy:
+    url: 
+        besttv: 12
+    category_id: [21344]
     layout: assist
-    price:
-        feature_type: Continuous
-        used_for: [filter, cluster, show]
-        prefdir: -1
-        min: 1
-        max: 10000
-    maxresolution: 
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    screensize:
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    power:
-        feature_type: Continuous
-        used_for: [desc, filter, cluster, show]
-    brand:
-        feature_type: Categorical
-        used_for: [filter, show]
-    displaytech:
-        feature_type: Categorical
-        used_for: [filter, show]
+    specs:
+        General:
+            price:
+                type: Continuous
+                used_for: [filter, cluster, show]
+                prefdir: -1
+                min: 1
+                max: 10000
+            maxresolution: 
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            screensize:
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            power:
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            brand:
+                type: Categorical
+                used_for: [filter, show]
+            displaytech:
+                type: Categorical
+                used_for: [filter, show]
