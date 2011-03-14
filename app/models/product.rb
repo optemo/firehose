@@ -178,7 +178,7 @@ class Product < ActiveRecord::Base
       records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
       record_vals[f] ||= records[f].values.map{|i|i.first.value}
       factors[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
-      factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => s.product_type, :name => f+"_factor")
+      factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
       fVal = records[f][product.id].first
       debugger unless fVal && fVal.value # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
       factorRow.value = Product.calculateFactor(fVal.value, f, record_vals[f])
