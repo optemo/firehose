@@ -206,21 +206,20 @@ class Product < ActiveRecord::Base
   
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
+    val = 0
     if f=="brand" 
-      debugger
      if Session.prefered[f].include?(fVal) 
-       return 1 
-     else 
-       return 0
-     end 
+       val=  0.1 
+     end
     else  
       ordered = contspecs.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
       return 0 if Session.prefDirection[f] == 0
       pos = ordered.index(fVal)
       len = ordered.length
-      (len - pos)/len.to_f
+      val = (len - pos)*0.33/len.to_f 
     end
+    val
   end  
 end
 class ValidationError < ArgumentError; end
