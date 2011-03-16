@@ -52,6 +52,7 @@ class Product < ActiveRecord::Base
     Session.binary["filter"].map{|f|"id in (select product_id from bin_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
     Session.categorical["filter"].map{|f|"id in (select product_id from cat_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}).join(" and ")}
   }
+  scope :current_type, :conditions => {:product_type => Session.product_type}
     
   def brand
     @brand ||= cat_specs.cache_all(id)["brand"]
@@ -160,7 +161,7 @@ class Product < ActiveRecord::Base
     records = {}
     record_vals = {}
     factors = {}
-    all_products = Product.instock
+    all_products = Product.instock.current_type
     all_products.each do |product|
       utility = []
       (Session.continuous["cluster"]+["brand"]).each do |f|
@@ -201,7 +202,7 @@ class Product < ActiveRecord::Base
     initial_products_id = Product.initial
     SearchProduct.delete_all(["search_id = ?",initial_products_id])
     SearchProduct.transaction do
-      Product.instock.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
+      Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
     end
   end
   
