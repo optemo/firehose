@@ -213,18 +213,17 @@ class Product < ActiveRecord::Base
     return nil if fVal.nil? #Don't process nil vlues
     if f=="brand"
      if Session.prefered[f].include?(fVal) 
-       return 1 
-     else 
-       return 0
-     end 
+       val=  1 
+     end
     else  
       ordered = contspecs.compact.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
       return 0 if Session.prefDirection[f] == 0
       pos = ordered.index(fVal)
       len = ordered.length
-      (len - pos)/len.to_f
+      val = (len - pos)*0.33/len.to_f 
     end
+    val
   end  
 end
 class ValidationError < ArgumentError; end
