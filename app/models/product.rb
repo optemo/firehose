@@ -167,13 +167,11 @@ class Product < ActiveRecord::Base
       (Session.continuous["cluster"]+["brand"]).each do |f|
         if f=="brand"
           records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-          record_vals[f] ||= records[f].values.map{|i|i.first.value}
-          factors[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
         else  
           records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-          record_vals[f] ||= records[f].values.map{|i|i.first.value}
-          factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
         end
+        record_vals[f] ||= records[f].values.map{|i|i.first.value}
+        factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
         factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
         if records[f][product.id]
           fVal = records[f][product.id].first.value
@@ -221,7 +219,7 @@ class Product < ActiveRecord::Base
       return 0 if Session.prefDirection[f] == 0
       pos = ordered.index(fVal)
       len = ordered.length
-      val = (len - pos)*0.33/len.to_f 
+      val = (len - pos)/len.to_f 
     end
     val
   end  
