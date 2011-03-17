@@ -3,7 +3,7 @@
 desc "Process product relationships and fill up prduct siblings table"
 task :upkeep => :environment do
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
+  unless ENV.include?("url") && (Session.new(ENV["url"]))
      raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
   end
   Result.upkeep_pre
@@ -18,7 +18,7 @@ end
 desc "Process product relationships and fill up prduct siblings table"
 task :bundles => :environment do
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
+  unless ENV.include?("url") && (Session.new(ENV["url"]))
      raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
   end
   Result.find_bundles
@@ -28,7 +28,7 @@ end
 desc "Set performance factors"
 task :set_performance_scores => :environment do 
   file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"])) && file[ENV["url"]]
+  unless ENV.include?("url") && (Session.new(ENV["url"]))
      raise "usage: rake set_performance_scores url=? # url is a valid url from products.yml; sets product_type."
   end
 

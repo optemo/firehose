@@ -160,7 +160,7 @@ class Product < ActiveRecord::Base
     records = {}
     record_vals = {}
     factors = {}
-    all_products = Product.valid.instock
+    all_products = Product.instock
     all_products.each do |product|
       utility = []
       (Session.continuous["cluster"]+["brand"]).each do |f|
@@ -174,10 +174,13 @@ class Product < ActiveRecord::Base
           factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
         end
         factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
-        fVal = records[f][product.id].first
-        debugger unless fVal && fVal.value # The alternative here is to crash. This should never happen if Product.valid.instock is doing its job.
-        factorRow.value = Product.calculateFactor(fVal.value, f, record_vals[f])
-        utility << factorRow.value
+        if records[f][product.id]
+          fVal = records[f][product.id].first.value
+        else
+          fVal = nil
+        end
+        factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
+        utility << factorRow.value if factorRow.value
         cont_activerecords << factorRow
       end
       
@@ -198,7 +201,7 @@ class Product < ActiveRecord::Base
     initial_products_id = Product.initial
     SearchProduct.delete_all(["search_id = ?",initial_products_id])
     SearchProduct.transaction do
-      Product.valid.instock.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
+      Product.instock.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
     end
   end
   
@@ -206,13 +209,13 @@ class Product < ActiveRecord::Base
   
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
-    val = 0
-    if f=="brand" 
+    return nil if fVal.nil? #Don't process nil vlues
+    if f=="brand"
      if Session.prefered[f].include?(fVal) 
-       val=  0.1 
+       val=  1 
      end
     else  
-      ordered = contspecs.sort
+      ordered = contspecs.compact.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
       return 0 if Session.prefDirection[f] == 0
       pos = ordered.index(fVal)
