@@ -179,7 +179,7 @@ class Product < ActiveRecord::Base
           fVal = nil
         end
         factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
-        utility << factorRow.value if factorRow.value
+        utility << factorRow.value*Session.utility_weight[f] if factorRow.value
         cont_activerecords << factorRow
       end
       
@@ -211,7 +211,9 @@ class Product < ActiveRecord::Base
     return nil if fVal.nil? #Don't process nil vlues
     if f=="brand"
      if Session.prefered[f].include?(fVal) 
-       val=  1 
+       val=  1
+     else
+       val = 0  
      end
     else  
       ordered = contspecs.compact.sort
@@ -222,6 +224,10 @@ class Product < ActiveRecord::Base
       val = (len - pos)/len.to_f 
     end
     val
+  end  
+  
+  def 
+    
   end  
 end
 class ValidationError < ArgumentError; end

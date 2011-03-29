@@ -9,8 +9,10 @@
 
 camera_bestbuy:
     url: 
+        localhost: 12
         bestbuy: 12
-    category_id: [20218] #[20218, 29157, 29259] #Point and Shoot, DSLR, Compact Sys
+        ilovecameras: 12
+        ilovecameras.optemo.com: 12
     layout: assist
     specs:
         General:
@@ -20,19 +22,83 @@ camera_bestbuy:
                 prefdir: -1
                 min: 1
                 max: 10000
+                utility: 5
+                cluster: 5
             maxresolution: 
                 type: Continuous
                 used_for: [desc, filter, cluster, show]
+                utility: 5 
+                cluster: 5 
             screensize:
                 type: Continuous
-                used_for: [desc, filter, cluster, show]
+                used_for: [desc, filter, show]
             opticalzoom:
                 type: Continuous
                 used_for: [desc, filter, cluster, show]
+                utility: 5
+                cluster: 5    
             brand:
                 type: Categorical
-                used_for: [filter, show]
+                used_for: [show, filter, cluster]
+                utility: 5
                 prefered: [Canon, Sony, Nikon] 
+            color:
+                type: Categorical
+                used_for: [show, filter]
+            customerRating:
+                type: Continuous
+                used_for: [show]
+        Status:
+            onsale:
+                type: Binary
+                used_for: [filter]
+            isClearance:
+                type: Binary
+                used_for: [filter]
+            isOnlineOnly:
+                type: Binary
+                used_for: [filter]
+            toprated:
+                type: Binary
+                used_for: [filter]
+        Video Resolution:
+            videoresolution720:
+                type: Binary
+                used_for: [filter]
+            videoresolution1080:
+                type: Binary
+                used_for: [filter]
+        New Technology:
+            hdmi:
+                type: Binary
+                used_for: [filter]
+            touchscreen:
+                type: Binary
+                used_for: [filter]
+            imagestabilization:
+                type: Binary
+                used_for: [filter]
+            waterproof:
+                type: Binary
+                used_for: [show, filter]
+            oled:
+                type: Binary
+                used_for: [filter]
+            gps:
+                type: Binary
+                used_for: [show, filter]
+            projector:
+                type: Binary
+                used_for: [show, filter]
+            3d:
+                type: Binary
+                used_for: [show, filter]
+            sweeppanorama:
+                type: Binary
+                used_for: [show, filter]
+            frontlcd:
+                type: Binary
+                used_for: [show, filter]
 
 # 29171  --  this is a small subset of cameras, with faster scraping & lower load for testing
 tv_bestbuy:
