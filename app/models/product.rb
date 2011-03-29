@@ -170,17 +170,15 @@ class Product < ActiveRecord::Base
         else  
           records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
         end
-        record_vals[f] ||= records[f].values.map{|i|i.first.value}
-        factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
         if records[f][product.id]
-          fVal = records[f][product.id].first.value
-        else
-          fVal = nil
+          record_vals[f] ||= records[f].values.map{|i|i.first.value}
+          factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
+          factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
+          fVal = records[f][product.id].first.value 
+          factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
+          utility << factorRow.value if factorRow.value
+          cont_activerecords << factorRow if factorRow.value
         end
-        factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
-        utility << factorRow.value if factorRow.value
-        cont_activerecords << factorRow
       end
       
       
