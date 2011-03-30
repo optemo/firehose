@@ -218,11 +218,7 @@ class Product < ActiveRecord::Base
     # Order the feature values, reversed to give the highest value to duplicates
     return nil if fVal.nil? #Don't process nil vlues
     if f=="brand"
-     if Session.prefered[f].include?(fVal) 
-       val=  1
-     else
-       val = 0  
-     end
+     Session.prefered[f].include?(fVal) ? val=  1 : val = 0  
     else  
       ordered = contspecs.compact.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
