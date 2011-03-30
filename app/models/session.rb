@@ -2,8 +2,8 @@ class Session
   # products.yml gets parsed below, initializing these variables.
   cattr_accessor :id, :search  # Basic individual data. These are not set in initialization.
   cattr_accessor :directLayout, :mobileView  # View choice (Assist vs. Direct, mobile view vs. computer view)
-  cattr_accessor :continuous, :binary, :categorical, :binarygroup, :prefered  # Caching of features' names
-  cattr_accessor :prefDirection, :maximum, :minimum, :utility_weight, :cluster_weight  # Stores which preferences are 'lower is better' vs. normal; used in sorting, plus some attribute globals
+  cattr_accessor :continuous, :binary, :categorical, :binarygroup, :prefered, :utility  # Caching of features' names
+  cattr_accessor :prefDirection, :maximum, :minimum, :utility_weights, :cluster_weights  # Stores which preferences are 'lower is better' vs. normal; used in sorting, plus some attribute globals
   cattr_accessor :dragAndDropEnabled, :relativeDescriptions, :numGroups  # These flags should probably be stripped back out of the code eventually
   cattr_accessor :product_type # Product type (camera_us, etc.), used everywhere
   cattr_accessor :piwikSiteId # Piwik Site ID, as configured in the currently-running Piwik install.
@@ -26,8 +26,9 @@ class Session
     self.categorical = Hash.new{|h,k| h[k] = []}
     self.binarygroup = Hash.new{|h,k| h[k] = []}
     self.prefered = Hash.new{|h,k| h[k] = []}
-    self.utility_weight = Hash.new(1)
-    self.cluster_weight = Hash.new(1)
+    self.utility = Hash.new{|h,k| h[k] = []} 
+    self.utility_weights = Hash.new(1)
+    self.cluster_weights = Hash.new(1)
     file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
     file.each_pair do |product_type,d|
       if d["url"].keys.include? url
@@ -66,11 +67,11 @@ class Session
         when "Categorical"
           atts["used_for"].each{|flag| self.categorical[flag] << feature}
           self.categorical["all"] << feature #Keep track of all features
-          self.prefered[feature] = atts["prefered"] if atts["prefered"]
+          self.prefered[feature] = atts["prefered"] if atts["prefered"]  
         end
-         self.utility_weight[feature] = atts["utility"] if atts["utility"]
+         self.utility_weights[feature] = atts["utility"] if atts["utility"]
          self.utility["all"]<<feature if atts["utility"]
-         self.cluster_weight[feature] = atts["cluster"] if atts["cluster"]
+         self.cluster_weights[feature] = atts["cluster"] if atts["cluster"]
       end
      
     end

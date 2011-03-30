@@ -1,3 +1,4 @@
+require 'ruby-debug'
 class Product < ActiveRecord::Base
   has_many :cat_specs
   has_many :bin_specs
@@ -164,26 +165,22 @@ class Product < ActiveRecord::Base
     all_products = Product.instock.current_type
     all_products.each do |product|
       utility = []
-      (Session.continuous["cluster"]+["brand"]).each do |f|
+      (Session.utility["all"]).each do |f|
         if f=="brand"
           records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
         else  
           records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
         end
-        record_vals[f] ||= records[f].values.map{|i|i.first.value}
-        factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
         if records[f][product.id]
-          fVal = records[f][product.id].first.value
-        else
-          fVal = nil
+          record_vals[f] ||= records[f].values.map{|i|i.first.value}
+          factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
+          factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
+          fVal = records[f][product.id].first.value 
+          factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
+          utility << factorRow.value*Product.utility_weights(f) if factorRow.value
+          cont_activerecords << factorRow if factorRow.value
         end
-        factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
-        utility << factorRow.value*Session.utility_weight[f] if factorRow.value
-        cont_activerecords << factorRow
-      end
-      
-      
+      end 
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
       product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
@@ -204,7 +201,17 @@ class Product < ActiveRecord::Base
     end
   end
   
+  
   private
+  
+  def self.utility_weights(feature)
+    unless @utility_weights
+      util_sum = Session.utility_weights.map{|k,v| v }.sum.to_f
+      @utility_weights = {}
+      Session.utility["all"].each{|f| @utility_weights[f]=Session.utility_weights[f]/util_sum if Session.utility_weights[f]}
+    end  
+    @utility_weights[feature]
+  end
   
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
@@ -225,9 +232,6 @@ class Product < ActiveRecord::Base
     end
     val
   end  
-  
-  def 
-    
-  end  
+      
 end
 class ValidationError < ArgumentError; end
