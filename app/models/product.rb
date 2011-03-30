@@ -1,4 +1,3 @@
-require 'ruby-debug'
 class Product < ActiveRecord::Base
   has_many :cat_specs
   has_many :bin_specs
@@ -166,10 +165,12 @@ class Product < ActiveRecord::Base
     all_products.each do |product|
       utility = []
       (Session.utility["all"]).each do |f|
-        if f=="brand"
+        if Session.categorical["all"].include?(f)
           records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-        else  
+        elsif Session.continuous["all"].include?(f)
           records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
+        else
+          raise ValidationError  
         end
         if records[f][product.id]
           record_vals[f] ||= records[f].values.map{|i|i.first.value}
@@ -206,8 +207,8 @@ class Product < ActiveRecord::Base
   
   def self.utility_weights(feature)
     unless @utility_weights
-      util_sum = Session.utility_weights.map{|k,v| v }.sum.to_f
       @utility_weights = {}
+      util_sum = Session.utility_weights.map{|k,v| v }.sum.to_f
       Session.utility["all"].each{|f| @utility_weights[f]=Session.utility_weights[f]/util_sum if Session.utility_weights[f]}
     end  
     @utility_weights[feature]
