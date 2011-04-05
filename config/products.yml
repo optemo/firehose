@@ -14,6 +14,7 @@ camera_bestbuy:
         ilovecameras: 12
         ilovecameras.optemo.com: 12
     layout: assist
+    category_id: [20218] #[20218, 29157, 29259] #Point and Shoot, DSLR, Compact Sys
     specs:
         General:
             price:
