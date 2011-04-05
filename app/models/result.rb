@@ -31,7 +31,7 @@ class Result < ActiveRecord::Base
   
   def self.upkeep_pre
     #Calculate optical zoom for SLR cameras
-    Product.instock.each do |p|
+    Product.current_type.instock.each do |p|
       next if ContSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"opticalzoom")
       lensrange = CatSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"lensrange")
       if lensrange
@@ -46,14 +46,17 @@ class Result < ActiveRecord::Base
   def self.upkeep_post
     #Set onsale binary because it's not in the feed
     binspecs = []
-    Product.valid.instock.each do |product|
-      binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
+    Product.current_type.instock.each do |product|
       if ContSpec.find_by_product_id_and_name_and_product_type(product.id,"price",Session.product_type).value > ContSpec.find_by_product_id_and_name_and_product_type(product.id,"saleprice",Session.product_type).value
+        binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
         binspec.value = true
+        binspecs << binspec
       else
-        binspec.value = false
+        #Remove sale item if it is there
+        binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type)
+        binspec.destroy if binspec
       end
-      binspecs << binspec
+      
     end
     BinSpec.transaction do
       binspecs.each(&:save)
@@ -62,7 +65,7 @@ class Result < ActiveRecord::Base
   end
   
   def self.find_bundles
-    Product.instock.each do |p|
+    Product.current_type.instock.each do |p|
       bundle = TextSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"bundle")
       if bundle
         data = JSON.parse(bundle.value.gsub("=>",":"))

@@ -3,7 +3,7 @@ class ProductSiblings < ActiveRecord::Base
   def self.get_relations
     s=Session
     ProductSiblings.delete_all(["name = 'imgsurl' and product_type = ?", s.product_type]) #switch it to updating
-    all_products = Product.instock
+    all_products = Product.instock.current_type
     siblings_activerecords = []
     TextSpec.where(["product_id IN (?) and name= ?", all_products, "relations"]).each do |record|
       data = JSON.parse(record.value.gsub("=>",":"))
