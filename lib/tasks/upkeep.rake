@@ -12,6 +12,7 @@ task :upkeep => :environment do
   #Get the color relationships loaded
   ProductSiblings.get_relations
   Result.upkeep_post
+  ProductSiblings.get_relations
 end
 
 #Here is where general upkeep scripts are
