@@ -64,6 +64,7 @@ class Session
         when "Binary"
           atts["used_for"].each{|flag| self.binary[flag] << feature; self.binarygroup[heading] << feature if flag == "filter"}
           self.binary["all"] << feature #Keep track of all features
+          self.prefered[feature] = atts["prefered"] if atts["prefered"]
         when "Categorical"
           atts["used_for"].each{|flag| self.categorical[flag] << feature}
           self.categorical["all"] << feature #Keep track of all features

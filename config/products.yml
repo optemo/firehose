@@ -53,6 +53,8 @@ camera_bestbuy:
             onsale:
                 type: Binary
                 used_for: [filter]
+                utility: 10
+                prefered: true
             isClearance:
                 type: Binary
                 used_for: [filter]
