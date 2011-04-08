@@ -13,6 +13,7 @@ class ScrapingRule < ActiveRecord::Base
     candidates = []
     ids = [ids] unless ids.kind_of? Array
     ids.each do |bbproduct|
+      raw_return = nil
       ["English","French"].each do |language|
         begin
           raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
@@ -86,7 +87,12 @@ class ScrapingRule < ActiveRecord::Base
             candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r.id, :product_id => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
           end
         end
-        ret_raw = raw_info if ret_raw == true #Return the raw info only on the first pass
+        #Return the raw info only on the first pass
+        raw_return = raw_info if language == "English" && ret_raw == true 
+        if language == "French" && ret_raw == true
+          raw_return["French Specs"] = raw_info["specs"]
+          ret_raw = raw_return
+        end
       end
     end
     if ret_raw
