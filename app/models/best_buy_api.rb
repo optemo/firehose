@@ -6,12 +6,13 @@ class BestBuyApi
     DEBUG = false
     
     #Find BestBuy products
-    def product_search(id, includeall = true)
+    def product_search(id, includeall = true, english = true)
+      q = english ? {} : {:lang => "fr"}
+      q[:id] = id
       if includeall
-        cached_request('product',{:id => id, :include => "all"})
-      else
-        cached_request('product',{:id => id})
+        q[:include] = "all"
       end
+      cached_request('product',q)
       # From the BestBuy API documentation, use &Include=media and/or any of the following: 
       # relations,description,availability,all (in comma-separated format as a URL parameter)
     end

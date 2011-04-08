@@ -5,15 +5,17 @@
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "cat", :class => "required") %> Cat</div>
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "bin", :class => "required") %> Bin</div>
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "text", :class => "required") %> Text</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "intr", :class => "required") %> Intr</div><br/>
-  <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %><br/>
-  <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %><br/>
-  <%= f.label :regex, "Regular Expression" %> <%= f.text_field(:regex, :size => 35, :class => "required regexp") %><br/>
-  <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %><br/>
-  <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %><br/>
-  <%= f.label :valid_inputs, "Valid Inputs (comma separate)" %> <%= f.text_field(:valid_inputs, :size => 35) %><br/>
-  <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id %>
+  <div class="rule_type_button"><%= f.radio_button(:rule_type, "intr", :class => "required") %> Intr</div>
+  <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %>
+  <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %>
+  <%= f.label :regex, "Regular Expression" %> <%= f.text_field(:regex, :size => 35, :class => "required regexp") %>
+  <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %>
+  <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %>
+  <%= f.label :valid_inputs, "Valid Inputs \n(, seperated)" %> <%= f.text_field(:valid_inputs, :size => 35) %>
+<%= f.label :french, "French" %>
+<%= f.check_box(:french) %>
+  <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id, :style => "clear: left; margin-left: 200px" %>
   <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
-  <p style="float: left; margin-bottom: 0">For the valid inputs field use the '*' as a separator.</p>
+  <p style="float: left; margin-bottom: 0">For the valid inputs field use the ',' as a separator.</p>
   </fieldset>
 <% end %>

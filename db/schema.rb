@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110301210621) do
+ActiveRecord::Schema.define(:version => 20110408002157) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -132,6 +132,7 @@ ActiveRecord::Schema.define(:version => 20110301210621) do
     t.string  "rule_type"
     t.boolean "active",             :default => true
     t.integer "priority",           :default => 0
+    t.boolean "french",             :default => false
   end
 
   create_table "search_products", :force => true do |t|
@@ -153,6 +154,7 @@ ActiveRecord::Schema.define(:version => 20110301210621) do
     t.text     "searchpids"
     t.string   "searchterm"
     t.string   "sortby"
+    t.string   "seesim"
   end
 
   create_table "surveys", :force => true do |t|
