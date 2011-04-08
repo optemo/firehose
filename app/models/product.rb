@@ -1,3 +1,4 @@
+require 'ruby-debug'
 class Product < ActiveRecord::Base
   has_many :cat_specs
   has_many :bin_specs
@@ -169,7 +170,9 @@ class Product < ActiveRecord::Base
           records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
         elsif Session.continuous["all"].include?(f)
           records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-        else
+        elsif Session.binary["all"].include?(f)
+          records[f] ||= BinSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
+        else  
           raise ValidationError  
         end
         if records[f][product.id]
@@ -217,8 +220,10 @@ class Product < ActiveRecord::Base
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
     return nil if fVal.nil? #Don't process nil vlues
-    if f=="brand"
+    if f=="brand" # should generalize it 
      Session.prefered[f].include?(fVal) ? val=  1 : val = 0  
+    elsif f=="onsale" #should generalize it 
+      Session.prefered[f] == fVal ? val = 1 : val =0
     else  
       ordered = contspecs.compact.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
