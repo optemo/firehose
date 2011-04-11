@@ -3,7 +3,7 @@ class ScrapingRulesController < ApplicationController
   def new
     @raw = params[:raw]
     #Fix utf-8 encoding
-    params[:rule][:remote_featurename] = CGI::unescape(params[:rule][:remote_featurename])
+    params[:rule][:remote_featurename] = CGI::unescape(params[:rule][:remote_featurename]) if params[:rule][:remote_featurename]
     @scraping_rule = ScrapingRule.new(params[:rule])
   end
   
