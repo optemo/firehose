@@ -81,7 +81,7 @@ task :warmupserver do
 end
 
 # redopermissions is last, so that if it fails due to the searchd pid, no other tasks get blocked
-after :deploy, "update_code"
-after :update_code, "serversetup"
-after :serversetup, "redopermissions"
+after :deploy, "serversetup"
+after :serversetup, "update_code"
+after :update_code, "redopermissions"
 after :redopermissions, "warmupserver"
