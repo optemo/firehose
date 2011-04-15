@@ -49,7 +49,7 @@ class Session
 
     # Check for what Piwik site ID to put down in the optemo.html.erb layout
     # These site ids MUST match what's in the piwik database.
-    self.piwikSiteId = product_yml["url"][self.product_type] || 10 # This is a catch-all for testing sites.
+    self.piwikSiteId = product_yml["url"][url] || 10 # This is a catch-all for testing sites.
 
     # This block gets out the continuous, binary, and categorical features
     product_yml["specs"].each_pair do |heading, specs|

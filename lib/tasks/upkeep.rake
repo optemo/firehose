@@ -15,6 +15,13 @@ task :upkeep => :environment do
   ProductSiblings.get_relations
 end
 
+desc "Update data automatically"
+task :update => :environment do
+  Session.new #Initialize the session
+  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml).create_from_current
+  Product.create_from_result(result.id)
+end
+
 #Here is where general upkeep scripts are
 desc "Process product relationships and fill up prduct siblings table"
 task :bundles => :environment do
