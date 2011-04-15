@@ -30,12 +30,12 @@ class Result < ActiveRecord::Base
   end
   
   def create_from_current
-    scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+    self.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
     raise ValidationError unless category
     product_skus = BestBuyApi.category_ids(YAML.load(category))
-    nonuniq = product_skus.count
+    self.nonuniq = product_skus.count
     product_skus.uniq!{|a|a.id}
-    total = product_skus.count
+    self.total = product_skus.count
     save
     
     # Make sure each rule knows which results it is part of
