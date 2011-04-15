@@ -18,7 +18,8 @@ end
 desc "Update data automatically"
 task :update => :environment do
   Session.new #Initialize the session
-  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml).create_from_current
+  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
+  result.create_from_current
   Product.create_from_result(result.id)
 end
 
