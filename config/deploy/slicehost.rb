@@ -31,4 +31,6 @@ role :db,  domain, :primary => true
 
 task :restartmemcached do
   run "rake -f #{current_path}/Rakefile cache:clear RAILS_ENV=production"
+  #Warm up server
+  run "curl -A 'Java' localhost > /dev/null"
 end
