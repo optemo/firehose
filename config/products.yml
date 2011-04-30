@@ -37,7 +37,11 @@ camera_bestbuy:
                 type: Continuous
                 used_for: [desc, filter, cluster, show]
                 utility: 5
-                cluster: 5    
+                cluster: 5 
+            saleprice:
+                type: Continuous
+                used_for: []
+                utility: 10       
             brand:
                 type: Categorical
                 used_for: [show, filter, cluster]
@@ -53,8 +57,8 @@ camera_bestbuy:
             onsale:
                 type: Binary
                 used_for: [filter]
-                utility: 10
-                prefered: true
+                #utility: 10
+                #prefered: true
             isClearance:
                 type: Binary
                 used_for: [filter]

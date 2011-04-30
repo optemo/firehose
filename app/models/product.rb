@@ -180,7 +180,16 @@ class Product < ActiveRecord::Base
           factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
           factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
           fVal = records[f][product.id].first.value 
-          factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
+          if f=="saleprice"
+            ori_price = records["price"][product.id].first.value
+            factorRow.value = Product.calculateFactor_sale(ori_price, fVal)
+          elsif Session.continuous["all"].include?(f)
+            factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
+          elsif Session.categorical["all"].include?(f)  
+            factorRow.value = Product.calculateFactor_categorical(fVal, f)
+          else  
+            raise ValidationError  
+          end    
           utility << factorRow.value*Product.utility_weights(f) if factorRow.value
           cont_activerecords << factorRow if factorRow.value
         end
@@ -201,7 +210,7 @@ class Product < ActiveRecord::Base
     initial_products_id = Product.initial
     SearchProduct.delete_all(["search_id = ?",initial_products_id])
     SearchProduct.transaction do
-      Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
+    Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
     end
   end
   
@@ -220,20 +229,21 @@ class Product < ActiveRecord::Base
   def self.calculateFactor(fVal, f, contspecs)
     # Order the feature values, reversed to give the highest value to duplicates
     return nil if fVal.nil? #Don't process nil vlues
-    if f=="brand" # should generalize it 
-     Session.prefered[f].include?(fVal) ? val=  1 : val = 0  
-    elsif f=="onsale" #should generalize it 
-      Session.prefered[f] == fVal ? val = 1 : val =0
-    else  
       ordered = contspecs.compact.sort
       ordered = ordered.reverse if Session.prefDirection[f] == 1
       return 0 if Session.prefDirection[f] == 0
       pos = ordered.index(fVal)
       len = ordered.length
-      val = (len - pos)/len.to_f 
-    end
-    val
+      (len - pos)/len.to_f 
+  end
+  
+  def self.calculateFactor_categorical(fVal, f)
+     Session.prefered[f].include?(fVal) ? val=  1 : val = 0  
+     val
+  end   
+  
+  def self.calculateFactor_sale(fVal1, fVal2) 
+     fVal1 > fVal2 ? (fVal1-fVal2)/fVal1 : 0
   end  
-      
 end
 class ValidationError < ArgumentError; end
