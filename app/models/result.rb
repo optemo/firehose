@@ -29,6 +29,23 @@ class Result < ActiveRecord::Base
     destroy
   end
   
+  def create_from_current
+    self.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+    raise ValidationError unless category
+    product_skus = BestBuyApi.category_ids(YAML.load(category))
+    self.nonuniq = product_skus.count
+    product_skus.uniq!{|a|a.id}
+    self.total = product_skus.count
+    save
+    
+    # Make sure each rule knows which results it is part of
+    ScrapingRule.find_all_by_active(true).each {|r| r.results.push(self); r.save}
+    candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = id}
+    Candidate.transaction do
+      candidate_records.each(&:save)
+    end
+  end
+  
   def self.upkeep_pre
     #Calculate optical zoom for SLR cameras
     Product.current_type.instock.each do |p|

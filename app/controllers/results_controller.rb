@@ -51,20 +51,7 @@ class ResultsController < ApplicationController
   # POST /results.xml
   def create
     @result = Result.new(params[:result])
-    @result.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
-    raise ValidationError unless @result.category
-    product_skus = BestBuyApi.category_ids(YAML.load(@result.category))
-    @result.nonuniq = product_skus.count
-    product_skus.uniq!{|a|a.id}
-    @result.total = product_skus.count
-    @result.save
-    
-    # Make sure each rule knows which results it is part of
-    ScrapingRule.find_all_by_active(true).each {|r| r.results.push(@result); r.save}
-    candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = @result.id}
-    Candidate.transaction do
-      candidate_records.each(&:save)
-    end
+    @result.create_from_current
     
     respond_to do |format|
       if @result.save

@@ -53,7 +53,9 @@ class Product < ActiveRecord::Base
     Session.binary["filter"].map{|f|"id in (select product_id from bin_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
     Session.categorical["filter"].map{|f|"id in (select product_id from cat_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}).join(" and ")}
   }
-  scope :current_type, :conditions => {:product_type => Session.product_type}
+  scope :current_type, lambda {
+    {:conditions => {:product_type => Session.product_type}}
+  }
     
   def brand
     @brand ||= cat_specs.cache_all(id)["brand"]

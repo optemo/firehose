@@ -9,6 +9,7 @@
 
 camera_bestbuy:
     url: 
+        firhose: 12
         localhost: 12
         bestbuy: 12
         ilovecameras: 12

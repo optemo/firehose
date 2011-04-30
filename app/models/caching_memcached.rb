@@ -6,6 +6,7 @@ module CachingMemcached
         d[:createdAt] = Time.now if d.class == Hash
         d
       end
+      data = data.dup
       request_time = data.delete(:createdAt)
       debugger if request_time.nil?
       if (Time.now - request_time).to_f > 20 # If the data is over 20 hours old (ignoring the time zone issues, this should work every day)
