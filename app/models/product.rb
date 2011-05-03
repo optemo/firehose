@@ -165,6 +165,7 @@ class Product < ActiveRecord::Base
     record_vals = {}
     factors = {}
     all_products = Product.instock.current_type
+    prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
     all_products.each do |product|
       utility = []
       (Session.utility["all"]).each do |f|
@@ -182,9 +183,10 @@ class Product < ActiveRecord::Base
           factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
           factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
           fVal = records[f][product.id].first.value 
-          if f=="saleprice"
-            ori_price = records["price"][product.id].first.value
-            factorRow.value = Product.calculateFactor_sale(ori_price, fVal)
+          if f=="onsale"
+            ori_price = prices[product.id].first.value
+            sale_price = records["saleprice"][product.id].first.value
+            factorRow.value = Product.calculateFactor_sale(ori_price, sale_price)
           elsif Session.continuous["all"].include?(f)
             factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
           elsif Session.categorical["all"].include?(f)  
