@@ -18,7 +18,7 @@ camera_bestbuy:
     category_id: [20218] #[20218, 29157, 29259] #Point and Shoot, DSLR, Compact Sys
     specs:
         General:
-            price:
+            saleprice:
                 type: Continuous
                 used_for: [filter, cluster, show]
                 prefdir: -1
@@ -38,7 +38,7 @@ camera_bestbuy:
                 type: Continuous
                 used_for: [desc, filter, cluster, show]
                 utility: 5
-                cluster: 5    
+                cluster: 5 
             brand:
                 type: Categorical
                 used_for: [show, filter, cluster]
