@@ -17,10 +17,15 @@ end
 
 desc "Update data automatically"
 task :update => :environment do
-  Session.new #Initialize the session
-  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
-  result.create_from_current
-  Product.create_from_result(result.id)
+    Session.new #Initialize the session
+    result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
+    result.create_from_current
+    Product.create_from_result(result.id)
+    # for each product_type, clean up results and related candidates days ago
+    #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
+    Result.cleanupByProductType(Session.product_type, 3)
+    # clean up inactive scraping rules not used any more
+    ScrapingRule.cleanup
 end
 
 #Here is where general upkeep scripts are
