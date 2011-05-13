@@ -1,6 +1,5 @@
 class Result < ActiveRecord::Base
-  has_many :candidates
-  has_and_belongs_to_many :scraping_rules
+  has_many :candidates, :dependent=>:destroy
   
   def changes
     begin
@@ -16,21 +15,16 @@ class Result < ActiveRecord::Base
     "New: <span style='color: green'>[#{newproducts.join(" , ")}]</span> Removed: <span style='color: red'>[#{removedproducts.join(" , ")}]</span>"
   end
   
-  def remove
-    #Remove any associated candidates
-    candidates.each(&:destroy)
-    #Remove any unneeded scraping rules
-    scraping_rules.each do |sr|
-      next if sr.active
-      next unless Candidate.find_by_scraping_rule_id(sr.id).nil?
-      sr.destroy
-    end
-    #Destroy the results
-    destroy
+  def self.cleanupByProductType(product_type, days)
+    # Get the date before which the results should be cleanup
+    last_day = Result.where(:product_type=>product_type).order(:created_at).last.created_at - days.day
+    Result.where("product_type=:product_type and created_at < :last_day", {:product_type=>product_type, :last_day=>last_day}).destroy_all
   end
+
+
   
   def create_from_current
-    self.scraping_rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+
     raise ValidationError unless category
     product_skus = BestBuyApi.category_ids(YAML.load(category))
     self.nonuniq = product_skus.count
@@ -38,8 +32,6 @@ class Result < ActiveRecord::Base
     self.total = product_skus.count
     save
     
-    # Make sure each rule knows which results it is part of
-    ScrapingRule.find_all_by_active(true).each {|r| r.results.push(self); r.save}
     candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = id}
     Candidate.transaction do
       candidate_records.each(&:save)
@@ -105,4 +97,5 @@ class Result < ActiveRecord::Base
       end
     end
   end
+
 end

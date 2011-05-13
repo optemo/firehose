@@ -6,12 +6,13 @@ class ScrapingRule < ActiveRecord::Base
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
   has_many :candidates
-  has_and_belongs_to_many :results
+
   
   def self.scrape(ids,ret_raw = false) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
     ids = [ids] unless ids.kind_of? Array
+    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
     ids.each do |bbproduct|
       raw_return = nil
       ["English","French"].each do |language|
@@ -29,7 +30,7 @@ class ScrapingRule < ActiveRecord::Base
           #Insert category id spec
           raw_info["category_id"] = bbproduct.category
           corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(bbproduct.id,Session.product_type)
-          rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+          
           rules.each do |r|
             next unless (!r.french && language == "English") || (r.french && language=="French")
             #Traverse the hash hierarchy
@@ -105,6 +106,10 @@ class ScrapingRule < ActiveRecord::Base
   def self.rules_by_priority(data)
     # This function checks the data passed in to see if there are multiple remote features being put into a single remote feature.
     data.to_a.sort{|a,b| a[1]["rule"].priority <=> b[1]["rule"].priority}
+  end
+
+  def self.cleanup
+    ScrapingRule.joins('LEFT JOIN (select distinct scraping_rule_id from candidates) as c ON c.scraping_rule_id=scraping_rules.id').where('c.scraping_rule_id is null AND scraping_rules.active=false').destroy_all
   end
   
 end
