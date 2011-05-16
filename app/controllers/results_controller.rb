@@ -83,7 +83,7 @@ class ResultsController < ApplicationController
   # DELETE /results/1
   # DELETE /results/1.xml
   def destroy
-    Result.find(params[:id]).remove
+    Result.find(params[:id]).destroy
 
     respond_to do |format|
       format.html { head :ok }
@@ -91,7 +91,7 @@ class ResultsController < ApplicationController
     end
   end
   
-  # POST /results/commit/1
+  # POST /reults/commit/1
   # POST /results/commit/1.xml
   def commit
     @result = Result.find(params[:id])
