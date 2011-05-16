@@ -17,6 +17,7 @@ class Result < ActiveRecord::Base
   
   def self.cleanupByProductType(product_type, days)
     # Get the date before which the results should be cleanup
+
     rets = Result.where(:product_type=>product_type).order('created_at desc')
     size = rets.size
     ago = 0
