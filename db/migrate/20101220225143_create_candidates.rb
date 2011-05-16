@@ -9,9 +9,11 @@ class CreateCandidates < ActiveRecord::Migration
 
       t.timestamps
     end
+    add_index('candidates', 'result_id')
   end
 
   def self.down
     drop_table :candidates
+    remove_index('candidates', 'result_id')
   end
 end

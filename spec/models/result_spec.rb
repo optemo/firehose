@@ -54,6 +54,7 @@ describe Result do
     end
 
     
+
     it "should remove candidates related with results" do
       result = Result.new(@attr)
       result.candidates = Array.new
@@ -68,6 +69,7 @@ describe Result do
       Result.cleanupByProductType('camera_bestbuy', 3)
       Candidate.count.should be_equal(3)
     end
+
 
 
   end

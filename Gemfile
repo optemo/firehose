@@ -33,6 +33,9 @@ gem 'ruby-debug19'
 # In firehose, use this in development mode too
 gem "dalli", "1.0.2"
 gem 'json'
+gem 'activerecord-import'
+gem 'capistrano'
+gem 'capistrano-ext'
 
 group :development do
   gem 'rspec-rails', '2.6.0'
