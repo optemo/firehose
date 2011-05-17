@@ -1,4 +1,5 @@
 class BestBuyApi
+  require 'net/http'
   class RequestError < StandardError; end
   class FeedDownError < StandardError; end
   class << self
