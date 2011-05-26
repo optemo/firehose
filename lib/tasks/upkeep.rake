@@ -14,18 +14,24 @@ task :upkeep => :environment do
   Result.upkeep_post
   ProductSiblings.get_relations
 end
-
+require 'benchmark'
 desc "Update data automatically"
 task :update => :environment do
-    Session.new #Initialize the session
-    result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
-    result.create_from_current
-    Product.create_from_result(result.id)
-    # for each product_type, clean up results and related candidates days ago
-    #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-    Result.cleanupByProductType(Session.product_type, 3)
-    # clean up inactive scraping rules not used any more
-    ScrapingRule.cleanup
+  Benchmark.bm do |x|
+    x.report("total:") {
+      Session.new #Initialize the session
+      result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
+
+      x.report("result.create_from_current"){result.create_from_current}
+      x.report("Product.create_from_result"){Product.create_from_result(result.id)}
+
+      # for each product_type, clean up results and related candidates days ago
+      #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
+      Result.cleanupByProductType(Session.product_type, 3)
+      # clean up inactive scraping rules not used any more
+      ScrapingRule.cleanup
+    }
+    end
 end
 
 #Here is where general upkeep scripts are

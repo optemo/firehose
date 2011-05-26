@@ -28,9 +28,6 @@ class ProductSiblings < ActiveRecord::Base
       end  
     end
     #Write products to the database
-    ProductSiblings.transaction do 
-      siblings_activerecords.each(&:save)
-      siblings_sym_activerecords.each(&:save)
-    end  
+    ProductSiblings.import(siblings_activerecords + siblings_sym_activerecords)
   end
 end

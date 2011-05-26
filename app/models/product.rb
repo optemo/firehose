@@ -1,10 +1,11 @@
 require 'ruby-debug'
 class Product < ActiveRecord::Base
-  has_many :cat_specs
-  has_many :bin_specs
-  has_many :cont_specs
-  has_many :search_products
-  
+  has_many :cat_specs, :dependent=>:delete_all
+  has_many :bin_specs, :dependent=>:delete_all
+  has_many :cont_specs, :dependent=>:delete_all
+  has_many :text_specs, :dependent=>:delete_all
+  has_many :search_products, :dependent => :delete_all
+
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
   end
@@ -23,7 +24,7 @@ class Product < ActiveRecord::Base
     #Algorithm for calculating id of initial products in product_searches table
     #We probably need a better algorithm to check for collisions
     chars = []
-    Session.product_type.each_char{|c|chars<<c.getbyte(0)*chars.size}
+    Session.product_type.each_char{|c|chars << c.getbyte(0)*chars.size}
     chars.sum*-1
   end
   
@@ -41,7 +42,7 @@ class Product < ActiveRecord::Base
     raise ValidationError unless st.inject{|res,el|el.compact.size == first_size}
     
     if p_ids
-      Session.categorical["cluster"].each{|f|  st<<CatSpec.cachemany(p_ids, f)} 
+      Session.categorical["cluster"].each{|f|  st << CatSpec.cachemany(p_ids, f)} 
       Session.binary["cluster"].each{|f|  st << BinSpec.cachemany(p_ids, f)}
     end
     st.transpose
@@ -103,11 +104,16 @@ class Product < ActiveRecord::Base
   def self.per_page
     9
   end
+
   
   def self.create_from_result(id)
     result = Result.find(id)
+    products_to_save = []
+    specs_to_save = {}
     #Reset the intock flags
-    Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; p.save }
+    Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; products_to_save << p }
+    Product.import products_to_save
+    products_to_save = []
     rules, multirules, colors = Candidate.organize(result.candidates)
     multirules.each_pair do |feature, candidates|
       #An entry is only in multirules if it has more then one rule
@@ -119,9 +125,9 @@ class Product < ActiveRecord::Base
           when "text" then TextSpec
           when "intr" then "intr"
           else CatSpec # This should never happen
-		    end
-		    #Create new product if necessary
-		    p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
+                     end
+        #Create new product if necessary
+        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
         if candidate.delinquent && spec_class != "intr"
           #This is a feature which was removed
           spec = spec_class.find_by_product_id_and_name(p.id,feature)
@@ -130,17 +136,22 @@ class Product < ActiveRecord::Base
           p.instock = true
           if spec_class == "intr"
             p[feature] = candidate.parsed
-            p.save
+            products_to_save << p
           else
             #This is a feature which should be added
-            p.save
-      	  	spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
-      	  	spec.product_type = Session.product_type
-      	  	spec.value = candidate.parsed
-      	  	spec.save
-    		  end
-  		  end
+            p.save if p.id.nil?
+
+            spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
+            spec.product_type = Session.product_type
+            spec.value = candidate.parsed
+            specs_to_save.keys.include?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+          end
+        end
       end
+    end
+    Product.import products_to_save
+    specs_to_save.each do |s_class, v|
+      s_class.import v
     end
     Result.upkeep_pre
     Result.find_bundles
@@ -206,16 +217,15 @@ class Product < ActiveRecord::Base
     end
 
     # Do all record saving at the end for efficiency
-    ContSpec.transaction do
-      cont_activerecords.each(&:save)
-    end
+    ContSpec.import cont_activerecords
+
 
     #Clear the search_product cache in the database
     initial_products_id = Product.initial
     SearchProduct.delete_all(["search_id = ?",initial_products_id])
-    SearchProduct.transaction do
-    Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)}.each(&:save)
-    end
+
+    SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)})
+
   end
   
   

@@ -19,11 +19,14 @@ class ResultsController < ApplicationController
     Session.category_id = YAML.load(@result.category)
     @product_count = @result.total
     @rules, @multirules, @colors = Candidate.organize(@result.candidates)
+
     if (newcount = @rules.values.first.first.count) < @product_count
       @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
       @exists_count = @product_count
       @product_count = newcount
     end
+
+
     
     respond_to do |format|
       format.html # show.html.erb
@@ -84,11 +87,12 @@ class ResultsController < ApplicationController
   # DELETE /results/1.xml
   def destroy
     Result.find(params[:id]).destroy
-
+   
     respond_to do |format|
-      format.html { head :ok }
+      format.html { head :ok}
       format.xml  { head :ok }
     end
+
   end
   
   # POST /reults/commit/1
@@ -96,6 +100,6 @@ class ResultsController < ApplicationController
   def commit
     @result = Result.find(params[:id])
     Product.create_from_result(@result.id)
-    redirect_to '/results'
+    render '/results'
   end
 end
