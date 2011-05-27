@@ -139,7 +139,11 @@ class Product < ActiveRecord::Base
             products_to_save << p
           else
             #This is a feature which should be added
-            p.save if p.id.nil?
+            if p.id.nil?
+              p.save
+            else
+              products_to_save << p
+            end
 
             spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
             spec.product_type = Session.product_type
