@@ -63,7 +63,7 @@ class Result < ActiveRecord::Base
         lensrange = lensrange.value
         ranges = lensrange.split("-")
         v = (ranges[1].to_f/ranges[0].to_f).round(1) #Round to one decimal point
-        contspects << ContSpec.new(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
+        contspecs << ContSpec.new(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
       end
     end
     ContSpec.import contspecs
@@ -86,7 +86,7 @@ class Result < ActiveRecord::Base
       end
       
     end
-    BinSpec.import binspecs if binspecs.size > 0
+    BinSpec.import binspecs, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] if binspecs.size > 0
     
   end
   
@@ -115,7 +115,7 @@ class Result < ActiveRecord::Base
       end
     end
     copiedspecs.each do |s_class, v|
-      s_class.import v
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
     end
   end
 

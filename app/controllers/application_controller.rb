@@ -1,5 +1,4 @@
 class ApplicationController < ActionController::Base
-  require 'net/http'
   protect_from_forgery
   before_filter :set_session
   

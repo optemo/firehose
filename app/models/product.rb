@@ -111,9 +111,8 @@ class Product < ActiveRecord::Base
     products_to_save = []
     specs_to_save = {}
     #Reset the intock flags
-    Product.find_all_by_product_type(result.product_type).each {|p| p.instock = false; products_to_save << p }
-    Product.import products_to_save
-    products_to_save = []
+    Product.update_all(['instock=false'], ['product_type=?', result.product_type])
+    
     rules, multirules, colors = Candidate.organize(result.candidates)
     multirules.each_pair do |feature, candidates|
       #An entry is only in multirules if it has more then one rule
@@ -139,7 +138,7 @@ class Product < ActiveRecord::Base
             products_to_save << p
           else
             #This is a feature which should be added
-            if p.id.nil?
+            if p.new_record?
               p.save
             else
               products_to_save << p
@@ -153,9 +152,9 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    Product.import products_to_save
+    Product.import products_to_save, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
-      s_class.import v
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
     end
     Result.upkeep_pre
     Result.find_bundles
@@ -221,15 +220,16 @@ class Product < ActiveRecord::Base
     end
 
     # Do all record saving at the end for efficiency
-    ContSpec.import cont_activerecords
+    ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
 
 
     #Clear the search_product cache in the database
     initial_products_id = Product.initial
-    SearchProduct.delete_all(["search_id = ?",initial_products_id])
+    SearchProduct.transaction do
+      SearchProduct.delete_all(["search_id = ?",initial_products_id])
 
-    SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)})
-
+      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)})
+    end
   end
   
   
