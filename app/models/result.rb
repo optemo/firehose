@@ -48,6 +48,7 @@ class Result < ActiveRecord::Base
     save
     
     candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = id}
+    # Bulk insert
     Candidate.import candidate_records
 
 
@@ -55,7 +56,7 @@ class Result < ActiveRecord::Base
   
   def self.upkeep_pre
     #Calculate optical zoom for SLR cameras
-    contspecs = []
+    contspecs = [] # For bulk insert
     Product.current_type.instock.each do |p|
       next if ContSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"opticalzoom")
       lensrange = CatSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"lensrange")
@@ -66,12 +67,13 @@ class Result < ActiveRecord::Base
         contspecs << ContSpec.new(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
       end
     end
+    # Bulk insert
     ContSpec.import contspecs
   end
     
   def self.upkeep_post
     #Set onsale binary because it's not in the feed
-    binspecs = []
+    binspecs = [] # For bulk insert
     Product.current_type.instock.each do |product|
       price_cont_spec = ContSpec.find_by_product_id_and_name_and_product_type(product.id,"price",Session.product_type)
       saleprice_cont_spec = ContSpec.find_by_product_id_and_name_and_product_type(product.id,"saleprice",Session.product_type)
@@ -86,12 +88,13 @@ class Result < ActiveRecord::Base
       end
       
     end
+    # Bulk insert/update with ActiveRecord_import. :on_duplicate_key_update only works on Mysql database
     BinSpec.import binspecs, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] if binspecs.size > 0
     
   end
   
   def self.find_bundles
-    copiedspecs = {}
+    copiedspecs = {} # For bulk insert
     Product.current_type.instock.each do |p|
       bundle = TextSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"bundle")
       if bundle
@@ -115,7 +118,7 @@ class Result < ActiveRecord::Base
       end
     end
     copiedspecs.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
     end
   end
 

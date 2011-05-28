@@ -152,9 +152,10 @@ class Product < ActiveRecord::Base
         end
       end
     end
+    # Bulk insert/update for efficiency
     Product.import products_to_save, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
     Result.upkeep_pre
     Result.find_bundles
@@ -172,7 +173,7 @@ class Product < ActiveRecord::Base
   end
   
   def self.calculate_factors
-    cont_activerecords = []
+    cont_activerecords = [] # For bulk insert/update
     #cat_activerecords =[]
     #bin_activerecords = []
     records = {}
@@ -219,7 +220,7 @@ class Product < ActiveRecord::Base
       cont_activerecords << product_utility
     end
 
-    # Do all record saving at the end for efficiency
+    # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
     ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
 
 
@@ -227,7 +228,7 @@ class Product < ActiveRecord::Base
     initial_products_id = Product.initial
     SearchProduct.transaction do
       SearchProduct.delete_all(["search_id = ?",initial_products_id])
-
+      # Bulk insert for efficiency. 
       SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)})
     end
   end

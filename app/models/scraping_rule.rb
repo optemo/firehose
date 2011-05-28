@@ -9,6 +9,7 @@ class ScrapingRule < ActiveRecord::Base
 
 
   def self.get_rules
+    # return rules with the regexp objects
     rules_hash = []
     rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
     rules.each do |r|
