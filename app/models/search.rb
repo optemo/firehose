@@ -18,6 +18,7 @@ class Search < ActiveRecord::Base
       end
     end
     # Clean up data
+
     Search.transaction do
       Search.where("created_at < ?", max_date).delete_all
       Userdatacat.where("created_at < ?", max_date).delete_all
