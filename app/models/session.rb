@@ -71,10 +71,10 @@ class Session
           self.prefered[feature] = atts["prefered"] if atts["prefered"]  
         end
          self.utility_weights[feature] = atts["utility"] if atts["utility"]
-         self.utility["all"]<<feature if atts["utility"]
+         self.utility["all"] << feature if atts["utility"]
          self.cluster_weights[feature] = atts["cluster"] if atts["cluster"]
       end
      
     end
-	end
+  end
 end

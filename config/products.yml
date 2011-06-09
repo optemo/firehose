@@ -133,3 +133,113 @@ tv_bestbuy:
             displaytech:
                 type: Categorical
                 used_for: [filter, show]
+drive_bestbuy:
+    url: 
+        bestdrive: 12
+    category_id: [20243, 20237, 20239, 30442, 20236, 29583]
+    layout: assist
+    specs:
+        General:
+            price:
+                type: Continuous
+                used_for: [filter, cluster, show]
+                prefdir: -1
+                min: 1
+                max: 10000
+            brand:
+                type: Categorical
+                used_for: [show, filter, cluster]
+                utility: 5
+            customerRating:
+                type: Continuous
+                used_for: [show]
+            includedInBox: 
+                type: Text
+                used_for: [show]
+            interface: 
+                type: Categorical
+                used_for: [show, filter, cluster]
+            dimensions: # 4.3 (W) x 10.8 (H) x 4.3 (D) cm
+                type: Categorical
+                used_for: [show]
+            pc: # PC/Mac
+                type: Binary
+                used_for: [show, filter, cluster]
+            mac:
+                type: Binary
+                used_for: [show, filter, cluster]
+            weight: # .048 kg
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            softwareIncluded:
+                type: Binary
+                used_for: [desc]
+            systemRequirements: # USB Connection
+                type: Categorical
+                used_for: [show, filter, cluster]
+            maximumDataTransferRate: # 480 Mbps (EXCEPT 20236)
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            # 20243 -- USB Flash Drives
+            capacity: # 4 GB
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+            isReadyBoostCompliant: # No
+                type: Binary
+                used_for: [filter]
+            isSoftwareIncluded: # Not Required
+                type: Binary
+                used_for: [filter]
+            typeOfMedia: # USB Stick
+                type: Categorical
+                used_for: [show, filter, cluster]
+            # 20237, 20239, 30442, 29583 -- External Hard Drives, Internal Hard Drives, Solid State Drives, Storage Accessories
+            averageSeekTime: # {"group"=>"", "name"=>"Average Seek Time", "value"=>"Not Applicable"},            
+                type: Continuous
+                used_for: [desc, filter, cluster, show]
+            dataBuffer: # {"group"=>"", "name"=>"Data Buffer", "value"=>"16 MB"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+            rotationsPerMinute: #{"group"=>"", "name"=>"Rotations Per Minute (RPM)", "value"=>"5000 RPM"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [5000, 7200] 
+            storageCapacity: # {"group"=>"", "name"=>"Storage Capacity", "value"=>"1.5 TB"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [250, 500, 1, 1.5] 
+            # 20236 -- DVD & CD Drives
+            cdReadSpeed: # {"group"=>"", "name"=>"CD Read Speed", "value"=>"52X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [52X]
+            cdRewriteSpeed: # {"group"=>"", "name"=>"CD Rewrite Speed", "value"=>"40X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [40X]
+            cdWriteSpeed: # {"group"=>"", "name"=>"CD Write Speed", "value"=>"52X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [52X]
+            dvdReadSpeed: # {"group"=>"", "name"=>"DVD Read Speed", "value"=>"52X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [24X]
+            dvdRewriteSpeed: # {"group"=>"", "name"=>"DVD Rewrite Speed", "value"=>"40X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [8X, 6X] # "DVD+RW:8X; DVD-RW:6X"
+            dvdWriteSpeed: # {"group"=>"", "name"=>"DVD Write Speed", "value"=>"52X"},
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+                prefered: [52X] # "DVD+R:24X; DVD-R:24X; DVD+R DL:4X; DVD-R DL:4X"
+            dataAccessTime:
+                type: Categorical
+                used_for: [desc, filter, cluster, show]
+            internal:
+                type: Binary
+                used_for: [desc, filter, cluster, show]
+            external:
+                type: Binary
+                used_for: [desc, filter, cluster, show]
+

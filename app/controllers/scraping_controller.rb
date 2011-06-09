@@ -11,8 +11,9 @@ class ScrapingController < ApplicationController
   end
 
   def scrape
-    @id = params[:id]
-    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id),true)
+    ids = params[:id].split(',') # the patten of params[:id] is product_id,category_id
+    @id = ids[0]
+    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => ids[1]),true)
     @scraped_features = Candidate.organize(candidates).first
     render :layout => false
   end

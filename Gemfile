@@ -36,6 +36,7 @@ gem 'json'
 gem 'activerecord-import'
 gem 'capistrano'
 gem 'capistrano-ext'
+gem 'fb_graph'
 
 group :development do
   gem 'rspec-rails', '2.6.0'
