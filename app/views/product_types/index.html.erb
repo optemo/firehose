@@ -1,0 +1,24 @@
+<ul class="level1">
+<% @product_types.each do |pt| %>
+<li class="togglable"><h2><%= pt.name %></h2>
+<a href="#" class="edit_button_href">URLs:</a><span><%= pt.url + ":" + pt.port + " Weight: {pt.weight}"%></span>
+<a href="#" class="edit_button_href">Categori_id:</a><span><%= pt.category_id %></span>
+</li>
+<li>
+  <% pt.product_type_headings.each do |spec| %>
+  <ul class="level2">
+    <li class="togglable">
+      <h3><%= spec.name %></h3>
+      <% spec.product_type_features.each do |feature| %>
+      <ul class="level3">
+	<li><%= feature.name %></li>
+	</ul>
+      <% end %>
+      <ul class="level3">
+      </ul>
+    </li>
+  </ul>
+  <% end %>
+</li>
+<% end %>
+</ul>
