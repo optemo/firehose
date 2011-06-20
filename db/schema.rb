@@ -62,6 +62,32 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
 
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
 
+  create_table "features", :force => true do |t|
+    t.integer  "heading_id",                                  :null => false
+    t.string   "name",                                        :null => false
+    t.string   "feature_type",     :default => "Categorical", :null => false
+    t.string   "used_for",         :default => "show"
+    t.boolean  "larger_is_better", :default => true
+    t.integer  "min",              :default => 0
+    t.integer  "max",              :default => 0
+    t.integer  "utility_weight",   :default => 1
+    t.integer  "cluster_weight",   :default => 1
+    t.string   "prefered"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "features", ["heading_id", "name"], :name => "index_features_on_heading_id_and_name", :unique => true
+
+  create_table "headings", :force => true do |t|
+    t.integer  "product_type_id", :null => false
+    t.string   "name",            :null => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "headings", ["product_type_id", "name"], :name => "index_headings_on_product_type_id_and_name", :unique => true
+
   create_table "keyword_searches", :force => true do |t|
     t.string  "keyword"
     t.integer "product_id"
@@ -82,46 +108,9 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
 
   add_index "product_siblings", ["product_id"], :name => "index_product_siblings_on_product_id"
 
-  create_table "product_type_features", :force => true do |t|
-    t.integer  "product_type_heading_id",                            :null => false
-    t.string   "name",                                               :null => false
-    t.string   "feature_type",            :default => "Categorical", :null => false
-    t.string   "used_for",                :default => "show"
-    t.boolean  "prefdir",                 :default => true
-    t.integer  "min",                     :default => 0
-    t.integer  "max",                     :default => 0
-    t.integer  "utility",                 :default => 1
-    t.integer  "cluster",                 :default => 1
-    t.string   "prefered"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "product_type_features", ["product_type_heading_id", "name"], :name => "index_product_type_features_on_product_type_heading_id_and_name", :unique => true
-
-  create_table "product_type_headings", :force => true do |t|
-    t.integer  "product_type_id", :null => false
-    t.string   "name",            :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "product_type_headings", ["product_type_id", "name"], :name => "index_product_type_headings_on_product_type_id_and_name", :unique => true
-
-  create_table "product_type_urls", :force => true do |t|
-    t.integer  "product_type_id",                 :null => false
-    t.string   "url",                             :null => false
-    t.integer  "port",            :default => 80
-    t.integer  "weight",          :default => 12
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "product_type_urls", ["url", "port"], :name => "index_product_type_urls_on_url_and_port", :unique => true
-
   create_table "product_types", :force => true do |t|
     t.string   "name",                              :null => false
-    t.string   "layouts",     :default => "assist"
+    t.string   "layout",      :default => "assist"
     t.string   "category_id",                       :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -225,6 +214,18 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
   end
 
   add_index "text_specs", ["product_id"], :name => "index_text_specs_on_product_id"
+
+  create_table "urls", :force => true do |t|
+    t.integer  "product_type_id",                   :null => false
+    t.string   "url",                               :null => false
+    t.integer  "port",            :default => 80
+    t.integer  "piwik_id",        :default => 12
+    t.integer  "show_order",      :default => 9999
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "urls", ["url", "port"], :name => "index_urls_on_url_and_port", :unique => true
 
   create_table "userdatabins", :force => true do |t|
     t.integer  "search_id"

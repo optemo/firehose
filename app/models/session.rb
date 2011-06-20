@@ -39,7 +39,7 @@ class Session
     # end
 
     p_url = nil
-    ProductTypeUrl.find_each do |u|
+    Url.find_each do |u|
       if u.url.include? url
         p_url = u
         break
@@ -61,25 +61,25 @@ class Session
     # Default is false
     # self.directLayout = product_yml["layout"] == "direct"
     # self.mobileView = product_yml["layout"] == "mobileview"
-    self.directLayout = p_type.layouts.split(',').map{ |l| l.strip }.include?("direct")
-    self.mobileView = p_type.layouts.split(',').map{ |l| l.strip }.include?("mobileview")
+    self.directLayout = p_type.layout.include?("direct")
+    self.mobileView = p_type.layout.include?("mobileview")
 
     # Check for what Piwik site ID to put down in the optemo.html.erb layout
     # These site ids MUST match what's in the piwik database.
     # self.piwikSiteId = product_yml["url"][url] || 10 # This is a catch-all for testing sites.
-    p_url ||= p_type.product_type_urls.first
-    self.piwikSiteId = p_url.weight || 10 # This is a catch-all for testing sites.
+    p_url ||= p_type.urls.first
+    self.piwikSiteId = p_url.piwik_id || 10 # This is a catch-all for testing sites.
     
     # This block gets out the continuous, binary, and categorical features
-    p_headings = ProductTypeHeading.find_all_by_product_type_id(p_type.id, :include => :product_type_features) # eager loading headings and features to reduce the queries.
+    p_headings = Heading.find_all_by_product_type_id(p_type.id, :include => :features) # eager loading headings and features to reduce the queries.
     p_headings.each do |heading|
-      heading.product_type_features.each do |feature|
+      heading.features.each do |feature|
         used_fors = feature.used_for.split(',').map { |uf| uf.strip }
         case feature.feature_type
         when "Continuous"
             used_fors.each{|flag| self.continuous[flag] << feature.name}
           self.continuous["all"] << feature.name #Keep track of all features
-          self.prefDirection[feature.name] = feature.prefdir ? 1 : -1
+          self.prefDirection[feature.name] = feature.larger_is_better ? 1 : -1
           self.maximum[feature] = feature.max if feature.max > 0
           self.minimum[feature] = feature.min if feature.min > 0
         when "Binary"
@@ -91,9 +91,9 @@ class Session
           self.categorical["all"] << feature.name #Keep track of all features
           self.prefered[feature.name] = feature.prefered if !feature.prefered.nil? && !feature.prefered.empty?
         end
-         self.utility_weights[feature.name] = feature.utility if feature.utility > 1
-         self.utility["all"] << feature.name if feature.utility > 1
-         self.cluster_weights[feature.name] = feature.cluster if feature.cluster > 1
+         self.utility_weights[feature.name] = feature.utility_weight if feature.utility_weight > 1
+         self.utility["all"] << feature.name if feature.utility_weight > 1
+         self.cluster_weights[feature.name] = feature.cluster_weight if feature.cluster_weight > 1
       end
     end
     # product_yml["specs"].each_pair do |heading, specs|
