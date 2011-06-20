@@ -80,8 +80,9 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
   add_index "features", ["heading_id", "name"], :name => "index_features_on_heading_id_and_name", :unique => true
 
   create_table "headings", :force => true do |t|
-    t.integer  "product_type_id", :null => false
-    t.string   "name",            :null => false
+    t.integer  "product_type_id",                   :null => false
+    t.string   "name",                              :null => false
+    t.integer  "show_order",      :default => 9999
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -216,11 +217,10 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
   add_index "text_specs", ["product_id"], :name => "index_text_specs_on_product_id"
 
   create_table "urls", :force => true do |t|
-    t.integer  "product_type_id",                   :null => false
-    t.string   "url",                               :null => false
+    t.integer  "product_type_id",                 :null => false
+    t.string   "url",                             :null => false
     t.integer  "port",            :default => 80
     t.integer  "piwik_id",        :default => 12
-    t.integer  "show_order",      :default => 9999
     t.datetime "created_at"
     t.datetime "updated_at"
   end

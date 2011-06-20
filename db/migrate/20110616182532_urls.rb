@@ -5,7 +5,6 @@ class Urls < ActiveRecord::Migration
       t.string :url, :null => false
       t.integer :port, :default => 80
       t.integer :piwik_id, :default => 12
-      t.integer :show_order, :default => 9999
       t.timestamps
     end
     add_index :urls, [:url, :port], :unique=>true
