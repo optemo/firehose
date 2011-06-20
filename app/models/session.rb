@@ -45,10 +45,11 @@ class Session
         break
       end
     end
-    p_url ||= ProductTypeUrl.find_by_product_type('camera_bestbuy').first
 
-    self.product_type = p_url.product_type.name
-    p_type = p_url.product_type
+    p_type = p_url.nil?? ProductType.find_all_by_name('camera_bestbuy').first : p_url.product_type
+    
+    self.product_type = p_type.name
+
     
     # product_yml = file[self.product_type]
     # self.category_id = product_yml["category_id"]
@@ -66,6 +67,7 @@ class Session
     # Check for what Piwik site ID to put down in the optemo.html.erb layout
     # These site ids MUST match what's in the piwik database.
     # self.piwikSiteId = product_yml["url"][url] || 10 # This is a catch-all for testing sites.
+    p_url ||= p_type.product_type_urls.first
     self.piwikSiteId = p_url.weight || 10 # This is a catch-all for testing sites.
     
     # This block gets out the continuous, binary, and categorical features
