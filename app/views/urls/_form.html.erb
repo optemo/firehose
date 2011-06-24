@@ -1,0 +1,30 @@
+<%= form_for(@purl) do |f| %>
+  <% if @purl.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@url.errors.count, "error") %> prohibited this result from being saved:</h2>
+
+      <ul>
+      <% @purl.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <%= f.hidden_field :product_type_id %>
+ <div class="field">
+    <%= f.label :url %><br />
+    <%= f.text_field :url %>
+ </div>
+  <div class="field">
+    <%= f.label "port" %><br />
+    <%= f.text_field :port %>
+ </div>
+  <div class="field">
+    <%= f.label "piwik_id" %>
+    <%= f.text_field :piwik_id %>
+ </div>
+  
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

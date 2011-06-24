@@ -1,6 +1,6 @@
 class ProductType < ActiveRecord::Base
-  has_many :urls
-  has_many :headings
+  has_many :urls, :dependent=>:delete_all
+  has_many :headings, :dependent=>:delete_all
   has_many :features, :through => :headings
 
   validates_presence_of :name

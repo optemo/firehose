@@ -177,8 +177,21 @@ $(document).ready(function(){
 				data: form.serialize(),
 				type: "DELETE",
 				success: function() {
-				    alert_substitute("Record has been removed.");
-				},
+				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete')) {
+					t.parent().nextUntil('dt', 'dd').remove();
+					t.parent().remove();
+					if(t.hasClass('feature-delete'))
+					    alert_substitute("Feature has been removed.");
+					if(t.hasClass('heading-delete'))
+					    alert_substitute("Heading has been removed.");
+					if(t.hasClass('url-delete'))
+					    alert_substitute("URL has been removed.");
+					}
+				    else
+					alert_substitute("Record has been removed.");
+				}
+				    
+				,
 				error: function() {
 					alert_substitute("Error in processing the request.");
 				}
@@ -218,6 +231,94 @@ $(document).ready(function(){
 		
 		return false;
 	});
+
+    // Editable
+    var editableVar = {
+	method: 'PUT',
+	indicator : 'Saving...',
+	tooltip : 'Click to edit...',
+	cancel : 'Cancel',
+	submit : 'Ok',
+	submitdata : function(value, settings) {
+	    pName = $(this).data("name");
+	    dId = $(this).data("id");
+	    origin = '';
+	    orgElement = '';
+	    if ($(this).hasClass('stream')) {
+		orgElement = $(this).data("origin");
+		return { name : pName, dId : dId, orgElement : orgElement };
+	    }
+	    return { name : pName, dId : dId };
+	},
+	callback : function(value, settings) {
+	    console.log(this);
+	    console.log(value);
+	    console.log(settings);
+	    if ($(this).hasClass('stream')) {
+		if(value == '') {
+		    $(this).prev('span.comma').remove();
+		    $(this).remove();
+		} else
+		{
+		    arr = value.split(',');
+		    $(this).data('origin', arr[0]);
+		    $(this).text(arr[0]);
+		    for (var i=1; i<arr.length; i++) {
+			spanElem = $("<span class='comma'>,</span>");
+			spanNewVal = $("<span class='" +$(this).attr("class") + "' data-origin='" + arr[i] + "' data-id='" + $(this).data("id") + "' data-name='" + $(this).data("name") + "'>" + arr[i] + "</span>");
+			spanNewVal.editable('/product_types/1', editableVar);
+			$(this).parent().append(spanElem);
+			$(this).parent().append(spanNewVal);
+		    }
+		    $(this).data('origin', value);
+		}
+	    }
+	}
+    };
+    $('.edit, .edit-select').editable('/product_types/1', editableVar);
+
+    $('a.show-hide').live('click', function () {
+	if($(this).text() == "Show Hidden Attributes") {
+	    $(this).parent().nextUntil('dt', 'dd.invisible').show();
+	    $(this).text ("Hide No Value Attributes");
+	} else {
+	    $(this).parent().nextUntil('dt', 'dd.invisible').hide();
+	    $(this).text ("Show Hidden Attributes");
+	    }
+	return false;
+	});
+
+    $('select#type_filter').live('change', function () {
+	$('#filter_form').submit();
+	});
+ 
+
+    // $('a.spec-delete').live('click', function () {
+    // 	if (($(this).parent().next('dd.features').(':first-child').children().length > 0)) {
+    // 	    alert_substitute("The heading is not empty. Can not be deleted!");
+    // 	    return false;
+    // 	}
+    // 	});
+    // $('.edit-select').editable('/product_types', {
+    // 	method: 'PUT',
+    // 	type: 'select',
+    // 	indicator : 'Saving...',
+    // 	tooltip : 'Click to edit...',
+    // 	submit : 'Ok',
+    // 	loadurl : '/product_types',
+    // 	loaddata : function(value, settings) {
+    // 	    return {foo: "bar"};
+    // 	    },
+    // 	submitdata : function(value, settings) {
+    // 	    return {foo: "bar"};
+    // 	},
+    // 	callback : function(value, settings) {
+    // 	    console.log(this);
+    // 	    console.log(value);
+    // 	    console.log(settings);
+    // 	}
+
+    // });
 });
 
 function removeSilkScreen() {

@@ -5,6 +5,7 @@
   <%= stylesheet_link_tag :all %>
   <%= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" %>
   <%= javascript_include_tag "jquery.validate.min" %>
+  <%= javascript_include_tag "jquery.jeditable.min" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tag %>
 </head>
@@ -14,7 +15,10 @@
         <h2>SKUs in category id <%= Session.category_id %></h2>
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
-        <%= link_to "results", "/results" %> - Make new result set, push into product &amp; spec tables</div>
+        <%= link_to "results", "/results" %> - Make new result set,
+	  push into product &amp; spec tables | 
+	<%= link_to "product_types", "/product_types" %> - Set up product types
+	</div>
     </div>
     <div id="content">
     <%= yield %>

@@ -81,7 +81,7 @@ class Features < ActiveRecord::Migration
       end
 
       if h.product_type.name == 'tv_bestbuy'
-        if h.name = 'General'
+        if h.name == 'General'
           Feature.create :heading => h, :name => 'price', :feature_type => 'Continuous',
           :used_for => 'filter, cluster, show', :larger_is_better => false, :min => 1, :max => 10000
           Feature.create :heading => h, :name => 'maxresolution', :feature_type => 'Continuous',
@@ -98,7 +98,7 @@ class Features < ActiveRecord::Migration
       end
 
       if h.product_type.name == 'drive_bestbuy'
-        if h.name = 'General'
+        if h.name == 'General'
           Feature.create :heading => h, :name => 'price', :feature_type => 'Continuous',
           :used_for => 'filter, cluster, show', :larger_is_better => false, :min => 1, :max => 10000
           Feature.create :heading => h, :name => 'brand', :feature_type => 'Categorical',
