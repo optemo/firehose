@@ -7,7 +7,7 @@ class ScrapingRule < ActiveRecord::Base
   validates :rule_type, :presence => true
   has_many :candidates
 
-  # REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => "^(.*)/http://www.bestbuy.ca\1", "imgmurl" => "^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2", "imglurl" => "^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2" }
+  REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
 
   def self.get_rules
     # return rules with the regexp objects

@@ -22,6 +22,7 @@ class Headings < ActiveRecord::Migration
 
       if t.name == 'drive_bestbuy'
         Heading.create :product_type => t, :name => 'General'
+        Heading.create :product_type => t, :name => 'Status'
         Heading.create :product_type => t, :name => 'USB Flash Drives'
         Heading.create :product_type => t, :name => 'External/Internal Hard Drives, Solid State Drives, Storage Accessories'
         Heading.create :product_type => t, :name => 'DVD & CD Drives'

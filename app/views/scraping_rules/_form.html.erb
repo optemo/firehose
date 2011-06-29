@@ -8,7 +8,7 @@
   <div class="rule_type_button"><%= f.radio_button(:rule_type, "intr", :class => "required") %> Intr</div>
   <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %>
   <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %>
-  <%= f.label :regex, "Regular Expression" %> <%= f.text_field(:regex, :size => 35, :class => "required regexp") %>
+ <%= f.label :regex, "Regular Expression" %> <%= select "scraping_rule", "regex", ScrapingRule::REGEXES, {:include_blank=>false}, {:class=>"require regex scraping_rule_regex"} %><div style="float: left;"><input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" maxlength="35" class="require regexp scraping_rule_regex_option" style="display:none;"  value='<%= @scraping_rule.regex %>' /><br style="clear: both;" /><span style="float: left;">Custom Regex</span><input type="checkbox" class="custom_regex" /></div>
   <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %>
   <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %>
   <%= f.label :valid_inputs, "Valid Inputs \n(* seperated)" %> <%= f.text_field(:valid_inputs, :size => 35) %>

@@ -63,15 +63,17 @@ ActiveRecord::Schema.define(:version => 20110616184340) do
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
 
   create_table "features", :force => true do |t|
-    t.integer  "heading_id",                                  :null => false
-    t.string   "name",                                        :null => false
-    t.string   "feature_type",     :default => "Categorical", :null => false
-    t.string   "used_for",         :default => "show"
-    t.boolean  "larger_is_better", :default => true
-    t.integer  "min",              :default => 0
-    t.integer  "max",              :default => 0
-    t.integer  "utility_weight",   :default => 1
-    t.integer  "cluster_weight",   :default => 1
+    t.integer  "heading_id",                                     :null => false
+    t.string   "name",                                           :null => false
+    t.string   "feature_type",        :default => "Categorical", :null => false
+    t.string   "used_for",            :default => "show"
+    t.string   "used_for_categories"
+    t.string   "used_for_order",      :default => "0"
+    t.boolean  "larger_is_better",    :default => true
+    t.integer  "min",                 :default => 0
+    t.integer  "max",                 :default => 0
+    t.integer  "utility_weight",      :default => 1
+    t.integer  "cluster_weight",      :default => 1
     t.string   "prefered"
     t.datetime "created_at"
     t.datetime "updated_at"

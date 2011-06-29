@@ -291,7 +291,27 @@ $(document).ready(function(){
     $('select#type_filter').live('change', function () {
 	$('#filter_form').submit();
 	});
- 
+
+    $(".custom_regex").live('click', function() {
+	reg = $(this).parent().prev();// children('.scraping_rule_regex');
+	reg_option = $(this).prev().prev().prev(); // prev('.scraping_rule_regex_option');
+
+	if (reg.is(":visible")) {
+	    reg.hide();
+	    reg_option.show();
+	    reg.attr('name', 'scraping_rule_option[regex]');
+	    reg_option.attr('name', 'scraping_rule[regex]');
+
+	}
+	else  {
+            reg.show();
+	    reg_option.hide();
+	    reg.attr('name', 'scraping_rule[regex]');
+	    reg_option.attr('name', 'scraping_rule_option[regex]');
+	}
+	    
+	    
+	});
 
     // $('a.spec-delete').live('click', function () {
     // 	if (($(this).parent().next('dd.features').(':first-child').children().length > 0)) {

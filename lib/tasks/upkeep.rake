@@ -17,7 +17,14 @@ end
 
 desc "Update data automatically"
 task :update => :environment do
-      Session.new #Initialize the session
+  if !ENV.include?("url")
+    Session.new
+  else
+    if Session.new(ENV["url"]).nil?
+      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+    end
+  end
+  
       result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
 
       result.create_from_current

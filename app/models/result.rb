@@ -106,7 +106,11 @@ class Result < ActiveRecord::Base
     Product.current_type.instock.each do |product|
       url_text_spec = TextSpec.find_by_product_id_and_name_and_product_type(product.id, "producturl", Session.product_type)
       if !url_text_spec.nil?
-        array = FbGraph::Query.new( "SELECT  total_count from link_stat  where  url='#{url_text_spec.value}'").fetch
+        begin
+          array = FbGraph::Query.new( "SELECT  total_count from link_stat  where  url='#{url_text_spec.value}'").fetch
+        rescue
+          next
+        end
         contspec = ContSpec.find_by_product_id_and_name_and_product_type(product.id, "fblike", Session.product_type) || ContSpec.new(:name => "fblike", :product_type => Session.product_type, :product_id => product.id)
         contspec.value = array[0]["total_count"]
         contspecs << contspec
