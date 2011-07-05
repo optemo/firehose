@@ -1,0 +1,139 @@
+<style type="text/css" media="screen">
+  .invisible {
+  display: none;
+  color: green;
+  }
+  .edit, .edit-select {
+ color:blue;
+  }
+  dt a, dd a {
+  margin-left: 15px;
+  }
+ 
+</style>
+<%= link_to(
+			       'New Product Type',
+			       new_product_type_path) %>
+<form id="filter_form" action="/product_types" method="GET">
+  <select id="type_filter" name="id">
+    <option value="">All</option>
+    <% @product_types.each do |p| %>
+   <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
+    <% end %>
+  </select>
+</form>
+<dl class="level1">
+<% @select_product_types.each do |pt| %>
+<dt><h2 class="edit" data-id="<%= pt.id %>"
+			       data-name="product_type-name"><%= pt.name
+								 %></h2>      <%= link_to("New Heading", "/headings/new?parent_id=#{pt.id}") %>
+</dt>
+<dd><strong>Category ID: </strong>
+  <% cids = pt.category_id.split(',') %>
+  <% len = cids.size; i=0 %>
+  <% cids.each do |cid| %>
+  <span class="edit stream"
+  data-origin="<%= cid %>" data-id="<%= pt.id %>" data-name="product_type-category_id"><%= cid.strip %></span>
+    <% if i < len -  1 %>
+    <% i += 1 %><span class='comma'>,</span>
+   <% end %>
+ <% end %>
+</dd>
+<dd><strong>Layout: </strong><span class="edit" data-id="<%= pt.id %>" 
+				   data-name="product_type-layout"><%= pt.layout
+								       %></span></dd>
+
+<dd>
+  <dl class="level2" data-parent-id="<%= pt.id %>">
+    <dt><strong>URLs</strong><%= link_to("New Url",
+    "/urls/new?parent_id=#{pt.id}" ) %></dt>
+    <% pt.urls.each do |url| %>
+    <dd>
+      URL: <span class="edit" data-id="<%= url.id %>" data-name="url-url"><%= url.url %></span>
+      Port: <span class="edit" data-id="<%= url.id %>" data-name="url-port"><%= url.port.nil??
+							 80 : url.port
+      %></span> PIWIK ID: <span class="edit" data-id="<%= url.id %>"
+      data-name="url-piwik_id"><%= url.piwik_id.nil?? 12 :
+      url.piwik_id %></span>
+      <%= link_to(
+      'Destroy', url, :confirm => 'Are you sure?', :method =>
+      :delete, :remote=>true, :class=>'url-delete') %>
+    </dd>
+    <% end %>
+    <% pt.headings.each do |spec| %>
+    <dt>
+      <strong class="edit" data-id="<%= spec.id %>"
+      data-name="heading-name"><%= spec.name %></strong>
+      <%= link_to("New Feature",
+	  "/features/new?parent_id=#{spec.id}") %><%= link_to(
+      'Destroy', spec, :confirm => 'Are you sure?', :method =>
+      :delete, :class=>'spec-delete') %>
+    </dt>
+    <dd><strong>Show Order: </strong><span class="edit" data-id="<%= spec.id %>" data-name="heading-show_order"><%= spec.show_order %></dd>
+    <dd class="features">
+      <dl class="level3" data-parent-id="<%= spec.id %>">
+	<% spec.features.each do |feature| %>
+	<dt><strong class="edit" data-id="<%= feature.id %>"
+	data-name="feature-name"><%= feature.name
+	%></strong><a href="#" class="show-hide">Show Hidden
+	Attributes</a><%= link_to( 'Destroy', feature, :confirm => 'Are
+	you sure?', :method => :delete, :class=>'feature-delete') %></dt>
+	<dd>Feature Type:<span class="edit-select" data-id="<%= feature.id %>" data-name="feature-feature_type"><%= feature.feature_type %></span></dd>
+       <dd>Used For:
+	 <% ufs = feature.used_for.split(','); len = ufs.size; i=0 %>
+	 <% ufs.each do |uf| %>
+	 <span class="edit-select stream" data-id="<%= feature.id %>"
+	 data-name="feature-used_for" data-origin="<%= uf.strip %>"><%=uf.strip %></span>
+	 <% if i < len -  1 %>
+	    <% i += 1 %><span class='comma'>,</span>
+	    <% end %>
+	 <% end %>
+       </dd>
+       <dd>Larger is Better ? <span class="edit-select true-false" data-id="<%= feature.id %>" data-name="feature-larger_is_better"><%= feature.larger_is_better %></span></dd>
+       <% if feature.min.nil? || feature.min == 0 %>
+       <dd class="invisible">Min: <span class="edit" data-id="<%= feature.id %>" data-name="feature-min">0</span></dd>
+       <% else %>
+       <dd>Min: <span class="edit" data-id="<%= feature.id %>" data-name="feature-min"><%= feature.min %></span></dd>
+       <% end %>
+       <% if feature.max.nil? || feature.max == 0 %>
+       <dd class="invisible">Max: <span class="edit" data-id="<%= feature.id %>" data-name="feature-max">0</span></dd>
+       <% else %>
+       <dd>Max: <span class="edit" data-id="<%= feature.id %>" data-name="feature-max"><%= feature.max %></span></dd>
+       <% end %>
+       <% if feature.utility_weight.nil? || feature.utility_weight == 1 %>
+       <dd class="invisible">Utility Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-utility_weight">1</span></dd>
+       <% else %>
+       <dd>Utility Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-utility_weight"><%= feature.utility_weight %></span></dd>
+       <% end %>
+       <% if feature.cluster_weight.nil? || feature.cluster_weight == 1 %>
+       <dd class="invisible">Cluster Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-cluster_weight">1</span></dd>
+       <% else %>
+       <dd>Cluster Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-cluster-weight"><%= feature.cluster_weight %></span></dd>
+       <% end %>
+       <% if feature.prefered.blank? %>
+       <dd class="invisible">
+	 Prefered:
+	 <span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-prefered">""</span>
+       </dd>
+       <% else %>
+       <% fpfs = feature.prefered.split(','); len = fpfs.size; i=0 %>
+	<dd>Prefered:
+	  <% feature.prefered.split(',').each do |fpf| %>
+	  <span class="edit-select stream" data-id="<%= feature.id %>"
+		data-origin="<%= fpf %>" data-name="feature-prefered"><%= fpf.strip %></span>
+	  <% if i < len -  1 %>
+	     <% i += 1 %><span class='comma'>,</span>
+	     <% end %>
+	     <% end %>
+	</dd>
+	<% end %>
+
+	<% end %>
+      </dl>
+      <% end %>
+    </dd>
+
+  </dl>
+</dd>
+<% end %>
+</dl>
