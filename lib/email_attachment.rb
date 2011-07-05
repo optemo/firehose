@@ -43,7 +43,7 @@ def product_orders
             if sku
               product = Product.find_by_sku(sku)
               if product
-                contspec = ContSpec.find_by_product_id_and_name_and_product_type(product.id, "orders", Session.product_type) || ContSpec.new(:name => "orders", :product_type => Session.product_type, :product_id => product.id)
+                contspec = ContSpec.find_by_product_id_and_name_and_product_type(product.id, "orders", product.product_type) || ContSpec.new(:name => "orders", :product_type => product.product_type, :product_id => product.id)
                 contspec.value = orders
                 contspecs << contspec
               end
