@@ -9,6 +9,6 @@ class NullObject
   def nil?; true; end
 end
 
-def Maybe(value)
-  value.nil? ? NullObject.new : value
+def Maybe(value, &block)
+  value.nil? ? (block.nil? ? NullObject.new : yield) : value
 end
