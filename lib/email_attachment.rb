@@ -10,7 +10,7 @@ def product_orders
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0] 
   # Only those with 'SOMETEXT' in subject are of our interest 
-    if msg.attr["ENVELOPE"].subject.index('Products Report') != nil 
+    if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
       body = msg.attr["BODY"] 
       i = 1 
       while body.parts[i] != nil 
