@@ -1,8 +1,6 @@
 class Result < ActiveRecord::Base
 
   has_many :candidates, :dependent=>:delete_all, :include => [:scraping_rule, :scraping_correction]
-
-
   
   def changes
     begin
@@ -70,6 +68,9 @@ class Result < ActiveRecord::Base
     end
     # Bulk insert
     ContSpec.import contspecs
+    
+    #Get BestSeller data from BestBuy Email
+    product_orders()
   end
     
   def self.upkeep_post
