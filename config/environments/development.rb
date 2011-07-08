@@ -1,4 +1,5 @@
 require 'null_object'
+require 'email_attachment'
 Firehose::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
