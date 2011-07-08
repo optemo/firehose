@@ -177,7 +177,7 @@ $(document).ready(function(){
 				data: form.serialize(),
 				type: "DELETE",
 				success: function() {
-				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete')) {
+				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete') || t.hasClass('category_id-delete')) {
 					t.parent().nextUntil('dt', 'dd').remove();
 					t.parent().remove();
 					if(t.hasClass('feature-delete'))
@@ -186,6 +186,9 @@ $(document).ready(function(){
 					    alert_substitute("Heading has been removed.");
 					if(t.hasClass('url-delete'))
 					    alert_substitute("URL has been removed.");
+					if(t.hasClass('url-delete'))
+					    alert_substitute("Category Id has been removed.");
+
 					}
 				    else
 					alert_substitute("Record has been removed.");

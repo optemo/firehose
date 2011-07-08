@@ -28,25 +28,24 @@
 			       data-name="product_type-name"><%= pt.name
 								 %></h2>      <%= link_to("New Heading", "/headings/new?parent_id=#{pt.id}") %>
 </dt>
-<dd><strong>Category ID: </strong>
-  <% cids = pt.category_id.split(',') %>
-  <% len = cids.size; i=0 %>
-  <% cids.each do |cid| %>
-  <span class="edit stream"
-  data-origin="<%= cid %>" data-id="<%= pt.id %>" data-name="product_type-category_id"><%= cid.strip %></span>
-    <% if i < len -  1 %>
-    <% i += 1 %><span class='comma'>,</span>
-   <% end %>
- <% end %>
-</dd>
 <dd><strong>Layout: </strong><span class="edit" data-id="<%= pt.id %>" 
 				   data-name="product_type-layout"><%= pt.layout
 								       %></span></dd>
-
 <dd>
   <dl class="level2" data-parent-id="<%= pt.id %>">
-    <dt><strong>URLs</strong><%= link_to("New Url",
-    "/urls/new?parent_id=#{pt.id}" ) %></dt>
+    <dt><strong>Category ID: </strong><%= link_to("New Category Id",
+    "/category_Ids/new?parent_id=#{pt.id}" ) %></dt>
+    <% cids = pt.category_id_product_type_maps.each do |category| %>
+    <dd>
+      <strong>Category Id: </strong><span class="edit" data-id="<%= category.id %>" data-name="category_id_product_type_maps-category_id"><%= category.category_id %></span>      <%= link_to(
+      'Destroy', category, :confirm => 'Are you sure?', :method =>
+      :delete, :remote=>true, :class=>'category_id-delete') %>
+
+    </dd>
+    <% end %>
+
+    <dt><strong>URLs</strong><%= link_to("New Url", "/urls/new?parent_id=#{pt.id}" ) %></dt>
+
     <% pt.urls.each do |url| %>
     <dd>
       URL: <span class="edit" data-id="<%= url.id %>" data-name="url-url"><%= url.url %></span>

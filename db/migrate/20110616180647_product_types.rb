@@ -3,7 +3,6 @@ class ProductTypes < ActiveRecord::Migration
     create_table :product_types do |t|
       t.string :name, :null=>false 
       t.string :layout, :default=>'assist'
-      t.string :category_id, :null=>false
       t.timestamps
     end
 
@@ -11,13 +10,13 @@ class ProductTypes < ActiveRecord::Migration
 
 
     ProductType.create :name => 'camera_bestbuy',
-    :layout => 'assist', :category_id => '20218'
+    :layout => 'assist'
 
     ProductType.create :name => 'tv_bestbuy',
-    :layout => 'assist', :category_id => '21344'
+    :layout => 'assist'
 
     ProductType.create :name => 'drive_bestbuy',
-    :layout => 'assist', :category_id => '20243, 20237, 20239, 30442, 20236, 29583'
+    :layout => 'assist'
   
 
   end

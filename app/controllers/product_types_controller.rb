@@ -53,7 +53,10 @@ class ProductTypesController < ApplicationController
     if names[0] == "feature"
       data = Feature.find(params[:dId])
     end
-    
+    if names[0] == "category_id_product_type_maps"
+      data = CategoryIdProductTypeMap.find(params[:dId])
+    end
+
 
     new_value = params[:value]
     if params[:orgElement]
