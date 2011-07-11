@@ -1,10 +1,8 @@
 class CategoryIdProductTypeMaps < ActiveRecord::Migration
   def self.up
-    create_table :category_id_product_type_maps do |t|
-      t.references :product_type, :null => false
-      t.integer :category_id, :null => false
-      t.timestamps
-    end
+    remove_column :category_id_product_type_maps, :product_type
+      add_column :category_id_product_type_maps, :product_type_id, :integer
+
 #    add_index :category_id_product_type_maps, [:product_type_id, :category_id], :unique => true
     ProductType.find_each do |t|
       if t.name == 'camera_bestbuy'
@@ -31,7 +29,8 @@ class CategoryIdProductTypeMaps < ActiveRecord::Migration
   end
 
   def self.down
- #   remove_index :category_id_product_type_maps, [:product_type_id, :category_id]
-    drop_table :category_id_product_type_maps
+    #   remove_index :category_id_product_type_maps, [:product_type_id, :category_id]
+    remove_column :category_id_product_type_maps, :product_type_id
+    add_column :category_id_product_type_maps, :product_type, :string
   end
 end
