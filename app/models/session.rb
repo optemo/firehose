@@ -30,14 +30,6 @@ class Session
     self.utility_weights = Hash.new(1)
     self.cluster_weights = Hash.new(1)
     
-    # file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-    # file.each_pair do |product_type,d|
-    #   if d["url"].keys.include? url
-    #     self.product_type = product_type
-    #     break
-    #   end
-    # end
-
     p_url = nil
 
     unless url.nil?
@@ -54,22 +46,20 @@ class Session
     self.product_type = p_type.name
 
     
-    # product_yml = file[self.product_type]
-    # self.category_id = product_yml["category_id"]
-    self.category_id = p_type.category_id.split(',').map{ |id| id.to_i }
+
+    self.category_id = p_type.category_id_product_type_maps.map{ |x| x.category_id }
     
     # directLayout controls the presented view: Optemo Assist vs. Optemo Direct. 
     # Direct needs no clustering, showing all products in browseable pages and offering "group by" buttons.
     # mobileView controls screen vs. mobile view (Optemo Mobile)
     # Default is false
-    # self.directLayout = product_yml["layout"] == "direct"
-    # self.mobileView = product_yml["layout"] == "mobileview"
+
     self.directLayout = p_type.layout.include?("direct")
     self.mobileView = p_type.layout.include?("mobileview")
 
     # Check for what Piwik site ID to put down in the optemo.html.erb layout
     # These site ids MUST match what's in the piwik database.
-    # self.piwikSiteId = product_yml["url"][url] || 10 # This is a catch-all for testing sites.
+
     p_url ||= p_type.urls.first
     self.piwikSiteId = p_url.piwik_id || 10 # This is a catch-all for testing sites.
     
@@ -99,29 +89,5 @@ class Session
          self.cluster_weights[feature.name] = feature.cluster_weight if feature.cluster_weight > 1
       end
     end
-    # product_yml["specs"].each_pair do |heading, specs|
-    #   specs.each_pair do |feature,atts|
-    #     case atts["type"]
-    #     when "Continuous"
-    #       atts["used_for"].each{|flag| self.continuous[flag] << feature}
-    #       self.continuous["all"] << feature #Keep track of all features
-    #       self.prefDirection[feature] = atts["prefdir"] if atts["prefdir"]
-    #       self.maximum[feature] = atts["max"] if atts["max"]
-    #       self.minimum[feature] = atts["min"] if atts["min"]
-    #     when "Binary"
-    #       atts["used_for"].each{|flag| self.binary[flag] << feature; self.binarygroup[heading] << feature if flag == "filter"}
-    #       self.binary["all"] << feature #Keep track of all features
-    #       self.prefered[feature] = atts["prefered"] if atts["prefered"]
-    #     when "Categorical"
-    #       atts["used_for"].each{|flag| self.categorical[flag] << feature}
-    #       self.categorical["all"] << feature #Keep track of all features
-    #       self.prefered[feature] = atts["prefered"] if atts["prefered"]  
-    #     end
-    #      self.utility_weights[feature] = atts["utility"] if atts["utility"]
-    #      self.utility["all"] << feature if atts["utility"]
-    #      self.cluster_weights[feature] = atts["cluster"] if atts["cluster"]
-    #   end
-     
-    # end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110706003041) do
+ActiveRecord::Schema.define(:version => 20110707002656) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -50,14 +50,12 @@ ActiveRecord::Schema.define(:version => 20110706003041) do
 
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
 
-  create_table "category_id_product_type_map", :force => true do |t|
-    t.string   "product_type"
-    t.integer  "category_id"
+  create_table "category_id_product_type_maps", :force => true do |t|
+    t.integer  "product_type_id", :null => false
+    t.integer  "category_id",     :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
-
-  add_index "category_id_product_type_map", ["category_id"], :name => "index_category_id_product_type_map_on_category_id"
 
   create_table "cont_specs", :force => true do |t|
     t.integer  "product_id"
@@ -121,9 +119,8 @@ ActiveRecord::Schema.define(:version => 20110706003041) do
   add_index "product_siblings", ["product_id"], :name => "index_product_siblings_on_product_id"
 
   create_table "product_types", :force => true do |t|
-    t.string   "name",                              :null => false
-    t.string   "layout",      :default => "assist"
-    t.string   "category_id",                       :null => false
+    t.string   "name",                             :null => false
+    t.string   "layout",     :default => "assist"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
