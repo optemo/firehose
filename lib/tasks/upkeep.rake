@@ -33,7 +33,8 @@ task :update => :environment do
       # for each product_type, clean up results and related candidates days ago
       #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
       Result.cleanupByProductType(Session.product_type, 3)
-      # clean up inactive scraping rules not used any more
+  # clean up inactive scraping rules not used any more
+  Feature.count_products
       ScrapingRule.cleanup
       Search.cleanup_history_data(7)
 end
