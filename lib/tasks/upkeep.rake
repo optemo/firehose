@@ -2,10 +2,17 @@
 #Here is where general upkeep scripts are
 desc "Process product relationships and fill up prduct siblings table"
 task :upkeep => :environment do
-  # file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"]))
-     raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
+  if !ENV.include?("url")
+    Session.new
+  else
+    url = Url.find_by_url(ENV["url"])
+    if url
+      Session.new url.product_type_id
+    else
+      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+    end
   end
+
   Result.upkeep_pre
   #Calculate new spec factors
   Product.calculate_factors
@@ -20,15 +27,18 @@ task :update => :environment do
   if !ENV.include?("url")
     Session.new
   else
-    if Session.new(ENV["url"]).nil?
+    url = Url.find_by_url(ENV["url"])
+    if url
+      Session.new url.product_type_id
+    else
       raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
     end
   end
   
-      result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
+  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
 
-      result.create_from_current
-      Product.create_from_result(result.id)
+  result.create_from_current
+  Product.create_from_result(result.id)
 
       # for each product_type, clean up results and related candidates days ago
       #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
@@ -42,21 +52,33 @@ end
 #Here is where general upkeep scripts are
 desc "Process product relationships and fill up prduct siblings table"
 task :bundles => :environment do
-  # file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"]))
-     raise "usage: rake get_relations url=? # url is a valid url from products.yml; sets product_type."
+  if !ENV.include?("url")
+    Session.new
+  else
+    url = Url.find_by_url(ENV["url"])
+    if url
+      Session.new url.product_type_id
+    else
+      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+    end
   end
+
   Result.find_bundles
 end
 
 
 desc "Set performance factors"
 task :set_performance_scores => :environment do 
-  # file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-  unless ENV.include?("url") && (Session.new(ENV["url"]))
-     raise "usage: rake set_performance_scores url=? # url is a valid url from products.yml; sets product_type."
+  if !ENV.include?("url")
+    Session.new
+  else
+    url = Url.find_by_url(ENV["url"])
+    if url
+      Session.new url.product_type_id
+    else
+      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+    end
   end
-
   begin
     # connect to the MySQL server
     dbh = Mysql2::Client.new({:host => "jaguar", :username => "opt_read", :password => "literati", :database => "piwik_09"})

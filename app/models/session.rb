@@ -10,7 +10,7 @@ class Session
   cattr_accessor :ab_testing_type # Categorizes new users for AB testing
   cattr_accessor :category_id
 
-  def initialize (url = nil)
+  def initialize (id = nil)
     # This parameter controls whether the interface features drag-and-drop comparison or not.
     self.dragAndDropEnabled = true
     # Relative descriptions, in comparison to absolute descriptions, have been the standard since late 2009, and now we use Boostexter labels also.
@@ -29,20 +29,25 @@ class Session
     self.utility = Hash.new{|h,k| h[k] = []} 
     self.utility_weights = Hash.new(1)
     self.cluster_weights = Hash.new(1)
-    
-    p_url = nil
 
-    unless url.nil?
-      Url.find_each do |u|
-        if u.url==url
-          p_url = u
-          break
-        end
-      end
+    if id
+      p_type = ProductType.find id
+    else
+      p_type = ProductType.first
     end
 
-    p_type = p_url.nil?? ProductType.find_all_by_name('camera_bestbuy').first : p_url.product_type
-    
+    # p_url = nil
+
+    # unless url.nil?
+    #   Url.find_each do |u|
+    #     if u.url==url
+    #       p_url = u
+    #       break
+    #     end
+    #   end
+    # end
+
+    # p_type = p_url.nil?? ProductType.find_all_by_name('camera_bestbuy').first : p_url.product_type
     self.product_type = p_type.name
 
     
