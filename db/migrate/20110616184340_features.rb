@@ -6,7 +6,7 @@ class Features < ActiveRecord::Migration
       t.string :feature_type, {:null => false, :default => 'Categorical'}
       t.string :used_for, :default => 'show'
       t.string :used_for_categories
-      t.string :used_for_order, :default => 9999
+      t.integer :used_for_order, :default => 9999
       t.boolean :larger_is_better, :default => true
       t.integer :min, :default => 0
       t.integer :max, :default => 0

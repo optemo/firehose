@@ -1,5 +1,11 @@
 class ScrapingController < ApplicationController
   def index
+    
+    if params[:product_type]
+      self.current_product_type = ProductType.find params[:product_type][:id]
+    end
+    @product_type = self.current_product_type
+    Session.new @product_type.id
   end
   
   def datafeed

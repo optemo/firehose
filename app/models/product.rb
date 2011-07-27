@@ -108,7 +108,7 @@ class Product < ActiveRecord::Base
   
   def self.create_from_result(id)
     result = Result.find(id)
-    products_to_save = []
+    products_to_save = {}
     specs_to_save = {}
     #Reset the intock flags
     Product.update_all(['instock=false'], ['product_type=?', result.product_type])
@@ -126,7 +126,15 @@ class Product < ActiveRecord::Base
           else CatSpec # This should never happen
                      end
         #Create new product if necessary
-        p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
+        if products_to_save.keys.include?(candidate.product_id)
+          p = products_to_save[candidate.product_id]
+        else
+          p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
+        end
+
+        if p.new_record?
+          p.save
+        end
         if candidate.delinquent && spec_class != "intr"
           #This is a feature which was removed
           spec = spec_class.find_by_product_id_and_name(p.id,feature)
@@ -135,25 +143,24 @@ class Product < ActiveRecord::Base
           p.instock = true
           if spec_class == "intr"
             p[feature] = candidate.parsed
-            products_to_save << p
+            products_to_save[candidate.product_id] = p 
           else
-            #This is a feature which should be added
-            if p.new_record?
-              p.save
-            else
-              products_to_save << p
-            end
-
             spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
+            
             spec.product_type = Session.product_type
             spec.value = candidate.parsed
             specs_to_save.keys.include?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+            if feature=='mpn' || feature=='title' || feature=='model'
+              p[feature] = spec.value
+            end
+            products_to_save[candidate.product_id] = p
+
           end
         end
       end
     end
     # Bulk insert/update for efficiency
-    Product.import products_to_save, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
+    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
@@ -207,7 +214,6 @@ class Product < ActiveRecord::Base
           elsif Session.categorical["all"].include?(f)  
             factorRow.value = Product.calculateFactor_categorical(fVal, f)
           else  
-             debugger 
             raise ValidationError  
           end    
         else

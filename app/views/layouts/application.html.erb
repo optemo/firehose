@@ -12,7 +12,16 @@
 <body>
     <div id="header">
 		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
-        <h2>SKUs in category id <%= Session.category_id %></h2>
+
+    
+        <h2>
+          <% @product_type = current_product_type %>
+          <%= form_for @product_type, :url=>root_path do |f| %>
+          Please select product: <%= select "product_type","id", ProductType.all.collect { |p| [ p.name, p.id] } %><%= f.submit "Change Product Type"%>
+          <% end %>
+          <br />
+          SKUs in category id <%= Session.category_id %>
+        </h2> 
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
         <%= link_to "results", "/results" %> - Make new result set,

@@ -7,7 +7,7 @@ def product_orders
   # All msgs in a folder 
   msgs = imap.search(["SINCE", "1-Jan-1969"]) 
   # Read each message 
-  msgs.reverse.each do |msgID|
+  msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0] 
   # Only those with 'SOMETEXT' in subject are of our interest 
     if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
