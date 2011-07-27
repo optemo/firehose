@@ -59,6 +59,7 @@
       :delete, :remote=>true, :class=>'url-delete') %>
     </dd>
     <% end %>
+
     <% pt.headings.each do |spec| %>
     <dt>
       <strong class="edit" data-id="<%= spec.id %>"
@@ -88,6 +89,21 @@
 	    <% end %>
 	 <% end %>
        </dd>
+    <% if feature.used_for_categories.nil? %>
+      <dd class='invisible'>Used For Categories:<span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-uses_for_categories">""</span></dd>
+    <% else %>
+      <dd>Used For Categories:
+	      <% ufcs = feature.used_for_categories.split(','); len = ufcs.size; i=0 %>
+	      <% ufcs.each do |ufc| %>
+	        <span class="edit-select stream" data-id="<%= feature.id %>"
+	              data-name="feature-used_for_categories" data-origin="<%= ufc.strip %>"><%=ufc.strip %></span>
+	        <% if i < len -  1 %>
+	          <% i += 1 %><span class='comma'>,</span>
+	        <% end %>
+	      <% end %>
+      </dd>
+    <% end %>
+       <dd>Order in Filter bar: <span class="edit" data-id="<%= feature.id %>" data-name="feature-used_for_order"><%= feature.used_for_order %></span></dd>
        <dd>Larger is Better ? <span class="edit-select true-false" data-id="<%= feature.id %>" data-name="feature-larger_is_better"><%= feature.larger_is_better %></span></dd>
        <% if feature.min.nil? || feature.min == 0 %>
        <dd class="invisible">Min: <span class="edit" data-id="<%= feature.id %>" data-name="feature-min">0</span></dd>
