@@ -7,7 +7,7 @@ class Feature < ActiveRecord::Base
   validates_presence_of :cluster_weight
   validates_format_of :utility_weight, :with=>/\d+/
   validates_format_of :cluster_weight, :with=>/\d+/
-  validates_inclusion_of :feature_type, %w(Continuous Binary Categorical)
+  validates_inclusion_of :feature_type, :in => %w(Continuous Binary Categorical)
   def self.count_products(p_type_name = nil)
     product_type_name = (Session.product_type ||= 'camera_bestbuy') if p_type_name.nil?
     product_type_name ||= p_type_name

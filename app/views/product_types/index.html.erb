@@ -3,7 +3,7 @@
   display: none;
   color: green;
   }
-  .edit, .edit-select {
+  .edit, .edit-select, .edit-select-bool, .edit-select-feature-type,.edit-int {
  color:blue;
   }
   dt a, dd a {
@@ -34,10 +34,10 @@
 <dd>
   <dl class="level2" data-parent-id="<%= pt.id %>">
     <dt><strong>Category ID: </strong><%= link_to("New Category Id",
-    "/category_Ids/new?parent_id=#{pt.id}" ) %></dt>
+    "/category_ids/new?parent_id=#{pt.id}" ) %></dt>
     <% cids = pt.category_id_product_type_maps.each do |category| %>
     <dd>
-      <strong>Category Id: </strong><span class="edit" data-id="<%= category.id %>" data-name="category_id_product_type_maps-category_id"><%= category.category_id %></span>      <%= link_to(
+      <strong>Category Id: </strong><span class="edit-int" data-id="<%= category.id %>" data-name="category_id_product_type_maps-category_id"><%= category.category_id %></span>      <%= link_to(
       'Destroy', category, :confirm => 'Are you sure?', :method =>
       :delete, :remote=>true, :class=>'category_id-delete') %>
 
@@ -69,16 +69,14 @@
       'Destroy', spec, :confirm => 'Are you sure?', :method =>
       :delete, :class=>'spec-delete') %>
     </dt>
-    <dd><strong>Show Order: </strong><span class="edit" data-id="<%= spec.id %>" data-name="heading-show_order"><%= spec.show_order %></dd>
+    <dd><strong>Show Order: </strong><span class="edit-int" data-id="<%= spec.id %>" data-name="heading-show_order"><%= spec.show_order %></dd>
     <dd class="features">
       <dl class="level3" data-parent-id="<%= spec.id %>">
 	<% spec.features.each do |feature| %>
 	<dt><strong class="edit" data-id="<%= feature.id %>"
 	data-name="feature-name"><%= feature.name
-	%></strong><a href="#" class="show-hide">Show Hidden
-	Attributes</a><%= link_to( 'Destroy', feature, :confirm => 'Are
-	you sure?', :method => :delete, :class=>'feature-delete') %></dt>
-	<dd>Feature Type:<span class="edit-select" data-id="<%= feature.id %>" data-name="feature-feature_type"><%= feature.feature_type %></span></dd>
+	%></strong><a href="#" class="show-hide not-all">Show All	Attributes</a><%= link_to( 'Destroy', feature, :confirm => 'Are	you sure?', :method => :delete, :class=>'feature-delete') %></dt>
+	<dd>Feature Type:<span class="edit-select-feature-type" data-id="<%= feature.id %>" data-name="feature-feature_type"><%= feature.feature_type %></span></dd>
        <dd>Used For:
 	 <% ufs = feature.used_for.split(','); len = ufs.size; i=0 %>
 	 <% ufs.each do |uf| %>
@@ -103,38 +101,38 @@
 	      <% end %>
       </dd>
     <% end %>
-       <dd>Order in Filter bar: <span class="edit" data-id="<%= feature.id %>" data-name="feature-used_for_order"><%= feature.used_for_order %></span></dd>
-       <dd>Larger is Better ? <span class="edit-select true-false" data-id="<%= feature.id %>" data-name="feature-larger_is_better"><%= feature.larger_is_better %></span></dd>
+       <dd>Order in Filter bar: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-used_for_order"><%= feature.used_for_order %></span></dd>
+       <dd>Larger is Better ? <span class="edit-select-bool true-false" data-id="<%= feature.id %>" data-name="feature-larger_is_better"><%= feature.larger_is_better %></span></dd>
        <% if feature.min.nil? || feature.min == 0 %>
-       <dd class="invisible">Min: <span class="edit" data-id="<%= feature.id %>" data-name="feature-min">0</span></dd>
+       <dd class="invisible">Min: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-min">0</span></dd>
        <% else %>
-       <dd>Min: <span class="edit" data-id="<%= feature.id %>" data-name="feature-min"><%= feature.min %></span></dd>
+       <dd>Min: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-min"><%= feature.min %></span></dd>
        <% end %>
        <% if feature.max.nil? || feature.max == 0 %>
-       <dd class="invisible">Max: <span class="edit" data-id="<%= feature.id %>" data-name="feature-max">0</span></dd>
+       <dd class="invisible">Max: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-max">0</span></dd>
        <% else %>
-       <dd>Max: <span class="edit" data-id="<%= feature.id %>" data-name="feature-max"><%= feature.max %></span></dd>
+       <dd>Max: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-max"><%= feature.max %></span></dd>
        <% end %>
        <% if feature.utility_weight.nil? || feature.utility_weight == 1 %>
-       <dd class="invisible">Utility Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-utility_weight">1</span></dd>
+       <dd class="invisible">Utility Weight: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-utility_weight">1</span></dd>
        <% else %>
-       <dd>Utility Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-utility_weight"><%= feature.utility_weight %></span></dd>
+       <dd>Utility Weight: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-utility_weight"><%= feature.utility_weight %></span></dd>
        <% end %>
        <% if feature.cluster_weight.nil? || feature.cluster_weight == 1 %>
-       <dd class="invisible">Cluster Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-cluster_weight">1</span></dd>
+       <dd class="invisible">Cluster Weight: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-cluster_weight">1</span></dd>
        <% else %>
-       <dd>Cluster Weight: <span class="edit" data-id="<%= feature.id %>" data-name="feature-cluster-weight"><%= feature.cluster_weight %></span></dd>
+       <dd>Cluster Weight: <span class="edit-int" data-id="<%= feature.id %>" data-name="feature-cluster-weight"><%= feature.cluster_weight %></span></dd>
        <% end %>
        <% if feature.prefered.blank? %>
        <dd class="invisible">
 	 Prefered:
-	 <span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-prefered">""</span>
+	 <span class="edit stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-prefered">""</span>
        </dd>
        <% else %>
        <% fpfs = feature.prefered.split(','); len = fpfs.size; i=0 %>
 	<dd>Prefered:
 	  <% feature.prefered.split(',').each do |fpf| %>
-	  <span class="edit-select stream" data-id="<%= feature.id %>"
+	  <span class="edit stream" data-id="<%= feature.id %>"
 		data-origin="<%= fpf %>" data-name="feature-prefered"><%= fpf.strip %></span>
 	  <% if i < len -  1 %>
 	     <% i += 1 %><span class='comma'>,</span>

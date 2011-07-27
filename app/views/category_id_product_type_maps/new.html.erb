@@ -1,3 +1,11 @@
+<script>
+  $("#new_category_id_product_type_map").validate({
+  debug: true,
+  rules: {
+  "category_id_product_type_map[category_id]": {required: true, digits: true}
+  }
+  });
+</script>
 <h1><%= @category.product_type.name %>: New Category ID </h1>
 <%= render 'form' %>
 <%= link_to 'Back', product_types_path %>

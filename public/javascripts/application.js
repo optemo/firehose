@@ -235,59 +235,82 @@ $(document).ready(function(){
 		return false;
 	});
 
-    // Editable
+    // Editable, use jeditable to edit inline. Document is jquery jeditable
     var editableVar = {
-	method: 'PUT',
-	indicator : 'Saving...',
-	tooltip : 'Click to edit...',
-	cancel : 'Cancel',
-	submit : 'Ok',
-	submitdata : function(value, settings) {
-	    pName = $(this).data("name");
-	    dId = $(this).data("id");
-	    origin = '';
-	    orgElement = '';
-	    if ($(this).hasClass('stream')) {
-		orgElement = $(this).data("origin");
-		return { name : pName, dId : dId, orgElement : orgElement };
-	    }
-	    return { name : pName, dId : dId };
-	},
-	callback : function(value, settings) {
-	    console.log(this);
-	    console.log(value);
-	    console.log(settings);
-	    if ($(this).hasClass('stream')) {
-		if(value == '') {
-		    $(this).prev('span.comma').remove();
-		    $(this).remove();
-		} else
-		{
-		    arr = value.split(',');
-		    $(this).data('origin', arr[0]);
-		    $(this).text(arr[0]);
-		    for (var i=1; i<arr.length; i++) {
-			spanElem = $("<span class='comma'>,</span>");
-			spanNewVal = $("<span class='" +$(this).attr("class") + "' data-origin='" + arr[i] + "' data-id='" + $(this).data("id") + "' data-name='" + $(this).data("name") + "'>" + arr[i] + "</span>");
-			spanNewVal.editable('/product_types/1', editableVar);
-			$(this).parent().append(spanElem);
-			$(this).parent().append(spanNewVal);
-		    }
-		    $(this).data('origin', value);
-		}
-	    }
-	}
+	      method: 'PUT',
+	      indicator : 'Saving...',
+	      tooltip : 'Click to edit...',
+	      cancel : 'Cancel',
+	      submit : 'Ok',
+	      submitdata : function(value, settings) {
+	          pName = $(this).data("name");
+	          dId = $(this).data("id");
+	          origin = '';
+	          orgElement = '';
+	          if ($(this).hasClass('stream')) {
+		            orgElement = $(this).data("origin");
+		            return { name : pName, dId : dId, orgElement : orgElement };
+	          }
+	          return { name : pName, dId : dId };
+	      },
+	      callback : function(value, settings) {
+	          console.log(this);
+	          console.log(value);
+	          console.log(settings);
+	          if ($(this).hasClass('stream')) {
+		            if(value == '') {
+		                $(this).prev('span.comma').remove();
+		                $(this).remove();
+		            } else
+		            {
+		                arr = value.split(',');
+		                $(this).data('origin', arr[0]);
+		                $(this).text(arr[0]);
+		                for (var i=1; i<arr.length; i++) {
+			                  spanElem = $("<span class='comma'>,</span>");
+			                  spanNewVal = $("<span class='" +$(this).attr("class") + "' data-origin='" + arr[i] + "' data-id='" + $(this).data("id") + "' data-name='" + $(this).data("name") + "'>" + arr[i] + "</span>");
+			                  spanNewVal.editable('/product_types/1', editableVar);
+			                  $(this).parent().append(spanElem);
+			                  $(this).parent().append(spanNewVal);
+		                }
+		                $(this).data('origin', value);
+		            }
+	          }
+	      }
     };
+    
     $('.edit, .edit-select').editable('/product_types/1', editableVar);
+    var editableSelectVar = {};
+    $.extend(editableSelectVar, editableVar, {type: 'select'});
+    $('.edit-select-bool').editable('/product_types/1', $.extend(editableSelectVar,{
+        data : "{true: 'Yes', false: 'No'}"
+    }));
+    $('.edit-select-feature-type').editable('/product_types/1', $.extend(editableSelectVar,{
+        data : "{'Categorical': 'Categorical', 'Binary': 'Binary', 'Continuous':'Continuous'}"
+    }));
+    $('.edit-int').editable('/product_types/1', $.extend(editableVar,{
+        onsubmit: function(settings, form) {
+            var input = $(form).find('input');
+            var original = input.val();
+            if (original == null || !original.toString().match(/^\d+$/)) {
+                alert("Invalid input. Please input valid number!");
+                return false;
+            }
+                
+        }
+    }));
 
     $('a.show-hide').live('click', function () {
-	if($(this).text() == "Show Hidden Attributes") {
-	    $(this).parent().nextUntil('dt', 'dd.invisible').show();
-	    $(this).text ("Hide No Value Attributes");
-	} else {
-	    $(this).parent().nextUntil('dt', 'dd.invisible').hide();
-	    $(this).text ("Show Hidden Attributes");
-	    }
+
+	      if($(this).hasClass("not-all")) {
+	          $(this).parent().nextUntil('dt', 'dd.invisible').show();
+	          $(this).text ("Hide No Value Attributes");
+            $(this).removeClass("not-all");
+	      } else {
+	          $(this).parent().nextUntil('dt', 'dd.invisible').hide();
+	          $(this).text ("Show All Attributes");
+            $(this).addClass("not-all");
+	      }
 	return false;
 	});
 
@@ -342,6 +365,7 @@ $(document).ready(function(){
     // 	}
 
     // });
+    
 });
 
 function removeSilkScreen() {

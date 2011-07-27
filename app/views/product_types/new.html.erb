@@ -1,3 +1,13 @@
+<script>
+      $("#new_product_type").validate({
+        debug: true,
+        rules: {
+            "product_type[name]": {required: true}
+        }
+    });
+
+</script>
+
 <h1>New Product Type</h1>
 
 <%= render 'form' %>
