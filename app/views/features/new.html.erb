@@ -1,6 +1,6 @@
 <script>
+  $(document).ready(function() {
   $("#new_feature").validate({
-  debug: true,
   rules: {
   "feature[name]": {required: true},
   "feature[min]": {required: true, digits: true},
@@ -8,6 +8,7 @@
   "feature[utility_weight]": {required: true, digits: true},
   "feature[cluster_weight]": {required: true, digits: true}
   }
+  });
   });
 </script>
 <h1><%= @feature.heading.name+'@'+@feature.heading.product_type.name %>: New Feature </h1>

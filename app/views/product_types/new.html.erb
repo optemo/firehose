@@ -1,10 +1,11 @@
 <script>
+  $(document).ready(function() {
       $("#new_product_type").validate({
-        debug: true,
         rules: {
             "product_type[name]": {required: true}
         }
     });
+  });
 
 </script>
 

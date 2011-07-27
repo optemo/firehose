@@ -339,6 +339,8 @@ $(document).ready(function(){
 	    
 	});
 
+
+
     // $('a.spec-delete').live('click', function () {
     // 	if (($(this).parent().next('dd.features').(':first-child').children().length > 0)) {
     // 	    alert_substitute("The heading is not empty. Can not be deleted!");

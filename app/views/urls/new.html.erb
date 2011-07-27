@@ -1,11 +1,12 @@
 <script>
+  $(document).ready(function() {
   $("#new_url").validate({
-  debug: true,
   rules: {
   "url[url]": {required: true},
   "url[port]": {required: true, digits: true},
   "url[piwik]": {required: true, digits: true}
   }
+  });
   });
 </script>
 <h1><%= @purl.product_type.name %>: New Url </h1>

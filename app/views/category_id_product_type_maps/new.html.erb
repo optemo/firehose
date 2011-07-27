@@ -1,9 +1,10 @@
 <script>
+  $(document).ready(function() {
   $("#new_category_id_product_type_map").validate({
-  debug: true,
   rules: {
   "category_id_product_type_map[category_id]": {required: true, digits: true}
   }
+  });
   });
 </script>
 <h1><%= @category.product_type.name %>: New Category ID </h1>

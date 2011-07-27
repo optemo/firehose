@@ -1,10 +1,11 @@
 <script>
-  $("#new_heading").validate({
-        debug: true,
-        rules: {
-            "heading[name]": {required: true},
-            "heading[show_order]" : {required: true, digits: true}
-        }
+    $(document).ready(function() {
+    $("#new_heading").validate({
+    rules: {
+    "heading[name]": {required: true},
+    "heading[show_order]" : {required: true, digits: true}
+    }
+    });
     });
 </script>
 <h1><%= @heading.product_type.name %>: New Heading </h1>
