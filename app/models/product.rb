@@ -207,6 +207,7 @@ class Product < ActiveRecord::Base
           elsif Session.categorical["all"].include?(f)  
             factorRow.value = Product.calculateFactor_categorical(fVal, f)
           else  
+             debugger 
             raise ValidationError  
           end    
         else

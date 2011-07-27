@@ -2,13 +2,13 @@ require 'mysql'
 require 'ruby-debug'
 
 
-cf = ['10154869', '10164409', '10166499', '10164927', '10163408', '10164959', '10162371', '10162518', '10168313']
-ch = 'B9001976'
+cf = ['10164410', '10164409', '10156023', '10168417', '10174719', 'B9002011', 'B9002017', 'B9002014', 'B9002026' ]
+ch = 'B9002045'
 
-hdf= ['10166034', '10167002','10155405', '10163156', '10157665', '10154954','10173203','10143877','10160772','10169523','10174031','10152255']
-hdh= '10172122' 
+hdf= ['10167002','10150284','10137885','10163156','10155745','10170034','10174027','10150896','10174947']
+hdh= '10172169' 
  
-con = Mysql.new('jaguar', 'maryam', 'sCbub3675NWnNZK2', 'firehose_development')
+con = Mysql.new('jaguar', 'maryam', 'sCbub3675NWnNZK2', 'firehose_production')
 id_cf = []
 id_ch = []
 id_hdf = []
@@ -31,7 +31,7 @@ hdf.each do |s|
     rs1.each_hash{|h| id_hdf << h['id']} 
 end 
 
-rs1 = con.query("select id from products where sku=\'#{ch}\'")
+rs1 = con.query("select id from products where sku=\'#{hdh}\'")
 rs1.each_hash{|h| id_hdh<<h['id']}
 
 
@@ -44,5 +44,5 @@ rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) v
 id_hdf.each do |i|
     rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{i}, \'featured\', 1, \'drive_bestbuy\')")
 end    
-
+debugger
 rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{id_hdh[0]}, \'hero\', 1, \'drive_bestbuy\')")
