@@ -213,7 +213,7 @@ class Product < ActiveRecord::Base
             factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
           elsif Session.categorical["all"].include?(f)  
             factorRow.value = Product.calculateFactor_categorical(fVal, f)
-          else
+          else  
             raise ValidationError  
           end    
         else
