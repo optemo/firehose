@@ -2,14 +2,14 @@
 #Here is where general upkeep scripts are
 desc "Process product relationships and fill up prduct siblings table"
 task :upkeep => :environment do
-  if !ENV.include?("url")
+  if !ENV.include?("product_type")
     Session.new
   else
-    url = Url.find_by_url(ENV["url"])
-    if url
-      Session.new url.product_type_id
+    id = ProductType.find_by_name(ENV["product_type"])
+    if id
+      Session.new id
     else
-      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
     end
   end
 
@@ -24,14 +24,14 @@ end
 
 desc "Update data automatically"
 task :update => :environment do
-  if !ENV.include?("url")
+  if !ENV.include?("product_type")
     Session.new
   else
-    url = Url.find_by_url(ENV["url"])
-    if url
-      Session.new url.product_type_id
+    id = ProductType.find_by_name(ENV["product_type"])
+    if id
+      Session.new id
     else
-      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
     end
   end
   
@@ -52,14 +52,14 @@ end
 #Here is where general upkeep scripts are
 desc "Process product relationships and fill up prduct siblings table"
 task :bundles => :environment do
-  if !ENV.include?("url")
+  if !ENV.include?("product_type")
     Session.new
   else
-    url = Url.find_by_url(ENV["url"])
-    if url
-      Session.new url.product_type_id
+    id = ProductType.find_by_name(ENV["product_type"])
+    if id
+      Session.new id
     else
-      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
     end
   end
 
@@ -69,14 +69,14 @@ end
 
 desc "Set performance factors"
 task :set_performance_scores => :environment do 
-  if !ENV.include?("url")
+  if !ENV.include?("product_type")
     Session.new
   else
-    url = Url.find_by_url(ENV["url"])
-    if url
-      Session.new url.product_type_id
+    id = ProductType.find_by_name(ENV["product_type"])
+    if id
+      Session.new id
     else
-      raise "usage: rake update url=? # url is a valid url from products.yml; sets product_type."
+      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
     end
   end
   begin
