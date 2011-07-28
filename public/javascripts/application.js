@@ -273,22 +273,23 @@ $(document).ready(function(){
 			                  $(this).parent().append(spanElem);
 			                  $(this).parent().append(spanNewVal);
 		                }
-		                $(this).data('origin', value);
+//		                $(this).data('origin', value);
 		            }
 	          }
 	      }
     };
     
     $('.edit, .edit-select').editable('/product_types/1', editableVar);
-    var editableSelectVar = {};
-    $.extend(editableSelectVar, editableVar, {type: 'select'});
-    $('.edit-select-bool').editable('/product_types/1', $.extend(editableSelectVar,{
-        data : "{true: 'Yes', false: 'No'}"
+
+     $('.edit-select-bool').editable('/product_types/1', $.extend({},editableVar,{
+        data : "{true: 'Yes', false: 'No'}",
+        type : 'select'
     }));
-    $('.edit-select-feature-type').editable('/product_types/1', $.extend(editableSelectVar,{
-        data : "{'Categorical': 'Categorical', 'Binary': 'Binary', 'Continuous':'Continuous'}"
+    $('.edit-select-feature-type').editable('/product_types/1', $.extend({},{
+        data : "{'Categorical': 'Categorical', 'Binary': 'Binary', 'Continuous':'Continuous'}",
+        type : 'select'
     }));
-    $('.edit-int').editable('/product_types/1', $.extend(editableVar,{
+    $('.edit-int').editable('/product_types/1', $.extend({},editableVar,{
         onsubmit: function(settings, form) {
             var input = $(form).find('input');
             var original = input.val();
@@ -338,6 +339,8 @@ $(document).ready(function(){
 	    
 	    
 	});
+
+
 
     // $('a.spec-delete').live('click', function () {
     // 	if (($(this).parent().next('dd.features').(':first-child').children().length > 0)) {

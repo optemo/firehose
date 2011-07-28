@@ -2,6 +2,7 @@
   .invisible {
   display: none;
   color: green;
+  font-style: italic;
   }
   .edit, .edit-select, .edit-select-bool, .edit-select-feature-type,.edit-int {
  color:blue;
@@ -88,7 +89,7 @@
 	 <% end %>
        </dd>
     <% if feature.used_for_categories.nil? %>
-      <dd class='invisible'>Used For Categories:<span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-uses_for_categories">""</span></dd>
+      <dd class='invisible'>Used For Categories:<span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-uses_for_categories"></span></dd>
     <% else %>
       <dd>Used For Categories:
 	      <% ufcs = feature.used_for_categories.split(','); len = ufcs.size; i=0 %>
@@ -126,7 +127,7 @@
        <% if feature.prefered.blank? %>
        <dd class="invisible">
 	 Prefered:
-	 <span class="edit stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-prefered">""</span>
+	 <span class="edit stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-prefered"></span>
        </dd>
        <% else %>
        <% fpfs = feature.prefered.split(','); len = fpfs.size; i=0 %>

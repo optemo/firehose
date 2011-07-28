@@ -61,6 +61,9 @@ class ProductTypesController < ApplicationController
     new_value = params[:value]
     if params[:orgElement]
       arr_data = data[names[1]].split(',')
+
+      arr_data.delete_if{|x| x.strip.blank?}
+      debugger      
       if params[:value].empty?
         arr_data.delete_if { |x| x.strip == params[:orgElement].strip }
       else
@@ -73,5 +76,6 @@ class ProductTypesController < ApplicationController
     data[names[1]] = new_value
     data.save
     render :inline=>params[:value]
+    
   end
 end
