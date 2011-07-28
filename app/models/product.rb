@@ -209,6 +209,8 @@ class Product < ActiveRecord::Base
             ori_price = prices[product.id].first.value
             sale_price = records["saleprice"][product.id].first.value
             factorRow.value = Product.calculateFactor_sale(ori_price, sale_price)
+          elsif Session.binary["all"].include?(f)
+            factorRow.value = 1 if fVal
           elsif Session.continuous["all"].include?(f)
             factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
           elsif Session.categorical["all"].include?(f)  
