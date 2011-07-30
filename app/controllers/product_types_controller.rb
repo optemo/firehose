@@ -62,8 +62,7 @@ class ProductTypesController < ApplicationController
     if params[:orgElement]
       arr_data = data[names[1]].split(',')
 
-      arr_data.delete_if{|x| x.strip.blank?}
-      debugger      
+      arr_data.delete_if{|x| x.strip.blank?}      
       if params[:value].empty?
         arr_data.delete_if { |x| x.strip == params[:orgElement].strip }
       else
