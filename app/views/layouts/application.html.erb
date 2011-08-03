@@ -10,6 +10,7 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
+  <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
     <div id="header">
 		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
 
