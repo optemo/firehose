@@ -5,6 +5,15 @@ html, body {
     padding: 0;
     margin: 0;
 }
+#server_environment_reminder {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-weight: bold;
+    padding:5px;
+    border: 1px solid black;
+    background: #FFF;
+}
 #header {
     width: 100%;
     background: #b6c4c5;

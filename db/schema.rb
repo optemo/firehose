@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110707002656) do
+ActiveRecord::Schema.define(:version => 20110803232800) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -51,11 +51,13 @@ ActiveRecord::Schema.define(:version => 20110707002656) do
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
 
   create_table "category_id_product_type_maps", :force => true do |t|
-    t.integer  "product_type_id", :null => false
-    t.integer  "category_id",     :null => false
+    t.integer  "category_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "product_type_id"
   end
+
+  add_index "category_id_product_type_maps", ["category_id"], :name => "index_category_id_product_type_maps_on_category_id"
 
   create_table "cont_specs", :force => true do |t|
     t.integer  "product_id"
@@ -84,6 +86,7 @@ ActiveRecord::Schema.define(:version => 20110707002656) do
     t.string   "prefered"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "has_products",        :default => true
   end
 
   add_index "features", ["heading_id", "name"], :name => "index_features_on_heading_id_and_name", :unique => true
@@ -105,6 +108,14 @@ ActiveRecord::Schema.define(:version => 20110707002656) do
 
   add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
   add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
+
+  create_table "product_bundles", :force => true do |t|
+    t.integer  "bundle_id"
+    t.integer  "product_id"
+    t.string   "product_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "product_siblings", :force => true do |t|
     t.integer  "product_id"
@@ -148,6 +159,11 @@ ActiveRecord::Schema.define(:version => 20110707002656) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "nonuniq"
+  end
+
+  create_table "results_scraping_rules", :id => false, :force => true do |t|
+    t.integer "result_id"
+    t.integer "scraping_rule_id"
   end
 
   create_table "scraping_corrections", :force => true do |t|
@@ -233,6 +249,7 @@ ActiveRecord::Schema.define(:version => 20110707002656) do
     t.datetime "updated_at"
   end
 
+  add_index "urls", ["product_type_id", "url", "port"], :name => "index_urls_on_product_type_id_and_url_and_port", :unique => true
   add_index "urls", ["url", "port"], :name => "index_urls_on_url_and_port", :unique => true
 
   create_table "userdatabins", :force => true do |t|
