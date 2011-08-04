@@ -44,5 +44,4 @@ rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) v
 id_hdf.each do |i|
     rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{i}, \'featured\', 1, \'drive_bestbuy\')")
 end    
-debugger
 rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{id_hdh[0]}, \'hero\', 1, \'drive_bestbuy\')")
