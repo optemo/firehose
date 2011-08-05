@@ -69,7 +69,7 @@ class ProductTypesController < ApplicationController
         index = arr_data.index{ |x| x.strip == params[:orgElement].strip }
         arr_data[index] = params[:value]
       end
-      new_value = arr_data.join(',')
+      new_value = arr_data.map{|d| d=d.strip}.join(',')
     end
 
     data[names[1]] = new_value
