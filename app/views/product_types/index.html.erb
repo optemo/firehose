@@ -89,12 +89,12 @@
 	 <% end %>
        </dd>
     <% if feature.used_for_categories.nil? %>
-      <dd class='invisible'>Used For Categories:<span class="edit-select stream" data-id="<%= feature.id %>" data-origin="" data-name="feature-uses_for_categories"></span></dd>
+      <dd class='invisible'>Used For Categories:<span class="edit stream" data-id="<%= feature.id %>" data-name="feature-used_for_categories"></span></dd>
     <% else %>
       <dd>Used For Categories:
 	      <% ufcs = feature.used_for_categories.split(','); len = ufcs.size; i=0 %>
 	      <% ufcs.each do |ufc| %>
-	        <span class="edit-select stream" data-id="<%= feature.id %>"
+	        <span class="edit stream" data-id="<%= feature.id %>"
 	              data-name="feature-used_for_categories" data-origin="<%= ufc.strip %>"><%=ufc.strip %></span>
 	        <% if i < len -  1 %>
 	          <% i += 1 %><span class='comma'>,</span>
