@@ -285,7 +285,7 @@ $(document).ready(function(){
         data : "{true: 'Yes', false: 'No'}",
         type : 'select'
     }));
-    $('.edit-select-feature-type').editable('/product_types/1', $.extend({},{
+    $('.edit-select-feature-type').editable('/product_types/1', $.extend({}, editableVar, {
         data : "{'Categorical': 'Categorical', 'Binary': 'Binary', 'Continuous':'Continuous'}",
         type : 'select'
     }));

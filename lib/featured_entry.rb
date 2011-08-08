@@ -3,10 +3,10 @@ require 'ruby-debug'
 
 
 cf = ['10162371', '10164923', '10164936', '10160766', '10162369', '10168309', '10164435', '10164978', '10164837']
-ch = '10164375'
+ch = 'B9002094'
 
-hdf= ['10134121','10174568','10158177','10159259','10143419','10154954','10155407','10160772','10160775']
-hdh= '10172122' 
+hdf= ['B9002102','10164604','10130152','10163289', '10154264','10173487','10164409', '10156032', '10154265']
+hdh= '10170034' 
  
 con = Mysql.new('jaguar', 'maryam', 'sCbub3675NWnNZK2', 'firehose_production')
 id_cf = []
@@ -44,5 +44,4 @@ rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) v
 id_hdf.each do |i|
     rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{i}, \'featured\', 1, \'drive_bestbuy\')")
 end    
-debugger
 rs2 = con.query("INSERT INTO bin_specs (product_id, name, value, product_type) values (#{id_hdh[0]}, \'hero\', 1, \'drive_bestbuy\')")
