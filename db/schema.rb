@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110803232800) do
+ActiveRecord::Schema.define(:version => 20110808231326) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -51,13 +51,11 @@ ActiveRecord::Schema.define(:version => 20110803232800) do
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
 
   create_table "category_id_product_type_maps", :force => true do |t|
-    t.integer  "category_id"
+    t.integer  "category_id",     :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "product_type_id"
   end
-
-  add_index "category_id_product_type_maps", ["category_id"], :name => "index_category_id_product_type_maps_on_category_id"
 
   create_table "cont_specs", :force => true do |t|
     t.integer  "product_id"
@@ -77,7 +75,7 @@ ActiveRecord::Schema.define(:version => 20110803232800) do
     t.string   "feature_type",        :default => "Categorical", :null => false
     t.string   "used_for",            :default => "show"
     t.string   "used_for_categories"
-    t.string   "used_for_order",      :default => "0"
+    t.integer  "used_for_order",      :default => 9999
     t.boolean  "larger_is_better",    :default => true
     t.integer  "min",                 :default => 0
     t.integer  "max",                 :default => 0
@@ -116,6 +114,8 @@ ActiveRecord::Schema.define(:version => 20110803232800) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "product_bundles", ["bundle_id"], :name => "index_product_bundles_on_bundle_id", :unique => true
 
   create_table "product_siblings", :force => true do |t|
     t.integer  "product_id"
@@ -238,9 +238,10 @@ ActiveRecord::Schema.define(:version => 20110803232800) do
     t.boolean  "modified"
   end
 
-  add_index "text_specs", ["product_id"], :name => "index_text_specs_on_product_id"
+  add_index "text_specs", ["product_id", "name"], :name => "index_text_specs_on_product_id_and_name", :unique => true
 
-  create_table "urls", :force => true do |t|
+  create_table "urls", :id => false, :force => true do |t|
+    t.integer  "id",              :default => 0,  :null => false
     t.integer  "product_type_id",                 :null => false
     t.string   "url",                             :null => false
     t.integer  "port",            :default => 80
@@ -249,8 +250,7 @@ ActiveRecord::Schema.define(:version => 20110803232800) do
     t.datetime "updated_at"
   end
 
-  add_index "urls", ["product_type_id", "url", "port"], :name => "index_urls_on_product_type_id_and_url_and_port", :unique => true
-  add_index "urls", ["url", "port"], :name => "index_urls_on_url_and_port", :unique => true
+  add_index "urls", ["product_type_id", "url", "port"], :name => "index_urls_on_product_type_id_and_url_and_port"
 
   create_table "userdatabins", :force => true do |t|
     t.integer  "search_id"
