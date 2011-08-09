@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110808231326) do
+ActiveRecord::Schema.define(:version => 20110809173628) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(:version => 20110808231326) do
     t.boolean  "modified"
   end
 
+  add_index "bin_specs", ["name", "value"], :name => "index_bin_specs_on_name_and_value"
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
 
   create_table "candidates", :force => true do |t|
@@ -48,6 +49,7 @@ ActiveRecord::Schema.define(:version => 20110808231326) do
     t.boolean  "modified"
   end
 
+  add_index "cat_specs", ["name"], :name => "index_cat_specs_on_name"
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
 
   create_table "category_id_product_type_maps", :force => true do |t|
@@ -67,6 +69,7 @@ ActiveRecord::Schema.define(:version => 20110808231326) do
     t.boolean  "modified"
   end
 
+  add_index "cont_specs", ["name", "value"], :name => "index_cont_specs_on_name_and_value"
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
 
   create_table "features", :force => true do |t|
@@ -198,6 +201,7 @@ ActiveRecord::Schema.define(:version => 20110808231326) do
     t.integer "product_id"
   end
 
+  add_index "search_products", ["product_id"], :name => "index_search_products_on_product_id"
   add_index "search_products", ["search_id"], :name => "index_search_products_on_search_id"
 
   create_table "searches", :force => true do |t|

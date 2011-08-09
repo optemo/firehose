@@ -1,4 +1,4 @@
-class AddIndexToSpecsAndSearchProducts < ActiveRecord::Migration
+class AddIndexesToSpecsAndSearchProducts < ActiveRecord::Migration
   def self.up
     add_index :bin_specs, [:name, :value]
     add_index :cat_specs, [:name]
