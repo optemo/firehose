@@ -22,8 +22,9 @@ ActiveRecord::Schema.define(:version => 20110809173628) do
     t.boolean  "modified"
   end
 
-  add_index "bin_specs", ["name", "value"], :name => "index_bin_specs_on_name_and_value"
+  add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
+  add_index "bin_specs", ["value"], :name => "index_bin_specs_on_value"
 
   create_table "candidates", :force => true do |t|
     t.integer  "scraping_rule_id"
@@ -69,8 +70,9 @@ ActiveRecord::Schema.define(:version => 20110809173628) do
     t.boolean  "modified"
   end
 
-  add_index "cont_specs", ["name", "value"], :name => "index_cont_specs_on_name_and_value"
+  add_index "cont_specs", ["name", "product_id"], :name => "index_cont_specs_on_name_and_product_id"
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
+  add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
   create_table "features", :force => true do |t|
     t.integer  "heading_id",                                     :null => false
