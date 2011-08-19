@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(:version => 20110815180331) do
 
   add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
+  add_index "bin_specs", ["value"], :name => "index_bin_specs_on_value"
 
   create_table "candidates", :force => true do |t|
     t.integer  "scraping_rule_id"
