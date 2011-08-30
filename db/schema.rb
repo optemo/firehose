@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110815180331) do
+ActiveRecord::Schema.define(:version => 20110819183145) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -24,7 +24,6 @@ ActiveRecord::Schema.define(:version => 20110815180331) do
 
   add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
-  add_index "bin_specs", ["value"], :name => "index_bin_specs_on_value"
 
   create_table "candidates", :force => true do |t|
     t.integer  "scraping_rule_id"
@@ -71,9 +70,27 @@ ActiveRecord::Schema.define(:version => 20110815180331) do
   end
 
   add_index "cont_specs", ["name", "product_id"], :name => "index_cont_specs_on_name_and_product_id"
-  add_index "cont_specs", ["name", "product_id"], :name => "index_cont_specs_on_product_id_and_name"
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
+
+  create_table "dynamic_facets", :force => true do |t|
+    t.integer "facet_id", :null => false
+    t.string  "category", :null => false
+  end
+
+  add_index "dynamic_facets", ["facet_id", "category"], :name => "index_dynamic_facets_on_facet_id_and_category", :unique => true
+
+  create_table "facets", :force => true do |t|
+    t.integer "product_type_id",                            :null => false
+    t.string  "name",                                       :null => false
+    t.string  "feature_type",    :default => "Categorical", :null => false
+    t.string  "used_for",        :default => "show"
+    t.integer "value"
+    t.string  "style",           :default => ""
+    t.boolean "active",          :default => true
+  end
+
+  add_index "facets", ["product_type_id"], :name => "index_facets_on_product_type_id"
 
   create_table "features", :force => true do |t|
     t.integer  "heading_id",                                     :null => false
@@ -165,6 +182,11 @@ ActiveRecord::Schema.define(:version => 20110815180331) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "nonuniq"
+  end
+
+  create_table "results_scraping_rules", :id => false, :force => true do |t|
+    t.integer "result_id"
+    t.integer "scraping_rule_id"
   end
 
   create_table "scraping_corrections", :force => true do |t|
