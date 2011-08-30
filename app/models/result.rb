@@ -92,34 +92,8 @@ class Result < ActiveRecord::Base
     end
     # Bulk insert/update with ActiveRecord_import. :on_duplicate_key_update only works on Mysql database
     BinSpec.import binspecs, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] if binspecs.size > 0
-
-    # Get the facebook "likes" for products
-    fb_like
   end
 
-  # Get the facebook "likes" for products
-  def self.fb_like
-    require 'fb_graph'
-    require 'benchmark'
-    contspecs = []
-    array = []
-    urls = ''
-    Product.current_type.instock.each do |product|
-      url_text_spec = TextSpec.find_by_product_id_and_name_and_product_type(product.id, "producturl", Session.product_type)
-      if !url_text_spec.nil?
-        begin
-          array = FbGraph::Query.new( "SELECT  total_count from link_stat  where  url='#{url_text_spec.value}'").fetch
-        rescue
-          next
-        end
-        contspec = ContSpec.find_by_product_id_and_name_and_product_type(product.id, "fblike", Session.product_type) || ContSpec.new(:name => "fblike", :product_type => Session.product_type, :product_id => product.id)
-        contspec.value = array[0]["total_count"]
-        contspecs << contspec
-      end
-    end
-    ContSpec.import contspecs, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] if contspecs.size > 0
-  end
-  
   def self.find_bundles
     copiedspecs = {} # For bulk insert
     product_bundles = []
