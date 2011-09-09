@@ -16,12 +16,13 @@ class ProductSiblings < ActiveRecord::Base
         all_sibs ||= ProductSiblings.where(["product_id IN (?) and name = ?", all_products, "imgsurl"]).group_by(&:sibling_id)
         sibs.each do |sib_id| 
           imgsurl = CatSpec.find_by_product_id_and_name(sib_id,"imgsurl").value
-          siblings_activerecords.push ProductSiblings.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> imgsurl}) unless all_sibs[sib_id]
+          siblings_activerecords.push ProductSiblings.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> imgsurl}) #unless all_sibs[sib_id]
         end
       end  
     end    
     # make sure color relationship is symmetric (R(a,b) => R(b,a))
     siblings_sym_activerecords = []
+    debugger
     siblings_activerecords.each do |p|
       unless siblings_activerecords.inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id)}
         siblings_sym_activerecords.push ProductSiblings.new({:product_id => p.sibling_id, :sibling_id =>p.product_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> CatSpec.find_by_product_id_and_name(p.product_id,"imgsurl").value}) 
