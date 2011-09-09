@@ -1,3 +1,3 @@
 class DynamicFacet < ActiveRecord::Base
-  belongs_to :category
+  belongs_to :facet
 end
