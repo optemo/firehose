@@ -13,13 +13,12 @@ task :upkeep => :environment do
     end
   end
 
-  Result.upkeep_pre
-  #Calculate new spec factors
-  Product.calculate_factors
-  #Get the color relationships loaded
-  ProductSiblings.get_relations
-  Result.upkeep_post
-  ProductSiblings.get_relations
+#  Result.upkeep_pre
+#  #Calculate new spec factors
+#  Product.calculate_factors
+# #Get the color relationships loaded
+ ProductSiblings.get_relations
+#  Result.upkeep_post
 end
 
 desc "Update data automatically"
