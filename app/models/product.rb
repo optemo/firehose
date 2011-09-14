@@ -20,14 +20,6 @@ class Product < ActiveRecord::Base
     end
   end
   
-  def self.initial
-    #Algorithm for calculating id of initial products in product_searches table
-    #We probably need a better algorithm to check for collisions
-    chars = []
-    Session.product_type.each_char{|c|chars << c.getbyte(0)*chars.size}
-    chars.sum*-1
-  end
-  
   #Currently only does continuous but others should be added
   def self.specs(p_ids = nil)
     st = []
@@ -236,11 +228,10 @@ class Product < ActiveRecord::Base
 
 
     #Clear the search_product cache in the database
-    initial_products_id = Product.initial
     SearchProduct.transaction do
-      SearchProduct.delete_all(["search_id = ?",initial_products_id])
+      SearchProduct.delete_all(["search_id = ?",Session.product_type_id])
       # Bulk insert for efficiency. 
-      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => initial_products_id)})
+      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => Session.product_type_id)})
     end
   end
   
