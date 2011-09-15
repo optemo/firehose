@@ -248,7 +248,7 @@ class Product < ActiveRecord::Base
   private
   
   def self.utility_weights(feature)
-    unless @utility_weights
+    unless @utility_weights             #i.e. if @utility_weights is not defined
       @utility_weights = {}
       util_sum = Session.utility_weights.map{|k,v| v }.sum.to_f
       Session.utility["all"].each{|f| @utility_weights[f]=Session.utility_weights[f]/util_sum if Session.utility_weights[f]}
