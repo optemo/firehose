@@ -65,7 +65,6 @@ task :bundles => :environment do
   Result.find_bundles
 end
 
-desc "Clears the Rails Cache"
 namespace :cache do
   desc 'Clear memcache'
   task :clear => :environment do
