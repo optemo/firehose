@@ -30,10 +30,10 @@ class ProductSiblings < ActiveRecord::Base
     # make sure color relationship is transitive (R(a,b) & R(b,c)=> R(a,c) but not reflexive)
     siblings_trans_activerecords = []
     siblings_activerecords.each do |s1|
-      # list of all siblings for p 
+      # list of all siblings for s1 
       siblings = siblings_activerecords.map{|s| s if s.product_id == s1.product_id}.compact
       siblings.each do |s2|
-        unless siblings.inject(false){|res,sib| res || (s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id))} 
+        unless siblings_activerecords.inject(false){|res,sib| res || (s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id))} 
           siblings_trans_activerecords.push ProductSiblings.new({:product_id => s1.sibling_id, :sibling_id => s2.sibling_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> CatSpec.find_by_product_id_and_name(s1.sibling_id,"imgsurl").value})  
         end  
       end
