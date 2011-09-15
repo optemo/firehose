@@ -65,6 +65,14 @@ task :bundles => :environment do
   Result.find_bundles
 end
 
+desc "Clears the Rails Cache"
+namespace :cache do
+  desc 'Clear memcache'
+  task :clear => :environment do
+    Rails.cache.clear if Rails.cache && Rails.cache.respond_to?(:clear)
+  end
+end
+
 
 desc "Set performance factors"
 task :set_performance_scores => :environment do 
