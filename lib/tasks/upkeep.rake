@@ -13,13 +13,12 @@ task :upkeep => :environment do
     end
   end
 
-  Result.upkeep_pre
-  #Calculate new spec factors
-  Product.calculate_factors
-  #Get the color relationships loaded
-  ProductSiblings.get_relations
-  Result.upkeep_post
-  ProductSiblings.get_relations
+#  Result.upkeep_pre
+#  #Calculate new spec factors
+#  Product.calculate_factors
+# #Get the color relationships loaded
+ ProductSiblings.get_relations
+#  Result.upkeep_post
 end
 
 desc "Update data automatically"
@@ -64,6 +63,13 @@ task :bundles => :environment do
   end
 
   Result.find_bundles
+end
+
+namespace :cache do
+  desc 'Clear memcache'
+  task :clear => :environment do
+    Rails.cache.clear if Rails.cache && Rails.cache.respond_to?(:clear)
+  end
 end
 
 
