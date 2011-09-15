@@ -20,32 +20,7 @@ class Product < ActiveRecord::Base
     end
   end
   
-  #Currently only does continuous but others should be added
-  def self.specs(p_ids = nil)
-    st = []
-    Session.continuous["filter"].each{|f| st << ContSpec.by_feat(f)}
-    #Check for 1 spec per product
-    raise ValidationError unless Session.search.products_size == st.first.length
-    #Check for no nil values
-    raise ValidationError unless st.first.size == st.first.compact.size
-    raise ValidationError unless st.first.size > 0
-    #Check that every spec has the same number of features
-    first_size = st.first.compact.size
-    raise ValidationError unless st.inject{|res,el|el.compact.size == first_size}
-    
-    if p_ids
-      Session.categorical["cluster"].each{|f|  st << CatSpec.cachemany(p_ids, f)} 
-      Session.binary["cluster"].each{|f|  st << BinSpec.cachemany(p_ids, f)}
-    end
-    st.transpose
-  end
-  
   scope :instock, :conditions => {:instock => true}
-  scope :valid, lambda {
-    {:conditions => (Session.continuous["filter"].map{|f|"id in (select product_id from cont_specs where #{Session.minimum[f] ? "value > " + Session.minimum[f].to_s : "value > 0"}#{" and value < " + Session.maximum[f].to_s if Session.maximum[f]} and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
-    Session.binary["filter"].map{|f|"id in (select product_id from bin_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}+\
-    Session.categorical["filter"].map{|f|"id in (select product_id from cat_specs where value IS NOT NULL and name = '#{f}' and product_type = '#{Session.product_type}')"}).join(" and ")}
-  }
   scope :current_type, lambda {
     {:conditions => {:product_type => Session.product_type}}
   }
@@ -182,38 +157,36 @@ class Product < ActiveRecord::Base
     prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
     all_products.each do |product|
       utility = []
-      (Session.utility["all"]).each do |f|
-        if Session.categorical["all"].include?(f)
-          records[f] ||= CatSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-        elsif Session.continuous["all"].include?(f)
-          records[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-        elsif Session.binary["all"].include?(f)
-          records[f] ||= BinSpec.where(["product_id IN (?) and name = ?", all_products, f]).group_by(&:product_id)
-        else      
-          raise ValidationError  
+      (Session.features["utility"]).each do |f|
+        model = case f.feature_type
+          when "Categorical" then CatSpec
+          when "Continuous" then ContSpec
+          when "Binary" then BinSpec
+          else raise ValidationError
         end
-        factors[f] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f][product.id] ? factors[f][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f+"_factor")
-        if records[f][product.id]
-          record_vals[f] ||= records[f].values.map{|i|i.first.value}
-          fVal = records[f][product.id].first.value 
-          if f=="onsale"
+        records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
+        factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
+        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f.name+"_factor")
+        if records[f.name][product.id]
+          record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
+          fVal = records[f.name][product.id].first.value 
+          if f.name=="onsale"
             ori_price = prices[product.id].first.value
             sale_price = records["saleprice"][product.id].first.value
             factorRow.value = Product.calculateFactor_sale(ori_price, sale_price)
-          elsif Session.binary["all"].include?(f)
+          elsif f.feature_type == "Binary"
             factorRow.value = 1 if fVal
-          elsif Session.continuous["all"].include?(f)
-            factorRow.value = Product.calculateFactor(fVal, f, record_vals[f])
-          elsif Session.categorical["all"].include?(f)  
-            factorRow.value = Product.calculateFactor_categorical(fVal, f)
+          elsif f.feature_type == "Continuous"
+            factorRow.value = Product.calculateFactor(fVal, f, record_vals[f.name])
+          elsif f.feature_type == "Categorical"
+            factorRow.value = 0 #For now categorical features don't get a utility
           else  
             raise ValidationError  
           end    
         else
           factorRow.value = 0    
         end
-        utility << factorRow.value*Product.utility_weights(f) if factorRow.value
+        utility << factorRow.value*f.value.abs if factorRow.value
         cont_activerecords << factorRow if factorRow.value
       end 
       #Add the static calculated utility
@@ -241,8 +214,8 @@ class Product < ActiveRecord::Base
   def self.utility_weights(feature)
     unless @utility_weights
       @utility_weights = {}
-      util_sum = Session.utility_weights.map{|k,v| v }.sum.to_f
-      Session.utility["all"].each{|f| @utility_weights[f]=Session.utility_weights[f]/util_sum if Session.utility_weights[f]}
+      util_sum = Session.features["utility"].map(&:value).sum.to_f
+      Session.features["utility"].each{|f| @utility_weights[f.name]=f.value/util_sum if f.value}
     end  
     @utility_weights[feature]
   end
@@ -251,17 +224,11 @@ class Product < ActiveRecord::Base
     # Order the feature values, reversed to give the highest value to duplicates
     return nil if fVal.nil? #Don't process nil vlues
       ordered = contspecs.compact.sort
-      ordered = ordered.reverse if Session.prefDirection[f] == 1
-      return 0 if Session.prefDirection[f] == 0
+      ordered = ordered.reverse if f.value < 0 #Negative weight means reversed
       pos = ordered.index(fVal)
       len = ordered.length
       (len - pos)/len.to_f 
   end
-  
-  def self.calculateFactor_categorical(fVal, f)
-     Session.prefered[f].include?(fVal) ? val=  1 : val = 0  
-     val
-  end   
   
   def self.calculateFactor_sale(fVal1, fVal2) 
      fVal1 > fVal2 ? (fVal1-fVal2)/fVal1 : 0
