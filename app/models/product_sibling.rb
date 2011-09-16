@@ -24,21 +24,22 @@ class ProductSibling < ActiveRecord::Base
     # make sure color relationship is symmetric (R(a,b) => R(b,a))
     siblings_sym_activerecords = []
     siblings_activerecords.each do |p|
-      unless siblings_activerecords.inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id)}
+      unless siblings_activerecords.inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id) || (sib.product_id == p.sibling_id && sib.sibling_id == p.product_id)}
         siblings_sym_activerecords.push ProductSibling.new({:product_id => p.sibling_id, :sibling_id =>p.product_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> CatSpec.find_by_product_id_and_name(p.product_id,"imgsurl").value}) 
       end  
     end
     # make sure color relationship is transitive (R(a,b) & R(b,c)=> R(a,c) but not reflexive)
     siblings_trans_activerecords = []
-    siblings_activerecords.each do |s1|
-      # list of all siblings for s1 
-      siblings = siblings_activerecords.map{|s| s if s.product_id == s1.product_id}.compact
-      siblings.each do |s2|
-        unless siblings_activerecords.inject(false){|res,sib| res || (s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id))} 
-          siblings_trans_activerecords.push ProductSibling.new({:product_id => s1.sibling_id, :sibling_id => s2.sibling_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> CatSpec.find_by_product_id_and_name(s1.sibling_id,"imgsurl").value})  
-        end  
-      end
+  siblings_activerecords.each do |s1|
+    # list of all siblings for s1 
+    siblings = siblings_activerecords.map{|s| s if s.product_id == s1.product_id}.compact
+    #debugger if s1.product_id==9670
+    siblings.each do |s2|
+      unless siblings_activerecords.inject(false){|res,sib| res || s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id)} 
+        siblings_trans_activerecords.push ProductSibling.new({:product_id => s1.sibling_id, :sibling_id => s2.sibling_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> CatSpec.find_by_product_id_and_name(s1.sibling_id,"imgsurl").value})  
+      end  
     end
+  end
     #Write products to the database
     ProductSibling.import(siblings_activerecords + siblings_sym_activerecords + siblings_trans_activerecords)
   end
