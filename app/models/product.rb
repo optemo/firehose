@@ -187,7 +187,8 @@ class Product < ActiveRecord::Base
         else
           factorRow.value = 0    
         end
-        utility << factorRow.value*f.value.abs if factorRow.value
+        #utility << factorRow.value*f.value.abs if factorRow.value
+        utility << factorRow.value*Product.utility_weights(f) if factorRow.value
         cont_activerecords << factorRow if factorRow.value
       end 
       #Add the static calculated utility
