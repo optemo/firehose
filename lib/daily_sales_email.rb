@@ -40,7 +40,14 @@ def read_daily_sales
   # Open csv file
   # ************* ROBS CHANGES ************
         contspecs = []
-        unless csvfile.blank?
+        
+        #sometimes the top email will be a weekly email.  I don't want to process this
+        weekly=false
+        if csvfile =~ /.+-.+-.+/
+          weekly=true
+        end
+        
+        unless csvfile.blank? || weekly
           
           #./tmp/Daily_Data my not exist as a directory
           %x{mkdir ./tmp/Daily_Data}
@@ -54,8 +61,28 @@ def read_daily_sales
                 product = Product.find_by_sku(sku)
                 if product && product.instock
                   u=product.cont_specs.find_by_name("utility")
-                  today_data.write(sku.to_s+" "+u.value.to_s+" "+orders.to_s+"\n")
-                  cumullative.write(Time.now.to_s[0..9]+" "+sku.to_s+" "+u.value.to_s+" "+orders.to_s+"\n")
+                  
+                  s=product.cont_specs
+                  to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
+                  add_on=""
+                  if product.product_type=="camera_bestbuy"
+                    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
+                  end
+                  if product.product_type=="drive_bestbuy"
+                    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+                           " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
+                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s
+                  end
+                  
+                  today_data.write(to_write+add_on+"\n")
+                  cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
                 end
               end
             end
@@ -65,7 +92,9 @@ def read_daily_sales
         end
   # ******************************************
       end 
-      break; #Only process the first email
+      unless weekly
+        break; #Only process the first email, unless that email is a weekly email
+      end
     end 
   end 
   imap.close

@@ -187,7 +187,8 @@ class Product < ActiveRecord::Base
         else
           factorRow.value = 0    
         end
-        utility << factorRow.value*f.value.abs if factorRow.value
+        #utility << factorRow.value*f.value.abs if factorRow.value
+        utility << factorRow.value*Product.utility_weights(f.name) if factorRow.value
         cont_activerecords << factorRow if factorRow.value
       end 
       #Add the static calculated utility
@@ -212,13 +213,13 @@ class Product < ActiveRecord::Base
   
   private
   
-  def self.utility_weights(feature)
+  def self.utility_weights(f_name)
     unless @utility_weights             #i.e. if @utility_weights is not defined
       @utility_weights = {}
       util_sum = Session.features["utility"].map(&:value).sum.to_f
       Session.features["utility"].each{|f| @utility_weights[f.name]=f.value/util_sum if f.value}
     end  
-    @utility_weights[feature]
+    @utility_weights[f_name]
   end
   
   def self.calculateFactor(fVal, f, contspecs)
