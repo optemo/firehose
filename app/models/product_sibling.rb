@@ -14,10 +14,9 @@ class ProductSibling < ActiveRecord::Base
         sibs = [] 
         #Check if the product is in our database
         all_products.map{|p| sibs<<p.id if skus.include?(p["sku"])}
-        all_sibs ||= ProductSibling.where(["product_id IN (?) and name = ?", all_products, "imgsurl"]).group_by(&:sibling_id)
         sibs.each do |sib_id| 
           imgsurl = CatSpec.find_by_product_id_and_name(sib_id,"imgsurl").value
-          siblings_activerecords.push ProductSibling.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> imgsurl}) unless all_sibs[sib_id]
+          siblings_activerecords.push ProductSibling.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"imgsurl", :product_type=>s.product_type, :value=> imgsurl}) 
         end
       end  
     end    
@@ -38,7 +37,9 @@ class ProductSibling < ActiveRecord::Base
       end  
     end
   end
-    #Write products to the database
+    #delete the old sibling relations
+    ProductSibling.delete_all 
+    #Write the new relations
     ProductSibling.import(siblings_activerecords)
   end
 end
