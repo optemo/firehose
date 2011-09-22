@@ -97,7 +97,7 @@ class Result < ActiveRecord::Base
   def self.find_bundles
     copiedspecs = {} # For bulk insert
     product_bundles = []
-    Product.current_type.instock.each do |p|
+    Product.current_type.each do |p|
       bundle = TextSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"bundle")
       if bundle
         data = JSON.parse(bundle.value.gsub("=>",":"))
@@ -123,14 +123,19 @@ class Result < ActiveRecord::Base
                 end
               end
             end
+          else
+            #Remove old bundles
+            Maybe(ProductBundle.find_by_bundle_id_and_product_type(p.id, Session.product_type)).destroy
           end
         end
+      else
+        #Remove old bundles
+        Maybe(ProductBundle.find_by_bundle_id_and_product_type(p.id, Session.product_type)).destroy
       end
     end
     copiedspecs.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified, :updated_at] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
     end
-    ProductBundle.delete_all
     ProductBundle.import product_bundles, :on_duplicate_key_update=>[:bundle_id, :product_id, :created_at, :updated_at]
   end
 
