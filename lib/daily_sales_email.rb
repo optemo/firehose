@@ -70,23 +70,15 @@ def read_daily_sales
                            " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("customerRating_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("displayDate_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("hero_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("featured_factor").value.to_s                           
+                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
                   end
                   if product.product_type=="drive_bestbuy"
                     add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("customerRating_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
                            " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
-                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("displayDate_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("hero_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("featured_factor").value.to_s
+                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s
                   end
                   
                   today_data.write(to_write+add_on+"\n")
