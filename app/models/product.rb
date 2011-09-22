@@ -6,6 +6,7 @@ class Product < ActiveRecord::Base
   has_many :text_specs, :dependent=>:delete_all
   has_many :search_products, :dependent => :delete_all
   has_many :product_siblings
+  has_many :product_bundles
 
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
@@ -138,6 +139,7 @@ class Product < ActiveRecord::Base
     Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
+    Equivalence.fill
     Result.upkeep_post
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin

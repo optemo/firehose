@@ -100,20 +100,16 @@ class Result < ActiveRecord::Base
     Product.current_type.instock.each do |p|
       bundle = TextSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"bundle")
       if bundle
-        # Find the first product in bundle which have the same product type with bundle
-        first_bundle_prod = false
         data = JSON.parse(bundle.value.gsub("=>",":"))
         data.map{|d|d["sku"]}.each do |sku|
           p_copy = Product.find_by_sku(sku)
           if p_copy
             # Get or create new product bundle
-            if !first_bundle_prod
-              if p_copy.product_type == Session.product_type
-                product_bundle = ProductBundle.find_or_initialize_by_bundle_id_and_product_type(p.id, Session.product_type)
-                product_bundle.product_id = p_copy.id
-                product_bundles << product_bundle
-                first_bundle_prod = true
-              end
+            if p_copy.product_type == Session.product_type
+              product_bundle = ProductBundle.find_or_initialize_by_bundle_id_and_product_type(p.id, Session.product_type)
+              product_bundle.product_id = p_copy.id
+              product_bundles << product_bundle
+              first_bundle_prod = true
             end
 
             #Copy over all the products specs
@@ -128,14 +124,13 @@ class Result < ActiveRecord::Base
               end
             end
           end
-          
         end
-
       end
     end
     copiedspecs.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified, :updated_at] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
     end
+    ProductBundle.delete_all
     ProductBundle.import product_bundles, :on_duplicate_key_update=>[:bundle_id, :product_id, :created_at, :updated_at]
   end
 
