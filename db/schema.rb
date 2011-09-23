@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110914002209) do
+ActiveRecord::Schema.define(:version => 20110921184003) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -84,6 +84,9 @@ ActiveRecord::Schema.define(:version => 20110914002209) do
     t.integer "product_id"
     t.integer "eq_id"
   end
+
+  add_index "equivalences", ["eq_id"], :name => "index_equivalences_on_eq_id"
+  add_index "equivalences", ["product_id"], :name => "index_equivalences_on_product_id"
 
   create_table "facets", :force => true do |t|
     t.integer "product_type_id",                            :null => false
@@ -192,6 +195,45 @@ ActiveRecord::Schema.define(:version => 20110914002209) do
   create_table "results_scraping_rules", :id => false, :force => true do |t|
     t.integer "result_id"
     t.integer "scraping_rule_id"
+  end
+
+  create_table "scraped_cameras", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.text     "title"
+    t.text     "imageurl"
+    t.text     "detailpageurl"
+    t.text     "manufacturerurl"
+    t.datetime "scrapedat"
+    t.string   "brand"
+    t.string   "model"
+    t.string   "mpn"
+    t.string   "dimensions"
+    t.integer  "itemwidth"
+    t.integer  "itemlength"
+    t.integer  "itemheight"
+    t.integer  "itemweight"
+    t.integer  "packageheight"
+    t.integer  "packagelength"
+    t.integer  "packagewidth"
+    t.integer  "packageweight"
+    t.float    "opticalzoom"
+    t.float    "maximumresolution"
+    t.string   "resolution"
+    t.float    "displaysize"
+    t.boolean  "slr"
+    t.boolean  "waterproof"
+    t.float    "maximumfocallength"
+    t.float    "minimumfocallength"
+    t.float    "digitalzoom"
+    t.boolean  "batteriesincluded"
+    t.string   "batterydescription"
+    t.string   "connectivity"
+    t.boolean  "hasredeyereduction"
+    t.string   "includedsoftware"
+    t.float    "averagereviewrating"
+    t.integer  "totalreviews"
+    t.text     "reviewtext"
   end
 
   create_table "scraping_corrections", :force => true do |t|

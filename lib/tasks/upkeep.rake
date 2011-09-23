@@ -1,6 +1,6 @@
 
 #Here is where general upkeep scripts are
-desc "Process product relationships and fill up prduct siblings table"
+desc "This is for testing only"
 task :upkeep => :environment do
   if !ENV.include?("product_type")
     Session.new
@@ -12,12 +12,12 @@ task :upkeep => :environment do
       raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
     end
   end
-
+  #!!!!!! For testing only
 #  Result.upkeep_pre
 #  #Calculate new spec factors
 #  Product.calculate_factors
 # #Get the color relationships loaded
- ProductSibling.get_relations
+    ProductSibling.get_relations
 #  Result.upkeep_post
 end
 
