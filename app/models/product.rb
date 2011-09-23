@@ -180,6 +180,7 @@ class Product < ActiveRecord::Base
           elsif f.feature_type == "Continuous"
             factorRow.value = Product.calculateFactor(fVal, f, record_vals[f.name])
           elsif f.feature_type == "Categorical"
+            #CategoricalFacetValue.where(["facet_id =?", f.id])
             factorRow.value = 0 #For now categorical features don't get a utility
           else  
             raise ValidationError  

@@ -38,7 +38,7 @@ class ProductSibling < ActiveRecord::Base
     end
   end
     #delete the old sibling relations
-    ProductSibling.delete_all 
+    ProductSibling.delete_all(["product_type = ?", s.product_type])
     #Write the new relations
     ProductSibling.import(siblings_activerecords)
   end
