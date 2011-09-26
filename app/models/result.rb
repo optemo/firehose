@@ -99,11 +99,11 @@ class Result < ActiveRecord::Base
     product_bundles = []
     Product.current_type.each do |p|
       bundle = TextSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"bundle")
-      if bundle
+      if p.instock && bundle
         data = JSON.parse(bundle.value.gsub("=>",":"))
         data.map{|d|d["sku"]}.each do |sku|
           p_copy = Product.find_by_sku(sku)
-          if p_copy
+          if p_copy && p_copy.instock
             # Get or create new product bundle
             if p_copy.product_type == Session.product_type
               product_bundle = ProductBundle.find_or_initialize_by_bundle_id_and_product_type(p.id, Session.product_type)
@@ -116,7 +116,7 @@ class Result < ActiveRecord::Base
             [ContSpec,BinSpec,CatSpec,TextSpec].each do |s_class|
               s_class.find_all_by_product_type_and_product_id(Session.product_type,p_copy.id).each do |spec|
                 copiedspec = s_class.find_by_product_id_and_product_type_and_name(p.id,Session.product_type,spec.name) || s_class.new(:product_id => p.id, :product_type => Session.product_type, :name => spec.name)
-                if copiedspec.modified || copiedspec.updated_at.nil?
+                if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
                   copiedspec.value = spec.value
                   copiedspec.modified = true
                   copiedspecs.keys.include?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
