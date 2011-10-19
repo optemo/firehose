@@ -6,7 +6,9 @@ class Equivalence < ActiveRecord::Base
       #Siblings is a symmetric and transitive relationship
       #while product bundles is non-symmetric
       eq = Equivalence.find_or_initialize_by_product_id(prod.id)
-      equivalences = prod.product_bundles.map(&:bundle_id)+ProductBundle.find_all_by_bundle_id(prod.id).map(&:product_id)+prod.product_siblings.map(&:sibling_id)
+      #Take out product bundles from Equivalences
+      #equivalences = prod.product_bundles.map(&:bundle_id)+ProductBundle.find_all_by_bundle_id(prod.id).map(&:product_id)+prod.product_siblings.map(&:sibling_id)
+      equivalences = prod.product_siblings.map(&:sibling_id)
       if sibling = eq_ar.select{|p|equivalences.include? p.product_id}.first
         eq.eq_id = sibling.eq_id
       else
