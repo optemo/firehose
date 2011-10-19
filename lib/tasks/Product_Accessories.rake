@@ -42,17 +42,17 @@ task :insert_accessories => :environment do
     #check if product p has a "top_copurchases text spec already"
     #if it does, modify.  Otherwise create.
     t=p.text_specs.find_by_name("top_copurchases")
-    if t
-      t.value=s
-      t.save
-    else      
-      t=TextSpec.new
-      t.name="top_copurchases"
-      t.value=s
-      t.product_id=p.id
-      t.product_type=p.product_type
-      t.save 
-    end   
+    #if t
+    #  t.value=s
+    #  t.save
+    #else      
+    #  t=TextSpec.new
+    #  t.name="top_copurchases"
+    #  t.value=s
+    #  t.product_id=p.id
+    #  t.product_type=p.product_type
+    #  t.save 
+    #end   
   end
   
   end_time=Time.now
@@ -116,52 +116,57 @@ end
 #if you try to load skus which aren't in the database, they will not be added, and an error message will be displayed
 
 def Build_Concurrence_Hash(l)
-  
-  c={}
-  print "counting..."
+  c = Hash.new{|h,k| h[k] = []} #Initialize to empty array
+  puts "Number of purchases #{l.length}"
+  copurchases = 0
   l.each do |s|
-    # s is a set of copurchased product skus.  Iterate over pairs of copurchases
-    s.each do |sku1|
-      
-      
-      #<><><><>
-      if p1=Product.find_by_sku(sku1) #check that a product with sku1 exists in the database & set to variable p1 if it is
-        
-        s.each do |sku2|
-          if p2=Product.find_by_sku(sku2) # same thing
-            
-            
-            #we want rows of c to be cameras and drives, while columns are relavent accesories
-            if p1.product_type=="camera_bestbuy" && p2.product_type=="camera_accessory_bestbuy" && p2 ||
-               p1.cat_specs.select{|s| s.name=="category"}[0].value!="29583" && p2.cat_specs.select{|s| s.name=="category"}[0].value=="29583" && p2
-             
-               #second line means that p1 is not a harddrive accessory but p2 is.  
-               #instead of having a "drive_accessory_bestbuy" product type,
-               #there is a product cat_spec with the name category that has the value 29583 if the product
-               #is a drive accessory
-               c[sku1]={} if c[sku1]==nil
-               if c[sku1][sku2]==nil
-                 c[sku1][sku2]=1
-               else
-                 c[sku1][sku2]=c[sku1][sku2]+1
-               end
-            end
-          else print "sku2 '",sku2,"' not found in database.\n" end
-        end
-      else print "sku1 '",sku1,"' not found in database.\n" end
-      #<><><><>
-      
+    #<><><><>
+    next if s.length < 2 #Only look at copurchases
+    products = s.map do |sku|
+      Product.find_by_sku_and_instock(sku,true) #check that a product with sku1 exists in the database
+    end.compact
+    next if products.length < 2 #Recheck after missing products
+    products = products.select{|p| p.product_type == "camera_bestbuy" || p.product_type == "camera_accessory_bestbuy"}
+    next if products.length < 2 #Recheck after missing products
+    products.each do |p|
+      if p.product_type == "camera_bestbuy"
+        acc = products.reject{|i|i.sku == p.sku || i.product_type != "camera_accessory_bestbuy"}
+        c[p.sku] << acc unless acc.empty?
+      end
     end
-    #end iter over s
+    
+    #we want rows of c to be cameras and drives, while columns are relavent accesories
+    #if p1.product_type=="camera_bestbuy" #&& p2.product_type=="camera_accessory_bestbuy" #||       p1.cat_specs.select{|s| s.name=="category"}[0].value!="29583" && p2.cat_specs.select{|s| s.name=="category"}[0].value=="29583"
+    # 
+    #   #second line means that p1 is not a harddrive accessory but p2 is.  
+    #   #instead of having a "drive_accessory_bestbuy" product type,
+    #   #there is a product cat_spec with the name category that has the value 29583 if the product
+    #   #is a drive accessory
+    #   puts p1.sku
+    #   c[sku1]={} if c[sku1]==nil
+    #   if c[sku1][sku2]==nil
+    #     c[sku1][sku2]=1
+    #   else
+    #     c[sku1][sku2]+=1
+    #   end
+    #end
+    #<><><><>
   end
 
   #sorts hash by counts
-
-  print "sorting..."
-
-  c.keys.each do |key|
-    c[key]=c[key].sort{ |l,r| r[1]<=>l[1]}
+  max_accessories = c.values.map(&:length).max
+  puts "Number of products with copurchases: #{c.keys.count}, with max: #{max_accessories}"
+  c.each_pair do |k,v|
+    next unless v.length == max_accessories
+    grouped = v.flatten.group_by(&:sku)
+    grouped.each_pair{|k,v|grouped[k] = v.length}
+    puts "Highest copurchases(#{k}) has #{grouped.length} accessories:"
+    puts grouped
+    break
   end
+
+  ps = Product.instock.select{|p|c.has_key? p.sku}
+  puts "Instock Cameras #{ps.length} / #{Product.instock.where(:product_type => "camera_bestbuy").count}"
   
   return c
 
@@ -182,21 +187,17 @@ end
 #read from file the list of copurchases
 
 def read_list_from_file()
-  x=[]
-  file = File.new("/rough_code/test_file_sixteen_times_as_long.txt","r")
-  count=0
-  avg_length_squared=0
-  while (line = file.gets)
-    s="#{line}"
-    x.push(s.split)
-    avg_length_squared=avg_length_squared+s.split.length**2
-    count=count+1
+  orders = Hash.new{|h,k| h[k] = []} #Initialize to empty array
+  abort("No file provided (file=example.csv)") if !ENV.include?("file")
+  file = File.new(ENV["file"],"r")
+  file.gets #First line is heading, throw away
+  count = 0
+  file.each do |line|
+    web_order, date, sku = line.split(',')
+    orders[web_order] << sku.chomp
+    count += 1
   end
-  avg_length_squared=avg_length_squared/count.to_f
-  print count," lines read...\n","Avg length squared per line = ",avg_length_squared,"...\n"
-  print "\n"
-  print "******** This should take between ",min_sec($c_min*count*avg_length_squared)," and ",min_sec($c_max*count*avg_length_squared)," ********\n"
-  print "\n"
+  puts "Read input file: #{count} lines"
   file.close
-  return x
+  return orders.values
 end
