@@ -87,7 +87,7 @@ class BestBuyApi
       end
       begin
         JSON.parse(res.body)
-      catch JSON::ParserError
+      rescue JSON::ParserError
         raise BestBuyApi::RequestError, "Bad Response: JSON Parser Error for #{request_url}"
       end
     end
