@@ -221,8 +221,8 @@ class Product < ActiveRecord::Base
   def self.utility_weights(f_name)
     unless @utility_weights             #i.e. if @utility_weights is not defined
       @utility_weights = {}
-      util_sum = Session.features["utility"].map(&:value).sum.to_f
-      Session.features["utility"].each{|f| @utility_weights[f.name]=f.value/util_sum if f.value}
+      util_sum = Session.features["utility"].map{|f|f.value.abs}.sum.to_f
+      Session.features["utility"].each{|f| @utility_weights[f.name]=f.value.abs/util_sum if f.value}
     end  
     @utility_weights[f_name]
   end
