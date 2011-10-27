@@ -85,7 +85,11 @@ class BestBuyApi
           raise BestBuyApi::RequestError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
         #end
       end
-      JSON.parse(res.body)
+      begin
+        JSON.parse(res.body)
+      catch JSON::ParserError
+        raise BestBuyApi::RequestError, "Bad Response: JSON Parser Error for #{request_url}"
+      end
     end
     
     protected

@@ -3,8 +3,7 @@ class Facet < ActiveRecord::Base
   has_many :dynamic_facets, :dependent=>:delete_all
   after_save{ Maybe(dynamic_facets).each{|x| x.save}}
   def self.count_products(p_type_name = nil)
-     product_type_name = (Session.product_type ||= 'camera_bestbuy') if p_type_name.nil?
-     product_type_name ||= p_type_name
+     product_type_name = p_type_name || Session.product_type || 'camera_bestbuy'
      facets_to_save = []
      Facet.all.each do |facet|
        if facet.feature_type == 'Binary'
