@@ -77,9 +77,8 @@ class Result < ActiveRecord::Base
     #Set onsale binary because it's not in the feed
     binspecs = [] # For bulk insert
     Product.current_type.instock.each do |product|
-      price_cont_spec = ContSpec.find_by_product_id_and_name_and_product_type(product.id,"price",Session.product_type)
-      saleprice_cont_spec = ContSpec.find_by_product_id_and_name_and_product_type(product.id,"saleprice",Session.product_type)
-      if !price_cont_spec.nil? && !saleprice_cont_spec.nil? && price_cont_spec.value > saleprice_cont_spec.value
+      saleEnd = CatSpec.find_by_product_id_and_name_and_product_type(product.id,"saleEndDate",Session.product_type)
+      if saleEnd && saleEnd.value && (Time.parse(saleEnd.value) - 4.hours) > Time.now
         binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
         binspec.value = true
         binspecs << binspec

@@ -43,7 +43,7 @@ task :update => :environment do
       #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
       Result.cleanupByProductType(Session.product_type, 3)
   # clean up inactive scraping rules not used any more
-      Facet.count_products
+      Facet.check_active
       ScrapingRule.cleanup
       Search.cleanup_history_data(7)
 end
