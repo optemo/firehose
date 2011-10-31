@@ -6,6 +6,7 @@ def read_daily_sales
   imap.select('Inbox') 
   # All msgs in a folder 
   msgs = imap.search(["SINCE", "1-Jan-1969"]) 
+  
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0] 
@@ -36,7 +37,7 @@ def read_daily_sales
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
            end
-         end
+        end
   # Open csv file
   # ************* ROBS CHANGES ************
         contspecs = []
@@ -46,46 +47,52 @@ def read_daily_sales
         if csvfile =~ /.+-.+-.+/
           weekly=true
         end
-        
+                
         unless csvfile.blank? || weekly
           
-          #./tmp/Daily_Data my not exist as a directory
-          %x{mkdir ./tmp/Daily_Data}
+          #./log/Daily_Data may not exist as a directory
+          FileUtils.mkdir_p("./log/Daily_Data") unless File.directory?("./log/Daily_Data")
           
-          today_data=File.open("./tmp/Daily_Data/"+Time.now.to_s[0..9]+".txt",'w')
-          cumullative=File.open("./tmp/Daily_Data/Cumullative_Data.txt",'a')
+          #### THIS DOES THE PROCESSING OF THE CSV FILE
+          orders_map = {} # map of sku => orders
+          
+          today_data=File.open("./log/Daily_Data/"+Time.now.to_s[0..9]+".txt",'w')
+          cumullative=File.open("./log/Daily_Data/Cumullative_Data.txt",'a')
           File.open(csvfile, 'r') do |f|
             f.each do |line|
               /\d+\.,,(?<sku>[^,]+),,(?<rev>"?\$\d+(,\d+)?"?),,,,[^,]+,,(?<orders>\d+)/ =~ line
-              if sku
-                product = Product.find_by_sku(sku)
-                if product && product.instock
-                  u=product.cont_specs.find_by_name("utility")
-                  
-                  s=product.cont_specs
-                  to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
-                  add_on=""
-                  if product.product_type=="camera_bestbuy"
-                    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
-                  end
-                  if product.product_type=="drive_bestbuy"
-                    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                           " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
-                           " "+product.cont_specs.find_by_name("orders_factor").value.to_s
-                  end
-                  
-                  today_data.write(to_write+add_on+"\n")
-                  cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
-                end
-              end
+              orders_map[sku] = orders if sku
             end
+          end
+          
+          Product.find_all_by_instock("1").each do |product|
+            sku = product.sku
+            orders_spec = orders_map[sku]
+            orders = (orders_spec.nil?) ? "0" : orders_spec
+            u=product.cont_specs.find_by_name("utility")
+            
+            s=product.cont_specs
+            to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
+            add_on=""
+            if product.product_type=="camera_bestbuy"
+              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
+            end
+            if product.product_type=="drive_bestbuy"
+              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+                     " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
+                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s
+            end
+            
+            today_data.write(to_write+add_on+"\n")
+            cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
+
           end
           today_data.close()
           cumullative.close()
