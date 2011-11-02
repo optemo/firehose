@@ -2,7 +2,7 @@ def read_daily_sales
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
-  imap.login('files@optemo.com', '***REMOVED***') 
+  imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
   # All msgs in a folder 
   msgs = imap.search(["SINCE", "1-Jan-1969"]) 
