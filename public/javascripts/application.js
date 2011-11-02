@@ -219,7 +219,7 @@ $(document).ready(function(){
 			}
 			params = {"sc[product_id]" : t.siblings(".expandable_sku").attr('data-id'),
 				"sc[product_type]" : elem.attr("data-pt"),
-				"sc[raw]" : t.siblings(".raw").html(),
+				"sc[raw]" : t.siblings(".raw").attr("data-rawhash") || t.siblings(".raw").html(),
 				"sc[scraping_rule_id]" : elem.attr("data-id")};
 			
 			for (var i in params)

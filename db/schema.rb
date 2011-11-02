@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110921184003) do
+ActiveRecord::Schema.define(:version => 20111102222330) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -52,6 +52,16 @@ ActiveRecord::Schema.define(:version => 20110921184003) do
   add_index "cat_specs", ["name"], :name => "index_cat_specs_on_name"
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
 
+  create_table "categorical_facet_values", :force => true do |t|
+    t.integer  "facet_id"
+    t.string   "name"
+    t.float    "value"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "categorical_facet_values", ["facet_id"], :name => "index_categorical_facet_values_on_facet_id"
+
   create_table "category_id_product_type_maps", :force => true do |t|
     t.integer  "category_id",     :null => false
     t.datetime "created_at"
@@ -72,6 +82,16 @@ ActiveRecord::Schema.define(:version => 20110921184003) do
   add_index "cont_specs", ["name", "product_id"], :name => "index_cont_specs_on_name_and_product_id"
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
+
+  create_table "daily_specs", :force => true do |t|
+    t.string  "sku"
+    t.string  "name"
+    t.string  "value_txt"
+    t.float   "value_flt"
+    t.boolean "value_bin"
+    t.string  "product_type"
+    t.date    "date"
+  end
 
   create_table "dynamic_facets", :force => true do |t|
     t.integer "facet_id", :null => false
@@ -240,7 +260,7 @@ ActiveRecord::Schema.define(:version => 20110921184003) do
     t.string   "product_id"
     t.string   "product_type"
     t.string   "raw"
-    t.string   "corrected"
+    t.text     "corrected"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "scraping_rule_id"
