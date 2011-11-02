@@ -4,7 +4,7 @@ class Facet < ActiveRecord::Base
   
   def self.check_active
      facets_to_save = []
-     Facet.where(id: Session.product_type_id, feature_type: 'Binary').each do |facet|
+     Facet.where(product_type_id: Session.product_type_id, feature_type: 'Binary').each do |facet|
        products_counts = BinSpec.joins("INNER JOIN products on products.id=product_id").where(bin_specs: {name: facet.name, product_type: Session.product_type},products: {instock: 1}).count
        facet.active = (products_counts > 0 ? 1 : 0)
        facets_to_save << facet
