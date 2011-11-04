@@ -78,7 +78,7 @@ class ScrapingRule < ActiveRecord::Base
             else
               raw = raw_info[r[:rule].remote_featurename]
             end
-            corr = corrections.find{|c|c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == raw.to_s.hash.to_s)}
+            corr = corrections.find{|c|c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == Digest::MD5.hexdigest(raw.to_s))}
             if corr
               parsed = corr.corrected
               delinquent = false
