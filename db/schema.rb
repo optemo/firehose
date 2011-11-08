@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111105010921) do
+ActiveRecord::Schema.define(:version => 20111102222330) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -84,16 +84,13 @@ ActiveRecord::Schema.define(:version => 20111105010921) do
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
   create_table "daily_specs", :force => true do |t|
-    t.string   "sku"
-    t.string   "name"
-    t.string   "spec_type"
-    t.string   "value_txt"
-    t.float    "value_flt"
-    t.boolean  "value_bin"
-    t.string   "product_type"
-    t.date     "date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string  "sku"
+    t.string  "name"
+    t.string  "value_txt"
+    t.float   "value_flt"
+    t.boolean "value_bin"
+    t.string  "product_type"
+    t.date    "date"
   end
 
   create_table "dynamic_facets", :force => true do |t|
@@ -160,17 +157,6 @@ ActiveRecord::Schema.define(:version => 20111105010921) do
 
   add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
   add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
-
-  create_table "old_daily_specs", :force => true do |t|
-    t.string  "sku"
-    t.string  "name"
-    t.string  "spec_type"
-    t.string  "value_txt"
-    t.float   "value_flt"
-    t.boolean "value_bin"
-    t.string  "product_type"
-    t.date    "date"
-  end
 
   create_table "product_bundles", :force => true do |t|
     t.integer  "bundle_id"
