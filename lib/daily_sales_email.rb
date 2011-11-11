@@ -4,12 +4,12 @@ def read_daily_sales
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
+    
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "1-Jan-1969"]) 
-  
+  msgs = imap.search(["SINCE", "9-Sep-2011"]) 
   # Read each message 
   msgs.reverse.each do |msgID| 
-    msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0] 
+    msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
   # Only those with 'SOMETEXT' in subject are of our interest 
     if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
       body = msg.attr["BODY"] 
