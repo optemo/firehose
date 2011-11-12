@@ -10,6 +10,7 @@ db/sphinx
 *.o
 config/*.sphinx.conf
 public/system
+.sass-cache
 
 webrat.log
 deploy-to-staging.sh
