@@ -38,5 +38,11 @@ module Firehose
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
+    
+    if $0 =~ /rake/
+      config.logger = Logger.new(STDOUT)
+    else
+      config.logger = Logger.new(Rails.root.join("log",Rails.env + ".log"),3,5*1024*1024)  
+    end
   end
 end
