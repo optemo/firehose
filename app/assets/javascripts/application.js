@@ -1,6 +1,7 @@
-// Place your application-specific JavaScript functions and classes here
-// This file is automatically included by javascript_include_tag :defaults
-
+/*
+*= require_self
+*= require_tree .
+*/
 $(document).ready(function(){
     $.validator.addMethod('regexp', function (possible_regexp, element) {
         try {

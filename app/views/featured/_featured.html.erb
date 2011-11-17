@@ -1,0 +1,9 @@
+<div class="featured">
+  <%= featured.cat_specs.find_by_name("image") %>
+  <%= image_tag featured.cat_specs.find_by_name("img150url").value, :class => "productimg", title: "SKU: #{featured.sku} ID:#{featured.id} #{featured.cat_specs.find_by_name("title").value}"%>
+  <div class="accessories">
+    <div>Accessories:</div>
+    <% acc = Hash[*featured.text_specs.find_by_name("top_copurchases").value.split("-")] %>
+    <%= render partial: "accessory", collection: acc.keys.zip(acc.values) %>
+  </div>
+</div>

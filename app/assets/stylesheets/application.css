@@ -1,3 +1,7 @@
+/*
+*= require_self
+*= require_tree .
+*/
 h2 {
     text-align:center;
 }
@@ -127,12 +131,12 @@ div#silkscreen {
 }
 
 .closed {
-	background: url("/images/demo-spindown-closed.gif") no-repeat left center;
+	background: url("data:image/gif;base64,R0lGODlhBgAHAPMKAI2Njb6+vq6urp6enoWFhaampt7e3u/v787Ozn19ff///wAAAAAAAAAAAAAAAAAAACH5BAUAAAoALAAAAAAGAAcAQAQUECBFVbok2JvEAUa1DeHGAVdxUBEAOw==") no-repeat left center;
 	padding-left: 13px;
 }
 
 .open {
-	background: url("/images/demo-spindown-open.gif") no-repeat left center;
+	background: url("data:image/gif;base64,R0lGODlhBwAGALMKAM7Ozr6+vq6urp6enoWFhaampt7e3u/v742NjX19ff///wAAAAAAAAAAAAAAAAAAACH5BAEAAAoALAAAAAAHAAYAAAQWEKU5kaETqEKHUgcxGZ8SJEL5IccXAQA7") no-repeat left center;
 	padding-left: 13px;
 }
 .bold

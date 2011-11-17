@@ -1,7 +1,6 @@
 def read_daily_sales
   require 'net/imap'
   require 'zip/zip'
-  require 'ruby-debug'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
@@ -20,7 +19,7 @@ def read_daily_sales
         i+=1 
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
-        cName = "#{Rails.root}/tmp/#{Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")}.zip" 
+        cName = "#{Rails.root}/tmp/#{Time.now.strftime("%y-%m-%d")}.zip" 
         
   # fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
@@ -58,7 +57,6 @@ def read_daily_sales
           orders_map = {} # map of sku => orders
           
           then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-          
           today_data=File.open("./log/Daily_Data/"+then_date+".txt",'w')
           cumullative=File.open("./log/Daily_Data/Cumullative_Data.txt",'a')
           File.open(csvfile, 'r') do |f|
@@ -100,7 +98,7 @@ def read_daily_sales
             end
             
             today_data.write(to_write+add_on+"\n")
-            cumullative.write(Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")+" "+to_write+add_on+"\n")
+            cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
 
           end
           today_data.close()
@@ -108,9 +106,9 @@ def read_daily_sales
         end
   # ******************************************
       end 
-      #unless weekly
-      #  break; #Only process the first email, unless that email is a weekly email
-      #end
+      unless weekly
+        break; #Only process the first email, unless that email is a weekly email
+      end
     end 
   end 
   imap.close

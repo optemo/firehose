@@ -1,11 +1,11 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.0.9'
+gem 'rails', '3.1.1'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'mysql2', '0.2.6'
+gem 'mysql2', '0.3.7'
 
 # Use unicorn as the web server
 # gem 'unicorn'
@@ -37,12 +37,21 @@ gem 'activerecord-import'
 gem 'capistrano'
 gem 'capistrano-ext'
 gem 'rubyzip'
+gem 'jquery-rails'
 
 group :development do
-  gem 'rspec-rails', '2.6.0'
+  gem 'rspec-rails'
 end
 
 group :test do
-  gem 'rspec', '2.6.0'
+  gem 'rspec'
   gem 'webrat', '0.7.3'
+end
+
+# Gems used only for assets and not required
+# in production environments by default.
+group :assets do
+  gem 'sass-rails', "  ~> 3.1.0"
+  gem 'coffee-rails', "~> 3.1.0"
+  gem 'uglifier'
 end
