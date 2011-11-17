@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111102222330) do
+ActiveRecord::Schema.define(:version => 20111105010921) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -84,13 +84,16 @@ ActiveRecord::Schema.define(:version => 20111102222330) do
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
   create_table "daily_specs", :force => true do |t|
-    t.string  "sku"
-    t.string  "name"
-    t.string  "value_txt"
-    t.float   "value_flt"
-    t.boolean "value_bin"
-    t.string  "product_type"
-    t.date    "date"
+    t.string   "sku"
+    t.string   "name"
+    t.string   "spec_type"
+    t.string   "value_txt"
+    t.float    "value_flt"
+    t.boolean  "value_bin"
+    t.string   "product_type"
+    t.date     "date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "dynamic_facets", :force => true do |t|

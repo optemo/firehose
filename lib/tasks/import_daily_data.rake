@@ -4,15 +4,18 @@ task :daily_factors => :environment do
   analyze_daily_factors
 end
 
+task :daily_sales => :environment do
+  require 'daily_sales'
+  save_daily_sales
+end
 
 def analyze_daily_factors
   product_type = "camera_bestbuy"
-  output_name = "/optemo/data/factors.txt"
+  output_name =  "./log/Daily_Data/factors.txt"
   factors = get_cumulative_data(product_type)
   out_file = File.open(output_name,'w')
   factors.keys.each do |date|
-    # for each date appearing in the factors
-    # and each sku...
+    # for each date appearing in the factors and each sku...
     # query the database to get: saleprice, maxresolution, opticalzoom, orders, brand, featured, onsale
     factors[date].each do |daily_product|
       sku = daily_product["sku"]
@@ -36,8 +39,7 @@ def analyze_daily_factors
       output_line = [
         date,
         sku,
-        daily_product["daily_sales"],
-        daily_product["utility"],
+        daily_product["sales"],
         daily_product["saleprice"],
         daily_product["maxresolution"],
         daily_product["opticalzoom"],
@@ -58,8 +60,8 @@ end
 def get_cumulative_data(product_type)
   # read the cumulative data file and extract factor values for products of the type given as input
   factors = {}
-  data_path =  "/optemo/data/"
-  fname = "Cumullative_Data.txt"
+  data_path =  "./log/Daily_Data/"
+  fname = "Cumullative_Data_Sales.txt"
   f = File.open(data_path + fname, 'r')
   lines = f.readlines
   lines.each do |line|
@@ -67,7 +69,8 @@ def get_cumulative_data(product_type)
       a = line.split
       date = a[0]
       factors[date] = [] if factors[date].nil?
-      factors[date] << {"sku" => a[1], "utility" => a[2], "daily_sales" => a[3], "product_type" => a[4], "saleprice_factor" => a[5], "maxresolution_factor" => a[6], "opticalzoom_factor" => a[7], "brand_factor" => a[8], "onsale_factor" => a[9], "orders_factor" => a[10]}
+      #factors[date] << {"sku" => a[1], "utility" => a[2], "daily_sales" => a[3], "product_type" => a[4], "saleprice_factor" => a[5], "maxresolution_factor" => a[6], "opticalzoom_factor" => a[7], "brand_factor" => a[8], "onsale_factor" => a[9], "orders_factor" => a[10]}
+      factors[date] << {"sku" => a[1], "sales" => a[2], "product_type" => a[3]}
     end
   end
   return factors
