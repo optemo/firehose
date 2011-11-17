@@ -2,7 +2,8 @@ require 'test_helper'
 
 class ResultsControllerTest < ActionController::TestCase
   setup do
-    @result = results(:one)
+    @result = Factory(:result, total: 3)
+    3.times { Factory(:candidate, result: @result) }
   end
 
   test "should get index" do
@@ -25,10 +26,10 @@ class ResultsControllerTest < ActionController::TestCase
   #end
 
   #Candidates are not ready yet
-  #test "should show result" do
-  #  get :show, :id => @result.to_param
-  #  assert_response :success
-  #end
+  test "should show result" do
+    get :show, :id => @result.to_param
+    assert_response :success
+  end
 
   test "should get edit" do
     get :edit, :id => @result.to_param

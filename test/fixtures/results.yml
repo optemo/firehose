@@ -1,7 +1,0 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-
-#  warnings: 1
-one:
-  id: 1
-  product_type: camera_bestbuy
-  category: --[22474, 28382, 28381, 20220, 20218]
