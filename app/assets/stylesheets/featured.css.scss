@@ -1,0 +1,27 @@
+// Place all the styles related to the featured controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.accessories {
+  display:inline-block;
+  border: 1px solid #888;
+  border-radius: 10px;
+  display: inline-block;
+  margin-left: 10px;
+  margin-top: 15px;
+  padding: 9px;
+  vertical-align: top;
+}
+.featured {
+  padding: 10px;
+}
+.accessories .productimg {
+  width: 75px;
+}
+.num {
+  background-color: pink;
+  border-radius: 10px;
+  padding: 2px 5px 0;
+  position: absolute;
+  right: 0;
+}

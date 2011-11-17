@@ -160,7 +160,7 @@ class Product < ActiveRecord::Base
     prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
     all_products.each do |product|
       utility = []
-      (Session.features["utility"]).each do |f|
+      Maybe(Session.features["utility"]).each do |f|
         model = case f.feature_type
           when "Categorical" then CatSpec
           when "Continuous" then ContSpec

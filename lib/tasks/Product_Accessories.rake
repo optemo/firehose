@@ -26,7 +26,8 @@ task :insert_accessories => :environment do
   print "\n"
   print "Reading in Copurchased Products..."
   l=read_list_from_file()
-  
+
+  #exit
   start_time=Time.now
   
   print "Building Concurrence Hash..."
@@ -36,23 +37,11 @@ task :insert_accessories => :environment do
   print "Adding to online Database..."
   c.keys.each do |key|
     #print key,c[key],"\n"
-    s=top_copurchases_string(key,2,c) #string of top 2 copurchase skus
-    p=Product.find_by_sku(key)
+    p = Product.find_by_sku(key)
     
-    #check if product p has a "top_copurchases text spec already"
-    #if it does, modify.  Otherwise create.
-    t=p.text_specs.find_by_name("top_copurchases")
-    #if t
-    #  t.value=s
-    #  t.save
-    #else      
-    #  t=TextSpec.new
-    #  t.name="top_copurchases"
-    #  t.value=s
-    #  t.product_id=p.id
-    #  t.product_type=p.product_type
-    #  t.save 
-    #end   
+    t = p.text_specs.find_or_create_by_name_and_product_type("top_copurchases",p.product_type)
+    t.value = top_copurchases(key,6,c).flatten.join("-") #string of top 2 copurchase skus
+    t.save
   end
   
   end_time=Time.now
@@ -152,21 +141,22 @@ def Build_Concurrence_Hash(l)
     #end
     #<><><><>
   end
-
-  #sorts hash by counts
-  max_accessories = c.values.map(&:length).max
-  puts "Number of products with copurchases: #{c.keys.count}, with max: #{max_accessories}"
-  c.each_pair do |k,v|
-    next unless v.length == max_accessories
-    grouped = v.flatten.group_by(&:sku)
-    grouped.each_pair{|k,v|grouped[k] = v.length}
-    puts "Highest copurchases(#{k}) has #{grouped.length} accessories:"
-    puts grouped
-    break
-  end
-
-  ps = Product.instock.select{|p|c.has_key? p.sku}
-  puts "Instock Cameras #{ps.length} / #{Product.instock.where(:product_type => "camera_bestbuy").count}"
+  
+  #Omitted for now
+  #Output interesting stuff
+  #max_accessories = c.values.map(&:length).max
+  #puts "Number of products with copurchases: #{c.keys.count}, with max: #{max_accessories}"
+  #c.each_pair do |k,v|
+  #  next unless v.length == max_accessories
+  #  grouped = v.flatten.group_by(&:sku)
+  #  grouped.each_pair{|k,v|grouped[k] = v.length}
+  #  puts "Highest copurchases(#{k}) has #{grouped.length} accessories:"
+  #  puts grouped
+  #  break
+  #end
+  #
+  #ps = Product.instock.select{|p|c.has_key? p.sku}
+  #puts "Instock Cameras #{ps.length} / #{Product.instock.where(:product_type => "camera_bestbuy").count}"
   
   return c
 
@@ -174,12 +164,8 @@ end
 
 # returns top k copurchases of product p.  Uses hash c from previous function
 # returns result as a string
-def top_copurchases_string(p,k,c)
-    top=""
-    for i in (0...[k,c[p].length].min) #it is possible there are less than k copurchased products
-      top=top+c[p][i][0].to_s+" "
-    end
-    return top
+def top_copurchases(sku,n,counts)
+  counts[sku].flatten.group_by(&:sku).sort{|a,b|b[1].length <=> a[1].length}[0..(n-1)].map{|a|[a[0],a[1].length]}
 end
 
 
@@ -188,6 +174,7 @@ end
 
 def read_list_from_file()
   orders = Hash.new{|h,k| h[k] = []} #Initialize to empty array
+  counts = Hash.new{|h,k| h[k] = 0} #Initialize to empty array
   abort("No file provided (file=example.csv)") if !ENV.include?("file")
   file = File.new(ENV["file"],"r")
   file.gets #First line is heading, throw away
@@ -195,9 +182,17 @@ def read_list_from_file()
   file.each do |line|
     web_order, date, sku = line.split(',')
     orders[web_order] << sku.chomp
+    counts[sku] += 1
     count += 1
   end
   puts "Read input file: #{count} lines"
   file.close
+  #topproducts = []
+  #counts.sort{|a,b|b[1] <=> a[1]}.each do |sku, count|
+  #  sku = sku.chomp
+  #  topproducts << sku if Product.find_by_sku_and_instock_and_product_type(sku,true,"camera_bestbuy")
+  #  break if topproducts.size == 10
+  #end
+  #puts "Top Products: #{topproducts.join(", ")}"
   return orders.values
 end
