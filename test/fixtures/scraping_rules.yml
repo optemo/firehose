@@ -1,0 +1,17 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  id: 2
+  local_featurename: name
+  remote_featurename: longDescription
+  product_type: camera_bestbuy
+  rule_type: Categorical
+  regex: .*
+
+two:
+  id: 4
+  local_featurename: title
+  remote_featurename: title
+  product_type: camera_bestbuy
+  rule_type: Categorical
+  regex: .*

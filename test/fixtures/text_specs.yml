@@ -1,15 +1,15 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
 one:
-  id: 
+  id: 1
   product_id: 1
   name: MyString
   value: MyText
   product_type: MyString
 
 two:
-  id: 
-  product_id: 1
+  id: 2
+  product_id: 45
   name: MyString
   value: MyText
   product_type: MyString
