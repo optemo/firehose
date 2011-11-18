@@ -17,7 +17,9 @@ class ApplicationController < ActionController::Base
   end
 
   def set_Session
-    if session[:current_product_type_id]
+    if params[:product_type] && params[:product_type][:id] 
+      Session.new params[:product_type][:id]
+    elsif session[:current_product_type_id]
       Session.new session[:current_product_type_id]
     else
       Session.new ProductType.first.id

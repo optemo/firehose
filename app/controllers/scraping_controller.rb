@@ -1,10 +1,6 @@
 class ScrapingController < ApplicationController
   def index
-    if params[:product_type]
-      self.current_product_type = ProductType.find params[:product_type][:id]
-    end
     @product_type = self.current_product_type
-    Session.new @product_type.id
   end
   
   def datafeed
@@ -28,6 +24,7 @@ class ScrapingController < ApplicationController
     products,@exists_count = BestBuyApi.some_ids(Session.category_id)
     @product_count = products.count
     @rules, @multirules, @colors = Candidate.organize(ScrapingRule.scrape(products))
+
     if (newcount = @rules.values.first.first.count) < @product_count
       @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
       @product_count = newcount
