@@ -1,16 +1,15 @@
 
-
 task :daily_data_collection => :environment do
   Session.new
   require 'daily_sales_email'
   read_daily_sales()
-  draw_daily_graph()
+  #generate_daily_graphs()
 end  
-
+  
 def draw_daily_graph()
-  command="echo 'set term png; set output \"./tmp/Daily_Data/"+Time.now.to_s[0..9]+".png\"; set xlabel \"Utility\"; set ylabel \"Sales\"; plot \"./tmp/Daily_Data/"+Time.now.to_s[0..9]+".txt\" using 2:3 title \""+Time.now.to_s[0..9]+"\"' | gnuplot"
+  command="echo 'set term png; set output \"./log/Daily_Data/"+Time.now.to_s[0..9]+".png\"; set xlabel \"Utility\"; set ylabel \"Sales\"; plot \"./log/Daily_Data/"+Time.now.to_s[0..9]+".txt\" using 2:3 title \""+Time.now.to_s[0..9]+"\"' | gnuplot"
   %x{#{command}}
-  command="echo 'set term png; set output \"./tmp/Daily_Data/Cumullative_as_of_"+Time.now.to_s[0..9]+".png\"; set xlabel \"Utility\"; set ylabel \"Sales\"; plot \"./tmp/Daily_Data/Cumullative_Data.txt\" using 3:4 title \""+Time.now.to_s[0..9]+"\"' | gnuplot"
+  command="echo 'set term png; set output \"./log/Daily_Data/Cumullative_as_of_"+Time.now.to_s[0..9]+".png\"; set xlabel \"Utility\"; set ylabel \"Sales\"; plot \"./log/Daily_Data/Cumullative_Data.txt\" using 3:4 title \""+Time.now.to_s[0..9]+"\"' | gnuplot"
   %x{#{command}}
 end
 

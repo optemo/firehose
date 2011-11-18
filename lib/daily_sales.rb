@@ -1,6 +1,7 @@
-def read_daily_sales
+def save_daily_sales
   require 'net/imap'
   require 'zip/zip'
+  require 'ruby-debug'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
@@ -19,7 +20,9 @@ def read_daily_sales
         i+=1 
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
-        cName = "#{Rails.root}/tmp/#{Time.now.strftime("%y-%m-%d")}.zip" 
+        then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
+        
+        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
         
   # fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
@@ -47,7 +50,9 @@ def read_daily_sales
         if csvfile =~ /.+-.+-.+/
           weekly=true
         end
-                
+        
+        orders_map = {} # map of sku => orders
+        
         unless csvfile.blank? || weekly
           
           #./log/Daily_Data may not exist as a directory
@@ -55,10 +60,9 @@ def read_daily_sales
           
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           orders_map = {} # map of sku => orders
+                    
+          cumullative=File.open("./log/Daily_Data/Cumullative_Data_sales.txt",'a')
           
-          then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-          today_data=File.open("./log/Daily_Data/"+then_date+".txt",'w')
-          cumullative=File.open("./log/Daily_Data/Cumullative_Data.txt",'a')
           File.open(csvfile, 'r') do |f|
             f.each do |line|
               /\d+\.,,(?<sku>[^,]+),,(?<rev>"?\$\d+(,\d+)?"?),,,,[^,]+,,(?<orders>\d+)/ =~ line
@@ -66,49 +70,25 @@ def read_daily_sales
             end
           end
           
-          # Changed: instead of looking at instock, get and look up
-          # in the daily_specs table which skus are listed for the given date
-          instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")          
-          instock.each do |daily_spec|
-            sku = daily_spec.sku
-            product = Product.find_by_sku(sku)
-            puts ("nil for " + sku) if product.nil?
-            sku = product.sku
+          instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")
+          instock.each do |prod_sku|
+            sku = prod_sku.sku
+            product_type = DailySpec.find_by_sku(sku).product_type
             orders_spec = orders_map[sku]
             orders = (orders_spec.nil?) ? "0" : orders_spec
-            u=product.cont_specs.find_by_name("utility")
-            
-            s=product.cont_specs
-            to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
-            add_on=""
-            if product.product_type=="camera_bestbuy"
-              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
-            end
-            if product.product_type=="drive_bestbuy"
-              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
-                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s
-            end
-            
-            today_data.write(to_write+add_on+"\n")
-            cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
-
+            # write orders to daily_sales for the date and the sku
+            ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "sales", :value_flt => orders, :product_type => product_type, :date => then_date)
+            to_write=sku.to_s+" "+orders.to_s + " " + product_type + "\n"
+            cumullative.write(then_date+" "+to_write)
+            ds.save
           end
-          today_data.close()
           cumullative.close()
         end
   # ******************************************
       end 
-      unless weekly
-        break; #Only process the first email, unless that email is a weekly email
-      end
+      #unless weekly
+      #  break; #Only process the first email, unless that email is a weekly email
+      #end
     end 
   end 
   imap.close
