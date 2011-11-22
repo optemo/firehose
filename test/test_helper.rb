@@ -9,6 +9,10 @@ Spork.prefork do
   ENV["RAILS_ENV"] = "test"
   require File.expand_path('../../config/environment', __FILE__)
   require 'rails/test_help'
+  # Factory Girl Shortcut, FactoryGirl.create() doesn't have to be repeated all the time
+  class Test::Unit::TestCase
+    include Factory::Syntax::Methods
+  end
 end
 
 Spork.each_run do

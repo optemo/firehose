@@ -77,6 +77,5 @@ Firehose::Application.routes.draw do
   match "featured" => "featured#index"
 
 
-
   root :to => "scraping#index"
 end

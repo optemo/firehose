@@ -1,6 +1,5 @@
 class ScrapingController < ApplicationController
   def index
-    @product_type = self.current_product_type
   end
   
   def datafeed
