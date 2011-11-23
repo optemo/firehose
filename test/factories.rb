@@ -21,13 +21,6 @@ FactoryGirl.define do
   end
   factory :product do
     title {|n| "Product#{n}"}
-    association :cat_specs
-    association :bin_specs
-    association :cont_specs
-    association :text_specs
-    association :search_products
-    association :product_siblings
-    association :product_bundles
   end
   factory :scraping_correction do
     association :scraping_rule
@@ -51,10 +44,10 @@ FactoryGirl.define do
   factory :search_product do
     association :product
   end
-  factory :product_siblings do
+  factory :product_sibling do
     association :product
   end
-  factory :product_bundles do
+  factory :product_bundle do
     association :product
   end
 end

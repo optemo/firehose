@@ -7,7 +7,7 @@ Firehose::Application.configure do
   # Code is not reloaded between requests
   config.cache_classes = true
   config.cache_store = :dalli_store, '127.0.0.1:11211',
-      { :namespace => "OPTEMO_DISCOVERY", :expires_in => 86400, :compress => true, :compress_threshold => 64*1024 }
+      { :namespace => "OPT", :expires_in => 86400, :compress => true, :compress_threshold => 64*1024 }
 
   # Full error reports are disabled and caching is turned on
   config.consider_all_requests_local       = false

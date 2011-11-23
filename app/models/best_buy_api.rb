@@ -70,7 +70,8 @@ class BestBuyApi
     end
 
     def cached_request(type, params = {})
-      CachingMemcached.cache_lookup(type + params.to_s) do
+      #Data is only valid for 1 hour
+      CachingMemcached.cache_lookup(type + params.to_s + Time.now.strftime("%Y-%m-%d-%H")) do
         send_request(type, params)
       end
     end
