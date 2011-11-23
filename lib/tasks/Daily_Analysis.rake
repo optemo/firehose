@@ -5,6 +5,13 @@ task :daily_data_collection => :environment do
   read_daily_sales()
   #generate_daily_graphs()
 end  
+ 
+task :daily_pageviews_collection => :environment do
+  Session.new
+  require 'daily_pageviews_email'
+  read_daily_pageviews
+  #generate_daily_graphs()
+end  
   
 def draw_daily_graph()
   command="echo 'set term png; set output \"./log/Daily_Data/"+Time.now.to_s[0..9]+".png\"; set xlabel \"Utility\"; set ylabel \"Sales\"; plot \"./log/Daily_Data/"+Time.now.to_s[0..9]+".txt\" using 2:3 title \""+Time.now.to_s[0..9]+"\"' | gnuplot"
