@@ -29,4 +29,23 @@ class ScrapingController < ApplicationController
       @product_count = newcount
     end
   end
+  
+  def myrules
+    @rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    
+    #Calculate Coverage
+    
+    if params[:coverage]
+      @coverage = {}
+      products,@exists_count = BestBuyApi.some_ids(Session.category_id)
+      @products_count = products.count
+       ScrapingRule.scrape(products).group_by(&:scraping_rule_id).each_pair{|sr_id, candidates| @coverage[sr_id] = covered(candidates)}
+    end
+  end
+  
+  private
+  def covered(array)
+    #Used to calculate feed coverage
+    array.inject(0){|res,elem|elem.delinquent ? res : res+1}
+  end
 end

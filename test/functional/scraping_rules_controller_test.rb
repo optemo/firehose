@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ScrapingRulesControllerTest < ActionController::TestCase
   setup do
-    @scraping_rule = scraping_rules(:one)
+    @scraping_rule = create(:scraping_rule)
   end
 
   test "should get new" do
