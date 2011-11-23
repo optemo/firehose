@@ -48,10 +48,10 @@ class ScrapingRulesController < ApplicationController
     unless potential_previous_scraping_rules.empty?
       @scraping_rule.priority = (potential_previous_scraping_rules.map(&:priority).max + 1)
     end
-    
+
     respond_to do |format|
       if @scraping_rule.save
-        format.html { head :ok }
+        format.html { redirect_to root_url }
       else
         format.html { head 412 }
       end
@@ -81,7 +81,7 @@ class ScrapingRulesController < ApplicationController
     
     respond_to do |format|
       if succeeded
-        format.html { head :ok }
+        format.html { redirect_to root_url }
       else
         format.html { head 412 }
       end
@@ -98,8 +98,8 @@ class ScrapingRulesController < ApplicationController
     end
     
     respond_to do |format|
-      format.html { head :ok }
-      format.xml  { head :ok }
+      format.html { redirect_to root_url }
+      format.xml  { head 412 }
     end
   end
 end

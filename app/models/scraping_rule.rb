@@ -6,6 +6,7 @@ class ScrapingRule < ActiveRecord::Base
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
   has_many :candidates
+  has_many :scraping_corrections
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
 

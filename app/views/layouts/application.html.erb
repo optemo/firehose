@@ -14,12 +14,12 @@
 
     
         <h2>
-          <% @product_type = current_product_type %>
-          <%= form_for @product_type, :url=>root_path do |f| %>
-          Please select product: <%= select "product_type","id", ProductType.all.collect { |p| [ p.name, p.id] } %><%= f.submit "Change Product Type"%>
+          <%= form_for ProductType.find(Session.product_type_id), :url=>root_path do |f| %>
+          Please select product: <%= f.select "id", ProductType.all.collect { |p| [ p.name, p.id] } %><%= f.submit "Change Product Type"%>
           <% end %>
-          <br />
-          SKUs in category id <%= Session.category_id %>
+          <div style="padding-top: 9px;">
+            SKUs in category id <%= Session.category_id %>
+          </div>
         </h2> 
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 

@@ -89,8 +89,8 @@ class ResultsController < ApplicationController
     Result.find(params[:id]).destroy
    
     respond_to do |format|
-      format.html { head :ok}
-      format.xml  { head :ok }
+      format.html { redirect_to results_path}
+      format.xml  { head 412 }
     end
 
   end

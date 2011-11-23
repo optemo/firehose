@@ -35,6 +35,7 @@ class BestBuyApi
     def some_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
+      id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       total = 0
       id.each do |my_id|
@@ -48,11 +49,12 @@ class BestBuyApi
     def category_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
+      id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
         page = 1
         totalpages = nil
-        while (page == 1 || page <= totalpages)
+        while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
           res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
           totalpages ||= res["totalPages"]
           ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
