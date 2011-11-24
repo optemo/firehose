@@ -9,6 +9,11 @@ class ScrapingRulesControllerTest < ActionController::TestCase
     get :new, :rule => {remote_featurename: "Name"}
     assert_response :success
   end
+  
+  test "should get rule candidates" do
+    get :show, id: @scraping_rule.id
+    assert_response :success
+  end
 
   test "should create scraping_rule" do
     assert_difference('ScrapingRule.count') do

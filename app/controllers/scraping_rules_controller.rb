@@ -88,6 +88,11 @@ class ScrapingRulesController < ApplicationController
     end
   end
   
+  def show
+    products,@exists_count = BestBuyApi.some_ids(Session.category_id)
+    @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id]))
+  end
+  
   def destroy
     if(Candidate.find_by_scraping_rule_id(params[:id]))
       #We have found a dependancy on the rule, so we'll just make it inactive

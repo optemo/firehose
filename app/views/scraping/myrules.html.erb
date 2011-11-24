@@ -6,7 +6,7 @@
 </div>
 <% @rules.each_pair do |local_feature,rules| %>
 	<div style="margin-bottom: 1em;">
-		<a href="#" class="togglable open title_link">
+		<a href="#" class="togglable open">
 			Feature: <span class="bold"><%= local_feature %></span>&nbsp;&nbsp;&nbsp;
 			<% if @coverage %>
 			  Coverage: <span class="bold"></span>
@@ -16,9 +16,9 @@
 		<div class="contentholder">
 	  <%# Rules for this local_feature %>
 		<% rules.each_with_index do |rule, remote_feature_counter| %>
-    <div>
-      <%= link_to "#", :class => "raise_rule_priority", :"data-id" => rule.id, :title => "Raise rule priority" do %>&#8679;<% end if remote_feature_counter >= 1%>
-    	<a href="#" class="togglable closed title_link">
+    <div data-id="<%= rule.id %>">
+      <%= link_to "#", :class => "raise_rule_priority", :title => "Raise rule priority" do %>&#8679;<% end if remote_feature_counter >= 1%>
+    	<a href="#" class="togglable closed fetch_candidates">
     		Remote Feature: <span class="bold"><%= rule.remote_featurename %></span>&nbsp;&nbsp;&nbsp;
     		<span style="color: <%= @colors[rule.local_featurename][rule.id] if @colors %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
     		<% if @coverage.present? %>
@@ -27,7 +27,7 @@
     	</a>
     	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.product_type %>
     	<%= link_to "Destroy", rule, :method => :delete %>
-    	<div class="contentholder"></div>
+    	<div class="contentholder">Processing...</div>
     </div>
     <% end %>
     </div>
