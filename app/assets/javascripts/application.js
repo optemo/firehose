@@ -315,6 +315,11 @@ $(document).ready(function(){
 	      }
 	return false;
 	});
+	
+	$('.coverage_submit').live('click', function(){
+	  $(this).parent().submit();
+	  //$.post(location.href, {coverage: 1})
+	});
 
     $('select#type_filter').live('change', function () {
 	$('#filter_form').submit();

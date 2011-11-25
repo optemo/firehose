@@ -11,6 +11,7 @@ db/sphinx
 config/*.sphinx.conf
 public/system
 .sass-cache
+config/newrelic.yml
 
 webrat.log
 deploy-to-staging.sh

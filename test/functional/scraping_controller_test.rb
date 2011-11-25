@@ -2,7 +2,8 @@ require 'test_helper'
 
 class ScrapingControllerTest < ActionController::TestCase
   setup do
-    #Session.new #Sets up a default camera_bestbuy session
+    @sr = create(:scraping_rule, local_featurename: "hophead")
+    @sr_drive = create(:scraping_rule, product_type: "drive_bestbuy")
   end
   test "should get index" do
     get :index
@@ -30,5 +31,10 @@ class ScrapingControllerTest < ActionController::TestCase
     get :datafeed
     assert_response :success
   end
-
+  
+  test "only the current rules should be displayed" do
+    get :myrules
+    assert_response :success
+    assert_equal assigns[:rules], [@sr].group_by(&:local_featurename), "Our scraping rules should be returned" 
+  end
 end
