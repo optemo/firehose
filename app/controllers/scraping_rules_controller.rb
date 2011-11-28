@@ -98,7 +98,7 @@ class ScrapingRulesController < ApplicationController
       @candidates = Candidate.multi(candidates)
     else
       #Check single rules
-      @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id]))
+      @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id])).sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
     end
   end
   

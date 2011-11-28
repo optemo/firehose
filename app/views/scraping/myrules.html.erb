@@ -8,8 +8,8 @@
 	<div style="margin-bottom: 1em;">
 		<a href="#" class="togglable open mytitle">
 			Feature: <span class="bold"><%= local_feature %></span>&nbsp;&nbsp;&nbsp;
-			<% if @coverage %>
-			  Coverage: <span class="bold"></span>
+			<% if @coverage.present? %>
+			  Coverage: <span class="bold"><%= @coverage[local_feature] || @coverage[rules.first.id] %>/<%= @products_count %></span>
 			<% end %>
 		</a>
 		<%= link_to "New Rule", "#", :class => "new_rule", :'data-lf' => local_feature %>

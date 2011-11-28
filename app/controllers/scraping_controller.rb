@@ -31,7 +31,7 @@ class ScrapingController < ApplicationController
   end
   
   def myrules
-    @rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    @rules = ScrapingRule.order('priority').find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
     @colors = {}
     @rules.each_pair do |lf, rs|
       @colors.merge! Hash[*rs.map(&:id).zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
@@ -42,7 +42,13 @@ class ScrapingController < ApplicationController
       @coverage = {}
       products,@exists_count = BestBuyApi.some_ids(Session.category_id)
       @products_count = products.count
-       ScrapingRule.scrape(products).group_by(&:scraping_rule_id).each_pair{|sr_id, candidates| @coverage[sr_id] = covered(candidates)}
+      ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
+        groups = candidates.group_by(&:scraping_rule_id)
+        if groups.keys.length > 1
+          @coverage[lf] = covered(Candidate.multi(candidates))
+        end
+        groups.each_pair{|sr_id, candidates| @coverage[sr_id] = covered(candidates)}
+      end
     end
   end
   
