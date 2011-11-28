@@ -20,17 +20,6 @@ class ScrapingController < ApplicationController
   end
   
   def rules
-    products,@exists_count = BestBuyApi.some_ids(Session.category_id)
-    @product_count = products.count
-    @rules, @multirules, @colors = Candidate.organize(ScrapingRule.scrape(products))
-
-    if (newcount = @rules.values.first.first.count) < @product_count
-      @warning = "#{@product_count-newcount} product#{'s' if @product_count-newcount > 1} missing"
-      @product_count = newcount
-    end
-  end
-  
-  def myrules
     @rules = ScrapingRule.order('priority').find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
     @colors = {}
     @rules.each_pair do |lf, rs|
