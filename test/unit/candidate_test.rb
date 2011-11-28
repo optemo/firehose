@@ -34,4 +34,12 @@ class CandidateTest < ActiveSupport::TestCase
     
     assert_equal colors[sr1.local_featurename], {sr1.id => "#4F3333", sr2.id => "green"}
   end
+  
+  test "Testing multi-rules" do
+    sr = create(:scraping_rule, priority: 2)
+    sr1 = create(:scraping_rule, priority: 1)
+    c1 = create(:candidate, scraping_rule: sr)
+    c2 = create(:candidate, scraping_rule: sr1)
+    assert_equal [c2], Candidate.multi([c1,c2])
+  end
 end

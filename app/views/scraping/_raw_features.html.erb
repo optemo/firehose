@@ -12,7 +12,7 @@
 				<li><%= hash["group"] %></li>
 				<ul class="featurehash">
 			<% end %>
-			<li><%= link_to "#{hash["name"]} -- #{hash["value"]}", "#", {:class => "title_link", :title => "Click for overlay", :'data-rf' => CGI::escape([k.gsub("French Specs","specs"),hash["group"],hash["name"]].join(".")), :'data-spec' => (hash["value"].to_s.length < 255 ? hash["value"] : nil)} %></li>
+			<li><%= link_to "#{hash["name"]} -- #{hash["value"]}", "#", {:class => "title_link mytitle", :title => "Click for overlay", :'data-rf' => CGI::escape([k.gsub("French Specs","specs"),hash["group"],hash["name"]].join(".")), :'data-spec' => (hash["value"].to_s.length < 255 ? hash["value"] : nil)} %></li>
 			<% currentgroup = hash["group"] %>
 		<% end %>
 		</ul>

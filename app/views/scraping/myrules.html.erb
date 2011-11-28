@@ -6,7 +6,7 @@
 </div>
 <% @rules.each_pair do |local_feature,rules| %>
 	<div style="margin-bottom: 1em;">
-		<a href="#" class="togglable open">
+		<a href="#" class="togglable open mytitle">
 			Feature: <span class="bold"><%= local_feature %></span>&nbsp;&nbsp;&nbsp;
 			<% if @coverage %>
 			  Coverage: <span class="bold"></span>
@@ -18,9 +18,9 @@
 		<% rules.each_with_index do |rule, remote_feature_counter| %>
     <div data-id="<%= rule.id %>">
       <%= link_to "#", :class => "raise_rule_priority", :title => "Raise rule priority" do %>&#8679;<% end if remote_feature_counter >= 1%>
-    	<a href="#" class="togglable closed fetch_candidates">
+    	<a href="#" class="togglable closed fetch_candidates mytitle">
     		Remote Feature: <span class="bold"><%= rule.remote_featurename %></span>&nbsp;&nbsp;&nbsp;
-    		<span style="color: <%= @colors[rule.local_featurename][rule.id] if @colors %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
+    		<span style="color: <%= @colors[rule.id] if @colors %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
     		<% if @coverage.present? %>
     		  Coverage: <span class="bold"><%= @coverage[rule.id] %>/<%= @products_count %></span>&nbsp;&nbsp;&nbsp;
     		<% end %>
@@ -29,6 +29,13 @@
     	<%= link_to "Destroy", rule, :method => :delete %>
     	<div class="contentholder">Processing...</div>
     </div>
+    <% end %>
+    
+    <% if @coverage.present? && rules.length > 1 #Multi-rules%>
+    <div data-id="<%= rules.map(&:id).join("-") %>">
+			<a href="#" class="togglable closed mytitle fetch_candidates">Applying All Rules</a>
+			<div class="contentholder">Processing...</div>	
+		</div>
     <% end %>
     </div>
     <%# End local_feature %>

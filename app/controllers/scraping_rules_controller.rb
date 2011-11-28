@@ -90,7 +90,16 @@ class ScrapingRulesController < ApplicationController
   
   def show
     products,@exists_count = BestBuyApi.some_ids(Session.category_id)
-    @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id]))
+    scraping_rules = Maybe(params[:id]).split('-')
+    @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
+    if scraping_rules.length > 1
+      #Check multirules
+      candidates = scraping_rules.map{|sr| ScrapingRule.scrape(products,false,ScrapingRule.find(sr))}.flatten
+      @candidates = Candidate.multi(candidates)
+    else
+      #Check single rules
+      @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id]))
+    end
   end
   
   def destroy

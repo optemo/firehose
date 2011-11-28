@@ -32,7 +32,10 @@ class ScrapingController < ApplicationController
   
   def myrules
     @rules = ScrapingRule.find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
-    
+    @colors = {}
+    @rules.each_pair do |lf, rs|
+      @colors.merge! Hash[*rs.map(&:id).zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
+    end
     #Calculate Coverage
     
     if params[:coverage]
