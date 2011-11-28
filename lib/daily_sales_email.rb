@@ -98,7 +98,7 @@ def read_daily_sales
             end
             
             today_data.write(to_write+add_on+"\n")
-            cumullative.write(Time.now.to_s[0..9]+" "+to_write+add_on+"\n")
+            cumullative.write(then_date+" "+to_write+add_on+"\n")
 
           end
           today_data.close()

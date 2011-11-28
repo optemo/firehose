@@ -13,6 +13,10 @@ def draw_daily_graph()
   %x{#{command}}
 end
 
+task :daily_sales => :environment do
+  require 'daily_sales'
+  save_daily_sales
+end
 
 task :generate_graphs => :environment do
   
