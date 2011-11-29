@@ -37,13 +37,11 @@ class BestBuyApi
       id = [id] unless id.class == Array
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
-      total = 0
       id.each do |my_id|
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
-        total += res["total"]
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
-      [ids,total]
+      ids
     end
     
     def category_ids(id)

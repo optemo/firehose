@@ -43,6 +43,10 @@ group :development do
   gem 'rspec-rails'
 end
 
+group :production do
+#  gem 'newrelic_rpm'
+end
+
 group :test do
   gem 'spork', '> 0.9.0.rc'
   gem 'spork-testunit'

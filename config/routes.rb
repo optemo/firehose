@@ -74,7 +74,7 @@ Firehose::Application.routes.draw do
   match 'scrape/:id' => 'scraping#scrape'
   match "rules" => "scraping#rules"
   match "datafeed" => "scraping#datafeed"
-  match "myrules" => "scraping#myrules"
+  match "myresults" => "scraping#myresults"
   match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
   match "featured" => "featured#index"
 

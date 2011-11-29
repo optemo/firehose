@@ -15,11 +15,25 @@ class ScrapingController < ApplicationController
     ids = params[:id].split(',') # the patten of params[:id] is product_id,category_id
     @id = ids[0]
     candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => ids[1]),true)
-    @scraped_features = Candidate.organize(candidates).first
     render :layout => false
   end
   
   def rules
+    show_products
+  end
+  
+  def myresults
+    show_products(true)
+    render 'rules'
+  end
+  
+  private
+  def covered(array)
+    #Used to calculate feed coverage
+    array.inject(0){|res,elem|elem.delinquent ? res : res+1}
+  end
+  
+  def show_products(full=false)
     @rules = ScrapingRule.order('priority').find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
     @colors = {}
     @rules.each_pair do |lf, rs|
@@ -27,9 +41,9 @@ class ScrapingController < ApplicationController
     end
     #Calculate Coverage
     
-    if params[:coverage]
+    if params[:coverage] || full
       @coverage = {}
-      products,@exists_count = BestBuyApi.some_ids(Session.category_id)
+      products = full ? BestBuyApi.category_ids(Session.category_id) : BestBuyApi.some_ids(Session.category_id)
       @products_count = products.count
       ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
         groups = candidates.group_by(&:scraping_rule_id)
@@ -39,11 +53,5 @@ class ScrapingController < ApplicationController
         groups.each_pair{|sr_id, candidates| @coverage[sr_id] = covered(candidates)}
       end
     end
-  end
-  
-  private
-  def covered(array)
-    #Used to calculate feed coverage
-    array.inject(0){|res,elem|elem.delinquent ? res : res+1}
   end
 end

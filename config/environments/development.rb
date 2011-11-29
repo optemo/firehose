@@ -8,7 +8,7 @@ Firehose::Application.configure do
   # since you don't have to restart the webserver when you make code changes.
   config.cache_classes = false
   config.cache_store = :dalli_store, '127.0.0.1:11211',
-      { :namespace => "OPTEMO_DISCOVERY", :expires_in => 86400, :compress => true, :compress_threshold => 64*1024 }
+      { :namespace => "OPT", :expires_in => 86400, :compress => true, :compress_threshold => 64*1024 }
 
   # Log error messages when you accidentally call methods on nil.
   config.whiny_nils = true
