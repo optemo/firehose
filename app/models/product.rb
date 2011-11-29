@@ -26,54 +26,6 @@ class Product < ActiveRecord::Base
   scope :current_type, lambda {
     {:conditions => {:product_type => Session.product_type}}
   }
-    
-  def brand
-    @brand ||= cat_specs.cache_all(id)["brand"]
-  end
-  
-  def tinyTitle
-    @tinyTitle ||= [brand.gsub("Hewlett-Packard", "HP"),model.split(' ')[0]].join(' ')
-  end
-  
-  def descurl
-    small_title.tr(' /','_-')
-  end
-
-  def mobile_descurl
-    "/show/"+[id,brand,model].join('-').tr(' /','_-')
-  end
-  
-  def display(attr, data) # This function is probably superceded by resolutionmaxunit, etc., defined in the appropriate YAML file (e.g. printer_us.yml)
-    if data.nil?
-      return 'Unknown'
-    elsif data == false
-      return "None"
-    elsif data == true
-      return "Yes"
-    else
-      ending = case attr
-        # The following lines are definitely superceded, as noted above
-#        when /zoom/
-#          ' X'
-#        when /[^p][^a][^p][^e][^r]size/
-#          ' in.' 
-        when /(item|package)(weight)/
-          data = data.to_f/100
-          ' lbs'
-        when /focal/
-          ' mm.'
-        when /ttp/
-          ' seconds'
-        else ''
-      end
-    end
-    data.to_s+ending
-  end
-  
-  def self.per_page
-    9
-  end
-
   
   def self.create_from_result(id)
     result = Result.find(id)
