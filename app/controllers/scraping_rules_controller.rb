@@ -88,6 +88,20 @@ class ScrapingRulesController < ApplicationController
     end
   end
   
+  def show
+    products = request.referer =~ /results/ ? BestBuyApi.category_ids(Session.category_id) : BestBuyApi.some_ids(Session.category_id)
+    scraping_rules = Maybe(params[:id]).split('-')
+    @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
+    if scraping_rules.length > 1
+      #Check multirules
+      candidates = scraping_rules.map{|sr| ScrapingRule.scrape(products,false,ScrapingRule.find(sr))}.flatten
+      @candidates = Candidate.multi(candidates)
+    else
+      #Check single rules
+      @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id])).sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
+    end
+  end
+  
   def destroy
     if(Candidate.find_by_scraping_rule_id(params[:id]))
       #We have found a dependancy on the rule, so we'll just make it inactive

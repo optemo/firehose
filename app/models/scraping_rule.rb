@@ -10,10 +10,12 @@ class ScrapingRule < ActiveRecord::Base
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
 
-  def self.get_rules
+  def self.get_rules(rules = [])
     # return rules with the regexp objects
     rules_hash = []
-    ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true).each do |r|
+    rules = [rules] unless rules.class == Array #Create an array if necessary
+    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true) if rules.empty?
+    rules.each do |r|
       # Generate the real regex
       rule_hash = {rule: r, regex: []}
       r.regex.split("^^").each do |current_regex|
@@ -36,11 +38,11 @@ class ScrapingRule < ActiveRecord::Base
     rules_hash
   end
   
-  def self.scrape(ids,ret_raw = false) #Can accept both one or more ids, whether to return the raw json
+  def self.scrape(ids,ret_raw = false,rules = []) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
-    rules_hash = get_rules
+    rules_hash = get_rules(rules)
     corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type)
 
     ids.each do |bbproduct|

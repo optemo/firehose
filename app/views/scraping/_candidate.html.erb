@@ -1,6 +1,6 @@
 <div>
 	<span class="bold"><%= candidate.product_id %>&nbsp;</span><span href="#" class="expandable_sku" data-id="<%=candidate.product_id%>">Fetch</span>&nbsp;&nbsp;&nbsp;
-	Data: <span class="parsed bold" style="color: <%= candidate.scraping_correction ? "#B00C35" :  @colors[candidate.scraping_rule.local_featurename][candidate.scraping_rule.id] %>" <%= "data-sc='#{candidate.scraping_correction.id}'" if candidate.scraping_correction %>><%= candidate.parsed %></span>&nbsp;&nbsp;
+	Data: <span class="parsed bold" style="color: <%= candidate.scraping_correction ? "#B00C35" : (@colors.nil? ? "#4F3333" : @colors[candidate.scraping_rule_id.to_s] )%>" <%= "data-sc='#{candidate.scraping_correction.id}'" if candidate.scraping_correction %>><%= candidate.parsed %></span>&nbsp;&nbsp;
 	<=&nbsp;&nbsp; <span class="raw"<%= "data-rawhash='#{Digest::MD5.hexdigest(candidate.raw.to_s)}'" if candidate.raw.size > 20 %>><%= candidate.raw %></span>&nbsp;&nbsp;&nbsp;
 	<% if candidate.scraping_correction #Is there a correction? %>
 		<%= link_to "Update Correction", "#", :class => "correction" %>

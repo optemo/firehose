@@ -21,6 +21,7 @@ FactoryGirl.define do
   end
   factory :product do
     title {|n| "Product#{n}"}
+    product_type "camera_bestbuy"
   end
   factory :scraping_correction do
     association :scraping_rule

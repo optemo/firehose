@@ -33,5 +33,14 @@ class Candidate < ActiveRecord::Base
 
     [rules,multirules,colors]
   end
-
+  
+  def self.multi(candidates)
+    res = {}
+    #Assign candidates by scraping rule priority
+    candidates.each do |c|
+      res[c.product_id] = c unless res[c.product_id] && (c.delinquent || (!res[c.product_id].delinquent && res[c.product_id].scraping_rule.priority < c.scraping_rule.priority))
+    end
+    #Order candidates by delinquents & corrections
+    res = res.values.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
+  end
 end

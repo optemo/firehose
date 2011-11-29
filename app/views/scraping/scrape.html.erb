@@ -1,18 +1,5 @@
 <%= link_to "Product " + @id, "#", :class => "closed togglable" %>
 <div class = "contentholder">
-	<div class="scraped_features">
-		<%= link_to "Scraped Results", "#", :class => "closed togglable" %>
-		<div>
-			<% @scraped_features.each_pair do |lf,scraped_results| %>
-				<div class="contentholder"><span class="bold"><%= lf %> </span>
-					<% scraped_results.each do |rule| %>
-					    <%= rule.first.parsed %>
-					<% end %>
-				</div>
-			<% end %>
-		</div>
-	</div>
-	
 	<div class="available_features">
 	    <%= link_to "Available Features", "#", :class => "closed togglable" %>
 	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>

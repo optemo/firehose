@@ -42,15 +42,15 @@ html, body {
     margin: 5px;
 }
 
-a.title_link {
+a.mytitle {
     text-decoration:none;
 }
 
-.featurehash li, a.title_link, .expandable_sku {
+.featurehash li, a.mytitle, .expandable_sku {
 	color: #4F3333;
 }
 
-.featurehash li:hover, a.title_link:hover, .expandable_sku:hover {
+.featurehash li:hover, a.mytitle:hover, .expandable_sku:hover {
     color: #B50A05;
 }
 
