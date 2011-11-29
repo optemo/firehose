@@ -1,3 +1,4 @@
+# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -218,45 +219,6 @@ ActiveRecord::Schema.define(:version => 20111105010921) do
   create_table "results_scraping_rules", :id => false, :force => true do |t|
     t.integer "result_id"
     t.integer "scraping_rule_id"
-  end
-
-  create_table "scraped_cameras", :force => true do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.text     "title"
-    t.text     "imageurl"
-    t.text     "detailpageurl"
-    t.text     "manufacturerurl"
-    t.datetime "scrapedat"
-    t.string   "brand"
-    t.string   "model"
-    t.string   "mpn"
-    t.string   "dimensions"
-    t.integer  "itemwidth"
-    t.integer  "itemlength"
-    t.integer  "itemheight"
-    t.integer  "itemweight"
-    t.integer  "packageheight"
-    t.integer  "packagelength"
-    t.integer  "packagewidth"
-    t.integer  "packageweight"
-    t.float    "opticalzoom"
-    t.float    "maximumresolution"
-    t.string   "resolution"
-    t.float    "displaysize"
-    t.boolean  "slr"
-    t.boolean  "waterproof"
-    t.float    "maximumfocallength"
-    t.float    "minimumfocallength"
-    t.float    "digitalzoom"
-    t.boolean  "batteriesincluded"
-    t.string   "batterydescription"
-    t.string   "connectivity"
-    t.boolean  "hasredeyereduction"
-    t.string   "includedsoftware"
-    t.float    "averagereviewrating"
-    t.integer  "totalreviews"
-    t.text     "reviewtext"
   end
 
   create_table "scraping_corrections", :force => true do |t|

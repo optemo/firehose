@@ -8,7 +8,7 @@
 <h3>Rules</h3>
 <% @rules.each_pair do |feature,d| %>
 	<div style="margin-bottom: 1em;">
-		<a href="#" class="togglable open title_link">
+		<a href="#" class="togglable open mytitle">
 			Feature: <span class="bold"><%= feature %></span>&nbsp;&nbsp;&nbsp;
 			Coverage: <span class="bold"><%= covered(@multirules[feature]||d.first) %>/<%= @product_count %></span>
 		</a>
@@ -17,7 +17,7 @@
 		
 		<% if @multirules[feature] %>
 		<div class="contentholder">
-			<a href="#" class="togglable closed title_link">Applying All Rules</a>
+			<a href="#" class="togglable closed mytitle">Applying All Rules</a>
 			<div class="contentholder">
 				<%= render :partial => 'candidate', :collection => @multirules[feature] %>
 			</div>	

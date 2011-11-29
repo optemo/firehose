@@ -35,24 +35,24 @@ class BestBuyApi
     def some_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
+      id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
-      total = 0
       id.each do |my_id|
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
-        total += res["total"]
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
-      [ids,total]
+      ids
     end
     
     def category_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
+      id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
         page = 1
         totalpages = nil
-        while (page == 1 || page <= totalpages)
+        while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
           res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
           totalpages ||= res["totalPages"]
           ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
@@ -68,7 +68,8 @@ class BestBuyApi
     end
 
     def cached_request(type, params = {})
-      CachingMemcached.cache_lookup(type + params.to_s) do
+      #Data is only valid for 1 hour
+      CachingMemcached.cache_lookup(type + params.to_s + Time.now.strftime("%Y-%m-%d-%H")) do
         send_request(type, params)
       end
     end

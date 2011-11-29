@@ -1,6 +1,7 @@
 /*
 *= require_self
-*= require_tree .
+*= require jquery.jeditable.min
+*= require jquery.validate.min
 */
 $(document).ready(function(){
     $.validator.addMethod('regexp', function (possible_regexp, element) {
@@ -83,7 +84,7 @@ $(document).ready(function(){
     $('.raise_rule_priority').click(function() {
         var t = $(this), form = t.parents("form");
         $.ajax({
-    		url: "/scraping_rules/raisepriority?id=" + t.attr("data-id"),
+    		url: "/scraping_rules/raisepriority?id=" + t.parent().attr("data-id"),
     		data: form.serialize(),
     		type: "POST",
     		success: function() {
@@ -123,13 +124,14 @@ $(document).ready(function(){
     });
 
     function addtoggle(item){
-		var closed = item.click(function() {
-			$(this).toggleClass("closed").toggleClass("open").siblings('div').toggle();
-			return false;
-		}).hasClass("closed");
+		var closed = item.hasClass("closed");
 		if (closed) {item.siblings('div').hide();}
 	}
 	$('.togglable').each(function(){addtoggle($(this));});
+	$('.togglable').live('click', function(){
+	  $(this).toggleClass("closed").toggleClass("open").siblings('div').toggle();
+		return false;
+	});
     $('#silkscreen').click(function () {removeSilkScreen();});
 
     $('#scraping_rule_submit, .correction_submit').live("click", function() {
@@ -314,6 +316,20 @@ $(document).ready(function(){
             $(this).addClass("not-all");
 	      }
 	return false;
+	});
+	
+	$('.coverage_submit').live('click', function(){
+	  $(this).parent().submit();
+	  //$.post(location.href, {coverage: 1})
+	});
+	
+	$('.fetch_candidates').live('click', function(){
+	  var contentbox = $(this).siblings('div');
+	  if(contentbox.html() == "Processing...") {
+	    $.get('/scraping_rules/'+$(this).parent().attr('data-id'), function(data){
+	      contentbox.html(data);
+	    });
+	  }
 	});
 
     $('select#type_filter').live('change', function () {

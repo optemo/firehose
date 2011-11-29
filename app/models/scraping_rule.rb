@@ -6,49 +6,47 @@ class ScrapingRule < ActiveRecord::Base
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
   has_many :candidates
+  has_many :scraping_corrections
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
 
-  def self.get_rules
+  def self.get_rules(rules = [])
     # return rules with the regexp objects
     rules_hash = []
-    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true)
+    rules = [rules] unless rules.class == Array #Create an array if necessary
+    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true) if rules.empty?
     rules.each do |r|
       # Generate the real regex
-      rule_hash = {}
-      rule_hash.merge!({:rule=>r})
-      rule = []
+      rule_hash = {rule: r, regex: []}
       r.regex.split("^^").each do |current_regex|
         regexstr = current_regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
         replace_i = regexstr.index(/[^\\]\//)
         if replace_i
-          rule << {:reg=>Regexp.new(regexstr[0..replace_i]), :sub=>regexstr[replace_i+2..-1]}
+          rule_hash[:regex] << {:reg=>Regexp.new(regexstr[0..replace_i]), :sub=>regexstr[replace_i+2..-1]}
         else
-          rule << {:reg=>Regexp.new(regexstr)}
+          rule_hash[:regex] << {:reg=>Regexp.new(regexstr)}
         end
       end
-      
-      rule_hash.merge!({:real_regex=>rule})
 
       # Generate the specs -- group and name
       if r.remote_featurename[/specs\./]
         identifiers = r.remote_featurename.split(".")
-        rule_hash.merge!({:specs=>{:group=>identifiers[1], :name=>identifiers[2]}})
+        rule_hash[:specs] = {group: identifiers[1], name: identifiers[2]}
       end
       rules_hash << rule_hash
     end
     rules_hash
   end
   
-  def self.scrape(ids,ret_raw = false) #Can accept both one or more ids, whether to return the raw json
+  def self.scrape(ids,ret_raw = false,rules = []) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
-    rules_hash = get_rules
+    rules_hash = get_rules(rules)
+    corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type)
 
     ids.each do |bbproduct|
       raw_return = nil
-      corrections = ScrapingCorrection.find_all_by_product_id_and_product_type(bbproduct.id,Session.product_type)
       ["English","French"].each do |language|
         begin
           raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
@@ -78,7 +76,7 @@ class ScrapingRule < ActiveRecord::Base
             else
               raw = raw_info[r[:rule].remote_featurename]
             end
-            corr = corrections.find{|c|c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == Digest::MD5.hexdigest(raw.to_s))}
+            corr = corrections.find{|c|c.product_id == bbproduct.id && c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == Digest::MD5.hexdigest(raw.to_s))}
             if corr
               parsed = corr.corrected
               delinquent = false
@@ -86,7 +84,7 @@ class ScrapingRule < ActiveRecord::Base
               #We can handle multiple passes of regular expressions with ^^
               current_text = raw.to_s
               firstregex = true
-              r[:real_regex].each do |current_regex|
+              r[:regex].each do |current_regex|
                 begin
                   if current_regex[:sub]
                     #Replacement part of the regex (do a match first, since it's a two-part operation)

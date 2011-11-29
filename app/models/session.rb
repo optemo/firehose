@@ -36,14 +36,6 @@ class Session
     self.directLayout = p_type.layout.include?("direct")
     self.mobileView = p_type.layout.include?("mobileview")
 
-    # Check for what Piwik site ID to put down in the optemo.html.erb layout
-    # These site ids MUST match what's in the piwik database.
-    p_url = nil  # Initialize variable out here for locality
-    p_type.urls.each do |u|
-      p_url = u if request_url && request_url[u.url] 
-    end
-    p_url ||= p_type.urls.first
-    self.piwikSiteId = p_url.piwik_id || 10 # This is a catch-all for testing sites.
     Session.set_features #In Firehose there are no dynamic features
   end
   

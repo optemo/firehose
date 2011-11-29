@@ -43,9 +43,20 @@ group :development do
   gem 'rspec-rails'
 end
 
+group :production do
+#  gem 'newrelic_rpm'
+end
+
 group :test do
-  gem 'rspec'
-  gem 'webrat', '0.7.3'
+  gem 'spork', '> 0.9.0.rc'
+  gem 'spork-testunit'
+  gem 'guard-test'
+  gem 'guard-spork'
+  gem 'rb-fsevent'
+  gem 'ruby-prof'
+  gem 'growl_notify'
+  gem 'factory_girl_rails'
+  #gem 'webrat', '0.7.3'
 end
 
 # Gems used only for assets and not required
