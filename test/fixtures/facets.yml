@@ -1,0 +1,57 @@
+
+onsale:
+  id: 1
+  product_type_id: 2
+  name: onsale
+  feature_type: Binary
+  used_for: utility
+  value: 751
+  active: 1
+customerRating:
+  id: 2
+  product_type_id: 2
+  name: customerRating
+  feature_type: Continuous
+  used_for: utility
+  value: 38
+  active: 1
+saleprice:
+  id: 3
+  product_type_id: 2
+  name: saleprice
+  feature_type: Continuous
+  used_for: utility
+  value: 1
+  active: 1
+maxresolution:
+  id: 4
+  product_type_id: 2
+  name: maxresolution
+  feature_type: Continuous
+  used_for: utility
+  value: 30
+  active: 1
+opticalzoom:
+  id: 5
+  product_type_id: 2
+  name: opticalzoom
+  feature_type: Continuous
+  used_for: utility
+  value: 4
+  active: 1
+brand:
+  id: 6
+  product_type_id: 2
+  name: brand
+  feature_type: Categorical
+  used_for: utility
+  value: 35
+  active: 1
+featured:
+  id: 7
+  product_type_id: 2
+  name: featured
+  feature_type: Binary
+  used_for: utility
+  value: 0
+  active: 1

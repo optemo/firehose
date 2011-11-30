@@ -22,18 +22,13 @@ class ScrapingControllerTest < ActionController::TestCase
     assert_response :success
   end
   
-  test "should get rules" do
-    get :rules
-    assert_response :success
-  end
-  
   test "should get datafeed" do
     get :datafeed
     assert_response :success
   end
   
   test "only the current rules should be displayed" do
-    get :myrules
+    get :rules
     assert_response :success
     assert_equal assigns[:rules], [@sr].group_by(&:local_featurename), "Our scraping rules should be returned" 
   end
