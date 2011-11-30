@@ -1,0 +1,7 @@
+
+onsale:
+  id: 1
+  product_id: 95
+  name: onsale
+  value: 1
+  product_type: camera_bestbuy
