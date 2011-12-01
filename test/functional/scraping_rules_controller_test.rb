@@ -17,8 +17,8 @@ class ScrapingRulesControllerTest < ActionController::TestCase
   
   test "should get multi-rules" do
     sr = create(:scraping_rule)
-    c1 = create(:candidate, scraping_rule: sr)
-    c2 = create(:candidate, scraping_rule: @scraping_rule)
+    c1 = build(:candidate, scraping_rule: sr)
+    c2 = build(:candidate, scraping_rule: @scraping_rule)
     get :show, id: [@scraping_rule.id,sr.id].join("-")
     assert_response :success
     #Check the colors

@@ -1,8 +1,36 @@
-class Candidate < ActiveRecord::Base
-  belongs_to :result
-  belongs_to :scraping_rule
-  belongs_to :scraping_correction
-
+class Candidate
+  attr_accessor :scraping_rule_id
+  attr_accessor :scraping_correction_id
+  attr_accessor :model
+  attr_accessor :name
+  attr_accessor :sku
+  attr_accessor :parsed
+  attr_accessor :raw
+  attr_accessor :delinquent
+  attr_writer :scraping_correction
+  attr_writer :scraping_rule
+  
+  def scraping_correction
+    @scraping_correction ||= ScrapingCorrection.find(@scraping_correction_id) if @scraping_correction_id
+    @scraping_correction
+  end
+  
+  def scraping_rule
+    @scraping_rule ||= ScrapingRule.find(@scraping_rule_id) if @scraping_rule_id
+    @scraping_rule
+  end
+  
+  def initialize(params={})
+    @scraping_rule_id = params[:scraping_rule_id]
+    @scraping_correction_idparams = [:scraping_correction_id]
+    @model = params[:model]
+    @name = params[:name]
+    @sku = params[:sku]
+    @parsed = params[:parsed]
+    @raw = params[:raw]
+    @delinquent = params[:delinquent]
+  end
+  
   def self.organize(candidates)
     rules = Hash.new{|h,k| h[k] = Hash.new} #Each of the rules that will be displayed
     multirules = Hash.new{|h,k| h[k] = Hash.new} #Which rule was used for a product when multiple rules are available
@@ -12,7 +40,7 @@ class Candidate < ActiveRecord::Base
         #Sort the products so that delinquents and corrected products show up first
         rules[local_featurename][scraping_rule_id] = c.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
         c.each do |c|
-          multirules[local_featurename][c.product_id] = c unless multirules[local_featurename][c.product_id] && (c.delinquent || (!multirules[local_featurename][c.product_id].delinquent && multirules[local_featurename][c.product_id].scraping_rule.priority < c.scraping_rule.priority))
+          multirules[local_featurename][c.sku] = c unless multirules[local_featurename][c.sku] && (c.delinquent || (!multirules[local_featurename][c.sku].delinquent && multirules[local_featurename][c.sku].scraping_rule.priority < c.scraping_rule.priority))
         end
       end
     end
@@ -34,13 +62,17 @@ class Candidate < ActiveRecord::Base
     [rules,multirules,colors]
   end
   
-  def self.multi(candidates)
+  def self.multi(candidates,sort = true)
     res = {}
     #Assign candidates by scraping rule priority
     candidates.each do |c|
-      res[c.product_id] = c unless res[c.product_id] && (c.delinquent || (!res[c.product_id].delinquent && res[c.product_id].scraping_rule.priority < c.scraping_rule.priority))
+      res[c.sku] = c unless res[c.sku] && (c.delinquent || (!res[c.sku].delinquent && res[c.sku].scraping_rule.priority < c.scraping_rule.priority))
     end
     #Order candidates by delinquents & corrections
-    res = res.values.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
+    if sort
+      res.values.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
+    else
+      res.values
+    end
   end
 end

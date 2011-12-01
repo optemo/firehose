@@ -119,7 +119,7 @@ class Result < ActiveRecord::Base
                 if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
                   copiedspec.value = spec.value
                   copiedspec.modified = true
-                  copiedspecs.keys.include?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
+                  copiedspecs.has_key?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
                 end
               end
             end
