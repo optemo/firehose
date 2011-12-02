@@ -70,20 +70,27 @@ class Product < ActiveRecord::Base
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
     end
-    
+    puts "Done Calculations #{Session.product_type} - #{Time.now}"
     # Bulk insert/update for efficiency
     Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
+    puts "Done DB insert #{Session.product_type} - #{Time.now}"
     Result.upkeep_pre
+    puts "Done Upkeep Pre #{Session.product_type} - #{Time.now}"
     Result.find_bundles
+    puts "Done Bundles #{Session.product_type} - #{Time.now}"
     #Calculate new spec factors
     Product.calculate_factors
+    puts "Done Calculate Factors #{Session.product_type} - #{Time.now}"
     #Get the color relationships loaded
     ProductSibling.get_relations
+    puts "Done Siblings #{Session.product_type} - #{Time.now}"
     Equivalence.fill
+    puts "Done Equivalence #{Session.product_type} - #{Time.now}"
     Result.upkeep_post
+    puts "Done Upkeep Post #{Session.product_type} - #{Time.now}"
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
