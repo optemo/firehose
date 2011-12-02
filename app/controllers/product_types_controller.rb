@@ -1,16 +1,16 @@
 class ProductTypesController < ApplicationController
-  def index
-    @product_types = ProductType.find(:all, :include=>[:headings, :features], :order=>"product_types.id, headings.id, features.id")
+  def index    
+    @product_types = ProductType.find(:all, :order=>"product_types.id")
     @select_product_types = @product_types
     if !params[:id].blank?
-      @select_product_types = [ProductType.find(params[:id], :include=>[:headings, :features], :order=>"product_types.id, headings.id, features.id")]
+      @select_product_types = [ProductType.find(params[:id], :order=>"product_types.id")]
       @slt = params[:id]
     end
   end
 
   def show
-    @product_types = ProductType.find(:all, :include=>[:headings, :features], :order=>"product_types.id, headings.id, features.id")
-    @select_product_types = [ProductType.find(params[:id], :include=>[:headings, :features], :order=>"product_types.id, headings.id, features.id")]
+    @product_types = ProductType.find(:all, :order=>"product_types.id")
+    @select_product_types = [ProductType.find(params[:id], :order=>"product_types.id")]
     @slt = params[:id]
     render :index
   end

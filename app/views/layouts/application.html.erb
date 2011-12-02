@@ -15,12 +15,17 @@
 
     
         <h2>
+
           <%= form_for ProductType.find(Session.product_type_id), :url=>root_path do |f| %>
-          Please select product: <%= f.select "id", ProductType.all.collect { |p| [ p.name, p.id] } %><%= f.submit "Change Product Type"%>
+          Please select product: <%= f.select "id", ProductType.all.collect { |p| [ p.name, p.id] } %>
+          
+          <%= f.submit "Change Product Type"%>
+          
+          
+          <%= link_to('New Product Type', new_product_type_path) %>
+          
           <% end %>
-          <div style="padding-top: 9px;">
-            SKUs in category id <%= Session.category_id %>
-          </div>
+          
         </h2> 
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
