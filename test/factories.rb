@@ -1,9 +1,8 @@
 FactoryGirl.define do
   factory :candidate do
     association :scraping_rule
-    association :result
     association :scraping_correction
-    product_id "100000A" #SKU
+    sku "100000A"
     parsed "value"
     raw "rawvalue"
   end
@@ -13,6 +12,7 @@ FactoryGirl.define do
     product_type "camera_bestbuy"
     rule_type "Categorical"
     regex ".*"
+    active true
   end
   factory :result do
     product_type "camera_bestbuy"

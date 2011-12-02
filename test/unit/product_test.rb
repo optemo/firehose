@@ -53,11 +53,27 @@ class ProductTest < ActiveSupport::TestCase
   end
   
   test "rating factor calculation" do
+    #Should have a star rating cutoff of >= 4
     rating1 = 0.0
-    assert_equal Product.calculateFactor_rating(rating1), 0
-    rating2 = 4.0
-    assert_equal Product.calculateFactor_rating(rating2), 1
-    rating3 = 5.0
-    assert_equal Product.calculateFactor_rating(rating3), 1
+    assert_equal 0, Product.calculateFactor_rating(rating1)
+    rating2 = 4.0                                          
+    assert_equal 1, Product.calculateFactor_rating(rating2)
+    rating3 = 5.0                                          
+    assert_equal 1, Product.calculateFactor_rating(rating3)
   end 
+  
+  test "Product and Spec import from BBY API" do
+    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
+    Product.feed_update
+    #20 created(Current BB page size), and 1 in the fixtures
+    assert_equal 21, Product.count, "There should be 10 products created in the database"
+    assert_equal true, Product.all.map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
+    assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the longDescription is available"
+  end
+  
+  test "Get Rules" do
+    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
+    myrules = ScrapingRule.get_rules([],false)
+    assert_equal sr, myrules.first[:rule], "Get Rules should return the singular rules in this case"
+  end
 end

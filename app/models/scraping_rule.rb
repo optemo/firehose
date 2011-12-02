@@ -9,40 +9,12 @@ class ScrapingRule < ActiveRecord::Base
   has_many :scraping_corrections
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
-
-  def self.get_rules(rules = [])
-    # return rules with the regexp objects
-    rules_hash = []
-    rules = [rules] unless rules.class == Array #Create an array if necessary
-    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true) if rules.empty?
-    rules.each do |r|
-      # Generate the real regex
-      rule_hash = {rule: r, regex: []}
-      r.regex.split("^^").each do |current_regex|
-        regexstr = current_regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
-        replace_i = regexstr.index(/[^\\]\//)
-        if replace_i
-          rule_hash[:regex] << {:reg=>Regexp.new(regexstr[0..replace_i]), :sub=>regexstr[replace_i+2..-1]}
-        else
-          rule_hash[:regex] << {:reg=>Regexp.new(regexstr)}
-        end
-      end
-
-      # Generate the specs -- group and name
-      if r.remote_featurename[/specs\./]
-        identifiers = r.remote_featurename.split(".")
-        rule_hash[:specs] = {group: identifiers[1], name: identifiers[2]}
-      end
-      rules_hash << rule_hash
-    end
-    rules_hash
-  end
   
-  def self.scrape(ids,ret_raw = false,rules = []) #Can accept both one or more ids, whether to return the raw json
+  def self.scrape(ids,ret_raw = false,rules = [], multi = nil) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
-    rules_hash = get_rules(rules)
+    rules_hash = get_rules(rules,multi)
     corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type)
 
     ids.each do |bbproduct|
@@ -113,7 +85,7 @@ class ScrapingRule < ActiveRecord::Base
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
             #Save the new candidate
-            candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :product_id => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil))
+            candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
           end
         end
         #Return the raw info only on the first pass
@@ -138,6 +110,46 @@ class ScrapingRule < ActiveRecord::Base
 
   def self.cleanup
     ScrapingRule.joins('LEFT JOIN (select distinct scraping_rule_id from candidates) as c ON c.scraping_rule_id=scraping_rules.id').where('c.scraping_rule_id is null AND scraping_rules.active=false').destroy_all
+  end
+  
+  def self.get_rules(rules, multi)
+    # return rules with the regexp objects
+    rules_hash = []
+    rules = [rules] unless rules.class == Array #Create an array if necessary
+    rules = ScrapingRule.find_all_by_product_type_and_active(Session.product_type, true) if rules.empty?
+    #Multi can be nil, true, or false
+    # If nil, it will be ignored
+    # If true it will only return candidates from multiple remote_featurenames for one local_featurename
+    # If false it will only return candidates from local_featurenames with one remote_featurename
+    unless multi.nil?
+      groups = rules.group_by(&:local_featurename)
+      rules = []
+      groups.each_pair do |lf, grouped_rules|
+        rules += grouped_rules if multi && grouped_rules.length > 1
+        rules += grouped_rules if !multi && grouped_rules.length == 1
+      end
+    end
+    rules.each do |r|
+      # Generate the real regex
+      rule_hash = {rule: r, regex: []}
+      r.regex.split("^^").each do |current_regex|
+        regexstr = current_regex.gsub(/^\//,"").gsub(/([^\\])\/$/,'\1')
+        replace_i = regexstr.index(/[^\\]\//)
+        if replace_i
+          rule_hash[:regex] << {:reg=>Regexp.new(regexstr[0..replace_i]), :sub=>regexstr[replace_i+2..-1]}
+        else
+          rule_hash[:regex] << {:reg=>Regexp.new(regexstr)}
+        end
+      end
+
+      # Generate the specs -- group and name
+      if r.remote_featurename[/specs\./]
+        identifiers = r.remote_featurename.split(".")
+        rule_hash[:specs] = {group: identifiers[1], name: identifiers[2]}
+      end
+      rules_hash << rule_hash
+    end
+    rules_hash
   end
   
 end

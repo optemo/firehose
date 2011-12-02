@@ -34,18 +34,12 @@ task :update => :environment do
     end
   end
   
-  result = Result.new(:product_type => Session.product_type, :category => Session.category_id.to_yaml)
+  Product.feed_update
 
-  result.create_from_current
-  Product.create_from_result(result.id)
-
-      # for each product_type, clean up results and related candidates days ago
-      #file = YAML::load(File.open("#{Rails.root}/config/products.yml"))
-      Result.cleanupByProductType(Session.product_type, 3)
-  # clean up inactive scraping rules not used any more
-      Facet.check_active
-      ScrapingRule.cleanup
-      Search.cleanup_history_data(7)
+  #clean up inactive scraping rules not used any more
+  Facet.check_active
+  ScrapingRule.cleanup
+  Search.cleanup_history_data(7)
 end
 
 #Here is where general upkeep scripts are

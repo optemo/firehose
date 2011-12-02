@@ -59,25 +59,7 @@ class ScrapingRulesController < ApplicationController
   end
   
   def update
-    if(Candidate.find_by_scraping_rule_id(params[:id]))
-      #We have found a dependancy on the rule
-      old_scrape = ScrapingRule.find(params[:id])
-      atts = old_scrape.attributes.merge(params[:scraping_rule].reject{|k,v|v.blank?})
-      atts.delete("id")
-      succeeded = ScrapingRule.create(atts)
-      if succeeded
-        old_scrape.update_attribute("active",false)
-        #Copy corrections to new rule
-        ScrapingCorrection.find_all_by_scraping_rule_id(old_scrape.id).each do |c|
-          new_c = c.dup
-          new_c.id = nil
-          new_c.scraping_rule_id = succeeded.id
-          new_c.save
-        end
-      end
-    else
-      succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule].reject{|k,v|v.blank?})
-    end
+    succeeded = ScrapingRule.find(params[:id]).update_attributes(params[:scraping_rule].reject{|k,v|v.blank?})
     
     respond_to do |format|
       if succeeded
@@ -103,13 +85,8 @@ class ScrapingRulesController < ApplicationController
   end
   
   def destroy
-    if(Candidate.find_by_scraping_rule_id(params[:id]))
-      #We have found a dependancy on the rule, so we'll just make it inactive
-      ScrapingRule.find(params[:id]).update_attribute("active",false)
-    else
-      ScrapingCorrection.delete_all(["scraping_rule_id = ?",params[:id]])
-      ScrapingRule.find(params[:id]).destroy
-    end
+    ScrapingCorrection.delete_all(["scraping_rule_id = ?",params[:id]])
+    ScrapingRule.find(params[:id]).destroy
     
     respond_to do |format|
       format.html { redirect_to root_url }

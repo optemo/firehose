@@ -27,6 +27,79 @@ class Product < ActiveRecord::Base
     {:conditions => {:product_type => Session.product_type}}
   }
   
+  def self.feed_update
+    raise ValidationError unless Session.category_id
+    product_skus = BestBuyApi.category_ids(Session.category_id)
+    #product_skus.uniq!{|a|a.id} #Uniqueness check
+    #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
+    candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
+    candidates = ScrapingRule.scrape(product_skus,false,[],false)
+    
+    products_to_save = {}
+    product_skus.each do |bb_product|
+      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
+      #Reset the instock flags
+      products_to_save[bb_product.id].instock = false
+    end
+    specs_to_save = {}
+    
+    candidates += Candidate.multi(candidates_multi,false) #bypass sorting
+    candidates.each do |candidate|
+      spec_class = case candidate.model
+        when "cat" then CatSpec
+        when "cont" then ContSpec
+        when "bin" then BinSpec
+        when "text" then TextSpec
+        else CatSpec # This should never happen
+      end
+      p = products_to_save[candidate.sku]
+    
+      if p.new_record?
+        p.save
+      end
+      
+      if candidate.delinquent
+        #This is a feature which was removed
+        spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
+        spec.destroy if spec && !spec.modified
+      else
+        p.instock = true
+        spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
+        spec.product_type = Session.product_type
+        spec.value = candidate.parsed
+        specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+      end
+    end
+    puts "Done Calculations #{Session.product_type} - #{Time.now}"
+    # Bulk insert/update for efficiency
+    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
+    specs_to_save.each do |s_class, v|
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
+    end
+    puts "Done DB insert #{Session.product_type} - #{Time.now}"
+    Result.upkeep_pre
+    puts "Done Upkeep Pre #{Session.product_type} - #{Time.now}"
+    Result.find_bundles
+    puts "Done Bundles #{Session.product_type} - #{Time.now}"
+    #Calculate new spec factors
+    Product.calculate_factors
+    puts "Done Calculate Factors #{Session.product_type} - #{Time.now}"
+    #Get the color relationships loaded
+    ProductSibling.get_relations
+    puts "Done Siblings #{Session.product_type} - #{Time.now}"
+    Equivalence.fill
+    puts "Done Equivalence #{Session.product_type} - #{Time.now}"
+    Result.upkeep_post
+    puts "Done Upkeep Post #{Session.product_type} - #{Time.now}"
+    #This assumes Firehose is running with the same memcache as the Discovery Platform
+    begin
+      Rails.cache.clear
+    rescue Dalli::NetworkError
+      puts "Memcache not available"
+    end
+    
+  end
+  
   def self.create_from_result(id)
     result = Result.find(id)
     products_to_save = {}

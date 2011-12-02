@@ -333,7 +333,7 @@ $(document).ready(function(){
 	});
 
     $('select#type_filter').live('change', function () {
-	$('#filter_form').submit();
+	$('#filter_form').attr("action", document.location.pathname).submit();
 	});
 
     $(".custom_regex").live('click', function() {

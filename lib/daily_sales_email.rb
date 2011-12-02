@@ -79,6 +79,42 @@ def read_daily_sales
             u=product.cont_specs.find_by_name("utility")
             
             s=product.cont_specs
+            
+              puts ActiveRecord::Base.connection
+              product_type = "camera_bestbuy"
+              camera_features['saleprice', 'price', 'maxresolution', 'opticalzoom', '']
+              # FIXME: refactor the code below
+              specs.each do |attributes|
+                sku = attributes[:sku]
+                saleprice = attributes[:saleprice]
+                maxresolution = attributes[:maxresolution]
+                opticalzoom = attributes[:opticalzoom]
+                orders = attributes[:orders]
+                brand = attributes[:brand]
+                featured = attributes[:featured]
+                onsale = attributes[:onsale]
+
+                # continuous features
+                ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "saleprice", :value_flt => saleprice, :product_type => product_type, :date => date)
+                ds.save
+                ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "maxresolution", :value_flt => maxresolution, :product_type => product_type, :date => date)
+                ds.save
+                ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "opticalzoom", :value_flt => opticalzoom, :product_type => product_type, :date => date)
+                ds.save
+                ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "orders", :value_flt => orders, :product_type => product_type, :date => date)
+                ds.save
+                # categorical features
+                ds = DailySpec.new(:spec_type => "cat", :sku => sku, :name => "brand", :value_txt => brand, :product_type => product_type, :date => date)
+                ds.save
+                # binary features
+                ds = DailySpec.new(:spec_type => "bin", :sku => sku, :name => "featured", :value_bin => featured, :product_type => product_type, :date => date)
+                ds.save
+                ds = DailySpec.new(:spec_type => "bin", :sku => sku, :name => "onsale", :value_bin => onsale, :product_type => product_type, :date => date)
+                ds.save
+              end
+
+            
+            
             to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
             add_on=""
             if product.product_type=="camera_bestbuy"

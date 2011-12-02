@@ -76,7 +76,8 @@ class Result < ActiveRecord::Base
   def self.upkeep_post
     #Set onsale binary because it's not in the feed
     binspecs = [] # For bulk insert
-    Product.current_type.instock.each do |product|
+    featured = BinSpec.find_all_by_product_type_and_name(Session.product_type,"featured").map(&:product)
+    (featured+Product.current_type.instock).each do |product|
       saleEnd = CatSpec.find_by_product_id_and_name_and_product_type(product.id,"saleEndDate",Session.product_type)
       if saleEnd && saleEnd.value && (Time.parse(saleEnd.value) - 4.hours) > Time.now
         binspec = BinSpec.find_by_product_id_and_name_and_product_type(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
@@ -118,7 +119,7 @@ class Result < ActiveRecord::Base
                 if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
                   copiedspec.value = spec.value
                   copiedspec.modified = true
-                  copiedspecs.keys.include?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
+                  copiedspecs.has_key?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
                 end
               end
             end

@@ -87,6 +87,11 @@ task :warmupserver do
   run "curl -A 'Java' localhost > /dev/null"
 end
 
+task :set_umask do
+  run "umask 0002"
+end
+
 # redopermissions is last, so that if it fails due to the searchd pid, no other tasks get blocked
+before 'deploy:update', :set_umask
 after "deploy:symlink", "serversetup"
 after :serversetup, "redopermissions"
