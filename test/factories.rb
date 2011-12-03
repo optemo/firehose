@@ -30,6 +30,9 @@ FactoryGirl.define do
     corrected "good to go"
     product_id "100000B" #SKU
   end
+  factory :search do
+     created_at {|d| "2011-11-#{d}"}
+  end
   factory :cat_spec do
     association :product
   end
