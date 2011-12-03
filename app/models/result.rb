@@ -55,22 +55,21 @@ class Result < ActiveRecord::Base
   
   def self.upkeep_pre
     #Calculate optical zoom for SLR cameras
-    contspecs = [] # For bulk insert
-    Product.current_type.instock.each do |p|
-      next if ContSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"opticalzoom")
-      lensrange = CatSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"lensrange")
-      if lensrange
-        lensrange = lensrange.value
-        ranges = lensrange.split("-")
-        v = (ranges[1].to_f/ranges[0].to_f).round(1) #Round to one decimal point
-        contspecs << ContSpec.new(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
+    if Session.product_type == "camera_bestbuy" #Only do this for cameras
+      contspecs = [] # For bulk insert
+      Product.current_type.instock.each do |p|
+        next if ContSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"opticalzoom")
+        lensrange = CatSpec.find_by_product_type_and_product_id_and_name(Session.product_type,p.id,"lensrange")
+        if lensrange
+          lensrange = lensrange.value
+          ranges = lensrange.split("-")
+          v = (ranges[1].to_f/ranges[0].to_f).round(1) #Round to one decimal point
+          contspecs << ContSpec.new(:product_type => Session.product_type, :name => "opticalzoom", :product_id => p.id, :value => v)
+        end
       end
+      # Bulk insert
+      ContSpec.import contspecs
     end
-    # Bulk insert
-    ContSpec.import contspecs
-    
-    #Get BestSeller data from BestBuy Email
-    product_orders()
   end
     
   def self.upkeep_post
@@ -103,14 +102,12 @@ class Result < ActiveRecord::Base
         data = JSON.parse(bundle.value.gsub("=>",":"))
         data.map{|d|d["sku"]}.each do |sku|
           p_copy = Product.find_by_sku(sku)
-          if p_copy && p_copy.instock
+          #Filtering out accessories
+          if p_copy && p_copy.product_type == Session.product_type
             # Get or create new product bundle
-            if p_copy.product_type == Session.product_type
-              product_bundle = ProductBundle.find_or_initialize_by_bundle_id_and_product_type(p.id, Session.product_type)
-              product_bundle.product_id = p_copy.id
-              product_bundles << product_bundle
-              first_bundle_prod = true
-            end
+            product_bundle = ProductBundle.find_or_initialize_by_bundle_id_and_product_type(p.id, Session.product_type)
+            product_bundle.product_id = p_copy.id
+            product_bundles << product_bundle
 
             #Copy over all the products specs
             [ContSpec,BinSpec,CatSpec,TextSpec].each do |s_class|
@@ -123,16 +120,12 @@ class Result < ActiveRecord::Base
                 end
               end
             end
-          else
-            #Remove old bundles
-            Maybe(ProductBundle.find_by_bundle_id_and_product_type(p.id, Session.product_type)).destroy
           end
         end
-      else
-        #Remove old bundles
-        Maybe(ProductBundle.find_by_bundle_id_and_product_type(p.id, Session.product_type)).destroy
       end
     end
+    #Remove old bundles
+    ProductBundle.delete_all(["product_type = ?", Session.product_type])
     copiedspecs.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified, :updated_at] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
     end
