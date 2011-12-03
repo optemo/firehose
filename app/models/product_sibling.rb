@@ -1,4 +1,3 @@
-require 'ruby-debug'
 class ProductSibling < ActiveRecord::Base
   belongs_to :product
   def self.get_relations
