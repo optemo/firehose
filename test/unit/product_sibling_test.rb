@@ -37,8 +37,8 @@ class TextSpecTest < ActiveSupport::TestCase
     ProductSibling.get_relations
     #there should be 6 records in the PrdouctSibling table (11 -> 12, 11-> 13 ,12->13 -> 12->11, 13->11, 13->12)
     assert_equal(6, ProductSibling.all.length)
-    # there should be some records with product_id equals to 12 
-    assert(ProductSibling.find_by_product_id(12))
+    # there should be two records with product_id equals to 12
+    assert_equal(2, ProductSibling.count(:conditions => "product_id= 12"))
 
   end
   
