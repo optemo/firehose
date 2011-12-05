@@ -11,13 +11,15 @@ class Search < ActiveRecord::Base
       
       max_date = max_date.to_date
       min_date = min_date.to_date
-      puts "min_date #{min_date}"
-      puts "max_date #{max_date}"
+      # print min and max date (for test)
+     # puts "min_date #{min_date}"
+     #  puts "max_date #{max_date}"
       
       return "days_kept is less than min_date" if max_date - days_kept.days <= min_date
   
       max_days_kept_date = max_date - days_kept.days
-      puts "max_days_kept_date #{max_days_kept_date}"
+      #for test
+     # puts "max_days_kept_date #{max_days_kept_date}"
       
       Search.transaction do
         Search.where("created_at <= ?", max_days_kept_date).delete_all
@@ -28,7 +30,8 @@ class Search < ActiveRecord::Base
      #for double check if those data correctly were deleted 
       min_date1 = Search.minimum(:created_at)
       return "min is nil" if min_date1.nil?
-      puts "min_date #{min_date1.to_date}"
+      #for test
+      #puts "min_date #{min_date1.to_date}"
       
   end
 end  
