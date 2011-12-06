@@ -1,10 +1,17 @@
 class ProductTypesController < ApplicationController
-  def index    
+  def index
     @product_types = ProductType.find(:all, :order=>"product_types.id")
     @select_product_types = @product_types
     if !params[:id].blank?
       @select_product_types = [ProductType.find(params[:id], :order=>"product_types.id")]
       @slt = params[:id]
+    end
+    respond_to do |format|
+      if params[:ajax] == 'true'
+        format.html { render :layout => 'ajax' }
+      else
+        format.html
+      end
     end
   end
 
@@ -35,7 +42,22 @@ class ProductTypesController < ApplicationController
     end
   end
 
-
+  def destroy
+    @product_type = ProductType.find(params[:id])
+    # TODO: remove this object from Session.product_type
+    # display a 'success' message, 
+    # and check that the product type doesn't actually appear anywhere
+    if @product_type.destroy
+      #redirect_to :action => index
+      #render :index
+      respond_to do |format|
+        #render :index
+        format.html { redirect_to product_types_url(nil, :ajax => true) }
+      end
+    else
+      render :nothing
+    end
+  end
 
 
   def update

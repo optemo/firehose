@@ -171,42 +171,37 @@ $(document).ready(function(){
 		div_to_add.delay(2000).fadeOut(1000);  
     }
 	
-	$("a").live('click',function(){
-		t = $(this), form = t.parents("form");
-		if (t.attr('data-method') == "delete")
-		{
-			$.ajax({
-				url: t.attr("href"),
-				data: form.serialize(),
-				type: "DELETE",
-				success: function() {
-				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete') || t.hasClass('category_id-delete')) {
-					t.parent().nextUntil('dt', 'dd').remove();
-					t.parent().remove();
-					if(t.hasClass('feature-delete'))
-					    alert_substitute("Feature has been removed.");
-					if(t.hasClass('heading-delete'))
-					    alert_substitute("Heading has been removed.");
-					if(t.hasClass('url-delete'))
-					    alert_substitute("URL has been removed.");
-					if(t.hasClass('url-delete'))
-					    alert_substitute("Category Id has been removed.");
-
-					}
-				    else
-					alert_substitute("Record has been removed.");
-				}
-				    
-				,
-				error: function() {
-					alert_substitute("Error in processing the request.");
-				}
-			});
-			return false;
-		} else {
-			return true;
-		}
-	});
+    $("a").live('click',function(){
+      		t = $(this), form = t.parents("form");
+      		if (t.attr('data-method') == "delete")
+      		{
+      		  if (confirm("Are you sure you want to delete this item?")) {
+      			$.ajax({
+      				url: t.attr("href"),
+      				data: form.serialize(),
+      				type: "DELETE",
+      				success: function(data) {
+      				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete') || t.hasClass('category_id-delete')) {
+      					t.parent().remove();
+      					if(t.hasClass('category_id-delete'))
+      					    alert_substitute("Category Id has been removed.");
+      					}
+      				  else if (t.hasClass('redirect_delete')) {
+      					  $('body').html(data);
+      					}
+      				}
+      				,
+      				error: function() {
+      					alert_substitute("Error in processing the request for delete.");
+      				}
+      			});
+      		  }
+      			return false;
+      		} else {
+      			return true;
+      		}
+      	});
+  
 	
 	$('.correction').live("click", function(){
 		myparams = [];
@@ -332,8 +327,9 @@ $(document).ready(function(){
 	  }
 	});
 
-    $('select#type_filter').live('change', function () {
-	$('#filter_form').attr("action", document.location.pathname).submit();
+  $('select#type_filter').live('change', function () {
+	  $('#filter_form').attr("action", document.location.pathname);
+	  $('#filter_form').submit();
 	});
 
     $(".custom_regex").live('click', function() {

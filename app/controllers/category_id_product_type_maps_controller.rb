@@ -13,9 +13,14 @@ class CategoryIdProductTypeMapsController < ApplicationController
     redirect_to('/product_types?id=' + @category.product_type.id.to_s, :notice => 'Category ID was successfully created.') 
     
   end
+  
+  def show
+    render :nothing => true
+  end
 
   # DELETE /category_ids/1
   def destroy
+    debugger
     CategoryIdProductTypeMap.find(params[:id]).destroy
     render :nothing => true
   end
