@@ -9,8 +9,9 @@ class Equivalence < ActiveRecord::Base
       #Take out product bundles from Equivalences
       #equivalences = prod.product_bundles.map(&:bundle_id)+ProductBundle.find_all_by_bundle_id(prod.id).map(&:product_id)+prod.product_siblings.map(&:sibling_id)
       equivalences = prod.product_siblings.map(&:sibling_id)
-      if sibling = eq_ar.select{|p|equivalences.include? p.product_id}.first
-        eq.eq_id = sibling.eq_id
+
+      if sibling = eq_ar.index{|p| equivalences.include? p.product_id}
+        eq.eq_id = eq_ar[sibling].eq_id
       else
         eq.eq_id = counter
         counter += 1
