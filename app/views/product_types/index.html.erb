@@ -31,7 +31,7 @@
           <%= link_to("Add New Category Id", "/category_ids/new?parent_id=#{pt.id}" ) %>
         </dt>
       
-        <%= link_to('Delete', {:action => 'destroy', :id => pt.id}, :method => :delete, :class => 'redirect_delete') %>
+        <%= link_to('Remove Product Type', {:action => 'destroy', :id => pt.id}, :method => :delete, :class => 'redirect_delete') %>
       
     </dd>
   <% end %>

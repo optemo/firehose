@@ -32,7 +32,6 @@ class ProductTypesController < ApplicationController
   # POST /product_types
   def create
     @product_type = ProductType.new(params[:product_type])
-    
     respond_to do |format|
       if @product_type.save
         format.html { redirect_to("/product_types?id=" + @product_type.id.to_s, :notice => 'Product type was successfully created.') }
@@ -44,14 +43,8 @@ class ProductTypesController < ApplicationController
 
   def destroy
     @product_type = ProductType.find(params[:id])
-    # TODO: remove this object from Session.product_type
-    # display a 'success' message, 
-    # and check that the product type doesn't actually appear anywhere
     if @product_type.destroy
-      #redirect_to :action => index
-      #render :index
       respond_to do |format|
-        #render :index
         format.html { redirect_to product_types_url(nil, :ajax => true) }
       end
     else
@@ -59,44 +52,9 @@ class ProductTypesController < ApplicationController
     end
   end
 
-
   def update
-    data = nil
-    names = params[:name].split('-')
-    if names[0] == "product_type"
-      data = ProductType.find(params[:dId])
-    end
-    if names[0] == "url"
-      data = Url.find(params[:dId])
-    end
-    if names[0] == "heading"
-      data = Heading.find(params[:dId])
-    end
-    if names[0] == "feature"
-      data = Feature.find(params[:dId])
-    end
-    if names[0] == "category_id_product_type_maps"
-      data = CategoryIdProductTypeMap.find(params[:dId])
-    end
-
-
-    new_value = params[:value]
-    if params[:orgElement]
-      arr_data = data[names[1]].split(',')
-
-      arr_data.delete_if{|x| x.strip.blank?}      
-      if params[:value].empty?
-        arr_data.delete_if { |x| x.strip == params[:orgElement].strip }
-      else
-        index = arr_data.index{ |x| x.strip == params[:orgElement].strip }
-        arr_data[index] = params[:value]
-      end
-      new_value = arr_data.map{|d| d=d.strip}.join(',')
-    end
-
-    data[names[1]] = new_value
-    data.save
-    render :inline=>params[:value]
-    
+    debugger
+    succeeded = ProductType.find(params[:id]).update_attributes(params[:product_type].reject{|k,v|v.blank?})
+    render :inline=>params[:product_type]
   end
 end

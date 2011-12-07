@@ -4,12 +4,3 @@ one:
 two:
   category_id: 28382
   product_type_id: 2
-three:
-  category_id: 28381
-  product_type_id: 2
-four:
-  category_id: 20220
-  product_type_id: 2
-five:
-  category_id: 20218
-  product_type_id: 2

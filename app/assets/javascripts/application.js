@@ -279,6 +279,17 @@ $(document).ready(function(){
     
     $('.edit, .edit-select').editable('/product_types/1', editableVar);
 
+    $('.edit-string').editable('/product_types/1', $.extend({},editableVar,{
+        onsubmit: function(settings, form) {
+            var input = $(form).find('input');
+            var original = input.val();
+            if (original == null || original.toString().length < 4) {
+                alert("Input too short.");
+                return false;
+            }  
+        }
+    }));
+
      $('.edit-select-bool').editable('/product_types/1', $.extend({},editableVar,{
         data : "{true: 'Yes', false: 'No'}",
         type : 'select'
@@ -294,8 +305,7 @@ $(document).ready(function(){
             if (original == null || !original.toString().match(/^\d+$/)) {
                 alert("Invalid input. Please input valid number!");
                 return false;
-            }
-                
+            }  
         }
     }));
 
