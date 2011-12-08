@@ -6,11 +6,20 @@ class ProductTypeTest < ActiveSupport::TestCase
     prod_type = build(:product_type, :name => nil)
     assert !prod_type.save, "product type should not be created without a name"
   end
-  
+    
   test "category id name validation" do
-    # validates_format_of :category_id, :with => /\d{5}/
+    # category_id must have a category_id and it should be 5 or more digits
     prod_type = create(:product_type)
-    category = build(:category_id_product_type_map, :product_type => prod_type)
+    category_orphan = build(:category_id_product_type_map, :product_type => nil, :category_id => 45146)
+    category1 = build(:category_id_product_type_map, :product_type => prod_type, :category_id => nil)
+    category2 = build(:category_id_product_type_map, :product_type => prod_type, :category_id => 451)
+    category3 = build(:category_id_product_type_map, :product_type => prod_type, :category_id => "X4514")
+    category_valid = build(:category_id_product_type_map, :product_type => prod_type, :category_id => 45145)
+    assert !category_orphan.save, "category id should not be created without a product_type"
+    assert !category1.save, "category id should not be created without a name"
+    assert !category2.save, "category id should have at least 5 digits"
+    assert !category3.save, "category id should be only digits"
+    assert category_valid.save, "valid category name"
   end
 
   test "assigning category ids to product type" do

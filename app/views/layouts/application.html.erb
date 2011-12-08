@@ -18,15 +18,12 @@
           Product selector:
           <form id="filter_form">
             <select id="type_filter" name="id">
-              <option value="">All</option>
+              <option value="">Default</option>
               <% ProductType.all.collect do |p| %>
                 <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
               <% end %>
             </select>
           </form>
-          
-          <%= link_to('New Product Type', new_product_type_path) %>
-
         </h2> 
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 

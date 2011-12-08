@@ -338,8 +338,10 @@ $(document).ready(function(){
 	});
 
   $('select#type_filter').live('change', function () {
-	  $('#filter_form').attr("action", document.location.pathname);
-	  $('#filter_form').submit();
+	  if (!document.location.pathname.match(/\/new$/)) {
+	    $('#filter_form').attr("action", document.location.pathname);
+	    $('#filter_form').submit();
+	  }
 	});
 
     $(".custom_regex").live('click', function() {
