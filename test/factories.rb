@@ -24,6 +24,12 @@ FactoryGirl.define do
     product_type "camera_bestbuy"
     instock true
   end
+  factory :product_type do
+    name {|n| "test_type#{n}"}
+  end
+  factory :category_id_product_type_map do
+    association :product_type
+  end
   factory :scraping_correction do
     association :scraping_rule
     product_type "camera_bestbuy"

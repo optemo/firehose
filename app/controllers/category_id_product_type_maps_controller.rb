@@ -8,10 +8,15 @@ class CategoryIdProductTypeMapsController < ApplicationController
   # POST /category_ids
   def create
     @category = CategoryIdProductTypeMap.new(params[:category_id_product_type_map])
-
-    @category.save
-    redirect_to('/product_types?id=' + @category.product_type.id.to_s, :notice => 'Category ID was successfully created.') 
-    
+    if @category.save
+      redirect_to('/product_types?id=' + @category.product_type.id.to_s, :notice => 'Category ID was successfully created.')
+    else
+      redirect_to('/product_types?id=' + @category.product_type.id.to_s, :notice => 'Category ID creation failed')
+    end
+  end
+  
+  def show
+    render :nothing => true
   end
 
   # DELETE /category_ids/1

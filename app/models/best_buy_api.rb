@@ -27,6 +27,19 @@ class BestBuyApi
       cached_request('category',{:id => id})
     end
     
+    def get_subcategories(id, english = true)
+      
+      q = english ? {:lang => "en"} : {:lang => "fr"}
+      q[:id] = id
+      subcats = {}
+      #puts "#{q}"
+      res = cached_request('category',q)  
+        children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
+        subcats = {{res["id"] => res["name"]} => children}  
+      
+      subcats
+    end
+    
     #Find all the products in a category
     def listing(id,page=1)
       cached_request('search',{:page => page, :categoryid => id})
@@ -41,7 +54,8 @@ class BestBuyApi
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
-      ids
+       #puts "#{ids.to_s}"
+       ids
     end
     
     def category_ids(id)
@@ -79,6 +93,7 @@ class BestBuyApi
       request_url = prepare_url(type,params)
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
+      #puts "#{res.body}"
       unless res.kind_of? Net::HTTPSuccess
         #if res.code == 302
         #  raise BestBuyApi::FeedDownError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
@@ -91,6 +106,7 @@ class BestBuyApi
       rescue JSON::ParserError
         raise BestBuyApi::RequestError, "Bad Response: JSON Parser Error for #{request_url}"
       end
+      
     end
     
     protected

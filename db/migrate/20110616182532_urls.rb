@@ -25,7 +25,7 @@ class Urls < ActiveRecord::Migration
         Url.create :product_type => t, :url => 'bestdrive', :port => 80, :piwik_id => 12
       end
     end
-
+-
   end
 
   def self.down

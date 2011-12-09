@@ -2,7 +2,7 @@
   $(document).ready(function() {
   $("#new_category_id_product_type_map").validate({
   rules: {
-  "category_id_product_type_map[category_id]": {required: true, digits: true}
+  "category_id_product_type_map[category_id]": {required: true, digits: true, minlength: 5}
   }
   });
   });

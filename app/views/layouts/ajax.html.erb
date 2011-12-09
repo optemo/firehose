@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Firehose</title>
-  <%= stylesheet_link_tag "application" %>
-  <%#= javascript_include_tag "http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js" %>
-  <%= javascript_include_tag "jquery" %>
-  <%= javascript_include_tag "application" %>
-  <%= csrf_meta_tag %>
-</head>
-<body>
-  <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
+<div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
     <div id="header">
 		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
 
@@ -18,12 +7,15 @@
           Product selector:
           <form id="filter_form">
             <select id="type_filter" name="id">
-              <option value="">Default</option>
+              <option value="">All</option>
               <% ProductType.all.collect do |p| %>
                 <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
               <% end %>
             </select>
           </form>
+          
+          <%= link_to('New Product Type', new_product_type_path) %>
+
         </h2> 
         <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
         <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
@@ -36,5 +28,3 @@
     <%= yield %>
     </div>
 <div id="silkscreen">&nbsp;</div>
-</body>
-</html>
