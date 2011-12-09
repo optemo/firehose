@@ -34,12 +34,12 @@ class Product < ActiveRecord::Base
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
+    #Reset the instock flags
+    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
     
     products_to_save = {}
     product_skus.each do |bb_product|
       products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
-      #Reset the instock flags
-      products_to_save[bb_product.id].instock = false
     end
     specs_to_save = {}
     
