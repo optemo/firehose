@@ -25,73 +25,11 @@ role :app, domain
 role :web, domain
 role :db,  domain, :primary => true
 
-############################################################
-#	Passenger
-#############################################################
+load 'deploy/assets'
+load 'config/deploy/recipes'
 
-namespace :deploy do
-desc "Sync the public/assets directory."
-  task :assets do
-    system "rsync -vr --exclude='.DS_Store' public/system #{user}@#{domain}:#{shared_path}"
-  end
-  desc "Restart Application"
-  task :restart do
-    run "touch #{current_path}/tmp/restart.txt"
-  end
-end
-
-desc "Create asset packages for production" 
-task :build_assets, :roles => [:web] do
-  run <<-EOF
-    cd #{release_path} && rake asset:packager:build_all
-  EOF
-end
-
-desc "Reindex search index"
-task :reindex do
-  run "rake -f #{current_path}/Rakefile ts:conf RAILS_ENV=production"
-  sudo "rake -f #{current_path}/Rakefile ts:rebuild RAILS_ENV=production"
-end
-
-
-desc "Compile C-Code"
-task :compilec do
-  sudo "cmake #{current_path}/lib/c_code/clusteringCodes/"
-  sudo "make hCluster"
-  sudo "cp codes/hCluster #{current_path}/lib/c_code/clusteringCodes/codes/hCluster"
-end
-
-desc "Configure the server files"
-task :serversetup do
-  # Instantiate the database.yml file
-  run "cd #{current_path}/config              && cp -f database.yml.deploy database.yml"
-  #run "cd #{current_path}/config/ultrasphinx   && cp -f development.conf.deploy development.conf && cp -f production.conf.deploy production.conf"
-end
-
-task :restartmemcached do
-  run "ps ax | awk '/memcached/ && !/awk/ {print $1}' > tempfile"
-  sudo "xargs kill < tempfile"
-  run "rm tempfile"
-  run "memcached -d"
-end
-
-task :fetchAutocomplete do
-  run "RAILS_ENV=production rake -f #{current_path}/Rakefile autocomplete:fetch"
-end
-
-task :redopermissions do
-  run "find #{current_path} #{current_path}/../../shared -user `whoami` ! -perm /g+w -execdir chmod g+w {} +"
-end
-
-task :warmupserver do
-  run "curl -A 'Java' localhost > /dev/null"
-end
-
-task :set_umask do
-  run "umask 0002"
-end
-
-# redopermissions is last, so that if it fails due to the searchd pid, no other tasks get blocked
 before 'deploy:update', :set_umask
-after "deploy:symlink", "serversetup"
-after :serversetup, "redopermissions"
+before "deploy:assets:precompile", :serversetup
+after "deploy:symlink", :restartmemcached
+after :restartmemcached, :redopermissions
+after "deploy:restart", :warmupserver

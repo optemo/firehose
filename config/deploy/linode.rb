@@ -28,9 +28,17 @@ role :db,  domain, :primary => true
 ############################################################
 #	Passenger
 #############################################################
+load 'deploy/assets'
+load 'config/deploy/recipes'
 
 task :restartmemcached do
   run "cd #{current_path} && bundle exec rake -f #{current_path}/Rakefile cache:clear RAILS_ENV=production"
   #Warm up server
   run "curl -A 'Java' localhost > /dev/null"
 end
+
+before 'deploy:update', :set_umask
+before "deploy:assets:precompile", :serversetup
+after "deploy:symlink", :restartmemcached
+after :restartmemcached, :redopermissions
+after "deploy:restart", :warmupserver
