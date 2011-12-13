@@ -1,7 +1,6 @@
 def save_daily_sales
   require 'net/imap'
   require 'zip/zip'
-  require 'ruby-debug'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
