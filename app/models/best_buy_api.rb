@@ -36,7 +36,7 @@ class BestBuyApi
       res = cached_request('category',q)  
         children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
         subcats = {{res["id"] => res["name"]} => children}  
-      
+    
       subcats
     end
     
@@ -80,6 +80,20 @@ class BestBuyApi
     def search(string,page=1)
       cached_request('search',{:page => page,:name => string})
     end
+    
+    def keyword_search(query)
+      
+        page = 1
+        totalpages = nil
+        skus = []
+        while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
+          res = cached_request('search',{:page => page,:query => query, :sortby => "name", :pagesize=> 100})
+          totalpages ||= res["totalPages"]
+          skus += res["products"].inject([]){|sks, ele| sks << ele["sku"] }
+          page += 1
+        end
+      skus
+    end
 
     def cached_request(type, params = {})
       #Data is only valid for 1 hour
@@ -91,6 +105,7 @@ class BestBuyApi
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
     def send_request(type,params)
       request_url = prepare_url(type,params)
+      #puts "#{request_url}"
       log "Request URL: #{request_url}"
       res = Net::HTTP.get_response(URI::parse(request_url))
       #puts "#{res.body}"

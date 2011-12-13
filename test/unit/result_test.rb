@@ -3,7 +3,6 @@ require 'test_helper'
 
 class ResultTest < ActiveSupport::TestCase
 
-
   test "Find bundles" do
     create :cat_spec, name: "padding", value: 'pillow', product: create(:product, sku: "101")
     create :text_spec, name: "bundle", value: '[{"sku": "101"}]', product: create(:product, sku: "102")

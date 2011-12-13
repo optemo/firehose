@@ -15,26 +15,6 @@ class Result < ActiveRecord::Base
     removedproducts = old_c-c
     "New: <span style='color: green'>[#{newproducts.join(" , ")}]</span> Removed: <span style='color: red'>[#{removedproducts.join(" , ")}]</span>"
   end
-  
-  def self.cleanupByProductType(product_type, days)
-    # Get the date before which the results should be cleanup
-
-    rets = Result.where(:product_type=>product_type).order('created_at desc')
-    size = rets.size
-    ago = 0
-    last_day = rets[0][:created_at].to_date
-    (0...size).each do |i|
-      
-      if rets[i][:created_at].to_date != last_day
-        ago += 1
-        last_day = rets[i][:created_at].to_date
-      end
-      break if ago == days - 1
-    end
-    
-    Result.where("product_type=:product_type and created_at < :last_day", {:product_type=>product_type, :last_day=>last_day}).destroy_all
-  end
-
 
   
   def create_from_current

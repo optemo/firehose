@@ -16,14 +16,18 @@ class TextSpecTest < ActiveSupport::TestCase
   test "check the number of days_kept" do
     create(:search, created_at: "2011-11-10")
     create(:search, created_at: "2011-11-11")
-    
-    assert_equal("days_kept is less than min_date", Search.cleanup_history_data(2) )
+  
+    Search.cleanup_history_data(2)
+    assert_equal("Thu, 10 Nov 2011".to_date, Search.minimum(:created_at).to_date)
   end
   
   test "check if the search works" do
      create(:search, created_at: "2011-11-12")
      create(:search, created_at: "2011-11-17")
      create(:search, created_at: "2011-11-20")
-     assert_nil(Search.cleanup_history_data(4));
+    Search.cleanup_history_data(4)
+      assert(Search.minimum(:created_at));
+     Search.cleanup_history_data(0)
+     assert_nil(Search.minimum(:created_at));
   end
 end
