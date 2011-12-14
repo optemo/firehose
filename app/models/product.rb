@@ -1,4 +1,3 @@
-require 'ruby-debug'
 class Product < ActiveRecord::Base
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
