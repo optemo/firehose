@@ -260,7 +260,7 @@ class Product < ActiveRecord::Base
       ordered = ordered.reverse if f.value < 0 #Negative weight means reversed
       pos = ordered.index(fVal)
       len = ordered.length
-      (len - pos)/len.to_f 
+      pos/len.to_f 
   end
   
   def self.calculateFactor_sale(fVal1, fVal2) 
