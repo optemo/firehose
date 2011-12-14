@@ -35,4 +35,3 @@ before 'deploy:update', :set_umask
 before "deploy:assets:precompile", :serversetup
 after "deploy:symlink", :restartmemcached
 after :restartmemcached, :redopermissions
-after "deploy:restart", :warmupserver

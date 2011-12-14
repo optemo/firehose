@@ -20,7 +20,7 @@ class ProductSibling < ActiveRecord::Base
         #Check if the product is in our database
         all_products.map{|p| sibs<<p.id if skus.include?(p["sku"])}
         sibs.each do |sib_id| 
-          color = CatSpec.find_by_product_id_and_name(sib_id,"color").value
+          color = CatSpec.find_by_product_id_and_name(sib_id,"color").try(:value)
           siblings_activerecords.push ProductSibling.new({:product_id => p_id, :sibling_id =>sib_id, :name=>"color", :product_type=>s.product_type, :value=> color}) 
         end
       end  
