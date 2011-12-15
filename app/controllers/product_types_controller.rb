@@ -52,7 +52,6 @@ class ProductTypesController < ApplicationController
   end
 
   def update
-    debugger
     succeeded = ProductType.find(params[:id]).update_attributes(params[:product_type].reject{|k,v|v.blank?})
     render :inline=>params[:product_type]
   end

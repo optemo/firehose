@@ -49,5 +49,10 @@ module Firehose
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+    
+    # Load the usernames and passwords
+    credentials_file = YAML.load_file("#{Rails.root}/config/credentials.yml")
+    ACCESS_UNAME = credentials_file['access']['username']
+    ACCESS_PASSWORD = credentials_file['access']['password']
   end
 end
