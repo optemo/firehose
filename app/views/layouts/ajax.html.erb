@@ -6,8 +6,7 @@
         <h2>
           Product selector:
           <form id="filter_form">
-            <select id="type_filter" name="id">
-              <option value="">All</option>
+            <select id="type_filter" name="product_type">
               <% ProductType.all.collect do |p| %>
                 <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
               <% end %>

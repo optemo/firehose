@@ -13,10 +13,6 @@ gem 'mysql2', '0.3.7'
 # Deploy with Capistrano
 # gem 'capistrano'
 
-# To use debugger (ruby-debug for Ruby 1.8.7+, ruby-debug19 for Ruby 1.9.2+)
-# gem 'ruby-debug'
-gem 'ruby-debug19'
-
 # Bundle the extra gems:
 # gem 'bj'
 # gem 'nokogiri'
@@ -41,6 +37,9 @@ gem 'jquery-rails'
 
 group :development do
   gem 'rspec-rails'
+  gem "linecache19", "0.5.13"
+  gem "ruby-debug-base19", "0.11.26"
+  gem "ruby-debug19", require: 'ruby-debug'
 end
 
 group :production do

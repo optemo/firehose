@@ -1,10 +1,9 @@
 class ProductTypesController < ApplicationController
   def index
-    @product_types = ProductType.find(:all, :order=>"product_types.id")
-    @select_product_types = @product_types
-    if !params[:id].blank?
-      @select_product_types = [ProductType.find(params[:id], :order=>"product_types.id")]
-      @slt = params[:id]
+    @select_product_types = nil
+    unless params[:product_type].blank?
+      @select_product_types = [ProductType.find(params[:product_type], :order=>"product_types.id")]
+      @slt = params[:product_type]
     end
     respond_to do |format|
       if params[:ajax] == 'true'
@@ -17,8 +16,8 @@ class ProductTypesController < ApplicationController
 
   def show
     @product_types = ProductType.find(:all, :order=>"product_types.id")
-    @select_product_types = [ProductType.find(params[:id], :order=>"product_types.id")]
-    @slt = params[:id]
+    @select_product_types = [ProductType.find(params[:product_type], :order=>"product_types.id")]
+    @slt = params[:product_type]
     render :index
   end
   

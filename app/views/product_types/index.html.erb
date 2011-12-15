@@ -13,13 +13,22 @@
  
 </style>
 
+<h2> Product Type </h2>
+
 <%= link_to('New Product Type', new_product_type_path) %>
+
+
+
 
 <% unless @select_product_types.nil? %>
   <% @select_product_types.each do |pt| %>
     <dd>
       <h2><%= pt.name %></h2>
       <dl class="level1" data-parent-id="<%= pt.id %>">
+        
+
+        
+        
         <dt>
           <%= link_to("Add New Category Id", "/category_ids/new?parent_id=#{pt.id}" ) %>
         </dt>
