@@ -1,6 +1,4 @@
 def featured_products(fs, product_type)
-  require 'ruby-debug'
-
   BinSpec.delete_all(["name= ? and product_type = ?", "featured", product_type])
   binspecs = []    
   fs.each do |s|

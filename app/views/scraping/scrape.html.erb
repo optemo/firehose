@@ -4,9 +4,4 @@
 	    <%= link_to "Available Features", "#", :class => "closed togglable" %>
 	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>
 	</div>
-	
-	<div class="raw_features">
-	    <%= link_to "Raw JSON:", "#" , :class => "closed togglable" %>
-	    <div><pre><%= PP.pp(@raw_info, "") %></pre></div>
-	</div>
 </div>

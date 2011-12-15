@@ -1,7 +1,7 @@
-set :application, "staging"
-set :repository,  "git@jaguar:site.git"
-set :domain, "jaguar"
-set :branch, "staging"
+set :application, "firehose"
+set :repository,  "git@jaguar:firehose.git"
+set :domain, "linode"
+set :branch, "master"
 set :user, "#{ `whoami`.chomp }"
 
 # If you aren't deploying to /u/apps/#{application} on the target
@@ -28,7 +28,10 @@ role :db,  domain, :primary => true
 ############################################################
 #	Passenger
 #############################################################
+load 'deploy/assets'
+load 'config/deploy/recipes'
 
-task :restartmemcached do
-  run "rake -f #{current_path}/Rakefile cache:clear RAILS_ENV=production"
-end
+before 'deploy:update', :set_umask
+before "deploy:assets:precompile", :serversetup
+after "deploy:symlink", :restartmemcached
+after :restartmemcached, :redopermissions
