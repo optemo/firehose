@@ -18,7 +18,6 @@
           Product selector:
           <form id="filter_form">
             <% @slt = params[:product_type] unless params[:product_type].nil? %>
-            <% debugger %>
             <select id="type_filter" name="product_type">
               <% ProductType.all.collect do |p| %>
                 <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
