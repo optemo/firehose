@@ -30,14 +30,25 @@ class ProductTypesController < ApplicationController
 
   # POST /product_types
   def create
-    @product_type = ProductType.new(params[:product_type])
-    respond_to do |format|
-      if @product_type.save
-        format.html { redirect_to("/product_types?id=" + @product_type.id.to_s, :notice => 'Product type was successfully created.') }
-      else
-        format.html { render :action => "new" }
+    @product_type = ProductType.new(:name => params[:name])
+    @product_type.save()
+    categories = params[:categories]
+    unless categories.nil?
+      categories.each do |catid|
+       category = CategoryIdProductTypeMap.new(:product_type_id => @product_type.id, :category_id => catid)
+       category.save()
       end
     end
+
+    respond_to do |format|
+      #format.html { redirect_to product_types_url(:product_type => @product_type.id, :ajax => 'true') }
+      format.html { redirect_to_show("/product_types?product_type=" + @product_type.id.to_s, :newbool => true) }
+    end
+  end
+  
+  def edit
+    @product_type = ProductType.find(params[:id])
+    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
   end
 
   def destroy
@@ -53,7 +64,14 @@ class ProductTypesController < ApplicationController
 
   def update
     debugger
-    succeeded = ProductType.find(params[:id]).update_attributes(params[:product_type].reject{|k,v|v.blank?})
+    @past_categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
+    @past_categories.each {|c| c.destroy}
+    
+    params[:categories].each do |catid|
+        category = CategoryIdProductTypeMap.new(:product_type_id => params[:id], :category_id => catid)
+        category.save()
+    end
+    
     render :inline=>params[:product_type]
   end
 end

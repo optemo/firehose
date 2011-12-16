@@ -17,17 +17,11 @@
 
 <%= link_to('New Product Type', new_product_type_path) %>
 
-
-
-
 <% unless @select_product_types.nil? %>
   <% @select_product_types.each do |pt| %>
     <dd>
       <h2><%= pt.name %></h2>
       <dl class="level1" data-parent-id="<%= pt.id %>">
-        
-
-        
         
         <dt>
           <%= link_to("Add New Category Id", "/category_ids/new?parent_id=#{pt.id}" ) %>
@@ -39,6 +33,8 @@
             <%= link_to('Delete', category, :confirm => 'Are you sure?', :method => :delete, :remote=>true, :class=>'category_id-delete') %>
           </dd>
         <% end %>
+        <%= link_to('Edit Product Type', {:action => 'edit', :id => pt.id}) %>
+        
         <%= link_to('Remove Product Type', {:action => 'destroy', :id => pt.id}, :method => :delete, :class => 'redirect_delete') %>
       </dl>
     </dd>

@@ -1,0 +1,15 @@
+<h1>Edit Product Type</h1>
+
+<div id="product_title" data-id="<%= @product_type.id %>" data-name="<%= @product_type.name %>">
+<h2><%= @product_type.name %> </h2>
+<% @categories.each do |c| -%>
+  <%= c.category_id %>
+<% end -%>
+</div>
+
+<%= render 'tree' %>
+
+<input type="button" id="save_type" value="Save" style="display:block; float:left;">
+
+<%= link_to 'Back', product_types_path %>
+

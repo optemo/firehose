@@ -6,7 +6,7 @@
 		<span style="color: <%= @colors[rule.local_featurename][rule.id] %>">Rule:</span> <%= rule.regex %>&nbsp;&nbsp;&nbsp;
 		Coverage: <span class="bold"><%= covered(remote_feature) %>/<%= pc %></span>
 	</a>&nbsp;&nbsp;&nbsp;
-	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.product_type %>
+	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.p_type %>
 	<%= link_to "Destroy", rule, :method => :delete %>
 	<div class="contentholder"><%= render :partial => 'candidate', :collection => remote_feature %></div>
 </div>

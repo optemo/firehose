@@ -1,8 +1,13 @@
 /*
 *= require_self
+*= require categories
 *= require jquery.jeditable.min
 *= require jquery.validate.min
+*= require jquery.hotkeys.js
+*= require jquery.cookie.js
+*= require jstree
 */
+
 $(document).ready(function(){
     $.validator.addMethod('regexp', function (possible_regexp, element) {
         try {

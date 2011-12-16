@@ -1,12 +1,18 @@
 class CategoryIdProductTypeMapsController < ApplicationController
   # Get /category_ids/new
   def new
-    @category = CategoryIdProductTypeMap.new
-    @category.product_type = ProductType.find(params[:parent_id])
+    #@category = CategoryIdProductTypeMap.new
+    @nodes = BestBuyApi.get_subcategories(params[:id])
+    respond_to do |format|
+      format.html { render :layout => 'empty' }
+    end
+    #@category.product_type = ProductType.find(params[:parent_id])
   end
 
   # POST /category_ids
+  # FIXME: get rid of this? not used
   def create
+    debugger
     @category = CategoryIdProductTypeMap.new(params[:category_id_product_type_map])
     if @category.save
       redirect_to('/product_types?id=' + @category.product_type.id.to_s, :notice => 'Category ID was successfully created.')

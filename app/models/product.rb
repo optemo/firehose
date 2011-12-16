@@ -23,7 +23,7 @@ class Product < ActiveRecord::Base
   
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda {
-    {:conditions => {:product_type => Session.product_type}}
+    {:conditions => {:product_type => Session.p_type}}
   }
   
   def self.feed_update
@@ -34,11 +34,11 @@ class Product < ActiveRecord::Base
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     #Reset the instock flags
-    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
+    Product.update_all(['instock=false'], ['product_type=?', Session.p_type])
     
     products_to_save = {}
     product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
+      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.p_type)
     end
     specs_to_save = {}
     
@@ -64,32 +64,32 @@ class Product < ActiveRecord::Base
       else
         p.instock = true
         spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.product_type = Session.product_type
+        spec.product_type = Session.p_type
         spec.value = candidate.parsed
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
     end
-    puts "Done Calculations #{Session.product_type} - #{Time.now}"
+    puts "Done Calculations #{Session.p_type} - #{Time.now}"
     # Bulk insert/update for efficiency
     Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
-    puts "Done DB insert #{Session.product_type} - #{Time.now}"
+    puts "Done DB insert #{Session.p_type} - #{Time.now}"
     Result.upkeep_pre
-    puts "Done Upkeep Pre #{Session.product_type} - #{Time.now}"
+    puts "Done Upkeep Pre #{Session.p_type} - #{Time.now}"
     Result.find_bundles
-    puts "Done Bundles #{Session.product_type} - #{Time.now}"
+    puts "Done Bundles #{Session.p_type} - #{Time.now}"
     #Calculate new spec factors
     Product.calculate_factors
-    puts "Done Calculate Factors #{Session.product_type} - #{Time.now}"
+    puts "Done Calculate Factors #{Session.p_type} - #{Time.now}"
     #Get the color relationships loaded
     ProductSibling.get_relations
-    puts "Done Siblings #{Session.product_type} - #{Time.now}"
+    puts "Done Siblings #{Session.p_type} - #{Time.now}"
     Equivalence.fill
-    puts "Done Equivalence #{Session.product_type} - #{Time.now}"
+    puts "Done Equivalence #{Session.p_type} - #{Time.now}"
     Result.upkeep_post
-    puts "Done Upkeep Post #{Session.product_type} - #{Time.now}"
+    puts "Done Upkeep Post #{Session.p_type} - #{Time.now}"
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
@@ -122,7 +122,7 @@ class Product < ActiveRecord::Base
         if products_to_save.keys.include?(candidate.product_id)
           p = products_to_save[candidate.product_id]
         else
-          p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
+          p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.p_type)
         end
 
         if p.new_record?
@@ -140,7 +140,7 @@ class Product < ActiveRecord::Base
           else
             spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
             
-            spec.product_type = Session.product_type
+            spec.product_type = Session.p_type
             spec.value = candidate.parsed
             specs_to_save.keys.include?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
             if feature=='mpn' || feature=='title' || feature=='model'
@@ -193,7 +193,7 @@ class Product < ActiveRecord::Base
         end
         records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
         factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f.name+"_factor")
+        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.p_type, :name => f.name+"_factor")
         if records[f.name][product.id]
           record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
           fVal = records[f.name][product.id].first.value 
@@ -224,7 +224,7 @@ class Product < ActiveRecord::Base
       end 
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.p_type, :name => "utility"})
       product_utility.value = utility.sum
       cont_activerecords << product_utility
     end

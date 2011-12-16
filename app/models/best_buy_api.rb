@@ -33,11 +33,40 @@ class BestBuyApi
       q[:id] = id
       subcats = {}
       #puts "#{q}"
-      res = cached_request('category',q)  
+      res = cached_request('category',q)
+
         children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
         subcats = {{res["id"] => res["name"]} => children}  
     
       subcats
+    end
+    
+    def get_tree(root_id, english = true)
+      q = english ? {:lang => "en"} : {:lang => "fr"}
+      q[:id] = root_id
+      
+      #cats = {}
+      
+      subcats = {}
+      
+      res = cached_request('category',q)
+      
+      
+      
+      children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
+      
+      # if children is empty, return nil
+      children.each do |child|
+        child_id = child.first.first
+        child_name = child.first.last
+        # puts child_name
+        get_tree(child_id)
+      end
+      
+      # for each child, call get_tree to get its children structure and then add the result to this tree, then return 
+      # this tree
+      # puts 'x'
+      subcats = {{res["id"] => res["name"]} => children}
     end
     
     #Find all the products in a category

@@ -11,13 +11,11 @@
 <body>
   <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
     <div id="header">
-		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
-
     
         <h2>
           Product selector:
           <form id="filter_form">
-            <% @slt = params[:product_type] unless params[:product_type].nil? %>
+            <% @slt = params[:product_type].nil? ? Session.product_type_id : params[:product_type] %>
             <select id="type_filter" name="product_type">
               <% ProductType.all.collect do |p| %>
                 <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>

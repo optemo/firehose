@@ -15,7 +15,13 @@
     <%= f.text_field :name %>
  </div>
   
-  <div class="actions">
-    <%= f.submit %>
+  <!-- category adding goes here -->
+  <%= render 'tree' -%>
+  
+  
+  <input type="button" id="submit_type" value="Create" style="display:block; float:left;">
+  <!-- <div class="actions">
+     f.submit
   </div>
+  -->
 <% end %>
