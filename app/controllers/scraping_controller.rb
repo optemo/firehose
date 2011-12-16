@@ -21,7 +21,7 @@ class ScrapingController < ApplicationController
     show_products
   end
   
-  def myresults
+  def results
     show_products(true)
     render 'rules'
   end

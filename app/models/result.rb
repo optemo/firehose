@@ -2,37 +2,6 @@ class Result < ActiveRecord::Base
 
   has_many :candidates, :dependent=>:delete_all, :include => [:scraping_rule, :scraping_correction]
   
-  def changes
-    begin
-      oldresult = Result.find(id-2)
-    rescue ActiveRecord::RecordNotFound
-      return
-    end
-    
-    c = candidates.map(&:product_id).uniq
-    old_c = oldresult.candidates.map(&:product_id).uniq
-    newproducts = c-old_c
-    removedproducts = old_c-c
-    "New: <span style='color: green'>[#{newproducts.join(" , ")}]</span> Removed: <span style='color: red'>[#{removedproducts.join(" , ")}]</span>"
-  end
-
-  
-  def create_from_current
-
-    raise ValidationError unless category
-    product_skus = BestBuyApi.category_ids(YAML.load(category))
-    self.nonuniq = product_skus.count
-    product_skus.uniq!{|a|a.id}
-    self.total = product_skus.count
-    save
-    
-    candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = id}
-    # Bulk insert
-    Candidate.import candidate_records
-
-
-  end
-  
   def self.upkeep_pre
     #Calculate optical zoom for SLR cameras
     if Session.product_type == "camera_bestbuy" #Only do this for cameras

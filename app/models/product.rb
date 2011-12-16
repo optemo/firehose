@@ -69,89 +69,6 @@ class Product < ActiveRecord::Base
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
     end
-    puts "Done Calculations #{Session.product_type} - #{Time.now}"
-    # Bulk insert/update for efficiency
-    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
-    specs_to_save.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
-    end
-    puts "Done DB insert #{Session.product_type} - #{Time.now}"
-    Result.upkeep_pre
-    puts "Done Upkeep Pre #{Session.product_type} - #{Time.now}"
-    Result.find_bundles
-    puts "Done Bundles #{Session.product_type} - #{Time.now}"
-    #Calculate new spec factors
-    Product.calculate_factors
-    puts "Done Calculate Factors #{Session.product_type} - #{Time.now}"
-    #Get the color relationships loaded
-    ProductSibling.get_relations
-    puts "Done Siblings #{Session.product_type} - #{Time.now}"
-    Equivalence.fill
-    puts "Done Equivalence #{Session.product_type} - #{Time.now}"
-    Result.upkeep_post
-    puts "Done Upkeep Post #{Session.product_type} - #{Time.now}"
-    #This assumes Firehose is running with the same memcache as the Discovery Platform
-    begin
-      Rails.cache.clear
-    rescue Dalli::NetworkError
-      puts "Memcache not available"
-    end
-    
-  end
-  
-  def self.create_from_result(id)
-    result = Result.find(id)
-    products_to_save = {}
-    specs_to_save = {}
-    #Reset the intock flags
-    Product.update_all(['instock=false'], ['product_type=?', result.product_type])
-    
-    rules, multirules, colors = Candidate.organize(result.candidates)
-    multirules.each_pair do |feature, candidates|
-      #An entry is only in multirules if it has more then one rule
-      (candidates||rules[feature].first).each do |candidate|
-        spec_class = case candidate.scraping_rule.rule_type
-          when "cat" then CatSpec
-          when "cont" then ContSpec
-          when "bin" then BinSpec
-          when "text" then TextSpec
-          when "intr" then "intr"
-          else CatSpec # This should never happen
-                     end
-        #Create new product if necessary
-        if products_to_save.keys.include?(candidate.product_id)
-          p = products_to_save[candidate.product_id]
-        else
-          p = Product.find_or_initialize_by_sku_and_product_type(candidate.product_id,Session.product_type)
-        end
-
-        if p.new_record?
-          p.save
-        end
-        if candidate.delinquent && spec_class != "intr"
-          #This is a feature which was removed
-          spec = spec_class.find_by_product_id_and_name(p.id,feature)
-          spec.destroy if spec && !spec.modified
-        else
-          p.instock = true
-          if spec_class == "intr"
-            p[feature] = candidate.parsed
-            products_to_save[candidate.product_id] = p 
-          else
-            spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,feature)
-            
-            spec.product_type = Session.product_type
-            spec.value = candidate.parsed
-            specs_to_save.keys.include?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
-            if feature=='mpn' || feature=='title' || feature=='model'
-              p[feature] = spec.value
-            end
-            products_to_save[candidate.product_id] = p
-
-          end
-        end
-      end
-    end
     # Bulk insert/update for efficiency
     Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
     specs_to_save.each do |s_class, v|
@@ -171,6 +88,7 @@ class Product < ActiveRecord::Base
     rescue Dalli::NetworkError
       puts "Memcache not available"
     end
+    
   end
   
   def self.calculate_factors

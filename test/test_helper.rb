@@ -40,3 +40,10 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 end
+
+#Turn off authentication for testing
+class ApplicationController < ActionController::Base
+  def authenticate
+    true
+  end
+end

@@ -1,9 +1,0 @@
-<div id="content">
-	<div class="warning">
-	    <%= @warning if defined? @warning %>
-	</div>
-<%= render :partial => "rules" %>
-<%= form_tag ("/results/commit/" + @result.id.to_s) do |f| %>
-    <div><%= submit_tag 'Save' %></div>
-<% end %>
-</div>
