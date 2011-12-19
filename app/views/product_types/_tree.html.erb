@@ -1,29 +1,24 @@
 
- 
+ <% top_category = "Departments" %>
  <div id="tree_categories" class="tree">
   	<ul>
-
-
-  	  <% nodes = BestBuyApi.get_subcategories("Departments") -%>
-
-
+  	  <% nodes = BestBuyApi.get_subcategories(top_category) -%>
   	  <% root = nodes.keys.first -%>
   	  <% children = nodes.values.first -%>
-  		<li id="<%= root.keys.first %>" class="jstree-closed">
-  			<a href="#"><%= root.keys.first %> <%= root.values.first %></a>
-  			<input type="checkbox" class="category_selection"/>
-  			<% if children.length < 0 %>
-    			<ul>
-    			  <% children.each do |c| -%>
-        	    <% child = c.first -%>
-    				  <li id="<%= child.first %>" class="">
-    					  <a href="#"> <%= child.first %> <%= child.last %></a>
-    					  <input type="checkbox" class="category_selection"/>
-    				  </li>
-    				<% end -%>
-    			</ul>
-    		<% end %>
+  	  <% category_id = root.keys.first -%>
+  	  <% category_name = root.values.first -%>
+  		<li id="<%= category_name %>" class="jstree-closed">
+  			<a href="#"><%= category_id %> <%= category_name %></a>
+  			<% unless category_id == top_category %>
+  			<!-- I think we never get inside here -->
+    			<% hasCategory = false %>
+    			<% if @categories -%>
+    			debugger
+    			  <% hasCategory = !@categories.find{ |item| item.category_id == category_id }.nil? %>
+    			<% end -%>
+    			<input type="checkbox" class="category_selection" <%= "checked" if hasCategory %>/>
+    			<% debugger %>
+  			<% end %>
   		</li>
   	</ul>
   </div>
- 

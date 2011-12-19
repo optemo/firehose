@@ -14,14 +14,5 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  def redirect_to_show(options = {}, response_status = {})
-    debugger
-    if request.xhr?
-      render(:show) {|page| page.redirect_to(options)}
-    else
-      render(:show) {|page| page.redirect_to(options)}
-      #super(options, response_status)
-    end
-  end
   
 end

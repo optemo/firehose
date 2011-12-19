@@ -16,27 +16,8 @@
 <h2> Product Type </h2>
 
 <%= link_to('New Product Type', new_product_type_path) %>
-
-<% unless @select_product_types.nil? %>
-  <% @select_product_types.each do |pt| %>
-    <dd>
-      <h2><%= pt.name %></h2>
-      <dl class="level1" data-parent-id="<%= pt.id %>">
-        
-        <dt>
-          <%= link_to("Add New Category Id", "/category_ids/new?parent_id=#{pt.id}" ) %>
-        </dt>
-        <% cids = pt.category_id_product_type_maps.each do |category| %>
-          <dd>
-            <strong>Category Id: </strong>
-            <span class="edit-int" data-id="<%= category.id %>" data-name="category_id_product_type_maps-category_id"><%= category.category_id %></span>
-            <%= link_to('Delete', category, :confirm => 'Are you sure?', :method => :delete, :remote=>true, :class=>'category_id-delete') %>
-          </dd>
-        <% end %>
-        <%= link_to('Edit Product Type', {:action => 'edit', :id => pt.id}) %>
-        
-        <%= link_to('Remove Product Type', {:action => 'destroy', :id => pt.id}, :method => :delete, :class => 'redirect_delete') %>
-      </dl>
-    </dd>
-  <% end %>
-<% end %>
+<% if @product_type -%>
+  <%= render "description" %>
+  <%= link_to('Edit Product Type', {:action => 'edit', :id => @product_type.id}) %>
+  <%= link_to('Remove Product Type', {:action => 'destroy', :id => @product_type.id}, :method => :delete, :class => 'redirect_delete') %>
+<% end -%>

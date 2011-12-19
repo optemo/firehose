@@ -1,6 +1,4 @@
 
-
-
 $('#submit_type').live("click",function(){
   if ($('#product_type_name').valid()) {
     var name = $('#product_type_name').attr('value');
@@ -10,10 +8,8 @@ $('#submit_type').live("click",function(){
       url: "/product_types",
       data: {name: name, categories: categories},
       success: function(data) {
-        alert("Finished submitting product type");
-        alert(data);
-        $('body').html(data);
-        //location.replace('/product_types?product_type=162');
+        location.replace('/product_types');
+        //$('body').html(data);
       },
       error: function(jqXHR, textStatus, errorThrown) {
         alert(jqXHR.statusText + " in submitting");
@@ -23,15 +19,15 @@ $('#submit_type').live("click",function(){
 });
 
 $('#save_type').live("click",function(){
-  var pid = $('#product_title').attr('data-id');
-  //var name = $('#product_title').attr('data-name');
+  var pid = $('#top_type').attr('data-id');
   var categories = get_selected();
   $.ajax({
     type: 'PUT',
     url: "/product_types/" + pid,
-    data: {categories: categories},
+    data: {categories: categories, id: pid},
     success: function(data) {
       alert("Finished submitting product type");
+      location.replace('/product_types');
     },
     error: function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText + " in submitting");
@@ -60,9 +56,11 @@ $(function () {
 
    $("#tree_categories").bind("open_node.jstree", function (event, data) { 
      var id = data.rslt.obj.attr("id");
+     var product_type_id = $('#top_type').attr('data-id');
+     debugger
      $.ajax({
        url: "/category_ids/new",
-       data: {id: id},
+       data: {id: id, product_type: product_type_id},
        success: function(data) {
          $('#' + id).replaceWith(data);
        }
@@ -80,7 +78,8 @@ function get_selected(){
   $(':checked').each (function (index) {
       if ($(this).hasClass('category_selection')) {
         var id = $(this).parent().attr('id');
-        selected.push(id);
+        var name = $(this).parent().attr('data-name');
+        selected.push([id, name]);
       }
   });
   return selected;

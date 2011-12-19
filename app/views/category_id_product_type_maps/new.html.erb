@@ -1,10 +1,12 @@
+<!-- FIXME: Make top category a variable elsewhere -->
+<% top_category = "Departments" %>
 
 <% parent = @nodes.keys.first -%>
 <% children = @nodes.values.first -%>
 <% parent_id = parent.keys.first %>
 <% parent_name = parent.values.first %>
 
-<li id="<%= parent_id %>" class="jstree-open 
+<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="jstree-open 
   <% unless children.length > 0 -%>
   jstree-leaf
   <% end -%>
@@ -13,19 +15,31 @@
   <a class="" href="#">
     <ins class="jstree-icon">&nbsp;</ins>
     <%= parent_id %> <%= parent_name %></a>
-    <input type="checkbox" class="category_selection"/>
+    <% unless parent_id == top_category -%>
+      <% hasCategory = false %>
+			<% if @categories -%>
+			  <% hasCategory = !@categories.find{ |item| String(item.category_id) == parent_id }.nil? %>
+			<% end -%>
+      <input type="checkbox" class="category_selection" <%= "checked" if hasCategory %>/>
+    <% end -%>
     <% if children.length > 0 %>
   		<ul>
   		  <% children.each do |c| -%>
   		  <% child = c.first -%>
-  			  <li id="<%= child.first %>" class="jstree-closed">
+  		  <% category_id = child.first -%>
+  		  <% category_name = child.last -%>
+  			  <li id="<%= category_id %>" data-name="<%= category_name %>" class="jstree-closed">
   			    <ins class="jstree-icon">&nbsp;</ins>
   				  <a class="" href="#"> 
   				    <ins class="jstree-icon">&nbsp;</ins>
-  				    <%= child.first %> <%= child.last %>
+  				    <%= category_id %> <%= category_name %>
   				  </a>
-  				  <input type="checkbox" class="category_selection"/>
-  			  </li>
+  				  <% hasCategory = false %>
+      			<% if @categories -%>
+      			  <% hasCategory = !@categories.find{ |item| String(item.category_id) == category_id }.nil? %>
+      			<% end -%>
+      			<input type="checkbox" class="category_selection" <%= "checked" if hasCategory %>/>
+    			  </li>
   			<% end -%>
   		</ul>
   	<% end %>
