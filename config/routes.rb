@@ -65,14 +65,13 @@ Firehose::Application.routes.draw do
   #resources :scraping, :only => [:create], :as => "scraping_rules"
   resources :scraping_corrections, :except => [:show, :index]
   resources :scraping_rules, :except => :index
-  resources :results, :product_types
+  resources :product_types
   resources :category_id_product_type_maps, :path=>"category_ids"
 
-  match 'results/commit/:id' => 'results#commit'
   match 'scrape/:id' => 'scraping#scrape'
   match "rules" => "scraping#rules"
   match "datafeed" => "scraping#datafeed"
-  match "myresults" => "scraping#myresults"
+  match "results" => "scraping#results"
   match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
   match "featured" => "featured#index"
 

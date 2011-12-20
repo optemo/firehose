@@ -1,7 +1,14 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :set_Session
+  before_filter :authenticate
+  
+  REALM = "Firehose"
+  USERS = { Firehose::Application::ACCESS_UNAME => 
+          Digest::MD5.hexdigest([Firehose::Application::ACCESS_UNAME, REALM, Firehose::Application::ACCESS_PASSWORD].join(":")) }
 
+  private
+  
   def set_Session
     #debugger
     if params[:p_type] 
@@ -13,6 +20,10 @@ class ApplicationController < ActionController::Base
       Session.new ProductType.first.id
     end
   end
-  
-  
+
+  def authenticate
+    authenticate_or_request_with_http_digest(REALM) do |username|
+      USERS[username]
+    end
+  end
 end
