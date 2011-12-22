@@ -8,8 +8,7 @@ $('#submit_type').live("click",function(){
       url: "/product_types",
       data: {name: name, categories: categories},
       success: function(data) {
-        location.replace('/product_types');
-        //$('body').html(data);
+        $('body').html(data);
       },
       error: function(jqXHR, textStatus, errorThrown) {
         alert(jqXHR.statusText + " in submitting");
@@ -26,8 +25,7 @@ $('#save_type').live("click",function(){
     url: "/product_types/" + pid,
     data: {categories: categories, id: pid},
     success: function(data) {
-      alert("Finished submitting product type");
-      location.replace('/product_types');
+      $('body').html(data);
     },
     error: function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText + " in submitting");
@@ -64,11 +62,7 @@ $(function () {
        success: function(data) {
          $('#' + id).replaceWith(data);
        }
-       // error: function(jqXHR, textStatus, errorThrown) {
-       //   alert(jqXHR.statusText);
-       // }
        });
-     // alert('got to open node');
   });
 
 });
@@ -82,5 +76,6 @@ function get_selected(){
         selected.push([id, name]);
       }
   });
+  alert(selected);
   return selected;
 }

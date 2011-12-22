@@ -1,0 +1,8 @@
+<h2> Product Type </h2>
+
+<%= link_to('New Product Type', new_product_type_path) %>
+<% if @product_type -%>
+  <%= render "description" %>
+  <%= link_to('Edit Product Type', {:action => 'edit', :id => @product_type.id}) %>
+  <%= link_to('Remove Product Type', {:action => 'destroy', :id => @product_type.id}, :method => :delete, :class => 'redirect_delete') %>
+<% end -%>

@@ -98,20 +98,6 @@ ActiveRecord::Schema.define(:version => 20111216221332) do
     t.datetime "updated_at"
   end
 
-  create_table "daily_specs2", :id => false, :force => true do |t|
-    t.integer  "id",           :default => 0, :null => false
-    t.string   "sku"
-    t.string   "name"
-    t.string   "spec_type"
-    t.string   "value_txt"
-    t.float    "value_flt"
-    t.boolean  "value_bin"
-    t.string   "product_type"
-    t.date     "date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "dynamic_facets", :force => true do |t|
     t.integer "facet_id", :null => false
     t.string  "category", :null => false
@@ -234,45 +220,6 @@ ActiveRecord::Schema.define(:version => 20111216221332) do
   create_table "results_scraping_rules", :id => false, :force => true do |t|
     t.integer "result_id"
     t.integer "scraping_rule_id"
-  end
-
-  create_table "scraped_cameras", :force => true do |t|
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.text     "title"
-    t.text     "imageurl"
-    t.text     "detailpageurl"
-    t.text     "manufacturerurl"
-    t.datetime "scrapedat"
-    t.string   "brand"
-    t.string   "model"
-    t.string   "mpn"
-    t.string   "dimensions"
-    t.integer  "itemwidth"
-    t.integer  "itemlength"
-    t.integer  "itemheight"
-    t.integer  "itemweight"
-    t.integer  "packageheight"
-    t.integer  "packagelength"
-    t.integer  "packagewidth"
-    t.integer  "packageweight"
-    t.float    "opticalzoom"
-    t.float    "maximumresolution"
-    t.string   "resolution"
-    t.float    "displaysize"
-    t.boolean  "slr"
-    t.boolean  "waterproof"
-    t.float    "maximumfocallength"
-    t.float    "minimumfocallength"
-    t.float    "digitalzoom"
-    t.boolean  "batteriesincluded"
-    t.string   "batterydescription"
-    t.string   "connectivity"
-    t.boolean  "hasredeyereduction"
-    t.string   "includedsoftware"
-    t.float    "averagereviewrating"
-    t.integer  "totalreviews"
-    t.text     "reviewtext"
   end
 
   create_table "scraping_corrections", :force => true do |t|

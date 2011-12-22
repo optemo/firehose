@@ -23,7 +23,7 @@ class Product < ActiveRecord::Base
   
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda {
-    {:conditions => {:product_type => Session.p_type}}
+    {:conditions => {:product_type => Session.product_type}}
   }
   
   def self.feed_update
@@ -34,11 +34,11 @@ class Product < ActiveRecord::Base
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     #Reset the instock flags
-    Product.update_all(['instock=false'], ['product_type=?', Session.p_type])
+    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
     
     products_to_save = {}
     product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.p_type)
+      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
     end
     specs_to_save = {}
     
@@ -52,8 +52,9 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       p = products_to_save[candidate.sku]
-    
+      
       if p.new_record?
+        p.instock = false
         p.save
       end
       
@@ -64,7 +65,7 @@ class Product < ActiveRecord::Base
       else
         p.instock = true
         spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.product_type = Session.p_type
+        spec.product_type = Session.product_type
         spec.value = candidate.parsed
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
@@ -111,7 +112,7 @@ class Product < ActiveRecord::Base
         end
         records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
         factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.p_type, :name => f.name+"_factor")
+        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f.name+"_factor")
         if records[f.name][product.id]
           record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
           fVal = records[f.name][product.id].first.value 
@@ -142,7 +143,7 @@ class Product < ActiveRecord::Base
       end 
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.p_type, :name => "utility"})
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
       product_utility.value = utility.sum
       cont_activerecords << product_utility
     end

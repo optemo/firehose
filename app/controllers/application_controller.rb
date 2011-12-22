@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :set_Session
-  before_filter :authenticate
+  #before_filter :authenticate
   
   REALM = "Firehose"
   USERS = { Firehose::Application::ACCESS_UNAME => 
@@ -10,20 +10,22 @@ class ApplicationController < ActionController::Base
   private
   
   def set_Session
-    #debugger
-    if params[:p_type] 
-      Session.new params[:p_type]
-      session[:current_product_type_id] = params[:p_type] #Save as cookie
+    if params[:product_type]
+      Session.new params[:product_type]
+      session[:current_product_type_id] = params[:product_type] #Save as cookie
     elsif session[:current_product_type_id] #Load from cookie if present
       Session.new session[:current_product_type_id]
     else
-      Session.new ProductType.first.id
+      default_type = ProductType.first.id
+      Session.new default_type
+      session[:current_product_type_id] = default_type
     end
   end
 
   def authenticate
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]
+
     end
   end
 end

@@ -116,8 +116,8 @@ task :set_performance_scores => :environment do
   all_products.each do |p_id|
     # If there is no value in the popularity hash, that means that it should be 0, not null.
     # This could be handled at the database level, but if it isn't, don't introduce a bug here.
-    product = ContSpec.find_by_product_id_and_name_and_product_type(p_id,"performance_factor",Session.p_type)
-    product ||= ContSpec.new(:product_id => p_id, :name=>"performance_factor", :product_type=> Session.p_type)   
+    product = ContSpec.find_by_product_id_and_name_and_product_type(p_id,"performance_factor",Session.product_type)
+    product ||= ContSpec.new(:product_id => p_id, :name=>"performance_factor", :product_type=> Session.product_type)   
     product.value = popularity_hash[p_id] || 0
     cont_specs_records << product
   end

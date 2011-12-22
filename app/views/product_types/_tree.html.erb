@@ -10,14 +10,7 @@
   		<li id="<%= category_name %>" class="jstree-closed">
   			<a href="#"><%= category_id %> <%= category_name %></a>
   			<% unless category_id == top_category %>
-  			<!-- I think we never get inside here -->
-    			<% hasCategory = false %>
-    			<% if @categories -%>
-    			debugger
-    			  <% hasCategory = !@categories.find{ |item| item.category_id == category_id }.nil? %>
-    			<% end -%>
-    			<input type="checkbox" class="category_selection" <%= "checked" if hasCategory %>/>
-    			<% debugger %>
+    		<input type="checkbox" class="category_selection"/>
   			<% end %>
   		</li>
   	</ul>

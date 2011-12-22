@@ -1,72 +1,90 @@
 class ProductTypesController < ApplicationController
   def index
-    @select_product_types = nil
-    unless params[:product_type].blank?
-      @select_product_types = [ProductType.find(params[:product_type], :order=>"product_types.id")]
-      @slt = params[:product_type]
-      # FIXME: since there is usually only one product selected, replace the array with one product
-      @product_type = ProductType.find(params[:product_type])
-      @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:product_type])
+    if params[:product_type].blank?
+      pid = session[:current_product_type_id]
+    else
+      pid = params[:product_type]
     end
+    @product_type = ProductType.find(pid)
+    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(pid)
     
     respond_to do |format|
+      
       if params[:ajax] == 'true'
-        format.html { render :layout => 'ajax' }
+        # TODO: determine if the ajax layout is necessary here
+        format.html { redirect_to :action => 'show', :id => pid, :layout => 'ajax' }
       else
-        format.html
+        format.html { redirect_to :action => 'show', :id => pid }
       end
     end
   end
 
   def show
-    @product_types = ProductType.find(:all, :order=>"product_types.id")
-    @select_product_types = [ProductType.find(params[:product_type], :order=>"product_types.id")]
-    @slt = params[:product_type]
-    render :index
+    @product_type = ProductType.find(params[:id])
+    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
+    session[:current_product_type_id] = params[:id]
+
+    respond_to do |format|
+      format.html # show.html.erb
+    end
   end
   
   # GET /product_types/new
   def new
-    if params[:new_type].nil?
-      @product_type = ProductType.new
+    @product_type = ProductType.new
+    
+    respond_to do |format|
+      format.html # new.html.erb
     end
   end
   
-  def update_categories(categories, pid)
-    unless categories.nil?
+  def update_categories(in_categories, pid)
+    @errors = []
+    unless in_categories.nil?
+      categories = in_categories.values()
       categories.each do |element|
-       pair = element.last
-       catid, catname = pair.first, pair.last
-       category = CategoryIdProductTypeMap.new(:product_type_id => pid, :category_id => catid, :name => catname)
-       # TODO: report error if it can't be saved
-       category.save()
+        catid, catname = element.first, element.last
+        category = CategoryIdProductTypeMap.new(:product_type_id => pid, :category_id => catid, :name => catname)
+        category.save()
+        if (category.errors.any?)
+          @errors << category.errors
+        end
+      end
+    end
+    return @errors
+  end
+  
+  # POST /product_types
+  def create
+    @product_type = ProductType.new(:name => params[:name])
+    if @product_type.save()
+      # there cannot be any errors in adding categories through the new form
+      @errors = update_categories(params[:categories], @product_type.id)
+      session[:current_product_type_id] = @product_type.id
+      respond_to do |format|
+          format.html { render :partial => "redirecting" }
+      end
+    else
+      respond_to do |format|
+        format.html { render :action => "new" }
       end
     end
   end
   
-
-  # POST /product_types
-  def create
-    @product_type = ProductType.new(:name => params[:name])
-    @product_type.save()
-    update_categories(params[:categories], @product_type.id)
+  def update
+    @errors = update_categories(params[:categories], params[:id])
+    session[:current_product_type_id] = params[:id]
     
-    @view_path = "/product_types?product_type=" + @product_type.id.to_s
-
     respond_to do |format|
-      format.html { render :partial => "redirecting" }
+      unless @errors.length > 0
+        format.html { render :partial => "redirecting" }
+      else
+        @product_type = ProductType.find(params[:id])
+        @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
+        format.html { render :action => "edit" }
+      end
     end
-  end
-  
-  def update    
-    @past_categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
-    @past_categories.each {|c| c.destroy}
-    update_categories(params[:categories], params[:id])
-    @view_path = "/product_types?product_type=" + params[:id]
-
-    respond_to do |format|
-      format.html { render :partial => "redirecting" }
-    end
+    
   end
   
   def edit
@@ -77,8 +95,9 @@ class ProductTypesController < ApplicationController
   def destroy
     @product_type = ProductType.find(params[:id])
     if @product_type.destroy
+      session.delete(:current_product_type_id)
       respond_to do |format|
-        format.html { redirect_to product_types_url(nil, :ajax => true) }
+        format.html { redirect_to product_types_url }
       end
     else
       render :nothing => true

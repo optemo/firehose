@@ -21,12 +21,11 @@ class Session
     self.extendednav = false
     self.features = Hash.new{|h,k| h[k] = []} # Features include utility, comparison, filter, cluster, sortby, show
 
-    # 2 is hard-coded to cameras at the moment and is the default
+    # Default was hardcoded to 2 before, now is the first product type found in the table
     # Check the product_types table for details
-    p_type = ProductType.find((p_type_id.blank? || p_type_id == "undefined") ? 2 : p_type_id)
+    p_type = ProductType.find((p_type_id.blank? || p_type_id == "undefined") ? ProductType.first.id : p_type_id)
     self.product_type = p_type.name
     self.product_type_id = p_type.id
-    
     self.category_id = p_type.category_id_product_type_maps.map{|x|x.category_id}
     
     # directLayout controls the presented view: Optemo Assist vs. Optemo Direct. 

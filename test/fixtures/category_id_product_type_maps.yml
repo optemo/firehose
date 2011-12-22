@@ -1,6 +1,12 @@
 one:
+  category_id: 30442
+  product_type_id: 6
+  name: first_category
+two:
+  category_id: 20237
+  product_type_id: 6
+  name: second_category
+three:
   category_id: 22474
   product_type_id: 2
-two:
-  category_id: 28382
-  product_type_id: 2
+  name: Point and Shoot

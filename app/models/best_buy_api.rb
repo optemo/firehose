@@ -28,7 +28,6 @@ class BestBuyApi
     end
     
     def get_subcategories(id, english = true)
-      
       q = english ? {:lang => "en"} : {:lang => "fr"}
       q[:id] = id
       subcats = {}

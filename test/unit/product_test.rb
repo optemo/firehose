@@ -34,7 +34,7 @@ class ProductTest < ActiveSupport::TestCase
     onsale_spec = ContSpec.find_by_product_id_and_name(pid, 'onsale_factor')
     rating_spec = ContSpec.find_by_product_id_and_name(pid, 'customerRating_factor')
     utility_spec = ContSpec.find_by_product_id_and_name(pid, 'utility')
-        
+    
     # check that that the specs and utility values are not nil for that product
     assert_not_nil saleprice_spec
     assert_not_nil opticalzoom_spec
@@ -47,7 +47,7 @@ class ProductTest < ActiveSupport::TestCase
     
     # check that values are as expected
     # TODO: check the values for the other factors as well, computed with more than one product
-    assert_in_delta utility_spec.value, 0.175172, 0.000001
+    assert_in_delta utility_spec.value, 0.1344268, 0.000001
     assert_in_delta rating_spec.value, 0.0, 0.000001
     
   end
@@ -67,8 +67,9 @@ class ProductTest < ActiveSupport::TestCase
     Product.feed_update
     #20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 10 products created in the database"
-    assert_equal true, Product.all.map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
-    assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the longDescription is available"
+    assert_equal false, Product.first.instock
+    assert_equal true, Product.all[1..-1].map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
+    assert_equal ["[longDescription]"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the price is available"
   end
   
   test "Get Rules" do

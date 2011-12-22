@@ -1,20 +1,20 @@
 <%= form_for(@product_type) do |f| %>
   <% if @product_type.errors.any? %>
     <div id="error_explanation">
-      <h2><%= pluralize(@url.errors.count, "error") %> prohibited this result from being saved:</h2>
+      <h2><%= pluralize(@product_type.errors.count, "error") %> prohibited this product from being saved:</h2>
 
       <ul>
-      <% @purl.errors.full_messages.each do |msg| %>
+      <% @product_type.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
       </ul>
     </div>
   <% end %>
 <div class="field">
-    <%= f.label :name %><br />
+    <%= f.label :name %><br/>
     <%= f.text_field :name %>
- </div>
+</div>
   
-  <%= render 'tree' -%>  
+  <%= render 'tree' %>
   <input type="button" id="submit_type" value="Create" style="display:block; float:left;">
 <% end %>
