@@ -69,7 +69,7 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 21, Product.count, "There should be 10 products created in the database"
     assert_equal false, Product.first.instock
     assert_equal true, Product.all[1..-1].map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
-    assert_equal ["[longDescription]"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the price is available"
+    assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the price is available"
   end
   
   test "Get Rules" do

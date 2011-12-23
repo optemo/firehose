@@ -341,10 +341,13 @@ $(document).ready(function(){
 	});
 
   $('select#type_filter').live('change', function () {
-    debugger
 	  if (document.location.pathname.match(/product_types\/(\S)+$/)) {
 	    redirect_location = '/product_types'
 	    $('#filter_form').attr("action", redirect_location);
+	    $('#filter_form').submit();
+	  }
+	  else {
+	    $('#filter_form').attr("action", document.location.pathname);
 	    $('#filter_form').submit();
 	  }
 	});

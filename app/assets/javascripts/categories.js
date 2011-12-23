@@ -35,14 +35,10 @@ $('#save_type').live("click",function(){
 
 $(function () {
 	$("#tree_categories")
-		// call `.jstree` with the options object
 		.jstree({
-			// the `plugins` array allows you to configure the active plugins on this instance
-			"plugins" : ["themes","html_data","ui","crrm"],
-			// each plugin you have included can have its own config object
-			//"core" : { "initially_open" : [ "node_root" ] },
+			//"plugins" : ["themes","html_data","ui","crrm"],
+			"plugins" : ["themes","html_data"],
 			"themes" : { "theme" : "classic" },
-	
 		})
 		// EVENTS
 		// each instance triggers its own events - to process those listen on the container
@@ -55,7 +51,6 @@ $(function () {
    $("#tree_categories").bind("open_node.jstree", function (event, data) { 
      var id = data.rslt.obj.attr("id");
      var product_type_id = $('#top_type').attr('data-id');
-     debugger
      $.ajax({
        url: "/category_ids/new",
        data: {id: id, product_type: product_type_id},
@@ -76,6 +71,5 @@ function get_selected(){
         selected.push([id, name]);
       }
   });
-  alert(selected);
   return selected;
 }

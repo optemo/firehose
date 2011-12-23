@@ -14,8 +14,8 @@ class ProductTypesControllerTest < ActionController::TestCase
   
   test "should show product_type" do
     prod_type = product_types(:two)
-    category1 = category_id_product_type_maps(:one)
-    category2 = category_id_product_type_maps(:two)
+    category1 = category_id_product_type_maps(:three)
+    category2 = category_id_product_type_maps(:four)
     get :show, id: prod_type.to_param
     assert_not_nil assigns(:product_type)
     assert_not_nil assigns(:categories)

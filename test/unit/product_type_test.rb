@@ -30,9 +30,8 @@ class ProductTypeTest < ActiveSupport::TestCase
   test "assigning category ids to product type" do
     # create two valid category ids for the product type, then retrieve them
     prod_type = product_types(:two)
-    category1 = category_id_product_type_maps(:one)
-    category2 = category_id_product_type_maps(:two)
-    debugger
+    category1 = category_id_product_type_maps(:three)
+    category2 = category_id_product_type_maps(:four)
     found_first = false
     found_second = false
     prod_type.category_id_product_type_maps.each do |category|

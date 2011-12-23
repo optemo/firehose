@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   before_filter :set_Session
-  #before_filter :authenticate
+  before_filter :authenticate
   
   REALM = "Firehose"
   USERS = { Firehose::Application::ACCESS_UNAME => 
