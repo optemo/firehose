@@ -11,10 +11,17 @@
 <body>
   <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
     <div id="header">
-    
+      <div id="actions">
+        <%= link_to "datafeed", "/datafeed" %> | 
+        <%= link_to "rules", "/rules" %> | 
+        <%= link_to "results", "/results" %> | 
+        <%= link_to "product_types", "/product_types" %> |
+        <%= link_to "layout_editor", "/layout_editor" %>
+      </div>
         <h2>
-          Product selector:
+          
           <form id="filter_form">
+            Product type
             <% @slt = params[:product_type].nil? ? Session.product_type_id : params[:product_type] %>
             <select id="type_filter" name="product_type">
               <% ProductType.all.collect do |p| %>
@@ -22,13 +29,7 @@
               <% end %>
             </select>
           </form>
-        </h2> 
-        <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
-        <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
-        <%= link_to "results", "/results" %> - Make new result set,
-	  push into product &amp; spec tables | 
-	<%= link_to "product_types", "/product_types" %> - Set up product types
-	</div>
+        </h2>
     </div>
     <div id="content">
     <%= yield %>

@@ -1,29 +1,26 @@
 <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
-    <div id="header">
-		<!--<div style="margin-top: 22px; margin-left: -175px; margin-right: 50px; float: right;"><%= select "category","id", ["Change Category", "20218 - Digital Cameras"], {}, {:style => "width: 125px;"} %></div>-->
-
-    
-        <h2>
-          Product selector:
-          <form id="filter_form">
-            <select id="type_filter" name="product_type">
-              <% ProductType.all.collect do |p| %>
-                <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
-              <% end %>
-            </select>
-          </form>
-          
-          <%= link_to('New Product Type', new_product_type_path) %>
-
-        </h2> 
-        <div id="actions"><%= link_to "datafeed", "/datafeed" %> - See the feed and define rules. | 
-        <%= link_to "rules", "/rules" %> - See rule coverage, edit rules. | 
-        <%= link_to "results", "/results" %> - Make new result set,
-	  push into product &amp; spec tables | 
-	<%= link_to "product_types", "/product_types" %> - Set up product types
-	</div>
+  <div id="header">
+    <div id="actions">
+      <%= link_to "datafeed", "/datafeed" %> | 
+      <%= link_to "rules", "/rules" %> | 
+      <%= link_to "results", "/results" %> | 
+      <%= link_to "product_types", "/product_types" %> |
+      <%= link_to "layout_editor", "/layout_editor" %>
     </div>
-    <div id="content">
-    <%= yield %>
-    </div>
+      <h2>
+        
+        <form id="filter_form">
+          Product type
+          <% @slt = params[:product_type].nil? ? Session.product_type_id : params[:product_type] %>
+          <select id="type_filter" name="product_type">
+            <% ProductType.all.collect do |p| %>
+              <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
+            <% end %>
+          </select>
+        </form>
+      </h2>
+  </div>
+  <div id="content">
+  <%= yield %>
+  </div>
 <div id="silkscreen">&nbsp;</div>
