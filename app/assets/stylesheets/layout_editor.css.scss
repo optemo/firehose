@@ -1,3 +1,30 @@
 // Place all the styles related to the layout_editor controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+$margin: 1px;
+$padding: 5px;
+
+@mixin box {
+  border: {
+    width: 1px;
+    color: gray;
+    style: solid;
+  }
+  padding: {
+    left: $padding;
+  }
+  margin: {
+    bottom: $margin;
+  }
+}
+
+.column {
+  width: 300px;
+  float: left;
+  padding: 5px;
+}
+
+.facetbox {
+  @include box;
+}

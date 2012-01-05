@@ -1,0 +1,44 @@
+<%= form_for(@product_type) do |f| %>
+  <div class='layout'>
+    <div class='column'>
+      <h2>Filters</h2>
+      <% @filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
+        <% case f.feature_type -%>
+        <% when 'Continuous', 'Categorical', 'Binary' -%>
+          <div class='facetbox'>
+              <div><%= f.name %></div> <!-- English name -->
+              <div><%= f.name %></div>
+              <div><%= f.feature_type %></div>
+            <div><%= f.style %></div>
+          </div>
+        <% when 'Heading' -%>
+          <div class='facetbox'>
+            <div><%= f.name %></div>
+            <div><%= f.style %></div>
+            <div><%= f.feature_type %></div>
+          </div>
+        <% when 'Spacer' -%>
+          <div class='facetbox'>
+            <div><%= f.feature_type %></div>
+          </div>
+        <% else %>
+          <% debugger %>
+        <% end -%>
+      <% end -%>
+      <div>Add new
+        <select id="new_filter" style=" ">
+        <!-- TODO: sort these alphabetically, also, don't show any that have already been added to the list -->
+        <% @filters.each do |f| -%>
+            <option value="<%= f.name %>"><%= f.name %></option>
+        <% end -%>
+        </select>
+      </div>
+    </div>
+    </div>
+    
+    <div class='column' id='sorting'><h2>Sorting</h2></div>
+    <div class='column' id='compare'><h2>Compare</h2></div>
+  </div>
+  <div style="clear:both;"></div>
+  <input type="button" id="submit_type" value="Save" style="display:block; float:left;">
+<% end %>

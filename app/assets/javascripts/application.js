@@ -1,6 +1,7 @@
 /*
 *= require_self
 *= require categories
+*= require layout_editor
 *= require jquery.jeditable.min
 *= require jquery.validate.min
 *= require jstree
