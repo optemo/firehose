@@ -8,6 +8,11 @@
 */
 
 $(document).ready(function(){
+  
+  //$(document).ready(function() {
+    update_dropdown();
+  //}
+  
     $.validator.addMethod('regexp', function (possible_regexp, element) {
         try {
             g = new RegExp(possible_regexp);

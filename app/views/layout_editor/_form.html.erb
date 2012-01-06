@@ -1,39 +1,45 @@
 <%= form_for(@product_type) do |f| %>
   <div class='layout'>
-    <div class='column'>
-      <h2>Filters</h2>
-      <% @filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
-        <% case f.feature_type -%>
-        <% when 'Continuous', 'Categorical', 'Binary' -%>
-          <div class='facetbox'>
-              <div><%= f.name %></div> <!-- English name -->
-              <div><%= f.name %></div>
-              <div><%= f.feature_type %></div>
-            <div><%= f.style %></div>
-          </div>
-        <% when 'Heading' -%>
-          <div class='facetbox'>
-            <div><%= f.name %></div>
-            <div><%= f.style %></div>
-            <div><%= f.feature_type %></div>
-          </div>
-        <% when 'Spacer' -%>
-          <div class='facetbox'>
-            <div><%= f.feature_type %></div>
-          </div>
-        <% else %>
-          <% debugger %>
+    <div class='column' id='filters'>
+      <div id='filters_body'>
+        <h2>Filters</h2>
+        <% @filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
+          <% case f.feature_type -%>
+          <% when 'Continuous', 'Categorical', 'Binary' -%>
+            <div class='facetbox' data-id='<%= f.name %>'>
+              <div>Name: <%= f.name %></div> <!-- English name -->
+              <div>DB name: <%= f.name %></div>
+              <div>Type: <%= f.feature_type %></div>  <!-- TODO: word for what's displayed not the feature_type itself -->
+              <% unless f.style.empty? -%>
+                <div><input type="checkbox" value="style"/> <%= f.style %> </div>
+              <% end -%>
+            </div>
+          <% when 'Heading' -%>
+            <div class='facetbox'>
+              <div>Name: <%= f.name %></div>
+              <div>DB name: <%= f.style %></div>
+              <div>Type: <%= f.feature_type %></div>
+            </div>
+          <% when 'Spacer' -%>
+            <div class='facetbox'>
+              <div>Type: <%= f.feature_type %></div>
+            </div>
+          <% else %>
+            <% debugger %>
+          <% end -%>
         <% end -%>
-      <% end -%>
+      </div>
       <div>Add new
+        <div><a id="add_header" href="#">Header</a></div>
+        <div><a id="add_header" href="#">Spacer</a></div>
+        <div>Filter:</div>
         <select id="new_filter" style=" ">
-        <!-- TODO: sort these alphabetically, also, don't show any that have already been added to the list -->
-        <% @filters.each do |f| -%>
-            <option value="<%= f.name %>"><%= f.name %></option>
+        <!-- TODO: don't show headings or spacers here -->
+        <% @filters.sort_by!{|f| f.name }.each do |f| -%>
+            <option class="filter_option" value="<%= f.name %>"><%= f.name %></option>
         <% end -%>
         </select>
       </div>
-    </div>
     </div>
     
     <div class='column' id='sorting'><h2>Sorting</h2></div>
