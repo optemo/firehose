@@ -3,23 +3,10 @@
     <div id='filters_body'>
       <h2>Filters</h2>
       <% @old_filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
-        <% case f.feature_type -%>
-        <% when 'Continuous', 'Categorical', 'Binary' -%>
           <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
-        <% when 'Heading' -%>
-          <div class='facetbox' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
-            <div>Display: <%= f.get_display_type(f.feature_type)  %></div>
-            <div>Name: <%= f.name %></div>
-            <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
-          </div>
-        <% when 'Spacer' -%>
-          <div class='facetbox' data-id='<%= f.name %>' data-label='' data-type='<%= f.feature_type %>'>
-            <div>Display: <%= f.get_display_type(f.feature_type) %></div>
-          </div>
-        <% end -%>
       <% end -%>
     </div>
-    <div>Add new
+    <div>Add New:
       <div><a id="add_header" href="#">Header</a></div>
       <div><a id="add_spacer" href="#">Spacer</a></div>
       <div>Filter:</div>
@@ -31,9 +18,38 @@
       </select>
     </div>
   </div>
-  
-  <div class='column' id='sorting'><h2>Sorting</h2></div>
-  <div class='column' id='compare'><h2>Compare</h2></div>
+  <div class='column' id='sorting'>
+	<div id='sorting_body'>
+	  <h2>Sorting</h2></div>
+	  <% @old_sortby.each do |f| -%> <!-- todo: get the list in the right ordering -->
+        <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+	  <% end -%>
+	  <div>Add New:
+	    <div>Sorting Option:</div>
+	    <select id="new_sortby" style=" ">
+	    <!-- check: are the tag attributes necessary? -->
+        <% @all_sortby.each do |f| -%>
+          <option class="sortby_option" value="<%= f %>"><%= f %></option>
+        <% end -%>
+	    </select>
+	  </div>
+	</div>
+  </div>
+  <div class='column' id='compare'>
+	<div id='compare_body'>
+      <h2>Compare</h2></div>
+	  <% @old_compare.each do |f| -%> <!-- todo: get the list in the right ordering -->
+        <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+	  <% end -%>
+	<div>Add New:
+	  <div>Comparison Field:</div>
+	  <select id="new_compare", style=" ">
+	  <% @all_compare.each do |f| -%>
+	    <option class="compare_option" value="<%= f %>"><%= f %></option>
+	  <% end -%>
+	  </select>
+	</div>
+  </div>
 </div>
 <div style="clear:both;"></div>
 <!-- <div><a id="submit_layout" href="#" style="display:block; float:left;">Save</a></div> -->

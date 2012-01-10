@@ -1,11 +1,16 @@
 <% case f.feature_type -%>
 <% when 'Continuous', 'Categorical', 'Binary' -%>
   <div class='facetbox' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
-    <div>Name: <%= f.name %></div>
-    <div>DB name: <%= f.name %></div>
-    <div>Display: <%= f.get_display_type(f.feature_type) %></div>
-    <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
-    <a class="remove_facet" href="#">Remove</a>
+  	<div>Name: <%= f.name %></div>
+  	<div>DB name: <%= f.name %></div> 
+ 	<% case f.used_for -%> 
+	  <% when 'filter' -%>
+        <div>Display: <%= f.get_display_type(f.feature_type) %></div>
+		<div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+	  <% when 'sortby' -%>
+		<div>Ordering: <select name="Ordering"><option>Ascending</option><option>Descending</option></select></div>
+	<% end -%>	
+	<a class="remove_facet" href="#">Remove</a>
   </div>
 <% when 'Heading' -%>
   <div class='facetbox' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
