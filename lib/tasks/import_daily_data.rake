@@ -91,6 +91,7 @@ task :import_daily_data => :environment do
     if snapshot =~ /\.sql/
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
       puts 'making records for date' + date.to_s
+      # ruby date < = > 
       
       # import data from the snapshot to the temp database
       puts "mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}"

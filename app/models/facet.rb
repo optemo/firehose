@@ -11,4 +11,19 @@ class Facet < ActiveRecord::Base
      end
      Facet.import facets_to_save, :on_duplicate_key_update => [:active] if facets_to_save.size > 0
    end
+   
+   def get_display_type(f_type)
+     case f_type
+       when 'Continuous'
+         'Slider'
+       when 'Categorical'
+         'Checkboxes for categories'
+       when 'Binary'
+         'Checkbox'
+       when 'Heading'
+         'Heading'
+       when 'Spacer'
+         'Spacer'
+     end
+   end
 end

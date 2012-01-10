@@ -1,0 +1,22 @@
+<% case f.feature_type -%>
+<% when 'Continuous', 'Categorical', 'Binary' -%>
+  <div class='facetbox' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
+    <div>Name: <%= f.name %></div>
+    <div>DB name: <%= f.name %></div>
+    <div>Display: <%= f.get_display_type(f.feature_type) %></div>
+    <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+    <a class="remove_facet" href="#">Remove</a>
+  </div>
+<% when 'Heading' -%>
+  <div class='facetbox' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
+    <div>Display: <%= f.get_display_type(f.feature_type)  %></div>
+    <div>Name: <%= f.name %></div>
+    <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+    <a class="remove_facet" href="#">Remove</a>
+  </div>
+<% when 'Spacer' -%>
+  <div class='facetbox' data-id='space1' data-label='' data-type='<%= f.feature_type %>'>
+    <div>Display: <%= f.get_display_type(f.feature_type) %></div>
+    <a class="remove_facet" href="#">Remove</a>
+  </div>
+<% end -%>
