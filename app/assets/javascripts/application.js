@@ -3,11 +3,19 @@
 *= require categories
 *= require layout_editor
 *= require jquery.jeditable.min
+*= require jquery_ujs
 *= require jstree
 */
 
 $(document).ready(function(){
-  
+    $(".sortable").sortable({
+    	revert: true
+    });
+    $("#draggable").draggable({
+      connectToSortable: "#sortable",
+  		helper: "original",
+  		revert: "invalid"
+  	});
     // $.validator.addMethod('regexp', function (possible_regexp, element) {
     //     try {
     //         g = new RegExp(possible_regexp);
