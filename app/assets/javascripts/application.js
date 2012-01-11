@@ -3,27 +3,26 @@
 *= require categories
 *= require layout_editor
 *= require jquery.jeditable.min
-*= require jquery.validate.min
 *= require jstree
 */
 
 $(document).ready(function(){
   
-    $.validator.addMethod('regexp', function (possible_regexp, element) {
-        try {
-            g = new RegExp(possible_regexp);
-            return (Object.prototype.toString.call(g) === "[object RegExp]");
-        } catch (err) { // Not a valid regexp
-            return false;
-        }
-    }, 'Invalid regular expression.');
-
-    $.validator.addMethod('ifcont', function (value, element) {
-        if ($('#rule_rule_type_cont:checked').length)
-            return /[-+]?[0-9]*\.?[0-9]+/.test(value);
-        else
-            return true;
-    }, 'Min / Max needed');
+    // $.validator.addMethod('regexp', function (possible_regexp, element) {
+    //     try {
+    //         g = new RegExp(possible_regexp);
+    //         return (Object.prototype.toString.call(g) === "[object RegExp]");
+    //     } catch (err) { // Not a valid regexp
+    //         return false;
+    //     }
+    // }, 'Invalid regular expression.');
+    // 
+    // $.validator.addMethod('ifcont', function (value, element) {
+    //     if ($('#rule_rule_type_cont:checked').length)
+    //         return /[-+]?[0-9]*\.?[0-9]+/.test(value);
+    //     else
+    //         return true;
+    // }, 'Min / Max needed');
 
     // Turn on overlay links for adding rules
     $('.title_link, .new_rule').live('click', function() {

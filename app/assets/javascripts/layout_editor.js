@@ -1,22 +1,16 @@
 
 $('#submit_layout').live("click",function(){
-  // collect all the filters, each with its attributes, checked bokes, etc.
+  alert('in submit function');
   ordered_filters = collect_filters();
-  
+  ordered_sorting = collect_sorting();
+  ordered_compare = collect_compare();
   // post to layout_editor with all of the filters and attributes
   // Then, do the same for the sortby and compare sections
-
-  // if ($(".hero_box").length == 0) {
-  //     alert("Invalid input set: no hero product specified!");
-  //     return false;
-  //   }
-  //   type = $("#title").attr('data-type');
-  //   skus = collect_featured_skus();
-  //   if (confirm("Confirm submitting " + skus.length + " products immediately")) {
+  debugger
   $.ajax({
     type: 'POST',
     url: "/layout_editor",
-    data: {filter_set: ordered_filters},
+    data: {filter_set: ordered_filters, sorting_set: ordered_sorting, compare_set: ordered_compare},
     success: function(data) {
       alert("Finished saving layout");
     },
@@ -34,7 +28,6 @@ $('.remove_facet').live("click",function(){
 
 $('select#new_filter').live('change', function () {
   var selected_type = $('#new_filter option:selected').attr('value')
-  alert(selected_type);
   $.ajax({
     url: "/facet/new",
     data: {name: selected_type, used_for: 'filter'},
@@ -47,6 +40,38 @@ $('select#new_filter').live('change', function () {
     }
   });
 });
+
+$('select#new_sorting').live('change', function () {
+  var selected_type = $('#new_sorting option:selected').attr('value')
+  $.ajax({
+    url: "/facet/new",
+    data: {name: selected_type, used_for: 'sortby'},
+    success: function(data) {
+      alert(data);
+      $('#sorting_body').append(data);
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      alert(jqXHR.statusText);
+    }
+  });
+});
+
+$('select#new_compare').live('change', function () {
+  var selected_type = $('#new_compare option:selected').attr('value')
+  $.ajax({
+    url: "/facet/new",
+    data: {name: selected_type, used_for: 'show'},
+    success: function(data) {
+      alert(data);
+      $('#compare_body').append(data);
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      alert(jqXHR.statusText);
+    }
+  });
+});
+
+
 
 // clicking to add a new "Header" or "Spacer"
 $('#add_header').live("click",function() {
@@ -80,7 +105,7 @@ $('#add_spacer').live("click",function() {
 
 function collect_filters() {
   var ordered_filters = new Array();
-  $('.facetbox').each (function (index) {
+  $('.filter_box').each (function (index) {
     var type = $(this).attr('data-type');
     var dbname = $(this).attr('data-id');
     var display = $(this).attr('data-label');
@@ -90,6 +115,32 @@ function collect_filters() {
       styled = kids.children().first().is(':checked');
     }
     ordered_filters[index] = [type,dbname,display,styled];
+    //ordered_filters.push([dbname,display,styled]);
+  });
+  return ordered_filters;
+}
+
+function collect_sorting() {
+  var ordered_filters = new Array();
+  $('.sortby_box').each (function (index) {
+    var type = $(this).attr('data-type');
+    var dbname = $(this).attr('data-id');
+    var display = $(this).attr('data-label');
+    var style = $($(this).children()[2].children).val();
+    //var style = $(this).children()[2].children.val();
+    ordered_filters[index] = [type,dbname,display,style];
+    //ordered_filters.push([dbname,display,styled]);
+  });
+  return ordered_filters;
+}
+
+function collect_compare() {
+  var ordered_filters = new Array();
+  $('.show_box').each (function (index) {
+    var type = $(this).attr('data-type');
+    var dbname = $(this).attr('data-id');
+    var display = $(this).attr('data-label');
+    ordered_filters[index] = [type,dbname,display,false];
     //ordered_filters.push([dbname,display,styled]);
   });
   return ordered_filters;

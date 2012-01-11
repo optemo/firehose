@@ -26,4 +26,34 @@ class Facet < ActiveRecord::Base
          'Spacer'
      end
    end
+   
+   def self.update_layout(product_type, used_for, facet_set)
+     # delete all existing facets for that pid and used_for
+     Facet.delete_all(["used_for = ? AND product_type_id = ?", used_for, product_type])
+     
+     # add facets from the input set
+     facet_set.each_pair do |index, vals|
+       fn = Facet.new()
+       fn[:feature_type] = vals[0]
+       fn[:name] = vals[1]
+       # TODO: store vals[2] as the readable name
+       
+       fn[:style] = case vals[3]
+       when "true"
+         'boldlabel'
+       when "asc"
+         'asc'
+       when "desc"
+         'desc'
+       else
+         ''
+       end
+       fn[:product_type_id] = product_type
+       fn[:value] = index
+       fn[:used_for] = used_for
+       fn[:active] = 1
+       fn.save()
+     end
+     
+   end
 end

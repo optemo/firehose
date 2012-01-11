@@ -25,6 +25,14 @@ $padding: 5px;
   padding: 5px;
 }
 
-.facetbox {
+.filter_box {
+  @include box;
+}
+
+.sortby_box {
+  @include box;
+}
+
+.show_box {
   @include box;
 }

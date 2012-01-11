@@ -1,4 +1,6 @@
 <div class='layout'>
+  <input type="button" id="submit_layout" value="Save" style="display:block; float:center;">
+  
   <div class='column' id='filters'>
     <div id='filters_body'>
       <h2>Filters</h2>
@@ -24,16 +26,16 @@
 	  <% @old_sortby.each do |f| -%> <!-- todo: get the list in the right ordering -->
         <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
 	  <% end -%>
-	  <div>Add New:
-	    <div>Sorting Option:</div>
-	    <select id="new_sortby" style=" ">
-	    <!-- check: are the tag attributes necessary? -->
-        <% @all_sortby.each do |f| -%>
-          <option class="sortby_option" value="<%= f %>"><%= f %></option>
-        <% end -%>
-	    </select>
-	  </div>
 	</div>
+  <div>Add New:
+    <div>Sorting Option:</div>
+    <select id="new_sorting" style=" ">
+    <!-- check: are the tag attributes necessary? -->
+      <% @all_sortby.each do |f| -%>
+        <option class="sortby_option" value="<%= f %>"><%= f %></option>
+      <% end -%>
+    </select>
+  </div>
   </div>
   <div class='column' id='compare'>
 	<div id='compare_body'>
@@ -41,6 +43,7 @@
 	  <% @old_compare.each do |f| -%> <!-- todo: get the list in the right ordering -->
         <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
 	  <% end -%>
+	</div>
 	<div>Add New:
 	  <div>Comparison Field:</div>
 	  <select id="new_compare", style=" ">
@@ -51,6 +54,5 @@
 	</div>
   </div>
 </div>
-<div style="clear:both;"></div>
-<!-- <div><a id="submit_layout" href="#" style="display:block; float:left;">Save</a></div> -->
-<input type="button" id="submit_layout" value="Save" style="display:block; float:left;">
+
+<!-- <div style="clear:both;"></div> <div><a id="submit_layout" href="#" style="display:block; float:left;">Save</a></div> -->
