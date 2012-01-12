@@ -34,12 +34,15 @@ task :update => :environment do
     end
   end
   
+  start = Time.now
   Product.feed_update
 
   #clean up inactive scraping rules not used any more
   Facet.check_active
   ScrapingRule.cleanup
   Search.cleanup_history_data(7)
+  #Report problem with script if it finishes too fast
+  `touch tmp/r_updateproblem.txt` if (Time.now - start < 1.minute)
 end
 
 #Here is where general upkeep scripts are
