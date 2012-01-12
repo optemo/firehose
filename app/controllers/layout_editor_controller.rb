@@ -14,26 +14,19 @@ class LayoutEditorController < ApplicationController
     @db_compare = Facet.find_all_by_product_type_id_and_used_for(id, 'show').sort_by!{|f| f.value }
     
     p_type = ProductType.find(id).name
-    results = ScrapingRule.find_all_by_product_type(p_type).select!{|sr| sr.active == true && sr.rule_type =~ /cont|cat|bin/}
-    @sr_filters = results.nil? ? [] : results.map(&:local_featurename).uniq!.sort!
-    results = ScrapingRule.find_all_by_product_type(p_type).select!{|sr| sr.active == true && sr.rule_type =~ /cont/}
-    results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq!
-    @sr_sortby = results.nil? ? [] : results.sort!
+    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /cont|cat|bin/}
+    results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
+    @sr_filters = results.nil? ? [] : results.sort
+    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /cont/}
+    results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
+    @sr_sortby = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters
   end
   
   def create
-    # process params[:filter_set]
-    # iterate over the values [in order of the keys] -- .each_pair
-    # start by removing all the facets for that product_type [and filter / sortby / show]
     product_type = Session.product_type_id
-    debugger
     Facet.update_layout(product_type, 'filter', params[:filter_set])
     Facet.update_layout(product_type, 'sortby', params[:sorting_set])
     Facet.update_layout(product_type, 'show', params[:compare_set])
-  end
-
-  def update
-    puts 'in update'
   end
 end

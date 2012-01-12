@@ -4,9 +4,6 @@ $('#submit_layout').live("click",function(){
   ordered_filters = collect_filters();
   ordered_sorting = collect_sorting();
   ordered_compare = collect_compare();
-  // post to layout_editor with all of the filters and attributes
-  // Then, do the same for the sortby and compare sections
-  debugger
   $.ajax({
     type: 'POST',
     url: "/layout_editor",
@@ -18,7 +15,6 @@ $('#submit_layout').live("click",function(){
       alert(jqXHR.statusText + " in submitting layout");
     }
   });
-  //   }
 });
 
 $('.remove_facet').live("click",function(){

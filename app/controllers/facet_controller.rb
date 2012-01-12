@@ -2,7 +2,6 @@ class FacetController < ApplicationController
   layout "empty"
   
   def new
-    
     if params[:type] =~ /Heading|Spacer/
       @new_facet = Facet.new(:product_type_id => Session.product_type_id, 
                 :name => 'Empty',
@@ -26,6 +25,5 @@ class FacetController < ApplicationController
                 :feature_type => f_type.first,
                 :used_for => params[:used_for])
     end
-    
   end
 end
