@@ -6,12 +6,15 @@
  	<% case f.used_for -%> 
   <% when 'filter' -%>
       <div>Display: <%= f.get_display_type(f.feature_type) %></div>
-	<div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+	    <% unless f.feature_type == 'Binary' -%>
+	      <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+	    <% end %>
   <% when 'sortby' -%>
 	<div>Ordering: 
 	  <select class="sort_option" id="sorting_<%= f.name %>">
-	    <option value="asc">Ascending</option>
-	    <option value="desc">Descending</option>
+	    <%= f.style %>
+	    <option value="asc" <%= 'selected=selected' if f.style == "asc" %>>Ascending</option>
+	    <option value="desc" <%= 'selected=selected' if f.style == "desc" %>>Descending</option>
 	  </select>
 	</div>
 	<% end -%>

@@ -47,3 +47,11 @@ brand:
   used_for: utility
   value: 35
   active: 1
+featured:
+  id: 7
+  product_type_id: 2
+  name: featured
+  feature_type: Binary
+  used_for: utility
+  value: 0
+  active: 1

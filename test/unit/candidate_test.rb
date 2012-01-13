@@ -13,22 +13,22 @@ class CandidateTest < ActiveSupport::TestCase
     assert colors
   end
   test "multirules combine scraping results according to scraping rule priority" do
-    sr1 = create(:scraping_rule, remote_featurename: "hophead", priority: 2)
+    sr1 = create(:scraping_rule, remote_featurename: "hophead", local_featurename: "title", priority: 2)
     c1 = build(:candidate, scraping_rule: sr1, parsed: "hop")
     
-    sr2 = create(:scraping_rule, remote_featurename: "loghead", priority: 1)
+    sr2 = create(:scraping_rule, remote_featurename: "loghead", local_featurename: "title", priority: 1)
     c2 = build(:candidate, scraping_rule: sr2, parsed: "log")
-
+    
     rules,multirules,colors = Candidate.organize([c1,c2])
     assert_equal rules["title"], [[c2], [c1]], "The rules should be grouped by local featurename and ordered by priority"
     assert_equal multirules["title"].first, c2, "For multirules, candidates should be chosen by priority"
   end
   
   test "Colors should match all the different rules being applied" do
-    sr1 = create(:scraping_rule, remote_featurename: "hophead", priority: 2)
+    sr1 = create(:scraping_rule, remote_featurename: "hophead", local_featurename: "title", priority: 2)
     c1 = build(:candidate, scraping_rule: sr1, parsed: "hop")
     
-    sr2 = create(:scraping_rule, remote_featurename: "loghead", priority: 1)
+    sr2 = create(:scraping_rule, remote_featurename: "loghead", local_featurename: "title", priority: 1)
     c2 = build(:candidate, scraping_rule: sr2, parsed: "log", sku: "1010101")
     rules,multirules,colors = Candidate.organize([c1,c2])
     

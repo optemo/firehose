@@ -19,7 +19,6 @@ FactoryGirl.define do
       when 2
         "bin"
       end}
-    #rule_type "cat"
     regex ".*"
     active true
   end
@@ -67,7 +66,7 @@ FactoryGirl.define do
     association :product_type
   end
   factory :scraping_correction do
-    association :scraping_rule
+    #association :scraping_rule
     product_type "camera_bestbuy"
     raw "error--"
     corrected "good to go"

@@ -19,12 +19,13 @@ $('#submit_layout').live("click",function(){
 $('.remove_facet').live("click",function(){
   var facet_element = $(this).parent();
   facet_element.remove();
+  return false;
 });
 
 $('select#new_filter').live('change', function () {
   var selected_type = $('#new_filter option:selected').attr('value');
   // check that the name is not already present in the page
-  if (jQuery.inArray(selected_type, collect_existing('.filter_box')) > -1) {
+  if (jQuery.inArray(selected_type, collect_names('.filter_box')) > -1) {
     alert('Element already exists in the layout');
   }
   else {
@@ -39,6 +40,7 @@ $('select#new_filter').live('change', function () {
       }
     });
   }
+  return false;
 });
 
 $('select#new_sorting').live('change', function () {
@@ -53,12 +55,13 @@ $('select#new_sorting').live('change', function () {
       alert(jqXHR.statusText + " in adding facet");
     }
   });
+  return false;
 });
 
 $('select#new_compare').live('change', function () {
   var selected_type = $('#new_compare option:selected').attr('value');
   // check that the name is not already present in the page
-  if (jQuery.inArray(selected_type, collect_existing('.show_box')) > -1) {
+  if (jQuery.inArray(selected_type, collect_names('.show_box')) > -1) {
     alert('Element already exists in the layout');
   }
   else {
@@ -73,6 +76,7 @@ $('select#new_compare').live('change', function () {
       }
     });
   }
+  return false;
 });
 
 $('#add_header').live("click",function() {
@@ -86,6 +90,7 @@ $('#add_header').live("click",function() {
       alert(jqXHR.statusText);
     }
   });
+  return false;
 });
 $('#add_spacer').live("click",function() {
   $.ajax({
@@ -98,6 +103,7 @@ $('#add_spacer').live("click",function() {
       alert(jqXHR.statusText);
     }
   });
+  return false;
 });
 
 function collect_attributes(element_class) {
@@ -124,7 +130,7 @@ function collect_attributes(element_class) {
 function collect_names(element_class) {
   var ordered_results = [];
   $(element_class).each (function (index) {
-    ordered_results.push($(this).attr('data-id'););
+    ordered_results.push($(this).attr('data-id'));
   });
   return ordered_results;
 }
