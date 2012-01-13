@@ -1,9 +1,8 @@
 
 $('#submit_layout').live("click",function(){
-  alert('in submit function');
-  ordered_filters = collect_filters();
-  ordered_sorting = collect_sorting();
-  ordered_compare = collect_compare();
+  ordered_filters = collect_attributes('.filter_box');
+  ordered_sorting = collect_attributes('.sortby_box');
+  ordered_compare = collect_attributes('.show_box');
   $.ajax({
     type: 'POST',
     url: "/layout_editor",
@@ -12,7 +11,7 @@ $('#submit_layout').live("click",function(){
       alert("Finished saving layout");
     },
     error: function(jqXHR, textStatus, errorThrown) {
-      alert(jqXHR.statusText + " in submitting layout");
+      alert(jqXHR.statusText + " in saving layout");
     }
   });
 });
@@ -23,57 +22,64 @@ $('.remove_facet').live("click",function(){
 });
 
 $('select#new_filter').live('change', function () {
-  var selected_type = $('#new_filter option:selected').attr('value')
-  $.ajax({
-    url: "/facet/new",
-    data: {name: selected_type, used_for: 'filter'},
-    success: function(data) {
-      alert(data);
-      $('#filters_body').append(data);
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      alert(jqXHR.statusText);
-    }
-  });
+  var selected_type = $('#new_filter option:selected').attr('value');
+  // check that the name is not already present in the page
+  if (jQuery.inArray(selected_type, collect_existing('.filter_box')) > -1) {
+    alert('Element already exists in the layout');
+  }
+  else {
+    $.ajax({
+      url: "/facet/new",
+      data: {name: selected_type, used_for: 'filter'},
+      success: function(data) {
+        $('#filters_body').append(data);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert(jqXHR.statusText + " in adding facet");
+      }
+    });
+  }
 });
 
 $('select#new_sorting').live('change', function () {
-  var selected_type = $('#new_sorting option:selected').attr('value')
+  var selected_type = $('#new_sorting option:selected').attr('value');
   $.ajax({
     url: "/facet/new",
     data: {name: selected_type, used_for: 'sortby'},
     success: function(data) {
-      alert(data);
       $('#sorting_body').append(data);
     },
     error: function(jqXHR, textStatus, errorThrown) {
-      alert(jqXHR.statusText);
+      alert(jqXHR.statusText + " in adding facet");
     }
   });
 });
 
 $('select#new_compare').live('change', function () {
-  var selected_type = $('#new_compare option:selected').attr('value')
-  $.ajax({
-    url: "/facet/new",
-    data: {name: selected_type, used_for: 'show'},
-    success: function(data) {
-      alert(data);
-      $('#compare_body').append(data);
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      alert(jqXHR.statusText);
-    }
-  });
+  var selected_type = $('#new_compare option:selected').attr('value');
+  // check that the name is not already present in the page
+  if (jQuery.inArray(selected_type, collect_existing('.show_box')) > -1) {
+    alert('Element already exists in the layout');
+  }
+  else {
+    $.ajax({
+      url: "/facet/new",
+      data: {name: selected_type, used_for: 'show'},
+      success: function(data) {
+        $('#compare_body').append(data);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert(jqXHR.statusText + " in adding facet");
+      }
+    });
+  }
 });
 
-// clicking to add a new "Header" or "Spacer"
 $('#add_header').live("click",function() {
   $.ajax({
     url: "/facet/new",
     data: {type: 'Heading', used_for: 'filter'},
     success: function(data) {
-      alert(data);
       $('#filters_body').append(data);
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -82,12 +88,10 @@ $('#add_header').live("click",function() {
   });
 });
 $('#add_spacer').live("click",function() {
-  alert('adding spacer');
   $.ajax({
     url: "/facet/new",
     data: {type: 'Spacer', used_for: 'filter'},
     success: function(data) {
-      alert(data);
       $('#filters_body').append(data);
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -96,45 +100,31 @@ $('#add_spacer').live("click",function() {
   });
 });
 
-function collect_filters() {
-  var ordered_filters = new Array();
-  $('.filter_box').each (function (index) {
+function collect_attributes(element_class) {
+  var ordered_facets = new Array();
+  $(element_class).each (function (index) {
     var type = $(this).attr('data-type');
     var dbname = $(this).attr('data-id');
     var display = $(this).attr('data-label');
     var styled = false;
-    var kids = $(this).children();
-    if (kids) {
-      styled = kids.children().first().is(':checked');
+    if (element_class == '.filter_box') {
+      var kids = $(this).children();
+      if (kids) {
+        styled = kids.children().first().is(':checked');
+      }
     }
-    ordered_filters[index] = [type,dbname,display,styled];
-    //ordered_filters.push([dbname,display,styled]);
-  });
-  return ordered_filters;
+    else if (element_class == '.sortby_box') {
+      styled = $($(this).children()[2].children).val();
+    }
+    ordered_facets[index] = [type,dbname,display,styled];
+    });
+  return ordered_facets;
 }
 
-function collect_sorting() {
-  var ordered_filters = new Array();
-  $('.sortby_box').each (function (index) {
-    var type = $(this).attr('data-type');
-    var dbname = $(this).attr('data-id');
-    var display = $(this).attr('data-label');
-    var style = $($(this).children()[2].children).val();
-    //var style = $(this).children()[2].children.val();
-    ordered_filters[index] = [type,dbname,display,style];
-    //ordered_filters.push([dbname,display,styled]);
+function collect_names(element_class) {
+  var ordered_results = [];
+  $(element_class).each (function (index) {
+    ordered_results.push($(this).attr('data-id'););
   });
-  return ordered_filters;
-}
-
-function collect_compare() {
-  var ordered_filters = new Array();
-  $('.show_box').each (function (index) {
-    var type = $(this).attr('data-type');
-    var dbname = $(this).attr('data-id');
-    var display = $(this).attr('data-label');
-    ordered_filters[index] = [type,dbname,display,false];
-    //ordered_filters.push([dbname,display,styled]);
-  });
-  return ordered_filters;
+  return ordered_results;
 }

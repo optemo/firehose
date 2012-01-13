@@ -336,7 +336,6 @@ $(document).ready(function(){
 
   $('select#type_filter').live('change', function () {
 	  current_location = document.location.pathname
-	  debugger
 	  if (current_location.match(/product_types\/(\S)+$/)) {
 		current_location = '/product_types';
 	  }

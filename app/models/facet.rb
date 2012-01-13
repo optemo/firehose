@@ -36,7 +36,7 @@ class Facet < ActiveRecord::Base
        fn = Facet.new()
        fn[:feature_type] = vals[0]
        fn[:name] = vals[1]
-       # TODO: store vals[2] as the readable name
+       # TODO: store vals[2] as the name to display
        
        fn[:style] = case vals[3]
        when "true"

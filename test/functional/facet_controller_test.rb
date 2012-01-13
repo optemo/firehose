@@ -14,27 +14,27 @@ class FacetControllerTest < ActionController::TestCase
   test "adding a heading to the layout" do
     get :new, type: 'Heading', used_for: 'filter'
     facet = assigns(:new_facet)
-    assert_equal Session.product_type_id, facet.product_type_id
+    assert_equal 2, facet.product_type_id
     assert_equal 'Heading', facet.feature_type
     assert_equal 'filter', facet.used_for
   end
 
   test "adding a compare facet to the layout" do
+    sr = create(:scraping_rule, local_featurename: "saleprice", rule_type: "cont")
     get :new, name: 'saleprice', used_for: 'show'
     facet = assigns(:new_facet)
-    debugger
-    assert_equal Session.product_type_id, facet.product_type_id
+    assert_equal 2, facet.product_type_id
     assert_equal 'saleprice', facet.name
     assert_equal 'Continuous', facet.feature_type
     assert_equal 'show', facet.used_for
   end
   
   test "adding a sortby element to the layout" do
-    get :new, type: 'opticalzoom', used_for: 'filter'
+    sr = create(:scraping_rule, local_featurename: "opticalzoom", rule_type: "cont")
+    get :new, name: 'opticalzoom', used_for: 'filter'
     facet = assigns(:new_facet)
     assert_equal 2, facet.product_type_id
-    #assert_equal Session.product_type_id, facet.product_type_id
-    assert_equal 'Heading', facet.feature_type
+    assert_equal 'Continuous', facet.feature_type
     assert_equal 'filter', facet.used_for
   end
 

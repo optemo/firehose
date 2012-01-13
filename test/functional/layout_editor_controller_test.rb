@@ -1,13 +1,10 @@
 require 'test_helper'
 
 class LayoutEditorControllerTest < ActionController::TestCase
-  # test "fail me" do
-  #   flunk
-  # end
   
   test 'index should redirect to show' do
     get :index
-    assert_redirected_to('show')
+    assert_redirected_to(layout_editor_path(Session.product_type_id))
   end
   
   test "should show layout for the right product_type" do
@@ -86,11 +83,14 @@ class LayoutEditorControllerTest < ActionController::TestCase
     f2 = create(:facet, used_for: "filter")
     f3 = create(:facet, used_for: "show")
     f3 = create(:facet, used_for: "sortby") 
-
+    
     original_filters = Facet.find_all_by_used_for("filter")
     original_sorting = Facet.find_all_by_used_for("sortby")
     original_compare = Facet.find_all_by_used_for("show")
     post :create, request_data
+    assert_response :success
+    assert_template(nil)
+    
     updated_filters = Facet.find_all_by_used_for("filter")
     updated_sorting = Facet.find_all_by_used_for("sortby")
     updated_compare = Facet.find_all_by_used_for("show")
@@ -106,6 +106,5 @@ class LayoutEditorControllerTest < ActionController::TestCase
     assert_nil Facet.find_by_id_and_name(original_compare.first.id, original_compare.first.name), 
       "a facet formerly in the database but not in the layout should be removed"
     assert_not_nil Facet.find_by_name_and_used_for('saleprice_factor','sortby'), "newly added facet should be in the database"
-    assert_template(nil)
   end
 end
