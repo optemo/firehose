@@ -28,5 +28,6 @@ class LayoutEditorController < ApplicationController
     Facet.update_layout(product_type, 'filter', params[:filter_set])
     Facet.update_layout(product_type, 'sortby', params[:sorting_set])
     Facet.update_layout(product_type, 'show', params[:compare_set])
+    render :nothing => true
   end
 end

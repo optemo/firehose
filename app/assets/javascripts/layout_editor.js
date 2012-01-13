@@ -67,11 +67,8 @@ $('select#new_compare').live('change', function () {
   });
 });
 
-
-
 // clicking to add a new "Header" or "Spacer"
 $('#add_header').live("click",function() {
-  
   $.ajax({
     url: "/facet/new",
     data: {type: 'Heading', used_for: 'filter'},

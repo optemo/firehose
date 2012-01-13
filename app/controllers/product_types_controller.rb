@@ -9,7 +9,6 @@ class ProductTypesController < ApplicationController
     @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(pid)
     
     respond_to do |format|
-      
       if params[:ajax] == 'true'
         # TODO: determine if the ajax layout is necessary here
         format.html { redirect_to :action => 'show', :id => pid, :layout => 'ajax' }

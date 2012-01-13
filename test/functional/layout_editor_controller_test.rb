@@ -1,14 +1,21 @@
 require 'test_helper'
 
 class LayoutEditorControllerTest < ActionController::TestCase
-  # test "the truth" do
-  #   assert true
+  # test "fail me" do
+  #   flunk
   # end
+  
+  test 'index should redirect to show' do
+    get :index
+    assert_redirected_to('show')
+  end
   
   test "should show layout for the right product_type" do
     # make scraping rules
     prod_type = product_types(:one)
     get :show, id: prod_type.id
+    assert_template('show')
+    assert_response :success
     
     assert_not_nil assigns("db_filters")
     assert_not_nil assigns("db_sortby")
@@ -18,7 +25,6 @@ class LayoutEditorControllerTest < ActionController::TestCase
     assert_not_nil assigns("sr_compare")
     assert_equal prod_type.id, session[:current_product_type_id], "The session should be stored in a cookie"
     assert_equal prod_type.id, Session.product_type_id, "The product type should be stored in the session object"
-    assert_response :success
   end
   
   test "getting feature names to add from the scraping rules" do
@@ -100,10 +106,6 @@ class LayoutEditorControllerTest < ActionController::TestCase
     assert_nil Facet.find_by_id_and_name(original_compare.first.id, original_compare.first.name), 
       "a facet formerly in the database but not in the layout should be removed"
     assert_not_nil Facet.find_by_name_and_used_for('saleprice_factor','sortby'), "newly added facet should be in the database"
-    
-    debugger
-    
-    puts 'done'
+    assert_template(nil)
   end
-  
 end
