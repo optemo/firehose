@@ -5,7 +5,7 @@
   	<div>DB name: <%= f.name %></div> 
  	<% case f.used_for -%> 
   <% when 'filter' -%>
-      <div>Display: <%= f.get_display_type(f.feature_type) %></div>
+      <div>Display: <%= f.get_display %></div>
 	    <% unless f.feature_type == 'Binary' -%>
 	      <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
 	    <% end %>
@@ -13,8 +13,8 @@
 	<div>Ordering: 
 	  <select class="sort_option" id="sorting_<%= f.name %>">
 	    <%= f.style %>
-	    <option value="asc" <%= 'selected=selected' if f.style == "asc" %>>Ascending</option>
 	    <option value="desc" <%= 'selected=selected' if f.style == "desc" %>>Descending</option>
+	    <option value="asc" <%= 'selected=selected' if f.style == "asc" %>>Ascending</option>
 	  </select>
 	</div>
 	<% end -%>
@@ -22,14 +22,14 @@
   </div>
 <% when 'Heading' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
-    <div>Display: <%= f.get_display_type(f.feature_type)  %></div>
+    <div>Display: <%= f.get_display  %></div>
     <div>Name: <%= f.name %></div>
     <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
     <a class="remove_facet" href="#">Remove</a>
   </div>
 <% when 'Spacer' -%>
   <div class='<%= f.used_for %>_box' data-id='space1' data-label='' data-type='<%= f.feature_type %>'>
-    <div>Display: <%= f.get_display_type(f.feature_type) %></div>
+    <div>Display: <%= f.get_display %></div>
     <a class="remove_facet" href="#">Remove</a>
   </div>
 <% end -%>

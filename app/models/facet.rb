@@ -12,7 +12,7 @@ class Facet < ActiveRecord::Base
      Facet.import facets_to_save, :on_duplicate_key_update => [:active] if facets_to_save.size > 0
    end
    
-   def get_display_type(f_type)
+   def self.get_display_type(f_type)
      case f_type
        when 'Continuous'
          'Slider'
@@ -54,6 +54,9 @@ class Facet < ActiveRecord::Base
        fn[:active] = 1
        fn.save()
      end
-     
+   end
+   
+   def get_display
+     Facet.get_display_type(feature_type)
    end
 end
