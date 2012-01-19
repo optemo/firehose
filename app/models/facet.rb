@@ -44,7 +44,7 @@ class Facet < ActiveRecord::Base
        when "asc"
          'asc'
        when "desc"
-         'desc'
+         ''
        else
          ''
        end

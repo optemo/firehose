@@ -1,11 +1,10 @@
 <%= form_for @scraping_rule, :remote => true, :html => { :class => "edit_scraping_rule" } do |f| %>
 <fieldset>
   <legend><b>Parsing Rule</b></legend>
-  <%= f.label :rule_type, "Type" %> <div class="rule_type_button"><%= f.radio_button(:rule_type, "cont", :class => "required") %> Cont</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "cat", :class => "required") %> Cat</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "bin", :class => "required") %> Bin</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "text", :class => "required") %> Text</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "intr", :class => "required") %> Intr</div>
+  <%= f.label :rule_type, "Type" %> <div class="rule_type_button"><%= f.radio_button(:rule_type, "Continuous", :class => "required") %> Cont</div>
+  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Categorical", :class => "required") %> Cat</div>
+  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Binary", :class => "required") %> Bin</div>
+  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Text", :class => "required") %> Text</div>
   <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %>
   <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %>
  <%= f.label :regex, "Regular Expression" %> <%= select "scraping_rule", "regex", ScrapingRule::REGEXES, {:include_blank=>false}, {:class=>"require regex scraping_rule_regex"} %><div style="float: left;"><input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" class="require regexp scraping_rule_regex_option" style="display:none;"  value='<%= @scraping_rule.regex %>' /><br style="clear: both;" /><span style="float: left;">Custom Regex</span><input type="checkbox" class="custom_regex" /></div>

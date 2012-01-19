@@ -3,6 +3,7 @@ $('#submit_type').live("click",function(){
   if ($('#product_type_name').valid()) {
     var name = $('#product_type_name').attr('value');
     var categories = get_selected();
+    debugger
     $.ajax({
       type: 'POST',
       url: "/product_types",
