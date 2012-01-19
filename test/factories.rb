@@ -13,11 +13,11 @@ FactoryGirl.define do
     sequence(:rule_type) {|n|
       case n % 3
       when 0
-        "cont"
+        "Continuous"
       when 1
-        "cat"
+        "Categorical"
       when 2
-        "bin"
+        "Binary"
       end}
     regex ".*"
     active true

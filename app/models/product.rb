@@ -45,10 +45,10 @@ class Product < ActiveRecord::Base
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     candidates.each do |candidate|
       spec_class = case candidate.model
-        when "cat" then CatSpec
-        when "cont" then ContSpec
-        when "bin" then BinSpec
-        when "text" then TextSpec
+        when "Categorical" then CatSpec
+        when "Continuous" then ContSpec
+        when "Binary" then BinSpec
+        when "Text" then TextSpec
         else CatSpec # This should never happen
       end
       p = products_to_save[candidate.sku]

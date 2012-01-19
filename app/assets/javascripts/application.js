@@ -4,6 +4,7 @@
 *= require layout_editor
 *= require jquery.jeditable.min
 *= require jquery_ujs
+*= require jquery.validate.min
 *= require jstree
 */
 
