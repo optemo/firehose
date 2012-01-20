@@ -1,5 +1,7 @@
 Firehose::Application.routes.draw do
   
+  get "facet/new"
+
 #  get "scraping/index"
 
 #  get "scraping/scrape"

@@ -1,0 +1,63 @@
+<div class='layout'>
+  <input type="button" id="submit_layout" value="Save" style="display:block; float:center;">
+  <div class='column' id='filters'>
+    <div id='filters_body' class="sortable">
+      <h2>Filters</h2>
+      <% @db_filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
+      <div class="draggable">
+        <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+      </div>
+      <% end -%>
+    </div>
+    <div>Add New:
+      <div><a id="add_header" href="#">Header</a></div>
+      <div><a id="add_spacer" href="#">Spacer</a></div>
+      <div>Filter:</div>
+      <select id="new_filter" style=" ">
+      <!-- check: are the tag attributes necessary? -->
+      <% @sr_filters.each do |f| -%>
+        <option class="filter_option" value="<%= f %>"><%= f %></option>
+      <% end -%>
+      </select>
+    </div>
+  </div>
+  <div class='column' id='sorting'>
+	<div id='sorting_body' class="sortable">
+	  <h2>Sorting</h2>
+    <% @db_sortby.each do |f| -%>
+    <div class="draggable">
+      <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+    </div>
+    <% end -%>
+	</div>
+  <div>Add New:
+    <div>Sorting Option:</div>
+    <select id="new_sorting" style=" ">
+    <!-- check: are the tag attributes necessary? -->
+      <% @sr_sortby.each do |f| -%>
+        <option class="sortby_option" value="<%= f %>"><%= f %></option>
+      <% end -%>
+    </select>
+  </div>
+  </div>
+  <div class='column' id='compare'>
+	<div id='compare_body' class="sortable">
+    <h2>Compare</h2>
+    <% @db_compare.each do |f| -%>
+    <div class="draggable">
+      <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+    </div>
+    <% end -%>
+	</div>
+	<div>Add New:
+	  <div>Comparison Field:</div>
+	  <select id="new_compare", style=" ">
+  	  <% @sr_compare.each do |f| -%>
+  	    <option class="compare_option" value="<%= f %>"><%= f %></option>
+  	  <% end -%>
+	  </select>
+	</div>
+  </div>
+</div>
+
+<!-- <div style="clear:both;"></div> <div><a id="submit_layout" href="#" style="display:block; float:left;">Save</a></div> -->

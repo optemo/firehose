@@ -1,4 +1,5 @@
 class Candidate
+  include ActiveModel::Serialization
   attr_accessor :scraping_rule_id
   attr_accessor :scraping_correction_id
   attr_accessor :model
@@ -53,12 +54,10 @@ class Candidate
       end
       colors[local_featurename] = Hash[*rule_id.keys.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
     end
-    
     #Order rules by priority for display
     rules.each do |lf,rule_ids|
       rules[lf] = rule_ids.values.sort{|a,b|a.first.scraping_rule.priority <=> b.first.scraping_rule.priority}#.group_by{|a| a.first.scraping_rule.remote_featurename}
     end
-
     [rules,multirules,colors]
   end
   

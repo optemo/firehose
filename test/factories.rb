@@ -7,13 +7,48 @@ FactoryGirl.define do
     raw "rawvalue"
   end
   factory :scraping_rule do
-    local_featurename "title"
+    sequence(:local_featurename) {|n| "title#{n}"}
     remote_featurename "title"
     product_type "camera_bestbuy"
-    rule_type "Categorical"
+    sequence(:rule_type) {|n|
+      case n % 3
+      when 0
+        "cont"
+      when 1
+        "cat"
+      when 2
+        "bin"
+      end}
     regex ".*"
     active true
   end
+  
+  factory :facet do
+    product_type_id 2
+    sequence(:name) {|n| "facet#{n}"}
+    sequence(:feature_type) {|n|
+      case n % 3
+      when 0
+        "Continuous"
+      when 1
+        "Binary"
+      when 2
+        "Categorical"
+      end}
+    sequence(:used_for) {|n|
+        case n % 3
+        when 0
+          "filter"
+        when 1
+          "show"
+        when 2
+          "sortby"
+        end}
+    sequence(:value) {|n| n}
+    style ""
+    active 1
+  end
+  
   factory :result do
     product_type "camera_bestbuy"
     category "--[22474, 28382, 28381, 20220, 20218]"
@@ -31,7 +66,7 @@ FactoryGirl.define do
     association :product_type
   end
   factory :scraping_correction do
-    association :scraping_rule
+    #association :scraping_rule
     product_type "camera_bestbuy"
     raw "error--"
     corrected "good to go"

@@ -1,27 +1,21 @@
 /*
 *= require_self
 *= require categories
+*= require layout_editor
 *= require jquery.jeditable.min
-*= require jquery.validate.min
+*= require jquery_ujs
 *= require jstree
 */
 
 $(document).ready(function(){
-    $.validator.addMethod('regexp', function (possible_regexp, element) {
-        try {
-            g = new RegExp(possible_regexp);
-            return (Object.prototype.toString.call(g) === "[object RegExp]");
-        } catch (err) { // Not a valid regexp
-            return false;
-        }
-    }, 'Invalid regular expression.');
-
-    $.validator.addMethod('ifcont', function (value, element) {
-        if ($('#rule_rule_type_cont:checked').length)
-            return /[-+]?[0-9]*\.?[0-9]+/.test(value);
-        else
-            return true;
-    }, 'Min / Max needed');
+    $(".sortable").sortable({
+    	revert: true
+    });
+    $("#draggable").draggable({
+      connectToSortable: "#sortable",
+  		helper: "original",
+  		revert: "invalid"
+  	});
 
     // Turn on overlay links for adding rules
     $('.title_link, .new_rule').live('click', function() {
@@ -341,15 +335,15 @@ $(document).ready(function(){
 	});
 
   $('select#type_filter').live('change', function () {
-	  if (document.location.pathname.match(/product_types\/(\S)+$/)) {
-	    redirect_location = '/product_types'
-	    $('#filter_form').attr("action", redirect_location);
-	    $('#filter_form').submit();
+	  current_location = document.location.pathname
+	  if (current_location.match(/product_types\/(\S)+$/)) {
+		current_location = '/product_types';
 	  }
-	  else {
-	    $('#filter_form').attr("action", document.location.pathname);
-	    $('#filter_form').submit();
+	  else if (current_location.match(/layout_editor\/(\S)+$/)) {
+		current_location = '/layout_editor';
 	  }
+	  $('#filter_form').attr("action", current_location);
+	  $('#filter_form').submit();
 	});
 
     $(".custom_regex").live('click', function() {
