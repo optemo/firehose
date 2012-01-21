@@ -168,10 +168,14 @@ $(document).ready(function(){
 		$("body").append(div_to_add);
 		div_to_add.delay(2000).fadeOut(1000);  
     }
-	
+
     $("a").live('click',function(){
       		t = $(this), form = t.parents("form");
-      		if (t.attr('data-method') == "delete")
+      		if (t.hasClass('category_id-delete')) {
+      		  t.parent().remove();
+      		  alert_substitute("Category Id has been removed.");
+      		}
+      		else if (t.attr('data-method') == "delete" && !t.hasClass('redirect_delete'))
       		{
       		  if (confirm("Are you sure you want to delete this item?")) {
       			$.ajax({
@@ -179,14 +183,9 @@ $(document).ready(function(){
       				data: form.serialize(),
       				type: "DELETE",
       				success: function(data) {
-      				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete') || t.hasClass('category_id-delete')) {
-      					t.parent().remove();
-      					if(t.hasClass('category_id-delete'))
-      					    alert_substitute("Category Id has been removed.");
-      					}
-      				  else if (t.hasClass('redirect_delete')) {
-      					  $('body').html(data);
-      					}
+      				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete')) {
+      					    t.parent().remove();
+      					  }
       				}
       				,
       				error: function() {

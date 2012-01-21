@@ -94,7 +94,7 @@ class ProductTypesController < ApplicationController
   def destroy
     @product_type = ProductType.find(params[:id])
     if @product_type.destroy
-      session.delete(:current_product_type_id)
+      session.delete(:current_product_type_id) if (params[:id] == session[:current_product_type_id])
       respond_to do |format|
         format.html { redirect_to product_types_url }
       end
