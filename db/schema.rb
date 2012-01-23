@@ -11,16 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120117231018) do
+ActiveRecord::Schema.define(:version => 20120121023426) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
     t.string   "name"
     t.boolean  "value"
-    t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "modified"
+    t.integer  "product_type_id"
   end
 
   add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
@@ -85,7 +85,8 @@ ActiveRecord::Schema.define(:version => 20120117231018) do
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
-  create_table "daily_specs", :force => true do |t|
+  create_table "daily_specs", :id => false, :force => true do |t|
+    t.integer  "id",           :default => 0, :null => false
     t.string   "sku"
     t.string   "name"
     t.string   "spec_type"
