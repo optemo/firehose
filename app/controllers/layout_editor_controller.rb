@@ -14,10 +14,10 @@ class LayoutEditorController < ApplicationController
     @db_compare = Facet.find_all_by_product_type_id_and_used_for(id, 'show').sort_by!{|f| f.value }
     
     p_type = ProductType.find(id).name
-    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /cont|cat|bin/}
+    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
     @sr_filters = results.nil? ? [] : results.sort
-    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /cont/}
+    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /Continuous/}
     results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
     @sr_sortby = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters

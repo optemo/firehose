@@ -31,7 +31,7 @@ class ProductTypesController < ApplicationController
   # GET /product_types/new
   def new
     @product_type = ProductType.new
-    
+    debugger
     respond_to do |format|
       format.html # new.html.erb
     end

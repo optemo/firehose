@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111216221332) do
+ActiveRecord::Schema.define(:version => 20120117231018) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"

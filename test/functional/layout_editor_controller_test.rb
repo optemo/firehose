@@ -27,9 +27,9 @@ class LayoutEditorControllerTest < ActionController::TestCase
   test "getting feature names to add from the scraping rules" do
     prod_type = product_types(:one)
     
-    sr1 = create(:scraping_rule, rule_type: "cont")
-    sr2 = create(:scraping_rule, rule_type: "cat")
-    sr3 = create(:scraping_rule, rule_type: "bin")
+    sr1 = create(:scraping_rule, rule_type: "Continuous")
+    sr2 = create(:scraping_rule, rule_type: "Categorical")
+    sr3 = create(:scraping_rule, rule_type: "Binary")
     
     get :show, id: prod_type.id
     

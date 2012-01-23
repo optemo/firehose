@@ -79,8 +79,8 @@ class ScrapingRule < ActiveRecord::Base
               #Validation Tests
               parsed = "**LOW" if r[:rule].min && parsed && parsed.to_f < r[:rule].min
               parsed = "**HIGH" if r[:rule].max && parsed && parsed.to_f > r[:rule].max
-              #debugger if r.rule_type == "cat" && !r.valid_inputs.blank? && !r.valid_inputs.split("*").include?(parsed)
-              parsed = "**INVALID" if r[:rule].rule_type == "cat" && parsed && !r[:rule].valid_inputs.blank? && !r[:rule].valid_inputs.split("*").include?(parsed)
+              #debugger if r.rule_type == "Categorical" && !r.valid_inputs.blank? && !r.valid_inputs.split("*").include?(parsed)
+              parsed = "**INVALID" if r[:rule].rule_type == "Categorical" && parsed && !r[:rule].valid_inputs.blank? && !r[:rule].valid_inputs.split("*").include?(parsed)
               
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
