@@ -33,7 +33,6 @@ class FacetControllerTest < ActionController::TestCase
     sr = create(:scraping_rule, local_featurename: "opticalzoom", rule_type: "Continuous")
     get :new, name: 'opticalzoom', used_for: 'filter'
     facet = assigns(:new_facet)
-    debugger
     assert_equal 2, facet.product_type_id
     assert_equal 'Continuous', facet.feature_type
     assert_equal 'filter', facet.used_for

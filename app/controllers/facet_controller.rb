@@ -16,7 +16,5 @@ class FacetController < ApplicationController
                 :feature_type => f_type.first,
                 :used_for => params[:used_for])
     end
-    debugger
-    puts 'done debugging'
   end
 end
