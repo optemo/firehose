@@ -37,9 +37,9 @@ gem 'jquery-rails'
 gem 'jstree-rails', :git => 'git://github.com/tristanm/jstree-rails.git'
 
 group :development do
-  # gem "linecache19", "0.5.13"
-  # gem "ruby-debug-base19", "0.11.26"
-  # gem "ruby-debug19", :require => 'ruby-debug'
+  gem "linecache19", "0.5.13"
+  gem "ruby-debug-base19", "0.11.26"
+  gem "ruby-debug19", :require => 'ruby-debug'
 end
 
 group :production do
@@ -47,9 +47,9 @@ group :production do
 end
 
 group :test do
-  # gem "linecache19", "0.5.13"
-  # gem "ruby-debug-base19", "0.11.26"
-  # gem "ruby-debug19", :require => 'ruby-debug'
+  gem "linecache19", "0.5.13"
+  gem "ruby-debug-base19", "0.11.26"
+  gem "ruby-debug19", :require => 'ruby-debug'
   gem 'spork', '> 0.9.0.rc'
   gem 'spork-testunit'
   gem 'guard-test'
