@@ -26,7 +26,8 @@
     		<% end %>
     	</a>
     	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.product_type %>
-    	<%= link_to "Destroy", rule, :method => :delete %>
+    	<%= link_to "Destroy", rule, :class => "delete_scraping_rule", :method => :delete, :remote => :true %>
+    	
     	<div class="contentholder">Processing...</div>
     </div>
     <% end %>

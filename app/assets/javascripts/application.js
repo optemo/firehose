@@ -124,14 +124,14 @@ $(document).ready(function(){
 	});
     $('#silkscreen').click(function () {removeSilkScreen();});
 
-    $('#scraping_rule_submit, .correction_submit').live("click", function() {
+    $('.scraping_rule_submit, .correction_submit').live("click", function() {
         var t = $(this), form = t.parents("form"), value = t.attr('Value');
         if (form.validate().valid()) { // Make sure the form is valid.
 			$.ajax({
 			    url: form.attr("action"), 
 			    data: form.serialize(), 
 				type: "POST",
-			    success: function() {
+			    success: function(data) {
 					switch(value) {
 						case "Correct":
 						    removeSilkScreen();
@@ -140,8 +140,10 @@ $(document).ready(function(){
 						case "Update Rule":
 							removeSilkScreen();
 						    alert_substitute("Rule Updated");
+						    ajaxhandler(data);
 						    break;
 						default:
+						    ajaxhandler(data);
 						    alert_substitute("Rule Created");
     					    removeSilkScreen();
 					}
@@ -164,28 +166,28 @@ $(document).ready(function(){
     $("a").live('click',function(){
       		t = $(this), form = t.parents("form");
       		
-      		if (t.hasClass('category_id-delete')) {
+      		if (t.hasClass('category_id-delete') || t.hasClass('delete_scraping_rule')) {
       		  t.parent().remove();
-      		  alert_substitute("Category Id has been removed.");
+      		  alert_substitute("Item has been removed.");
       		  return false;
       		}
       		else if (t.attr('data-method') == "delete" && !t.hasClass('redirect_delete'))
       		{
       		  if (confirm("Are you sure you want to delete this item?")) {
-      			$.ajax({
-      				url: t.attr("href"),
-      				data: form.serialize(),
-      				type: "DELETE",
-      				success: function(data) {
-      				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete')) {
-      					    t.parent().remove();
-      					  }
-      				}
-      				,
-      				error: function() {
-      					alert_substitute("Error in processing the request for delete.");
-      				}
-      			});
+      			  $.ajax({
+        				url: t.attr("href"),
+        				data: form.serialize(),
+        				type: "DELETE",
+        				success: function(data) {
+        				    if (t.hasClass('feature-delete') || t.hasClass('spec-delete') || t.hasClass('url-delete')) {
+        					    t.parent().remove();
+        					  }
+        				}
+        				,
+        				error: function() {
+        					alert_substitute("Error in processing the request for delete.");
+        				}
+        			});
       		  }
       			return false;
       		} else {
@@ -391,6 +393,23 @@ $(document).ready(function(){
     // });
     
 });
+
+/* The ajax handler takes data from the ajax call and inserts the data into the #main part and then the #filtering part. */
+function ajaxhandler(data) {
+    debugger;
+    var rdr;
+    if (rdr = /\[REDIRECT\](.*)/.exec(data)) {
+      window.location.replace(rdr[1]);
+    } else {
+      var parts = data.split('[BRK]');
+      if (parts.length == 2) {
+        $('#ajaxfilter').empty().append(parts[1]);
+        $('#main').html(parts[0]);
+        my.whenDOMready();
+        return 0;
+      }
+    }
+};
 
 function removeSilkScreen() {
     $('#silkscreen').css({'display' : 'none', 'top' : '', 'left' : '', 'width' : ''}).fadeTo(0, 0).hide();
