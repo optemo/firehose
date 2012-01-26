@@ -90,14 +90,17 @@ class Result < ActiveRecord::Base
             product_bundles << product_bundle
 
             #Copy over all the products specs
+          
             [ContSpec,BinSpec,CatSpec,TextSpec].each do |s_class|
               s_class.find_all_by_product_type_and_product_id(Session.product_type,p_copy.id).each do |spec|
-                copiedspec = s_class.find_by_product_id_and_product_type_and_name(p.id,Session.product_type,spec.name) || s_class.new(:product_id => p.id, :product_type => Session.product_type, :name => spec.name)
-                if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
-                  copiedspec.value = spec.value
-                  copiedspec.modified = true
-                  copiedspecs.has_key?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
-                end
+                unless spec.name =="featured" || spec.name =="featured_factor" || spec.name =="next_featured"
+                  copiedspec = s_class.find_by_product_id_and_product_type_and_name(p.id,Session.product_type,spec.name) || s_class.new(:product_id => p.id, :product_type => Session.product_type, :name => spec.name)
+                  if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
+                    copiedspec.value = spec.value
+                    copiedspec.modified = true
+                    copiedspecs.has_key?(s_class) ? copiedspecs[s_class] << copiedspec : copiedspecs[s_class] = [copiedspec]
+                  end
+                end  
               end
             end
           end
