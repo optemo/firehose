@@ -9,14 +9,6 @@
 */
 
 $(document).ready(function(){
-    $(".sortable").sortable({
-    	revert: true
-    });
-    $("#draggable").draggable({
-      connectToSortable: "#sortable",
-  		helper: "original",
-  		revert: "invalid"
-  	});
 
     // Turn on overlay links for adding rules
     $('.title_link, .new_rule').live('click', function() {
@@ -171,9 +163,11 @@ $(document).ready(function(){
 
     $("a").live('click',function(){
       		t = $(this), form = t.parents("form");
+      		
       		if (t.hasClass('category_id-delete')) {
       		  t.parent().remove();
       		  alert_substitute("Category Id has been removed.");
+      		  return false;
       		}
       		else if (t.attr('data-method') == "delete" && !t.hasClass('redirect_delete'))
       		{

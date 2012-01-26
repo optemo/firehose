@@ -1,3 +1,13 @@
+$(document).ready(function(){
+  $(".sortable").sortable({
+  	revert: true
+  });
+  $("#draggable").draggable({
+    connectToSortable: "#sortable",
+  	helper: "original",
+  	revert: "invalid"
+  });
+});
 
 $('#submit_layout').live("click",function(){
   ordered_filters = collect_attributes('.filter_box');
