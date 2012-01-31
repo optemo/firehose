@@ -269,8 +269,13 @@ $(document).ready(function(){
 	          }
 	      }
     };
-    
-    $('.edit, .edit-select').editable('/product_types/1', editableVar);
+
+    // $('.edit-translation').editable(function(value, settings) {
+    //   return(value);
+    // });
+
+    // FIXME: remove .editable calls that are not being us
+    //$('.edit, .edit-select').editable('/product_types/1', editableVar);
 
     $('.edit-string').editable('/product_types/1', $.extend({},editableVar,{
         onsubmit: function(settings, form) {
@@ -396,7 +401,6 @@ $(document).ready(function(){
 
 /* The ajax handler takes data from the ajax call and inserts the data into the #main part and then the #filtering part. */
 function ajaxhandler(data) {
-    debugger;
     var rdr;
     if (rdr = /\[REDIRECT\](.*)/.exec(data)) {
       window.location.replace(rdr[1]);

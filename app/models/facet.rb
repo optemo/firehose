@@ -30,14 +30,17 @@ class Facet < ActiveRecord::Base
    def self.update_layout(product_type, used_for, facet_set)
      # delete all existing facets for that pid and used_for
      Facet.delete_all(["used_for = ? AND product_type_id = ?", used_for, product_type])
-     
      # add facets from the input set
      facet_set.each_pair do |index, vals|
        fn = Facet.new()
        fn[:feature_type] = vals[0]
-       fn[:name] = vals[1]
-       # TODO: store vals[2] as the name to display
-       
+       if fn[:feature_type] == 'Heading'
+         fn[:name] = 'heading' + index.to_s
+       elsif fn[:feature_type] == 'Spacer'
+         fn[:name] = 'spacer' + index.to_s
+       else
+         fn[:name] = vals[1]
+       end
        fn[:style] = case vals[3]
        when "true"
          'boldlabel'
@@ -48,6 +51,14 @@ class Facet < ActiveRecord::Base
        else
          ''
        end
+       # store the display name as a translation string
+       suffix = (fn[:style] == "asc") ? '_asc' : ''
+       I18n.backend.store_translations(I18n.locale, 
+         ProductType.find(product_type).name => {
+           'specs' => {
+             fn[:name] + suffix => { 'name' => vals[2] }
+           }
+         })
        fn[:product_type_id] = product_type
        fn[:value] = index
        fn[:used_for] = used_for

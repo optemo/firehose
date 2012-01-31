@@ -1,8 +1,9 @@
 <% case f.feature_type -%>
 <% when 'Continuous', 'Categorical', 'Binary' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
-  	<div>Name: <%= f.name %></div>
-  	<div>DB name: <%= f.name %></div> 
+    <% suffix = (f.style == 'asc') ? '_asc' : '' -%>
+  	<div>Name: <span class='edit-translation'><%= is_new ? (f.name + suffix) : t(Session.product_type+'.specs.'+ f.name + suffix + '.name') %></span></div>
+  	<div>DB name: <%= (f.name + suffix) %></div> 
  	<% case f.used_for -%> 
   <% when 'filter' -%>
       <div>Display: <%= f.get_display %></div>
@@ -22,8 +23,8 @@
   </div>
 <% when 'Heading' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
+    <div>Name: <span class='edit-translation'><%= is_new ? f.name : t(Session.product_type+'.specs.'+f.name+'.name') %></span></div>
     <div>Display: <%= f.get_display  %></div>
-    <div>Name: <%= f.name %></div>
     <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
     <a class="remove_facet" href="#">Remove</a>
   </div>
