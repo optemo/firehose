@@ -270,43 +270,6 @@ $(document).ready(function(){
 	      }
     };
 
-    // $('.edit-translation').editable(function(value, settings) {
-    //   return(value);
-    // });
-
-    // FIXME: remove .editable calls that are not being us
-    //$('.edit, .edit-select').editable('/product_types/1', editableVar);
-
-    $('.edit-string').editable('/product_types/1', $.extend({},editableVar,{
-        onsubmit: function(settings, form) {
-            var input = $(form).find('input');
-            var original = input.val();
-            if (original == null || original.toString().length < 4) {
-                alert("Input too short.");
-                return false;
-            }  
-        }
-    }));
-
-     $('.edit-select-bool').editable('/product_types/1', $.extend({},editableVar,{
-        data : "{true: 'Yes', false: 'No'}",
-        type : 'select'
-    }));
-    $('.edit-select-feature-type').editable('/product_types/1', $.extend({}, editableVar, {
-        data : "{'Categorical': 'Categorical', 'Binary': 'Binary', 'Continuous':'Continuous'}",
-        type : 'select'
-    }));
-    $('.edit-int').editable('/product_types/1', $.extend({},editableVar,{
-        onsubmit: function(settings, form) {
-            var input = $(form).find('input');
-            var original = input.val();
-            if (original == null || !original.toString().match(/^\d+$/)) {
-                alert("Invalid input. Please input valid number!");
-                return false;
-            }  
-        }
-    }));
-
     $('a.show-hide').live('click', function () {
 
 	      if($(this).hasClass("not-all")) {
