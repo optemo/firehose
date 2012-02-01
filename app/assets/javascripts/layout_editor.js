@@ -165,7 +165,7 @@ function collect_attributes(element_class) {
     if (element_class == '.filter_box') {
       var kids = $(this).children();
       if (kids) {
-        styled = kids.children().first().is(':checked');
+        styled = kids.children('input').is(':checked');
       }
     }
     else if (element_class == '.sortby_box') {
