@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120117231018) do
+ActiveRecord::Schema.define(:version => 20120201222536) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -85,7 +85,8 @@ ActiveRecord::Schema.define(:version => 20120117231018) do
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
-  create_table "daily_specs", :force => true do |t|
+  create_table "daily_specs", :id => false, :force => true do |t|
+    t.integer  "id",           :default => 0, :null => false
     t.string   "sku"
     t.string   "name"
     t.string   "spec_type"
@@ -244,9 +245,9 @@ ActiveRecord::Schema.define(:version => 20120117231018) do
     t.float   "max"
     t.text    "valid_inputs"
     t.string  "rule_type"
-    t.boolean "active",             :default => true
     t.integer "priority",           :default => 0
     t.boolean "french",             :default => false
+    t.boolean "active",             :default => true
   end
 
   create_table "search_products", :force => true do |t|
@@ -298,11 +299,13 @@ ActiveRecord::Schema.define(:version => 20120117231018) do
   add_index "text_specs", ["product_id", "name"], :name => "index_text_specs_on_product_id_and_name", :unique => true
 
   create_table "translations", :force => true do |t|
-    t.string  "locale"
-    t.string  "key"
-    t.text    "value"
-    t.text    "interpolations"
-    t.boolean "is_proc",        :default => false
+    t.string   "locale"
+    t.string   "key"
+    t.text     "value"
+    t.text     "interpolations"
+    t.boolean  "is_proc",        :default => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "urls", :id => false, :force => true do |t|
