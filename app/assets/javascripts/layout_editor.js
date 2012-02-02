@@ -50,7 +50,6 @@ function make_editable() {
 function erroneous(input_set) {
   for (i in input_set) {
     tuple = input_set[i];
-    debugger;
     if (tuple[2].match(/\/form/) != null) {
       return true;
     }
@@ -157,7 +156,8 @@ function collect_attributes(element_class) {
   $(element_class).each (function (index) {
     var type = $(this).attr('data-type');
     var dbname = $(this).attr('data-id');
-    var display = $(this).children().children('span').html();
+    var unit = "";
+    var display = $(this).children().children('span').first().html();
     if (display == null) {
       display = ""; // not null so that it can be used in the ajax params
     }
@@ -171,8 +171,14 @@ function collect_attributes(element_class) {
     else if (element_class == '.sortby_box') {
       styled = $($(this).children()[2].children).val();
     }
-    ordered_facets[index] = [type,dbname,display,styled];
-    });
+    if (element_class == '.filter_box' || element_class == '.show_box') {
+      unit = $(this).children().children('span').last().html();
+      if (unit == null || unit.match(/Click to edit/)) {
+        unit = "";
+      }
+    }
+    ordered_facets[index] = [type,dbname,display,unit,styled];
+  });
   return ordered_facets;
 }
 

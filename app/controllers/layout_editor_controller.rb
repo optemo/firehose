@@ -25,7 +25,6 @@ class LayoutEditorController < ApplicationController
   
   def create
     product_type = Session.product_type_id
-    
     Facet.update_layout(product_type, 'filter', params[:filter_set])
     Facet.update_layout(product_type, 'sortby', params[:sorting_set])
     Facet.update_layout(product_type, 'show', params[:compare_set])

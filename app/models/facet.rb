@@ -41,7 +41,7 @@ class Facet < ActiveRecord::Base
        else
          fn[:name] = vals[1]
        end
-       fn[:style] = case vals[3]
+       fn[:style] = case vals[4]
        when "true"
          'boldlabel'
        when "asc"
@@ -56,7 +56,7 @@ class Facet < ActiveRecord::Base
        I18n.backend.store_translations(I18n.locale, 
          ProductType.find(product_type).name => {
            'specs' => {
-             fn[:name] + suffix => { 'name' => vals[2] }
+             fn[:name] + suffix => { 'name' => vals[2], 'unit' => vals[3] }
            }
          })
        fn[:product_type_id] = product_type
