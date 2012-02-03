@@ -8,6 +8,7 @@ class LayoutEditorController < ApplicationController
   
   def show
     id = params[:id]
+    
     @product_type = ProductType.find(id)
     @db_filters = Facet.find_all_by_product_type_id_and_used_for(id, 'filter').sort_by!{|f| f.value }
     @db_sortby = Facet.find_all_by_product_type_id_and_used_for(id, 'sortby').sort_by!{|f| f.value }

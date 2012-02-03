@@ -15,6 +15,7 @@ $('#submit_layout').live("click",function(){
   ordered_filters = collect_attributes('.filter_box');
   ordered_sorting = collect_attributes('.sortby_box');
   ordered_compare = collect_attributes('.show_box');
+  locale = $(location).attr('search').split('=')[1];
   if (erroneous(ordered_filters) || erroneous(ordered_sorting) || erroneous(ordered_compare)) {
     alert('Error: please save the values of all display fields before saving layout');
     return false;
@@ -23,7 +24,7 @@ $('#submit_layout').live("click",function(){
     $.ajax({
       type: 'POST',
       url: "/layout_editor",
-      data: {filter_set: ordered_filters, sorting_set: ordered_sorting, compare_set: ordered_compare},
+      data: {locale: locale, filter_set: ordered_filters, sorting_set: ordered_sorting, compare_set: ordered_compare},
       success: function(data) {
         alert("Finished saving layout");
       },
