@@ -1,8 +1,11 @@
 <h1>Layout</h1>
-
-
+<% if I18n.locale == :fr -%>
 <%= link_to('English', layout_editor_url(:locale => 'en')) %>
+<span>French</span>
+<% else %>
+<span>English</span>
   <%= link_to('French', layout_editor_url(:locale => 'fr')) %>
+<% end %>
 
 <%= render 'editor' %>
 <div style="clear:both;"></div>

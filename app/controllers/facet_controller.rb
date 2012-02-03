@@ -10,9 +10,8 @@ class FacetController < ApplicationController
     else
       f_type = ScrapingRule.find_all_by_product_type_and_local_featurename(Session.product_type, params[:name]).select{|i| i.active}.map{ |sr|
         sr.rule_type}.delete_if{|i| i.nil?}
-      factor_name = (params[:used_for] == 'sortby') ? (params[:name] + '_filter') : params[:name]
       @new_facet = Facet.new(:product_type_id => Session.product_type_id, 
-                :name => factor_name,
+                :name => params[:name],
                 :feature_type => f_type.first,
                 :used_for => params[:used_for])
     end

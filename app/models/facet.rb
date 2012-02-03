@@ -34,36 +34,45 @@ class Facet < ActiveRecord::Base
      facet_set.each_pair do |index, vals|
        fn = Facet.new()
        fn[:feature_type] = vals[0]
-       if fn[:feature_type] == 'Heading'
-         fn[:name] = 'heading' + index.to_s
-       elsif fn[:feature_type] == 'Spacer'
-         fn[:name] = 'spacer' + index.to_s
-       else
-         fn[:name] = vals[1]
-       end
+       fn[:name] = vals[1]
        fn[:style] = case vals[4]
        when "true"
          'boldlabel'
        when "asc"
          'asc'
        when "desc"
-         ''
+         'desc'
        else
          ''
        end
-       # store the display name as a translation string
-       suffix = (fn[:style] == "asc") ? '_asc' : ''
-       I18n.backend.store_translations(I18n.locale, 
-         ProductType.find(product_type).name => {
-           'specs' => {
-             fn[:name] + suffix => { 'name' => vals[2], 'unit' => vals[3] }
-           }
-         })
        fn[:product_type_id] = product_type
        fn[:value] = index
        fn[:used_for] = used_for
        fn[:active] = 1
        fn.save()
+       
+       if fn[:feature_type] == 'Heading' or fn[:feature_type] == 'Spacer'
+          fn[:name] = fn[:feature_type] + fn.id.to_s
+          fn.save()
+       end
+       # store the display name as a translation string
+       suffix = (fn[:style] == "asc" or fn[:style] == "desc") ? ('_' + fn[:style]) : ''
+       unless (fn[:feature_type] == 'Spacer')
+         I18n.backend.store_translations(I18n.locale, 
+           ProductType.find(product_type).name => {
+             used_for => {
+               fn[:name] + suffix => { 'name' => vals[2] }
+             }
+           })
+          unless (fn[:feature_type] == 'Heading' or used_for == 'sortby')
+           I18n.backend.store_translations(I18n.locale, 
+             ProductType.find(product_type).name => {
+               used_for => {
+                 fn[:name] + suffix => { 'unit' => vals[3] }
+               }
+             })
+          end
+       end
      end
    end
    
