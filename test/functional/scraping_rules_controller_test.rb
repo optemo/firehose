@@ -31,7 +31,7 @@ class ScrapingRulesControllerTest < ActionController::TestCase
       @scraping_rule.id = 3
       post :create, :scraping_rule => @scraping_rule.attributes
     end
-    assert_redirected_to rules_url
+    assert_response :success
   end
 
   test "should get edit" do
@@ -41,14 +41,13 @@ class ScrapingRulesControllerTest < ActionController::TestCase
 
   test "should update scraping_rule" do
     put :update, :id => @scraping_rule.to_param, :scraping_rule => @scraping_rule.attributes
-    assert_redirected_to rules_url
+    assert_response :success
   end
 
   test "should destroy scraping_rule" do
     assert_difference('ScrapingRule.count', -1) do
       delete :destroy, :id => @scraping_rule.to_param
     end
-    debugger
-    assert_redirected_to rules_url
+    assert_response :success
   end
 end

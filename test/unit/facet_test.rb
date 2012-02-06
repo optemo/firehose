@@ -6,27 +6,32 @@ class FacetTest < ActiveSupport::TestCase
      f1 = create(:facet)
      f2 = create(:facet)
      f3 = create(:facet)
-     filter_data = {"0"=>["Binary", "toprated", "toprated", "false"],
-                  "1"=>["Heading", "status", "status", "true"]}
+     filter_data = {"0"=>["Binary", "toprated", "Top Rated", "stars", "false"],
+                  "1"=>["Heading", "Heading1", "Some Heading", "anything", "true"],
+                  "2"=>["Spacer", "space1", "", "", "false"]}
      Facet.update_layout(2, 'filter', filter_data) 
-     sorting_data = {"0"=>["Continuous", "displayDate", "displayDate", "asc"],
-                    "1"=>["Continuous", "saleprice_factor", "saleprice_factor", "desc"] }
+     sorting_data = {"0"=>["Continuous", "displayDate", "Display Date", "", "asc"],
+                    "1"=>["Continuous", "saleprice", "Sale Price", "$", "desc"] }
      Facet.update_layout(2, 'sortby', sorting_data)
-     compare_data = {"0"=>["Categorical", "color", "color", "false"],
-                    "1"=>["Continuous", "saleprice_factor", "saleprice_factor", "true"] }
+     compare_data = {"0"=>["Continuous", "regularPrice", "Compare prices", "$$", "false"],
+                    "1"=>["Binary", "usb3", "usb3", "", "false"]}
      Facet.update_layout(2, 'show', compare_data)
 
      assert_nil Facet.find_by_name(f1.name), 'previous facets should be removed when the layout is updated'
      assert_nil Facet.find_by_name(f2.name), 'previous facets should be removed when the layout is updated'
      assert_nil Facet.find_by_name(f3.name), 'previous facets should be removed when the layout is updated'
      
-     assert_not_nil Facet.find_by_name_and_used_for('status', 'filter'), 'new facet should be present in the database'
-     assert_not_nil Facet.find_by_name_and_used_for('displayDate', 'sortby'), 'new facet should be present in the database'
-     assert_not_nil Facet.find_by_name_and_used_for('color', 'show'), 'new facet should be present in the database'
+     assert_not_nil Facet.find_by_name_and_used_for('toprated', 'filter'), 'new facet should be present in the database'
+     assert_not_nil Facet.find_by_name_and_used_for('saleprice', 'sortby'), 'new facet should be present in the database'
+     assert_not_nil Facet.find_by_name_and_used_for('regularPrice', 'show'), 'new facet should be present in the database'
 
-     assert Facet.find_by_name_and_used_for('status', 'filter').value > Facet.find_by_name_and_used_for('toprated', 'filter').value, 'order should be as definded'
-     assert Facet.find_by_name_and_used_for('saleprice_factor', 'sortby').value > Facet.find_by_name_and_used_for('displayDate', 'sortby').value, 'order should be as definded'
-     assert Facet.find_by_name_and_used_for('saleprice_factor', 'show').value > Facet.find_by_name_and_used_for('color', 'show').value, 'order should be as definded'
+     assert Facet.find_by_feature_type_and_used_for('Spacer', 'filter').value > Facet.find_by_name_and_used_for('toprated', 'filter').value, 'order should be as defined'
+     assert Facet.find_by_name_and_used_for('saleprice', 'sortby').value > Facet.find_by_name_and_used_for('displayDate', 'sortby').value, 'order should be as defined'
+     assert Facet.find_by_name_and_used_for('usb3', 'show').value > Facet.find_by_name_and_used_for('regularPrice', 'show').value, 'order should be as defined'
+     
+     assert_equal "stars", I18n.t('camera_bestbuy.filter.toprated.unit'), 'filter unit should be stored as translation'
+     assert_equal "Display Date", I18n.t('camera_bestbuy.sortby.displayDate_asc.name'), 'sorby translation should be stored with its direction as translation'
+     assert_equal "Compare prices", I18n.t('camera_bestbuy.show.regularPrice.name'), 'compare translation should be stored as translation'
   end
   
   test "get display type" do

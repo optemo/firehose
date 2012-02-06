@@ -76,6 +76,6 @@ class ProductTypesControllerTest < ActionController::TestCase
     assert_difference('ProductType.count', -1) do
       delete :destroy, id: @product_type.to_param
     end
-    assert_redirected_to product_types_path(session[:current_product_type_id])
+    assert_redirected_to product_types_path
   end
 end
