@@ -93,13 +93,13 @@ class ChangeProductType < ActiveRecord::Migration
   
   def convert_type_id(model)
     model.all.each do |p|
-      p.update_attribute(:product_type, type_id_to_str(p.product_type_id)
+      p.update_attribute(:product_type, type_id_to_str(p.product_type_id))
     end
   end
   
   def convert_type(model)
     model.all.each do |p|
-      p.update_attribute(:product_type, type_to_str(p.product_type)
+      p.update_attribute(:product_type, type_to_str(p.product_type))
     end
   end
   

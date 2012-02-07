@@ -23,10 +23,5 @@ task :assign_leafs => :environment do
     
     #Update product_type to leaf node
     product_type.update_attribute(:value, product_type.value[0]+found.category)
-end
-
-aa = [1]
-aa.each do |a|
-  aa << 4 if a == 1
-  puts a
+  end
 end
