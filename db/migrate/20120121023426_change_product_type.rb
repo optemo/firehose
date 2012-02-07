@@ -38,9 +38,6 @@ class ChangeProductType < ActiveRecord::Migration
       remove_column :searches, :session_id
       add_column :searches, :product_type, :string #Will get tree nodes
       
-      #Daily Specs
-      convert_type(DailySpec) #Leaf nodes
-      
       #Remove old tables
       drop_table :candidates
       drop_table :features
