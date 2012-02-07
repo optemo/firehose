@@ -8,7 +8,7 @@ class ChangeProductType < ActiveRecord::Migration
       remove_column :text_specs, :product_type
 
       #Products table
-      give_product_new_types
+      give_product_new_types #Leaf nodes
       remove_column :products, :product_type
       remove_column :products, :title
       remove_column :products, :model
@@ -18,7 +18,7 @@ class ChangeProductType < ActiveRecord::Migration
       
       #Facets
       add_column :facets, :product_type, :string
-      convert_type_id(Facet)
+      convert_type_id(Facet) #Tree Nodes
       remove_column :facets, :product_type_id
 
       #Product Variations
@@ -27,7 +27,7 @@ class ChangeProductType < ActiveRecord::Migration
 
       #Scraping
       remove_column :scraping_corrections, :product_type
-      convert_type(ScrapingRule)
+      convert_type(ScrapingRule) #Leaf nodes
       remove_column :scraping_rules, :active
 
       #Search
@@ -36,10 +36,10 @@ class ChangeProductType < ActiveRecord::Migration
       remove_column :searches, :searchterm
       remove_column :searches, :seesim
       remove_column :searches, :session_id
-      add_column :searches, :product_type, :string
+      add_column :searches, :product_type, :string #Will get tree nodes
       
       #Daily Specs
-      convert_type(DailySpec)
+      convert_type(DailySpec) #Leaf nodes
       
       #Remove old tables
       drop_table :candidates
@@ -49,6 +49,8 @@ class ChangeProductType < ActiveRecord::Migration
       drop_table :urls
       drop_table :surveys
       drop_table :search_products
+      drop_table :category_id_product_type_map
+      #drop_table :product_types
     end
   
     def down
@@ -113,10 +115,7 @@ class ChangeProductType < ActiveRecord::Migration
   end
   
   def type_id_to_str(type_id)
-    case type_id
-      when 2 then 'B20218'
-      when 4 then
-      when 6 then 'B20232'
-    end
+    pt = ProductType.find(type_id)
+    type_to_str(pt.name)
   end
 end
