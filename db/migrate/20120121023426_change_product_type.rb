@@ -46,7 +46,7 @@ class ChangeProductType < ActiveRecord::Migration
       drop_table :urls
       drop_table :surveys
       drop_table :search_products
-      drop_table :category_id_product_type_map
+      drop_table :category_id_product_type_maps
       #drop_table :product_types
     end
   
@@ -107,12 +107,16 @@ class ChangeProductType < ActiveRecord::Migration
     case type
       when 'camera_bestbuy' then 'B20218'
       when 'drive_bestbuy' then 'B20232'
-      when 'tv_bestbuy' then
+      else 'B00000'
     end
   end
   
   def type_id_to_str(type_id)
-    pt = ProductType.find(type_id)
-    type_to_str(pt.name)
+    pt = ProductType.find_by_id(type_id)
+    if pt.nil?
+      nil
+    else
+      type_to_str(pt.name)
+    end
   end
 end
