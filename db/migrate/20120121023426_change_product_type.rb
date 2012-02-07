@@ -20,19 +20,19 @@ class ChangeProductType < ActiveRecord::Migration
   
     def down
       add_column :daily_specs, :product_type, :string
-      change_type_in(DailySpec)
+      change_type_back(DailySpec)
       remove_column :daily_specs, :product_type_id  
       add_column :bin_specs, :product_type, :string
-      change_type_in(BinSpec)
+      change_type_back(BinSpec)
       remove_column :bin_specs, :product_type_id
       add_column :cat_specs, :product_type, :string
-      change_type_in(CatSpec)
+      change_type_back(CatSpec)
       remove_column :cat_specs, :product_type_id
       add_column :cont_specs, :product_type, :string
-      change_type_in(ContSpec)
+      change_type_back(ContSpec)
       remove_column :cont_specs, :product_type_id
       add_column :text_specs, :product_type, :string
-      change_type_in(TextSpec)
+      change_type_back(TextSpec)
       remove_column :text_specs, :product_type_id
     end
   
