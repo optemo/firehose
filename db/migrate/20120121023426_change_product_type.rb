@@ -107,7 +107,17 @@ class ChangeProductType < ActiveRecord::Migration
     case type
       when 'camera_bestbuy' then 'B20218'
       when 'drive_bestbuy' then 'B20232'
-      when 'tv_bestbuy' then
+      when 'dslr_bestbuy' then 'B29157'
+      when 'laptop_bestbuy' then 'B20352'
+      when 'camera_futureshop' then 'F1127'
+      when 'dslr_futureshop' then 'F23773'
+      when 'lens_flash_filter_futureshop' then 'F25855'
+      #Note: have scraping rules for instant_camera_futureshop and digital_photo_frame_futureshop if necessary
+      when 'laptop_futureshop' then 'F1002'
+      when 'hard_drive_futureshop' then 'F1084'
+      when 'usb_drive_futureshop' then ' F23813'
+      when 'drive_futureshop' then 'F1082'  #this is for optical drives. May rename as optical_drive_futureshop 08/02/12
+      when 'disc_and_case_futureshop' then '23033'
     end
   end
   
