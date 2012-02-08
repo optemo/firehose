@@ -4,7 +4,8 @@ task :assign_leafs => :environment do
   Product.all.each do |p|
     #Old category id
     product_type = CatSpec.find_by_name_and_product_id("product_type",p.id)
-    treenodes = [p.value[1..-1]]
+    next if product_type.value == "B00000"
+    treenodes = [product_type.value[1..-1]]
     #Find the leaf nodes
     leafnodes = []
     treenodes.each do |tnode|
@@ -14,13 +15,18 @@ task :assign_leafs => :environment do
       if children.empty?
         leafnodes << tnode
       else
-        treenodes += children
+        children.each do |c|
+          treenodes << c
+        end
       end
     end
     
     #Search for this product in the leaf nodes
-    found = BestBuyApi.category_ids(leafnodes).select{|bbp|bbp.id == p.sku}
-    
+    found = BestBuyApi.category_ids(leafnodes).select{|bbp|bbp.id == p.sku}.first
+    if found.nil?
+      puts "#{leafnodes}"
+      exit
+    end
     #Update product_type to leaf node
     product_type.update_attribute(:value, product_type.value[0]+found.category)
   end
