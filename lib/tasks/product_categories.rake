@@ -1,24 +1,12 @@
-desc ""
-task :fill_categories => :environment do
-  # starting at the root node of the API
-  # for bestbuy, that's 'Departments'
-  # for futureshop, that's 'Departments'?
-  # starting at the root
-  # do a modified preorder traversal (?)
-  # set node.left to ++n;  for each child in order, call function with n -> increments n each time;
-  # when the children of a node are done, set node.left to ++n;
-
-  
+desc "Traverse the hierachy of categories from the API and store it in the database"
+task :fill_categories => :environment do  
   traverse({'Departments'=>'Departments'}, 1, 1)
-  debugger
-  # $english = false
-  # traverse({'20005'=>'Departments'}, 0, 1)
-  
   puts 'Done saving categories!'
 end
 
 def traverse(root_node, i, level)
-  # get the children of the node
+  # traverse the subtree of categories starting at root_node, mark nodes in the product category table,
+  # and save both English and French translations 
 
   name = root_node.values.first
   catid = root_node.keys.first
@@ -38,10 +26,10 @@ def traverse(root_node, i, level)
   
   begin
     children = BestBuyApi.get_subcategories(catid).values.first
-  rescue Exception
+  rescue BestBuyApi::RequestError
     puts catid
     puts 'got timeout; waiting and trying again'
-    sleep(10)
+    sleep(60)
     children = BestBuyApi.get_subcategories(catid).values.first
   end
   

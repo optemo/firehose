@@ -46,7 +46,7 @@ class ChangeProductType < ActiveRecord::Migration
       drop_table :urls
       drop_table :surveys
       drop_table :search_products
-      drop_table :category_id_product_type_map
+      drop_table :category_id_product_type_maps
       #drop_table :product_types
     end
   
@@ -111,18 +111,23 @@ class ChangeProductType < ActiveRecord::Migration
       when 'laptop_bestbuy' then 'B20352'
       when 'camera_futureshop' then 'F1127'
       when 'dslr_futureshop' then 'F23773'
-      when 'lens_flash_filter_futureshop' then 'F25855'
+      #when 'lens_flash_filter_futureshop' then 'F25855'    #uncomment when required by FS
       #Note: have scraping rules for instant_camera_futureshop and digital_photo_frame_futureshop if necessary
       when 'laptop_futureshop' then 'F1002'
       when 'hard_drive_futureshop' then 'F1084'
       when 'usb_drive_futureshop' then ' F23813'
-      when 'drive_futureshop' then 'F1082'  #this is for optical drives. May rename as optical_drive_futureshop 08/02/12
-      when 'disc_and_case_futureshop' then '23033'
+      when 'optical_drive_futureshop' then 'F1082'
+      when 'disc_and_case_futureshop' then 'F23033'
+      else 'B00000'
     end
   end
   
   def type_id_to_str(type_id)
-    pt = ProductType.find(type_id)
-    type_to_str(pt.name)
+    pt = ProductType.find_by_id(type_id)
+    if pt.nil?
+      nil
+    else
+      type_to_str(pt.name)
+    end
   end
 end
