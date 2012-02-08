@@ -30,21 +30,18 @@ class Facet < ActiveRecord::Base
    def self.update_layout(product_type, used_for, facet_set)
      # delete all existing facets for that pid and used_for
      Facet.delete_all(["used_for = ? AND product_type_id = ?", used_for, product_type])
-     
      # add facets from the input set
      facet_set.each_pair do |index, vals|
        fn = Facet.new()
        fn[:feature_type] = vals[0]
        fn[:name] = vals[1]
-       # TODO: store vals[2] as the name to display
-       
-       fn[:style] = case vals[3]
+       fn[:style] = case vals[4]
        when "true"
          'boldlabel'
        when "asc"
          'asc'
        when "desc"
-         ''
+         'desc'
        else
          ''
        end
@@ -53,6 +50,29 @@ class Facet < ActiveRecord::Base
        fn[:used_for] = used_for
        fn[:active] = 1
        fn.save()
+       
+       if fn[:feature_type] == 'Heading' or fn[:feature_type] == 'Spacer'
+          fn[:name] = fn[:feature_type] + fn.id.to_s
+          fn.save()
+       end
+       # store the display name as a translation string
+       suffix = (fn[:style] == "asc" or fn[:style] == "desc") ? ('_' + fn[:style]) : ''
+       unless (fn[:feature_type] == 'Spacer')
+         I18n.backend.store_translations(I18n.locale, 
+           ProductType.find(product_type).name => {
+             used_for => {
+               fn[:name] + suffix => { 'name' => vals[2] }
+             }
+           })
+          unless (fn[:feature_type] == 'Heading' or used_for == 'sortby')
+           I18n.backend.store_translations(I18n.locale, 
+             ProductType.find(product_type).name => {
+               used_for => {
+                 fn[:name] + suffix => { 'unit' => vals[3] }
+               }
+             })
+          end
+       end
      end
    end
    

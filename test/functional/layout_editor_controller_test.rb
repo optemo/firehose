@@ -7,6 +7,13 @@ class LayoutEditorControllerTest < ActionController::TestCase
     assert_redirected_to(layout_editor_path(Session.product_type_id))
   end
   
+  test 'change locale' do
+    get :index, :locale => :en
+    assert_equal :en, I18n.locale
+    get :index, :locale => :fr
+    assert_equal :fr, I18n.locale
+  end
+  
   test "should show layout for the right product_type" do
     # make scraping rules
     prod_type = product_types(:one)
@@ -68,15 +75,15 @@ class LayoutEditorControllerTest < ActionController::TestCase
   test "saving a new layout" do
     request_data = {"id" => 2,
       "filter_set"=>
-      {"0"=>["Binary", "toprated", "toprated", "false"],
-       "1"=>["Heading", "status", "status", "true"],
+      {"0"=>["Binary", "toprated", "Top Rated", "stars", "boldlabel"],
+       "1"=>["Heading", "status", "Status", "", ""],
        },
      "sorting_set"=>
-      {"0"=>["Continuous", "displayDate", "displayDate", "asc"],
-       "1"=>["Continuous", "saleprice_factor", "saleprice_factor", "asc"],
-       "2"=>["Continuous", "orders", "orders", "asc"]},
+      {"0"=>["Continuous", "displayDate", "displayDate", "", "asc"],
+       "1"=>["Continuous", "saleprice", "Sale Price", "$", "asc"],
+       "2"=>["Continuous", "orders", "orders", "", "asc"]},
      "compare_set"=>
-      {"0"=>["Categorical", "color", "color", "false"]}
+      {"0"=>["Categorical", "color", "color", "", ""]}
      }
     
     f1 = create(:facet, used_for: "filter")
@@ -105,6 +112,6 @@ class LayoutEditorControllerTest < ActionController::TestCase
       "a facet formerly in the database but not in the layout should be removed"
     assert_nil Facet.find_by_id_and_name(original_compare.first.id, original_compare.first.name), 
       "a facet formerly in the database but not in the layout should be removed"
-    assert_not_nil Facet.find_by_name_and_used_for('saleprice_factor','sortby'), "newly added facet should be in the database"
+    assert_not_nil Facet.find_by_name_and_used_for('saleprice','sortby'), "newly added facet should be in the database"
   end
 end

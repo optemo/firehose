@@ -51,7 +51,7 @@ class ScrapingRulesController < ApplicationController
 
     respond_to do |format|
       if @scraping_rule.save
-        format.html { redirect_to root_url }
+        format.html { render text: "[REDIRECT]#{ rules_url }" }
       else
         format.html { head 412 }
       end
@@ -63,7 +63,7 @@ class ScrapingRulesController < ApplicationController
     
     respond_to do |format|
       if succeeded
-        format.html { redirect_to root_url }
+        format.html { render text: "[REDIRECT]#{ rules_url }" }
       else
         format.html { head 412 }
       end
@@ -87,10 +87,6 @@ class ScrapingRulesController < ApplicationController
   def destroy
     ScrapingCorrection.delete_all(["scraping_rule_id = ?",params[:id]])
     ScrapingRule.find(params[:id]).destroy
-    
-    respond_to do |format|
-      format.html { redirect_to root_url }
-      format.xml  { head 412 }
-    end
+    render :nothing => true
   end
 end

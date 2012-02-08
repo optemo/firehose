@@ -1,20 +1,62 @@
+$(document).ready(function(){
+  $(".sortable").sortable({
+  	revert: true
+  });
+  $("#draggable").draggable({
+    connectToSortable: "#sortable",
+  	helper: "original",
+  	revert: "invalid"
+  });
+  
+  make_editable();
+});
 
 $('#submit_layout').live("click",function(){
   ordered_filters = collect_attributes('.filter_box');
   ordered_sorting = collect_attributes('.sortby_box');
   ordered_compare = collect_attributes('.show_box');
-  $.ajax({
-    type: 'POST',
-    url: "/layout_editor",
-    data: {filter_set: ordered_filters, sorting_set: ordered_sorting, compare_set: ordered_compare},
-    success: function(data) {
-      alert("Finished saving layout");
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      alert(jqXHR.statusText + " in saving layout");
-    }
-  });
+  locale = $(location).attr('search').split('=')[1];
+  if (erroneous(ordered_filters) || erroneous(ordered_sorting) || erroneous(ordered_compare)) {
+    alert('Error: please save the values of all display fields before saving layout');
+    return false;
+  }
+  else {
+    $.ajax({
+      type: 'POST',
+      url: "/layout_editor",
+      data: {locale: locale, filter_set: ordered_filters, sorting_set: ordered_sorting, compare_set: ordered_compare},
+      success: function(data) {
+        alert("Finished saving layout");
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert(jqXHR.statusText + " in saving layout");
+      }
+    });
+  }
 });
+
+function make_editable() {
+  $('.edit-translation').each(function(){
+    $(this).removeClass('edit-translation').editable(function(value, settings) {
+      return(value);
+    },{
+      tooltip : 'click to edit',
+      submit  : 'OK',
+      onblur  : 'cancel',
+      width   : '250px'
+    });
+  });
+}
+
+function erroneous(input_set) {
+  for (i in input_set) {
+    tuple = input_set[i];
+    if (tuple[2].match(/\/form/) != null) {
+      return true;
+    }
+  }
+  return false;
+}
 
 $('.remove_facet').live("click",function(){
   var facet_element = $(this).parent();
@@ -34,6 +76,7 @@ $('select#new_filter').live('change', function () {
       data: {name: selected_type, used_for: 'filter'},
       success: function(data) {
         $('#filters_body').append(data);
+        make_editable();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         alert(jqXHR.statusText + " in adding facet");
@@ -50,6 +93,7 @@ $('select#new_sorting').live('change', function () {
     data: {name: selected_type, used_for: 'sortby'},
     success: function(data) {
       $('#sorting_body').append(data);
+      make_editable();
     },
     error: function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText + " in adding facet");
@@ -70,6 +114,7 @@ $('select#new_compare').live('change', function () {
       data: {name: selected_type, used_for: 'show'},
       success: function(data) {
         $('#compare_body').append(data);
+        make_editable();
       },
       error: function(jqXHR, textStatus, errorThrown) {
         alert(jqXHR.statusText + " in adding facet");
@@ -85,6 +130,7 @@ $('#add_header').live("click",function() {
     data: {type: 'Heading', used_for: 'filter'},
     success: function(data) {
       $('#filters_body').append(data);
+      make_editable();
     },
     error: function(jqXHR, textStatus, errorThrown) {
       alert(jqXHR.statusText);
@@ -111,19 +157,29 @@ function collect_attributes(element_class) {
   $(element_class).each (function (index) {
     var type = $(this).attr('data-type');
     var dbname = $(this).attr('data-id');
-    var display = $(this).attr('data-label');
+    var unit = "";
+    var display = $(this).children().children('span').first().html();
+    if (display == null) {
+      display = ""; // not null so that it can be used in the ajax params
+    }
     var styled = false;
     if (element_class == '.filter_box') {
       var kids = $(this).children();
       if (kids) {
-        styled = kids.children().first().is(':checked');
+        styled = kids.children('input').is(':checked');
       }
     }
     else if (element_class == '.sortby_box') {
       styled = $($(this).children()[2].children).val();
     }
-    ordered_facets[index] = [type,dbname,display,styled];
-    });
+    if (element_class == '.filter_box' || element_class == '.show_box') {
+      unit = $(this).children().children('span').last().html();
+      if (unit == null || unit.match(/Click to edit/)) {
+        unit = "";
+      }
+    }
+    ordered_facets[index] = [type,dbname,display,unit,styled];
+  });
   return ordered_facets;
 }
 

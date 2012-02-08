@@ -20,7 +20,7 @@
   <% cids = @categories.each do |category| %>
     <dd>
       <%= category.category_id %> <%= category.name %> 
-      <%= link_to('Delete', category, :confirm => 'Are you sure?', :method => :delete, :remote=>true, :class=>'category_id-delete') %>
+      <%= link_to('Delete', category, :confirm => 'Are you sure you want to remove this category?', :method => :delete, :remote=>true, :class=>'category_id-delete') %>
     </dd>
   <% end %>
 <%= render 'tree' %>

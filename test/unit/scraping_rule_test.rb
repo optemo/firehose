@@ -1,8 +1,22 @@
 require 'test_helper'
 
 class ScrapingRuleTest < ActiveSupport::TestCase
-  # Replace this with your real tests.
-  test "the truth" do
-    assert true
+  test "validations" do
+    sr1 = build(:scraping_rule, :local_featurename => nil)
+    assert !sr1.save, "must have local_featurename"
+    sr1 = build(:scraping_rule, :remote_featurename => nil)
+    assert !sr1.save, "must have remote_featurename"
+    sr1 = build(:scraping_rule, :regex => nil)
+    assert !sr1.save, "must have regex"
+    sr1 = build(:scraping_rule, :product_type => nil)
+    assert !sr1.save, "must have product_type"
+    sr1 = build(:scraping_rule, :product_type => nil)
+    assert !sr1.save, "must have product_type"
+    sr1 = build(:scraping_rule, :rule_type => nil)
+    assert !sr1.save, "must have rule_type"
+    sr1 = build(:scraping_rule, :local_featurename => "Name.withperiod")
+    assert !sr1.save, "local_featurename with punctuation not allowed"
+    sr1 = build(:scraping_rule, :local_featurename => "Name with spaces")
+    assert !sr1.save, "local_featurename with spaces not allowed"
   end
 end

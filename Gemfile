@@ -26,6 +26,10 @@ gem 'mysql2', '0.3.7'
 #   gem 'webrat'
 # end
 
+gem 'i18n-active_record',
+    :git => 'git://github.com/svenfuchs/i18n-active_record.git',
+    :require => 'i18n/active_record'
+
 # In firehose, use this in development mode too
 gem "dalli", "1.0.2"
 gem 'json'

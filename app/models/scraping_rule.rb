@@ -1,6 +1,6 @@
 class ScrapingRule < ActiveRecord::Base
   #Validation for remote_featurename, local_featurename
-  validates :local_featurename,  :presence => true
+  validates :local_featurename,  :presence => true, :format => { :with => /^(\w|_)*$/}
   validates :remote_featurename, :presence => true
   validates :regex, :presence => true
   validates :product_type, :presence => true
@@ -144,7 +144,7 @@ class ScrapingRule < ActiveRecord::Base
 
       # Generate the specs -- group and name
       if r.remote_featurename[/specs\./]
-        identifiers = r.remote_featurename.split(".")
+        identifiers = r.remote_featurename.split(".", 3)
         rule_hash[:specs] = {group: identifiers[1], name: identifiers[2]}
       end
       rules_hash << rule_hash

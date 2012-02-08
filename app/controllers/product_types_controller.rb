@@ -31,7 +31,6 @@ class ProductTypesController < ApplicationController
   # GET /product_types/new
   def new
     @product_type = ProductType.new
-    debugger
     respond_to do |format|
       format.html # new.html.erb
     end
@@ -94,7 +93,7 @@ class ProductTypesController < ApplicationController
   def destroy
     @product_type = ProductType.find(params[:id])
     if @product_type.destroy
-      session.delete(:current_product_type_id)
+      session.delete(:current_product_type_id) if (params[:id] == session[:current_product_type_id])
       respond_to do |format|
         format.html { redirect_to product_types_url }
       end

@@ -1,14 +1,14 @@
 <% case f.feature_type -%>
 <% when 'Continuous', 'Categorical', 'Binary' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
-  	<div>Name: <%= f.name %></div>
-  	<div>DB name: <%= f.name %></div> 
+    <% suffix = (f.style == 'asc' or f.style == 'desc') ? ('_' + f.style) : '' -%>
+  	<div>Name: <span class='edit-translation'><%= t(Session.product_type+'.'+f.used_for+'.'+f.name+suffix+'.name', :default => f.name + suffix) %></span></div>
+  	<div>DB name: <%= (f.name + suffix) %></div> 
  	<% case f.used_for -%> 
   <% when 'filter' -%>
       <div>Display: <%= f.get_display %></div>
-	    <% unless f.feature_type == 'Binary' -%>
-	      <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
-	    <% end %>
+      <div>Unit: <span class='edit-translation'><%= t(Session.product_type+'.'+f.used_for+'.'+f.name+'.unit', :default => '') %></span></div>
+	    <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
   <% when 'sortby' -%>
 	<div>Ordering: 
 	  <select class="sort_option" id="sorting_<%= f.name %>">
@@ -17,13 +17,15 @@
 	    <option value="asc" <%= 'selected=selected' if f.style == "asc" %>>Ascending</option>
 	  </select>
 	</div>
+	<% when 'show' -%>
+	<div>Unit: <span class='edit-translation'><%= t(Session.product_type+'.'+f.used_for+'.'+f.name+'.unit', :default => '') %></span></div>
 	<% end -%>
 	<a class="remove_facet" href="#">Remove</a>
   </div>
 <% when 'Heading' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
+    <div>Name: <span class='edit-translation'><%= t(Session.product_type+'.'+f.used_for+'.'+f.name+'.name', :default => f.name) %></span></div>
     <div>Display: <%= f.get_display  %></div>
-    <div>Name: <%= f.name %></div>
     <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
     <a class="remove_facet" href="#">Remove</a>
   </div>

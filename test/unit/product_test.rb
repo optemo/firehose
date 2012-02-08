@@ -64,12 +64,10 @@ class ProductTest < ActiveSupport::TestCase
   
   test "Product and Spec import from BBY API" do
     sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
-    debugger
     Product.feed_update
     # 20 created(Current BB page size), and 1 in the fixtures Note: this seems to be 19 now
     assert_equal 20, Product.count, "There should be 20 products created in the database" 
     assert_equal false, Product.first.instock
-    debugger
     assert_equal true, Product.all[1..-1].map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
     assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the price is available" #FIXME: fix this test
   end
