@@ -111,12 +111,12 @@ class ChangeProductType < ActiveRecord::Migration
       when 'laptop_bestbuy' then 'B20352'
       when 'camera_futureshop' then 'F1127'
       when 'dslr_futureshop' then 'F23773'
-      when 'lens_flash_filter_futureshop' then 'F25855'
+      #when 'lens_flash_filter_futureshop' then 'F25855'    #uncomment when required by FS
       #Note: have scraping rules for instant_camera_futureshop and digital_photo_frame_futureshop if necessary
       when 'laptop_futureshop' then 'F1002'
       when 'hard_drive_futureshop' then 'F1084'
       when 'usb_drive_futureshop' then ' F23813'
-      when 'drive_futureshop' then 'F1082'  #this is for optical drives. May rename as optical_drive_futureshop 08/02/12
+      when 'optical_drive_futureshop' then 'F1082'
       when 'disc_and_case_futureshop' then '23033'
     end
   end
