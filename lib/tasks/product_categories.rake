@@ -9,12 +9,12 @@ task :fill_categories => :environment do
   # when the children of a node are done, set node.left to ++n;
 
   
-  traverse({'20005'=>'Cameras & Camcorders'}, 0, 1)
+  traverse({'Departments'=>'Departments'}, 1, 1)
   debugger
   # $english = false
   # traverse({'20005'=>'Departments'}, 0, 1)
   
-  puts 'Done saving categories'
+  puts 'Done saving categories!'
 end
 
 def traverse(root_node, i, level)
@@ -27,23 +27,32 @@ def traverse(root_node, i, level)
   
   retailer = ENV["retailer"]
   prefix = retailer == 'bestbuy' ? 'B' : 'F'
-  i = i + 1
+  
   cat = ProductCategory.new(:product_type => prefix + catid, :feed_id => catid, :retailer => retailer, 
         :l_id => i, :level => level)
-  # Store a translation in locale for catid -> name
+  
+  i = i + 1
   
   I18n.backend.store_translations(:en, cat.product_type => { "name" => english_name} )
   I18n.backend.store_translations(:fr, cat.product_type => { "name" => french_name} )
-  #debugger
   
-  children = BestBuyApi.get_subcategories(catid).values.first
-  
-  children.each do |child|
-    traverse(child, i, level+1)
+  begin
+    children = BestBuyApi.get_subcategories(catid).values.first
+  rescue Exception
+    puts catid
+    puts 'got timeout; waiting and trying again'
+    sleep(10)
+    children = BestBuyApi.get_subcategories(catid).values.first
   end
   
-  i = i + 1
+  children.each do |child|
+    i = traverse(child, i, level+1)
+  end
+  
   cat.r_id = i
   cat.save()
+  
+  i = i + 1
+  return i
 end
 
