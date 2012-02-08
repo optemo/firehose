@@ -135,7 +135,11 @@ class BestBuyApi
       request_url = prepare_url(type,params)
       #puts "#{request_url}"
       log "Request URL: #{request_url}"
-      res = Net::HTTP.get_response(URI::parse(request_url))
+      begin
+        res = Net::HTTP.get_response(URI::parse(request_url))
+      rescue Timeout::Error
+        raise BestBuyApi::RequestError, "Timeout Error"
+      end
       #puts "#{res.body}"
       unless res.kind_of? Net::HTTPSuccess
         #if res.code == 302
