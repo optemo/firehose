@@ -98,4 +98,5 @@ FactoryGirl.define do
   factory :product_bundle do
     association :product
   end
+  factory :product_category
 end
