@@ -9,8 +9,14 @@ task :assign_leafs => :environment do
     #Find the leaf nodes
     leafnodes = []
     treenodes.each do |tnode|
-      children = BestBuyApi.get_subcategories(tnode).values.first.map do |hash|
-        hash.keys.first
+      begin
+        children = BestBuyApi.get_subcategories(tnode).values.first.map do |hash|
+          hash.keys.first
+        end
+      rescue BestBuyApi::TimeoutError
+        puts "Timeout for #{p.sku}"
+        sleep 30
+        retry
       end
       if children.empty?
         leafnodes << tnode
@@ -22,12 +28,15 @@ task :assign_leafs => :environment do
     end
     
     #Search for this product in the leaf nodes
-    found = BestBuyApi.category_ids(leafnodes).select{|bbp|bbp.id == p.sku}.first
-    if found.nil?
-      puts "#{leafnodes}"
-      exit
+    begin
+      found = BestBuyApi.category_ids(leafnodes).select{|bbp|bbp.id == p.sku}.first
+    rescue BestBuyApi::TimeoutError
+      puts "Timeout for #{p.sku}"
+      sleep 30
+      retry
     end
     #Update product_type to leaf node
-    product_type.update_attribute(:value, product_type.value[0]+found.category)
+    product_type.update_attribute(:value, product_type.value[0]+(found.try(:category)||"0000"))
+    puts "Updated #{p.sku}"
   end
 end

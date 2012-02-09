@@ -26,7 +26,7 @@ def traverse(root_node, i, level)
   
   begin
     children = BestBuyApi.get_subcategories(catid).values.first
-  rescue BestBuyApi::RequestError
+  rescue BestBuyApi::TimeoutError
     puts catid
     puts 'got timeout; waiting and trying again'
     sleep(60)

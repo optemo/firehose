@@ -2,6 +2,7 @@ class BestBuyApi
   require 'net/http'
   class RequestError < StandardError; end
   class FeedDownError < StandardError; end
+  class TimeoutError < StandardError; end
   class << self
     
     if ENV["retailer"].nil?
@@ -149,7 +150,7 @@ class BestBuyApi
       begin
         res = Net::HTTP.get_response(URI::parse(request_url))
       rescue Timeout::Error
-        raise BestBuyApi::RequestError, "Timeout Error"
+        raise BestBuyApi::TimeoutError
       end
       #puts "#{res.body}"
       unless res.kind_of? Net::HTTPSuccess
