@@ -156,7 +156,8 @@ function collect_attributes(element_class) {
   var ordered_facets = new Array();
   $(element_class).each (function (index) {
     var type = $(this).attr('data-type');
-    var dbname = $(this).attr('data-id');
+    var dbname = $(this).attr('data-name');
+    var dbid = $(this).attr('data-id');
     var unit = "";
     var display = $(this).children().children('span').first().html();
     if (display == null) {
@@ -178,7 +179,7 @@ function collect_attributes(element_class) {
         unit = "";
       }
     }
-    ordered_facets[index] = [type,dbname,display,unit,styled];
+    ordered_facets[index] = [dbid,type,dbname,display,unit,styled];
   });
   return ordered_facets;
 }
@@ -186,7 +187,7 @@ function collect_attributes(element_class) {
 function collect_names(element_class) {
   var ordered_results = [];
   $(element_class).each (function (index) {
-    ordered_results.push($(this).attr('data-id'));
+    ordered_results.push($(this).attr('data-name'));
   });
   return ordered_results;
 }
