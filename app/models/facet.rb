@@ -4,7 +4,7 @@ class Facet < ActiveRecord::Base
   
   def self.check_active
      facets_to_save = []
-     Facet.where(product_type_id: Session.product_type_id, feature_type: 'Binary').each do |facet|
+     Facet.where(product_type: Session.product_type, feature_type: 'Binary').each do |facet|
        products_counts = BinSpec.joins("INNER JOIN products on products.id=product_id").where(bin_specs: {name: facet.name, product_type: Session.product_type},products: {instock: 1}).count
        facet.active = (products_counts > 0 ? 1 : 0)
        facets_to_save << facet
@@ -29,7 +29,7 @@ class Facet < ActiveRecord::Base
    
    def self.update_layout(product_type, used_for, facet_set)
      # delete all existing facets for that pid and used_for
-     Facet.delete_all(["used_for = ? AND product_type_id = ?", used_for, product_type])
+     Facet.delete_all(["used_for = ? AND product_type = ?", used_for, product_type])
      # add facets from the input set
      facet_set.each_pair do |index, vals|
        fn = Facet.new()

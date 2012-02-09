@@ -27,8 +27,8 @@ class Product < ActiveRecord::Base
   }
   
   def self.feed_update
-    raise ValidationError unless Session.category_id
-    product_skus = BestBuyApi.category_ids(Session.category_id)
+    raise ValidationError unless Session.product_type
+    product_skus = BestBuyApi.category_ids(Session.product_type)
     #product_skus.uniq!{|a|a.id} #Uniqueness check
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
@@ -150,13 +150,6 @@ class Product < ActiveRecord::Base
 
     # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
     ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-
-    #Clear the search_product cache in the database
-    SearchProduct.transaction do
-      SearchProduct.delete_all(["search_id = ?",Session.product_type_id])
-      # Bulk insert for efficiency. 
-      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => Session.product_type_id)})
-    end
   end
   
   

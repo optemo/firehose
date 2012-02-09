@@ -5,11 +5,9 @@ one:
   product_id: 1
   name: MyString
   value: MyText
-  product_type: MyString
 
 two:
   id: 2
   product_id: 45
   name: MyString
   value: MyText
-  product_type: MyString
