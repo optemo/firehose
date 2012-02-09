@@ -11,7 +11,7 @@
         
         <form id="filter_form">
           Product type
-          <% @slt = params[:product_type].nil? ? Session.product_type_id : params[:product_type] %>
+          <% @slt = params[:product_type].nil? ? Session.product_type : params[:product_type] %>
           <select id="type_filter" name="product_type">
             <% ProductType.all.collect do |p| %>
               <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
