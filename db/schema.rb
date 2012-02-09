@@ -11,16 +11,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120201222536) do
+ActiveRecord::Schema.define(:version => 20120121023426) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
     t.string   "name"
     t.boolean  "value"
-    t.string   "product_type"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "modified"
+    t.integer  "product_type_id"
   end
 
   add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
@@ -245,9 +245,9 @@ ActiveRecord::Schema.define(:version => 20120201222536) do
     t.float   "max"
     t.text    "valid_inputs"
     t.string  "rule_type"
+    t.boolean "active",             :default => true
     t.integer "priority",           :default => 0
     t.boolean "french",             :default => false
-    t.boolean "active",             :default => true
   end
 
   create_table "search_products", :force => true do |t|
@@ -299,13 +299,11 @@ ActiveRecord::Schema.define(:version => 20120201222536) do
   add_index "text_specs", ["product_id", "name"], :name => "index_text_specs_on_product_id_and_name", :unique => true
 
   create_table "translations", :force => true do |t|
-    t.string   "locale"
-    t.string   "key"
-    t.text     "value"
-    t.text     "interpolations"
-    t.boolean  "is_proc",        :default => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string  "locale"
+    t.string  "key"
+    t.text    "value"
+    t.text    "interpolations"
+    t.boolean "is_proc",        :default => false
   end
 
   create_table "urls", :id => false, :force => true do |t|
