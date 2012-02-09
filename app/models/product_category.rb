@@ -3,23 +3,23 @@ class ProductCategory < ActiveRecord::Base
   def self.get_children(nodes, level=nil)
     nodes = [nodes] unless nodes.class == Array
     search = build_query(nodes, left="l_id > ", right="r_id < ", level)
-    return ProductCategory.where(search)
+    return ProductCategory.where(search).map{|x| x.product_type}
   end
   
   def self.get_ancestors(nodes, level=nil)
     nodes = [nodes] unless nodes.class == Array
     search = build_query(nodes, left="l_id < ", right="r_id > ", level)
-    return ProductCategory.where(search)
+    return ProductCategory.where(search).map{|x| x.product_type}
   end
   
   def self.get_subcategories(node)
     root = ProductCategory.where(:product_type => node).first
-    return ProductCategory.where("l_id > ? and r_id < ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level+1)
+    return ProductCategory.where("l_id > ? and r_id < ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level+1).map{|x| x.product_type}
   end  
   
   def self.get_parent(node)
     root = ProductCategory.where(:product_type => node).first
-    return ProductCategory.where("l_id < ? and r_id > ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level-1) 
+    return ProductCategory.where("l_id < ? and r_id > ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level-1) .map{|x| x.product_type}
   end
   
   def self.build_query(nodes, left, right, level)
