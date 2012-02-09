@@ -1,32 +1,25 @@
-
-
 price:
   id: 100
   product_id: 95
   name: price
   value: 279.97
-  product_type: camera_bestbuy
 saleprice:
   id: 101
   product_id: 95
   name: saleprice
   value: 249.97
-  product_type: camera_bestbuy
 rating:
   id: 102
   product_id: 95
   name: customerRating
   value: 3.75
-  product_type: camera_bestbuy
 zoom:
   id: 103
   product_id: 95
   name: opticalzoom
   value: 14
-  product_type: camera_bestbuy
 maxresolution:
   id: 105
   product_id: 95
   name: maxresolution
   value: 14.1
-  product_type: camera_bestbuy
