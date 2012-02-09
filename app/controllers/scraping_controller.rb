@@ -3,17 +3,12 @@ class ScrapingController < ApplicationController
   end
   
   def datafeed
-    # This function shows the application frame and shows a list of the products for a given category.
-    if params[:category_id]
-      Session.category_id = params[:category_id]
-    end
-    @product_skus = BestBuyApi.category_ids(Session.category_id)
+    @product_skus = BestBuyApi.category_ids(Session.product_type)
   end
 
   def scrape
-    ids = params[:id].split(',') # the patten of params[:id] is product_id,category_id
-    @id = ids[0]
-    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => ids[1]),true)
+    @id, category = params[:id].split(',') # the patten of params[:id] is product_id,category_id
+    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => category),true)
     render :layout => false
   end
   
@@ -42,7 +37,7 @@ class ScrapingController < ApplicationController
     
     if params[:coverage] || full
       @coverage = {}
-      products = full ? BestBuyApi.category_ids(Session.category_id) : BestBuyApi.some_ids(Session.category_id)
+      products = full ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
       @products_count = products.count
       ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
         groups = candidates.group_by(&:scraping_rule_id)

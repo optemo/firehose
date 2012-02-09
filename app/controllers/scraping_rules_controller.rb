@@ -71,7 +71,7 @@ class ScrapingRulesController < ApplicationController
   end
   
   def show
-    products = request.referer =~ /results/ ? BestBuyApi.category_ids(Session.category_id) : BestBuyApi.some_ids(Session.category_id)
+    products = request.referer =~ /results/ ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
     scraping_rules = Maybe(params[:id]).split('-')
     @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
     if scraping_rules.length > 1

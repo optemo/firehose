@@ -55,8 +55,6 @@ FactoryGirl.define do
     total 0
   end
   factory :product do
-    title {|n| "Product#{n}"}
-    product_type "camera_bestbuy"
     instock true
   end
   factory :product_type do
@@ -67,7 +65,7 @@ FactoryGirl.define do
   end
   factory :scraping_correction do
     #association :scraping_rule
-    product_type "camera_bestbuy"
+    product_type "B20243"
     raw "error--"
     corrected "good to go"
     product_id "100000B" #SKU
@@ -77,7 +75,6 @@ FactoryGirl.define do
   end
   factory :cat_spec do
     association :product
-    product_type "camera_bestbuy"
   end
   factory :bin_spec do
     association :product
@@ -87,7 +84,6 @@ FactoryGirl.define do
   end
   factory :text_spec do
     association :product
-    product_type "camera_bestbuy"
   end
   factory :search_product do
     association :product
