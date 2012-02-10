@@ -15,8 +15,7 @@ class ScrapingRule < ActiveRecord::Base
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
-    #We will need to keep product_type if we want to keep this here
-    corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type_leaves)
+    corrections = ScrapingCorrection.all
 
     ids.each do |bbproduct|
       raw_return = nil
@@ -117,7 +116,7 @@ class ScrapingRule < ActiveRecord::Base
     # return rules with the regexp objects
     rules_hash = []
     rules = [rules] unless rules.class == Array #Create an array if necessary
-    rules = ScrapingRule.find_all_by_product_type(Session.product_type_leaves) if rules.empty?
+    rules = ScrapingRule.find_all_by_product_type(Session.product_type_branch) if rules.empty?
     #Multi can be nil, true, or false
     # If nil, it will be ignored
     # If true it will only return candidates from multiple remote_featurenames for one local_featurename
