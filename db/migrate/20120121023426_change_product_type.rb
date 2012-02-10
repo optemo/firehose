@@ -22,8 +22,8 @@ class ChangeProductType < ActiveRecord::Migration
       remove_column :facets, :product_type_id
 
       #Product Variations
-      remove_column :product_bundles, :product_type
-      remove_column :product_siblings, :product_type
+      convert_type(ProductBundle) #Leaf Node
+      convert_type(ProductSibling) #Leaf Node
 
       #Scraping
       remove_column :scraping_corrections, :product_type
@@ -66,10 +66,6 @@ class ChangeProductType < ActiveRecord::Migration
       #Facets
       add_column :facets, :product_type_id, :integer
       remove_column :facets, :product_type
-
-      #Product Variations
-      add_column :product_bundles, :product_type, :string
-      add_column :product_siblings, :product_type, :string
 
       #Scraping
       add_column :scraping_corrections, :product_type, :string

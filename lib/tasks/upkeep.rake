@@ -59,7 +59,7 @@ task :bundles => :environment do
     end
   end
 
-  Result.find_bundles
+  ProductBundle.get_relations
 end
 
 namespace :cache do

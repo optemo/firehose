@@ -22,9 +22,7 @@ class Product < ActiveRecord::Base
   end
   
   scope :instock, :conditions => {:instock => true}
-  scope :current_type, lambda {
-    {:conditions => {:product_type => Session.product_type}}
-  }
+  scope :current_type, joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})
   
   def self.feed_update
     raise ValidationError unless Session.product_type
@@ -76,7 +74,7 @@ class Product < ActiveRecord::Base
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
     Result.upkeep_pre
-    Result.find_bundles
+    ProductBundle.get_relations
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded
