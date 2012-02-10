@@ -21,7 +21,7 @@ class ApplicationController < ActionController::Base
     elsif session[:current_product_type_id] #Load from cookie if present
       Session.new session[:current_product_type_id]
     else
-      default_type = ProductType.first.id
+      default_type = ProductCategory.first.product_type
       Session.new default_type
       session[:current_product_type_id] = default_type
     end
