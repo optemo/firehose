@@ -2,24 +2,42 @@ class ProductCategory < ActiveRecord::Base
   
   def self.get_children(nodes, level=nil)
     nodes = [nodes] unless nodes.class == Array
-    search = build_query(nodes, left="l_id > ", right="r_id < ", level)
-    return ProductCategory.where(search) if search 
+    search = build_query(nodes, left="l_id > ", right="r_id < ", level)  
+    if search
+      CachingMemcached.cache_lookup("ProductCategory#{search.hash}") do
+        ProductCategory.where(search).map(&:product_type)
+      end
+    end
   end
   
   def self.get_ancestors(nodes, level=nil)
     nodes = [nodes] unless nodes.class == Array
     search = build_query(nodes, left="l_id < ", right="r_id > ", level)
-    return ProductCategory.where(search).map{|x| x.product_type} if search
+    if search
+      CachingMemcached.cache_lookup("ProductCategory#{search.hash}") do
+        ProductCategory.where(search).map(&:product_type)
+      end
+    end
   end
   
   def self.get_subcategories(node)
     root = ProductCategory.where(:product_type => node).first
-    return ProductCategory.where("l_id > ? and r_id < ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level+1).map{|x| x.product_type} if root
+    search = "l_id > #{root.l_id} and r_id < #{root.r_id} and retailer = '#{root.retailer}' and level = #{root.level+1}" if root
+    if search
+      CachingMemcached.cache_lookup("ProductCategory#{search.hash}") do
+        ProductCategory.where(search).map(&:product_type)
+      end
+    end
   end  
   
   def self.get_parent(node)
     root = ProductCategory.where(:product_type => node).first
-    return ProductCategory.where("l_id < ? and r_id > ? and retailer = ? and level = ?", root.l_id, root.r_id, root.retailer, root.level-1) .map{|x| x.product_type} if root
+    search = "l_id < #{root.l_id} and r_id > #{root.r_id} and retailer = '#{root.retailer}' and level = #{root.level-1}" if root
+    if search
+      CachingMemcached.cache_lookup("ProductCategory#{search.hash}") do
+        ProductCategory.where(search).map(&:product_type) 
+      end
+    end
   end
   
   def self.build_query(nodes, left, right, level)
@@ -37,10 +55,15 @@ class ProductCategory < ActiveRecord::Base
     return overall_search.join(" OR ") unless overall_search.blank?
   end
   
-  def self.leaves (node)
-    node = [node] unless node.class == Array
+  def self.leaves (nodes)
+    nodes = [nodes] unless nodes.class == Array
    # node = node[0..0] if Rails.env.test? #Only check first node for testing
-     return leaves= get_children(node).where("l_id = (r_id-1)").map{|x| x.product_type}.uniq
+    search = build_query(nodes, left="l_id > ", right="r_id < ",nil)  
+    if search
+      CachingMemcached.cache_lookup("ProductCategory_leaves#{search.hash}") do
+        ProductCategory.where(search).where("l_id=(r_id-1)").map(&:product_type)
+      end
+    end
   end
  
   def self.print(product_types)
