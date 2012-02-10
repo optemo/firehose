@@ -16,7 +16,8 @@ class ScrapingRule < ActiveRecord::Base
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
     #We will need to keep product_type if we want to keep this here
-    corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type_leaves)
+    #corrections = ScrapingCorrection.find_all_by_product_type(Session.product_type_leaves)
+    corrections = ScrapingCorrection.all
 
     ids.each do |bbproduct|
       raw_return = nil

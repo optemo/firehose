@@ -20,11 +20,10 @@ FactoryGirl.define do
         "Binary"
       end}
     regex ".*"
-    active true
   end
   
   factory :facet do
-    product_type_id 2
+    product_type "B20218"
     sequence(:name) {|n| "facet#{n}"}
     sequence(:feature_type) {|n|
       case n % 3
@@ -65,7 +64,6 @@ FactoryGirl.define do
   end
   factory :scraping_correction do
     #association :scraping_rule
-    product_type "B20243"
     raw "error--"
     corrected "good to go"
     product_id "100000B" #SKU

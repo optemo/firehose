@@ -1,7 +1,7 @@
 
 onsale:
   id: 1
-  product_type: 2
+  product_type: B20218
   name: onsale
   feature_type: Binary
   used_for: utility
@@ -9,7 +9,7 @@ onsale:
   active: 1
 customerRating:
   id: 2
-  product_type: 2
+  product_type: B20218
   name: customerRating
   feature_type: Continuous
   used_for: utility
@@ -17,7 +17,7 @@ customerRating:
   active: 1
 saleprice:
   id: 3
-  product_type: 2
+  product_type: B20218
   name: saleprice
   feature_type: Continuous
   used_for: utility
@@ -25,7 +25,7 @@ saleprice:
   active: 1
 maxresolution:
   id: 4
-  product_type: 2
+  product_type: B20218
   name: maxresolution
   feature_type: Continuous
   used_for: utility
@@ -33,7 +33,7 @@ maxresolution:
   active: 1
 opticalzoom:
   id: 5
-  product_type: 2
+  product_type: B20218
   name: opticalzoom
   feature_type: Continuous
   used_for: utility
@@ -41,7 +41,7 @@ opticalzoom:
   active: 1
 brand:
   id: 6
-  product_type: 2
+  product_type: B20218
   name: brand
   feature_type: Categorical
   used_for: utility
@@ -49,7 +49,7 @@ brand:
   active: 1
 featured:
   id: 7
-  product_type: 2
+  product_type: B20218
   name: featured
   feature_type: Binary
   used_for: utility

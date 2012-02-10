@@ -6,12 +6,12 @@ class ProductTypesControllerTest < ActionController::TestCase
   end
 
   test "should get index" do
-    get :index
-    assert_equal Session.product_type, "camera_bestbuy", "The Session product type should be set"
-    assert session[:current_product_type_id], "The session should be stored in a cookie"
-    assert_redirected_to product_type_path(assigns(:product_type))
-  end
-  
+      get :index
+      assert_equal Session.product_type, "camera_bestbuy", "The Session product type should be set"
+      assert session[:current_product_type_id], "The session should be stored in a cookie"
+      assert_redirected_to product_type_path(assigns(:product_type))
+    end
+    
   test "should show product_type" do
     prod_type = product_types(:two)
     category1 = category_id_product_type_maps(:three)
