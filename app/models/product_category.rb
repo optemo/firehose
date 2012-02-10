@@ -55,7 +55,7 @@ class ProductCategory < ActiveRecord::Base
     return overall_search.join(" OR ") unless overall_search.blank?
   end
   
-  def self.leaves (nodes)
+  def self.get_leaves (nodes)
     nodes = [nodes] unless nodes.class == Array
    # node = node[0..0] if Rails.env.test? #Only check first node for testing
     search = build_query(nodes, left="l_id > ", right="r_id < ",nil)  

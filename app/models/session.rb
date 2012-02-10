@@ -11,11 +11,11 @@ class Session
   end
   
   def self.product_type_leaves
-    #get_leaves(@product_type)
+    ProductCategory.get_leaves(@product_type)
   end
   
   def self.product_type_branch
-    #get_ancestors(@product_type)+[@product_type]+get_children(@product_type)
+    ProductCategory.get_ancestors(@product_type)+[@product_type]+ProductCategory.get_children(@product_type)
   end
   
   def self.set_features(categories = [])
