@@ -92,5 +92,8 @@ FactoryGirl.define do
   factory :product_bundle do
     association :product
   end
-  factory :product_category
+  factory :product_category do
+    retailer "bestbuy"
+    feed_id 0
+  end
 end

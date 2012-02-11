@@ -6,7 +6,8 @@ class ProductTypesController < ApplicationController
       pid = params[:product_type]
     end
     @product_type = ProductType.find(pid)
-    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(pid)
+    @categories = nil
+    # @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(pid)
     
     respond_to do |format|
       if params[:ajax] == 'true'
@@ -20,7 +21,8 @@ class ProductTypesController < ApplicationController
 
   def show
     @product_type = ProductType.find(params[:id])
-    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
+    @categories = []
+    #@categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
     session[:current_product_type_id] = params[:id]
 
     respond_to do |format|
@@ -87,7 +89,8 @@ class ProductTypesController < ApplicationController
   
   def edit
     @product_type = ProductType.find(params[:id])
-    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
+    @categories = []
+#    @categories = CategoryIdProductTypeMap.find_all_by_product_type_id(params[:id])
   end
 
   def destroy
