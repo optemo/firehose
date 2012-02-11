@@ -4,9 +4,9 @@ def save_daily_sales
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
-    
+  
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "9-Sep-2011"]) 
+  msgs = imap.search(["BEFORE", "6-Feb-2012","SINCE", "5-Feb-2012"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -19,8 +19,8 @@ def save_daily_sales
         i+=1 
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
-        then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-        
+        then_date = Date.parse(msg.attr["ENVELOPE"].date)
+        #then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
         cName = "#{Rails.root}/tmp/#{then_date}.zip" 
         
   # fetch attachment. 
@@ -43,7 +43,6 @@ def save_daily_sales
   # Open csv file
   # ************* ROBS CHANGES ************
         contspecs = []
-        
         #sometimes the top email will be a weekly email.  I don't want to process this
         weekly=false
         if csvfile =~ /.+-.+-.+/
@@ -68,17 +67,16 @@ def save_daily_sales
               orders_map[sku] = orders if sku
             end
           end
-          
-          instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")
-          instock.each do |prod_sku|
+          products = DailySpec.where(:date => then_date.prev_day().strftime("%Y-%m-%d")).select("DISTINCT(sku)")
+          products.each do |prod_sku|
             sku = prod_sku.sku
-            product_type = DailySpec.find_by_sku(sku).product_type
+            product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
             orders_spec = orders_map[sku]
             orders = (orders_spec.nil?) ? "0" : orders_spec
             # write orders to daily_sales for the date and the sku
-            ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "sales", :value_flt => orders, :product_type => product_type, :date => then_date)
+            ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "orders", :value_flt => orders, :product_type => product_type, :date => then_date.prev_day().strftime("%Y-%m-%d"))
             to_write=sku.to_s+" "+orders.to_s + " " + product_type + "\n"
-            cumullative.write(then_date+" "+to_write)
+            cumullative.write(then_date.prev_day().strftime("%Y-%m-%d")+" "+to_write)
             ds.save
           end
           cumullative.close()

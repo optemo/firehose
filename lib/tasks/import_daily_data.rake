@@ -17,6 +17,7 @@ end
 
 def import_data(raw)
   directory = "/optemo/snapshots/slicehost"
+  
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
     if entry =~ /\.gz/
@@ -28,14 +29,14 @@ def import_data(raw)
   Dir.foreach(directory) do |snapshot|
     if snapshot =~ /\.sql/
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
-      puts 'making records for date' + date.to_s
+      puts 'making records for date ' + date.to_s
       # import data from the snapshot to the temp database
-      puts "mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}"
-      %x[mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}]
+      puts "mysql -u marc -p keiko2010 -h jaguar temp < #{directory}/#{snapshot}"
+      %x[mysql -u marc -p keiko2010 -h jaguar temp < #{directory}/#{snapshot}]
 
+      #username and password cannot be company's (optemo, tiny******)
       ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-        :username => "oana", :password => "cleanslate")
-      
+        :username => "marc", :password => "keiko2010")
       case raw
       when true
         specs = get_instock_attributes()
@@ -54,7 +55,9 @@ end
 def get_instock_factors()
   
   specs = []
-  instock = Product.find_all_by_product_type_and_instock("camera_bestbuy", 1)
+  
+  #instock = Product.find_all_by_product_type_and_instock("camera_bestbuy", 1)
+  
   instock.each do |p|
     
     sku = p.sku
@@ -103,57 +106,94 @@ end
 # output: an array of hashes of the selected specs, one entry per product
 def get_instock_attributes()
   specs = []
-  instock = Product.find_all_by_product_type_and_instock("camera_bestbuy", 1)
+  instock = Product.find_all_by_instock(1)
   instock.each do |p|
     sku = p.sku
     pid = p.id
     saleprice = ContSpec.find_by_product_id_and_name(pid,"saleprice")
-    maxresolution = ContSpec.find_by_product_id_and_name(pid,"maxresolution")
-    opticalzoom = ContSpec.find_by_product_id_and_name(pid,"opticalzoom")
-    #orders = ContSpec.find_by_product_id_and_name(pid,"orders")
     brand = CatSpec.find_by_product_id_and_name(pid,"brand")
-    
-    # if any of the expected features do not have values in the DB, don't create a new spec for that product
-    if maxresolution.nil? or opticalzoom.nil? or brand.nil?
-      print "found nil raw features for "
-      print pid
-      next
+    if saleprice != nil && brand != nil
+      new_spec = {:sku => sku, :saleprice => saleprice.value, :brand => brand.value, :product_type => saleprice.product_type}
+      specs << new_spec
+#    elsif brand != nil
+#      new_spec = {:sku => sku, :brand => brand.value, :product_type => brand.product_type} 
+#    elsif saleprice != nil
+#      new_spec = {:sku => sku, :saleprice => saleprice.value, :product_type => saleprice.product_type}
+    else
+      puts "SKU: #{sku} has no price and/or brand"
     end
-    # featured and onsale may be nil when the value is not missing value but should be of 0
-    featured = BinSpec.find_by_product_id_and_name(pid,"featured") # if nil -> 0, else value
-    onsale = BinSpec.find_by_product_id_and_name(pid,"onsale")
-    featured = featured.nil? ? 0 : 1
-    onsale = onsale.nil? ? 0 : 1
-    
-    new_spec = {:sku => sku, :saleprice => saleprice.value, :maxresolution => maxresolution.value, 
-      :opticalzoom => opticalzoom.value, :orders => orders.value, :brand => brand.value, 
-      :featured => featured, :onsale => onsale}
-    specs << new_spec
+#    specs << new_spec
   end
   return specs
 end
 
+####ORIGINAL CODE ######
+#def get_instock_attributes()
+#  specs = []
+#  
+#  instock = Product.find_all_by_product_type_and_instock("camera_bestbuy", 1)
+#  instock.each do |p|
+#    sku = p.sku
+#    pid = p.id
+#    saleprice = ContSpec.find_by_product_id_and_name(pid,"saleprice")
+#    maxresolution = ContSpec.find_by_product_id_and_name(pid,"maxresolution")
+#    opticalzoom = ContSpec.find_by_product_id_and_name(pid,"opticalzoom")
+#    #orders = ContSpec.find_by_product_id_and_name(pid,"orders")
+#    brand = CatSpec.find_by_product_id_and_name(pid,"brand")
+#    
+#    # if any of the expected features do not have values in the DB, don't create a new spec for that product
+#    if maxresolution.nil? or opticalzoom.nil? or brand.nil?
+#      print "found nil raw features for "
+#      print pid
+#      next
+#    end
+#    # featured and onsale may be nil when the value is not missing value but should be of 0
+#    featured = BinSpec.find_by_product_id_and_name(pid,"featured") # if nil -> 0, else value
+#    onsale = BinSpec.find_by_product_id_and_name(pid,"onsale")
+#    featured = featured.nil? ? 0 : 1
+#    onsale = onsale.nil? ? 0 : 1
+#    
+#    new_spec = {:sku => sku, :saleprice => saleprice.value, :maxresolution => maxresolution.value, 
+#      :opticalzoom => opticalzoom.value, :orders => orders.value, :brand => brand.value, 
+#      :featured => featured, :onsale => onsale}
+#    
+#    specs << new_spec
+#  end
+#  return specs
+#end
+
 def update_daily_specs(date, specs, raw)
-  product_type = "camera_bestbuy"
   specs.each do |attributes|
     sku = attributes[:sku]
     if raw == true
-      add_daily_spec(sku, "cont", "saleprice", attributes[:saleprice], product_type, date)
-      add_daily_spec(sku, "cont", "maxresolution", attributes[:maxresolution], product_type, date)
-      add_daily_spec(sku, "cont", "opticalzoom", attributes[:opticalzoom], product_type, date)
-      add_daily_spec(sku, "cont", "orders", attributes[:orders], product_type, date)
-      add_daily_spec(sku, "cat", "brand", attributes[:brand], product_type, date)
-      add_daily_spec(sku, "bin", "featured", attributes[:featured], product_type, date)
-      add_daily_spec(sku, "bin", "onsale", attributes[:onsale], product_type, date)
-    elsif raw == false
-      add_daily_spec(sku, "cont", "price_factor", attributes[:price_factor], product_type, date)
-      add_daily_spec(sku, "cont", "maxresolution_factor", attributes[:maxresolution_factor], product_type, date)
-      add_daily_spec(sku, "cont", "opticalzoom_factor", attributes[:opticalzoom_factor], product_type, date)
-      add_daily_spec(sku, "cont", "onsale_factor", attributes[:onsale_factor], product_type, date)
-      add_daily_spec(sku, "cont", "featured_factor", attributes[:featured_factor], product_type, date)
+      add_daily_spec(sku, "cont", "saleprice", attributes[:saleprice], attributes[:product_type], date)
+      add_daily_spec(sku, "cat", "brand", attributes[:brand], attributes[:product_type], date)
     end
   end
 end
+
+####ORIGINAL CODE ######
+#def update_daily_specs(date, specs, raw)
+#  product_type = "camera_bestbuy"
+#  specs.each do |attributes|
+#    sku = attributes[:sku]
+#    if raw == true
+#      add_daily_spec(sku, "cont", "saleprice", attributes[:saleprice], product_type, date)
+#      add_daily_spec(sku, "cont", "maxresolution", attributes[:maxresolution], product_type, date)
+#      add_daily_spec(sku, "cont", "opticalzoom", attributes[:opticalzoom], product_type, date)
+#      add_daily_spec(sku, "cont", "orders", attributes[:orders], product_type, date)
+#      add_daily_spec(sku, "cat", "brand", attributes[:brand], product_type, date)
+#      add_daily_spec(sku, "bin", "featured", attributes[:featured], product_type, date)
+#      add_daily_spec(sku, "bin", "onsale", attributes[:onsale], product_type, date)
+#    elsif raw == false
+#      add_daily_spec(sku, "cont", "price_factor", attributes[:price_factor], product_type, date)
+#      add_daily_spec(sku, "cont", "maxresolution_factor", attributes[:maxresolution_factor], product_type, date)
+#      add_daily_spec(sku, "cont", "opticalzoom_factor", attributes[:opticalzoom_factor], product_type, date)
+#      add_daily_spec(sku, "cont", "onsale_factor", attributes[:onsale_factor], product_type, date)
+#      add_daily_spec(sku, "cont", "featured_factor", attributes[:featured_factor], product_type, date)
+#    end
+#  end
+#end
 
 def add_daily_spec(sku, spec_type, name, value, product_type, date)
   case spec_type

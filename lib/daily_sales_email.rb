@@ -27,6 +27,7 @@ def read_daily_sales
         File.open(cName,'wb+') do |f|
           f.write(attachment.unpack('m')[0])
         end
+  
   # Unzip file
         #I coulnd't figure out how to unzip a string, otherwise we could do this whole thing in memory instead of temp files
         csvfile = ""
@@ -68,7 +69,8 @@ def read_daily_sales
           
           # Changed: instead of looking at instock, get and look up
           # in the daily_specs table which skus are listed for the given date
-          instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")          
+          instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")    
+                debugger      
           instock.each do |daily_spec|
             sku = daily_spec.sku
             product = Product.find_by_sku(sku)
@@ -83,6 +85,7 @@ def read_daily_sales
               puts ActiveRecord::Base.connection
               product_type = "camera_bestbuy"
               camera_features['saleprice', 'price', 'maxresolution', 'opticalzoom', '']
+              
               # FIXME: refactor the code below
               specs.each do |attributes|
                 sku = attributes[:sku]
@@ -115,34 +118,35 @@ def read_daily_sales
 
             
             
-            to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
-            add_on=""
-            if product.product_type=="camera_bestbuy"
-              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
-            end
-            if product.product_type=="drive_bestbuy"
-              add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
-                     " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
-                     " "+product.cont_specs.find_by_name("orders_factor").value.to_s
-            end
-            
-            today_data.write(to_write+add_on+"\n")
-            cumullative.write(then_date+" "+to_write+add_on+"\n")
+         #  to_write=sku.to_s+" "+u.value.to_s+" "+orders.to_s+" "+product.product_type
+         #  add_on=""
+         #  if product.product_type=="camera_bestbuy"
+         #    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("maxresolution_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("opticalzoom_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("orders_factor").value.to_s                         
+         #  end
+         #  if product.product_type=="drive_bestbuy"
+         #    add_on=" "+product.cont_specs.find_by_name("saleprice_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("brand_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("onsale_factor").value.to_s+
+         #           " "+product.cont_specs.find_by_name("capacity_factor").value.to_s+                           
+         #           " "+product.cont_specs.find_by_name("orders_factor").value.to_s
+         #  end
+         #  
+         #   today_data.write(to_write+add_on+"\n")
+         #   cumullative.write(then_date+" "+to_write+add_on+"\n")
 
           end
-          today_data.close()
-          cumullative.close()
+        #  today_data.close()
+        #  cumullative.close()
         end
   # ******************************************
       end 
-      unless weekly
+      process_everything = true
+      unless process_everything
         break; #Only process the first email, unless that email is a weekly email
       end
     end 
