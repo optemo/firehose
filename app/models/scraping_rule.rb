@@ -15,7 +15,6 @@ class ScrapingRule < ActiveRecord::Base
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
-    
     corrections = ScrapingCorrection.all
 
     ids.each do |bbproduct|
@@ -107,10 +106,6 @@ class ScrapingRule < ActiveRecord::Base
   def self.rules_by_priority(data)
     # This function checks the data passed in to see if there are multiple remote features being put into a single remote feature.
     data.to_a.sort{|a,b| a[1]["rule"].priority <=> b[1]["rule"].priority}
-  end
-
-  def self.cleanup
-    ScrapingRule.joins('LEFT JOIN (select distinct scraping_rule_id from candidates) as c ON c.scraping_rule_id=scraping_rules.id').where('c.scraping_rule_id is null AND scraping_rules.active=false').destroy_all
   end
   
   def self.get_rules(rules, multi)

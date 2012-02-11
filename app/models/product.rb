@@ -32,11 +32,11 @@ class Product < ActiveRecord::Base
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     #Reset the instock flags
-    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
+    Product.current_type.update_all(instock: false)
     
     products_to_save = {}
     product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
+      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
     end
     specs_to_save = {}
     
@@ -63,13 +63,12 @@ class Product < ActiveRecord::Base
       else
         p.instock = true
         spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.product_type = Session.product_type
         spec.value = candidate.parsed
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
     end
     # Bulk insert/update for efficiency
-    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
+    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :instock]
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end

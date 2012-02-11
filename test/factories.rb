@@ -9,7 +9,7 @@ FactoryGirl.define do
   factory :scraping_rule do
     sequence(:local_featurename) {|n| "title#{n}"}
     remote_featurename "title"
-    product_type "camera_bestbuy"
+    product_type "B20218"
     sequence(:rule_type) {|n|
       case n % 3
       when 0
