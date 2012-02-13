@@ -6,7 +6,7 @@ def save_daily_sales
   imap.select('Inbox') 
   
   # All msgs in a folder 
-  msgs = imap.search(["BEFORE", "6-Feb-2012","SINCE", "5-Feb-2012"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
+  msgs = imap.search(["BEFORE", "2-Feb-2012","SINCE", "1-Feb-2012"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -67,6 +67,7 @@ def save_daily_sales
               orders_map[sku] = orders if sku
             end
           end
+          #only select the products that have some existing spec in the daily spec table for that day
           products = DailySpec.where(:date => then_date.prev_day().strftime("%Y-%m-%d")).select("DISTINCT(sku)")
           products.each do |prod_sku|
             sku = prod_sku.sku

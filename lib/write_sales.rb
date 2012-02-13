@@ -9,6 +9,9 @@ def write_sale_in_time_frame (number_of_days)
   products.each do |product|
     sales = 0
     count = 0
+    
+    ################# CHANGE THIS BACK TO THE LINE BELOW FOR NORMAL OPERATION (today line) ######################
+    #day_wanted = Date.new(2012,2,9)
     day_wanted = Date.today.prev_day
     
     for day in 1..number_of_days
@@ -22,7 +25,7 @@ def write_sale_in_time_frame (number_of_days)
       end
       day_wanted = day_wanted.prev_day
     end
-    
+  
     #If the product already has an orders row, update this, otherwise make a new one
     if ContSpec.where(:product_id => product.id, :name => "orders", :product_type => product.product_type).empty?
       cont = ContSpec.new(:product_id => product.id, :name => "orders", :value => sales, :product_type => product.product_type) 
@@ -31,12 +34,12 @@ def write_sale_in_time_frame (number_of_days)
       temp_cont = ContSpec.where(:product_id => product.id, :name => "orders", :product_type => product.product_type).first
       ContSpec.update(temp_cont.id, :value => sales)
     end
-    
+  
     #Stores the products that had no presence in DailySpec (check -> shouldn't normally happen))
     if count == number_of_days
       missing_prods.push(product.sku)
     end
   end
-  
-  p "Products missing completely from DailySpec table: "+missing_prods
+
+  p "Products missing completely from DailySpec table: "+missing_prods.to_s
 end
