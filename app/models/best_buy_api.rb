@@ -4,14 +4,8 @@ class BestBuyApi
   class FeedDownError < StandardError; end
   class TimeoutError < StandardError; end
   class << self
-    
-    if ENV["retailer"].nil?
-      URL = "http://www.bestbuy.ca/api/v2"
-    elsif ENV["retailer"] == 'bestbuy'
-      URL = "http://www.bestbuy.ca/api/v2"
-    else
-      URL = "http://www.futureshop.ca/api/v2"
-    end
+    URL = {"B" => "http://www.bestbuy.ca/api/v2",
+           "F" => "http://www.futureshop.ca/api/v2"}
     DEBUG = false
     
     #Find BestBuy products
@@ -190,10 +184,12 @@ class BestBuyApi
           v = v.join(',') if v.is_a? Array
           qs << "&#{k.to_s}=#{URI.encode(v.to_s)}"
         }
+        url = URL[Session.retailer]
+        raise RequestError, "Base url not specified for retailer: #{Session.retailer}" if url.blank?
         if params[:id]
-            "#{URL}/json/#{type}/#{params[:id]}?#{qs}"
+            "#{url}/json/#{type}/#{params[:id]}?#{qs}"
         else
-            "#{URL}/json/#{type}?#{qs}"
+            "#{url}/json/#{type}?#{qs}"
         end
       end
    end

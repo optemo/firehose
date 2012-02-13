@@ -3,7 +3,7 @@ class ScrapingController < ApplicationController
   end
   
   def datafeed
-    @product_skus = BestBuyApi.category_ids(Session.product_type)
+    @product_skus = BestBuyApi.category_ids(Session.feed_id)
   end
 
   def scrape
