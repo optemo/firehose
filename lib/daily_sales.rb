@@ -6,7 +6,7 @@ def save_daily_sales
   imap.select('Inbox') 
   
   # All msgs in a folder 
-  msgs = imap.search(["BEFORE", "2-Feb-2012","SINCE", "1-Feb-2012"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
+  msgs = imap.search(["BEFORE", "11-Feb-2012","SINCE", "18-Jul-2011"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]

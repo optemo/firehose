@@ -16,6 +16,8 @@ task :import_daily_factors => :environment do
 end
 
 def import_data(raw)
+  #runs on Maria's iMac:
+  #directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
   directory = "/mysql_backup/slicehost"
   
