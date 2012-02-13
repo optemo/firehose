@@ -297,18 +297,14 @@ $(document).ready(function(){
 	    });
 	  }
 	});
-
-  $('select#type_filter').live('change', function () {
-	  current_location = document.location.pathname
-	  if (current_location.match(/product_types\/(\S)+$/)) {
-		current_location = '/product_types';
-	  }
-	  else if (current_location.match(/layout_editor\/(\S)+$/)) {
-		current_location = '/layout_editor';
-	  }
-	  $('#filter_form').attr("action", current_location);
-	  $('#filter_form').submit();
-	});
+	
+	//$('#filter_form').live('click', function(){
+	//  $.ajax(
+	//    data: $(this).find('input').val();
+	//    url: "/product_type"
+	//    success: function(data){alert(data);}
+	//  );
+	//});
 
     $(".custom_regex").live('click', function() {
 	reg = $(this).parent().prev();// children('.scraping_rule_regex');

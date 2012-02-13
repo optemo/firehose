@@ -4,7 +4,11 @@
       <p>Choose Product Type</p>
     </div>
     <div class="current_product_type">
-      <%= Session.product_type %>
+      <%# Session.product_type %>
+      <form>
+        <input type="text" name="product_type" value="<%= Session.product_type %>" size="4"/>
+        <input type="submit" value="Go" />
+      </form>
     </div>
   </div>
   <div id="actions">
