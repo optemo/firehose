@@ -66,14 +66,10 @@ Firehose::Application.routes.draw do
     resources :facets, only: [:index, :new, :create], path: "layout_editor"
     resources :scraping_corrections, :except => [:show, :index]
     resources :scraping_rules
-    match "datafeed" => "scraping#datafeed"
-    match "results" => "scraping#results"
-  end
-  
+    resources :b_bproducts, only: [:index, :show]
+    match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
+  end  
   resources :category_id_product_type_maps, only: [:new, :show], :path=>"category_ids"
   
-  match 'scrape/:id' => 'scraping#scrape'
-  match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
   match "featured" => "featured#index"
-  
 end

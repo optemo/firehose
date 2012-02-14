@@ -8,7 +8,7 @@
     </div>
   </div>
   <div id="actions">
-    <%= link_to "datafeed", "/datafeed" %> | 
+    <%= link_to "datafeed", product_type_b_bproducts_path(Session.product_type) %> | 
     <%= link_to "rules", product_type_scraping_rules_path(Session.product_type) %> | 
     <%= link_to "results", product_type_scraping_rules_path(Session.product_type, full: true) %> | 
     <%= link_to "layout_editor", product_type_facets_path(Session.product_type) %>
