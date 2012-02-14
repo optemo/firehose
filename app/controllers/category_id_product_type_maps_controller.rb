@@ -11,9 +11,10 @@ class CategoryIdProductTypeMapsController < ApplicationController
     end
   end
   #
-  # def show
-  #   render :nothing => true
-  # end
+  def show
+    debugger
+    render :nothing => true
+  end
 
   # DELETE /category_ids/1
   def destroy

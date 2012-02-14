@@ -95,11 +95,10 @@ class LayoutEditorControllerTest < ActionController::TestCase
    original_filters = Facet.find_all_by_used_for("filter")
    original_sorting = Facet.find_all_by_used_for("sortby")
    original_compare = Facet.find_all_by_used_for("show")
-   debugger
    post :create, request_data
    assert_response :success
    assert_template(nil)
-   debugger
+   
    updated_filters = Facet.find_all_by_used_for("filter")
    updated_sorting = Facet.find_all_by_used_for("sortby")
    updated_compare = Facet.find_all_by_used_for("show")

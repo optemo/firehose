@@ -11,10 +11,10 @@ class ScrapingControllerTest < ActionController::TestCase
   end
   
   test "Change current product type" do
-    post :index, :product_type => 6
-    assert_equal Session.product_type, "drive_bestbuy", "The Session object should be set"
+    post :index, :product_type => "B20232"
+    assert_equal Session.product_type, "B20232", "The Session object should be set"
     get :index
-    assert session[:current_product_type_id], "The session should be stored in a cookie"
+    assert session[:current_product_type], "The session should be stored in a cookie"
   end
 
   test "should get scrape for digital elph" do

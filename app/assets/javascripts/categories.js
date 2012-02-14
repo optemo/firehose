@@ -58,6 +58,7 @@ $(function () {
          $('#' + id).replaceWith(data);
        }
        });
+       applySilkScreen();
   });
 
 });

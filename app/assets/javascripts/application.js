@@ -35,7 +35,7 @@ $(document).ready(function(){
         rule_adder_div.load(myurl, (function () {
             // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
             // html attribute triggers written out in views/scraping_rules/new.html.erb.
-            $(this).find('form').validate({
+            $(this).find('form').validationlidate({
                 rules: {
                     regexp: "regexp",
                     ifcont: "ifcont"
@@ -47,9 +47,10 @@ $(document).ready(function(){
     
     var dropdown_function = function() {
         var t = $(this);
+        debugger;
         var el_to_insert_after = t.next(); // The "destroy" link
         $.ajax({
-            url: "/scraping_rules/"+t.attr('data-id')+"/edit", // Get the form
+            url: window.location + '/' + t.attr('data-id')+"/edit", // Get the form
 		    data: null, 
 			type: "GET",
 		    success: function(data) {
@@ -69,7 +70,33 @@ $(document).ready(function(){
         return false;
     };
     
+    var dropdown_categories = function() {
+        var t = $(this);
+        var el_to_insert_after = t.next(); // The "destroy" link
+        $.ajax({
+            url: "/category_ids/show", // Get the form
+		    data: null, 
+			type: "GET",
+		    success: function(data) {
+                // Insert the editing fields directly below
+		        el_to_insert_after.after(data);
+			},
+			error: function() {
+		        alert_substitute("There is an error in the call to categories");
+		    }
+        });
+        // t.text('Hide Rule').unbind('click').click(function() {
+        //     t.text('Edit Rule');
+        //     el_to_insert_after.next().remove();
+        //     t.unbind('click').click(dropdown_function);
+        //     return false;
+        // });
+        return false;
+    };
+    
     $('.edit_rule_dropdown').click(dropdown_function);
+    
+    $('#open_category_tree').click(dropdown_categories);
     
     $('.raise_rule_priority').click(function() {
         var t = $(this), form = t.parents("form");
