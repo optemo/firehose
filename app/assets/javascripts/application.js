@@ -292,19 +292,11 @@ $(document).ready(function(){
 	$('.fetch_candidates').live('click', function(){
 	  var contentbox = $(this).siblings('div');
 	  if(contentbox.html() == "Processing...") {
-	    $.get('/scraping_rules/'+$(this).parent().attr('data-id'), function(data){
+	    $.get(window.location+"/"+$(this).parent().attr('data-id'), function(data){
 	      contentbox.html(data);
 	    });
 	  }
 	});
-	
-	//$('#filter_form').live('click', function(){
-	//  $.ajax(
-	//    data: $(this).find('input').val();
-	//    url: "/product_type"
-	//    success: function(data){alert(data);}
-	//  );
-	//});
 
     $(".custom_regex").live('click', function() {
 	reg = $(this).parent().prev();// children('.scraping_rule_regex');
