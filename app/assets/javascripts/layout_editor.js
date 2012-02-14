@@ -66,8 +66,10 @@ $('.remove_facet').live("click",function(){
 
 $('select#new_filter').live('change', function () {
   var selected_type = $('#new_filter option:selected').attr('value');
-  // check that the name is not already present in the page
-  if (jQuery.inArray(selected_type, collect_names('.filter_box')) > -1) {
+  if (selected_type == "none") {
+    return false;
+  }
+  else if (jQuery.inArray(selected_type, collect_names('.filter_box')) > -1) {
     alert('Element already exists in the layout');
   }
   else {
@@ -88,6 +90,9 @@ $('select#new_filter').live('change', function () {
 
 $('select#new_sorting').live('change', function () {
   var selected_type = $('#new_sorting option:selected').attr('value');
+  if (selected_type == "none") {
+    return false;
+  }
   $.ajax({
     url: "/facet/new",
     data: {name: selected_type, used_for: 'sortby'},
@@ -104,6 +109,9 @@ $('select#new_sorting').live('change', function () {
 
 $('select#new_compare').live('change', function () {
   var selected_type = $('#new_compare option:selected').attr('value');
+  if (selected_type == "none") {
+    return false;
+  }
   // check that the name is not already present in the page
   if (jQuery.inArray(selected_type, collect_names('.show_box')) > -1) {
     alert('Element already exists in the layout');

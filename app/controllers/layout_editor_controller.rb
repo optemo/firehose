@@ -7,17 +7,16 @@ class LayoutEditorController < ApplicationController
   end
   
   def show
-    id = params[:id]
-    @product_type = ProductType.find(id)
-    @db_filters = Facet.find_all_by_product_type_and_used_for(id, 'filter').sort_by!{|f| f.value }
-    @db_sortby = Facet.find_all_by_product_type_and_used_for(id, 'sortby').sort_by!{|f| f.value }
-    @db_compare = Facet.find_all_by_product_type_and_used_for(id, 'show').sort_by!{|f| f.value }
+    pid = params[:id]
+
+    @db_filters = Facet.find_all_by_product_type_and_used_for(pid, 'filter').sort_by!{|f| f.value }
+    @db_sortby = Facet.find_all_by_product_type_and_used_for(pid, 'sortby').sort_by!{|f| f.value }
+    @db_compare = Facet.find_all_by_product_type_and_used_for(pid, 'show').sort_by!{|f| f.value }
     
-    p_type = ProductType.find(id).name
-    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
+    results = ScrapingRule.find_all_by_product_type(pid).select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
     @sr_filters = results.nil? ? [] : results.sort
-    results = ScrapingRule.find_all_by_product_type_and_active(p_type,true).select{|sr| sr.rule_type =~ /Continuous/}
+    results = ScrapingRule.find_all_by_product_type(pid).select{|sr| sr.rule_type =~ /Continuous/}
     results = (results.nil? or results.empty?) ? [] : results.map(&:local_featurename).uniq
     @sr_sortby = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters

@@ -15,6 +15,7 @@
       <div>Filter:</div>
       <select id="new_filter" style=" ">
       <!-- check: are the tag attributes necessary? -->
+      <option class="filter_option" value="none">Pick One</option>
       <% @sr_filters.each do |f| -%>
         <option class="filter_option" value="<%= f %>"><%= f %></option>
       <% end -%>
@@ -34,6 +35,7 @@
     <div>Sorting Option:</div>
     <select id="new_sorting" style=" ">
     <!-- check: are the tag attributes necessary? -->
+    <option class="sortby_option" value="none">Pick One</option>
       <% @sr_sortby.each do |f| -%>
         <option class="sortby_option" value="<%= f %>"><%= f %></option>
       <% end -%>
@@ -52,6 +54,7 @@
 	<div>Add New:
 	  <div>Comparison Field:</div>
 	  <select id="new_compare", style=" ">
+      <option class="compare_option" value="none">Pick One</option>
   	  <% @sr_compare.each do |f| -%>
   	    <option class="compare_option" value="<%= f %>"><%= f %></option>
   	  <% end -%>
