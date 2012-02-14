@@ -17,9 +17,9 @@ end
 
 def import_data(raw)
   #runs on Maria's iMac:
-  #directory = "/optemo/snapshots/slicehost"
+  directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
-  directory = "/mysql_backup/slicehost"
+  #directory = "/mysql_backup/slicehost"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -46,7 +46,8 @@ def import_data(raw)
       when false
         specs = get_instock_factors()
       end
-      ActiveRecord::Base.establish_connection(:development)
+      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "jaguar",
+        :username => "marc", :password => "keiko2010")
       update_daily_specs(date, specs, raw)
     end
   end

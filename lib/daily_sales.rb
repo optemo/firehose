@@ -1,4 +1,7 @@
 def save_daily_sales
+  ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "jaguar",
+    :username => "marc", :password => "keiko2010")
+  
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
