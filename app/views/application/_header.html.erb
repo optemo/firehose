@@ -4,18 +4,13 @@
       <p>Choose Product Type</p>
     </div>
     <div class="current_product_type">
-      <%# Session.product_type %>
-      <form>
-        <input type="text" name="product_type" value="<%= Session.product_type %>" size="4"/>
-        <input type="submit" value="Go" />
-      </form>
+      <%= Session.product_type %>
     </div>
   </div>
   <div id="actions">
     <%= link_to "datafeed", "/datafeed" %> | 
-    <%= link_to "rules", "/rules" %> | 
-    <%= link_to "results", "/results" %> | 
-    <%= link_to "product_types", "/product_types" %> |
-    <%= link_to "layout_editor", "/layout_editor" %>
+    <%= link_to "rules", product_type_scraping_rules_path(Session.product_type) %> | 
+    <%= link_to "results", product_type_scraping_rules_path(Session.product_type, full: true) %> | 
+    <%= link_to "layout_editor", product_type_facets_path(Session.product_type) %>
   </div>
 </div>

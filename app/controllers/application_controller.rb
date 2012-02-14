@@ -15,15 +15,10 @@ class ApplicationController < ActionController::Base
   end
   
   def set_Session
-    if params[:product_type]
-      Session.new params[:product_type]
-      session[:current_product_type] = params[:product_type] #Save as cookie
-    elsif session[:current_product_type] #Load from cookie if present
-      Session.new session[:current_product_type]
+    if params[:product_type_id]
+      Session.new params[:product_type_id]
     else
-      default_type = ProductCategory.first.product_type
-      Session.new default_type
-      session[:current_product_type] = default_type
+      Session.new ProductCategory.first.product_type
     end
   end
 

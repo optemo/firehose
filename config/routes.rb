@@ -1,10 +1,4 @@
 Firehose::Application.routes.draw do
-  
-  get "facet/new"
-
-#  get "scraping/index"
-
-#  get "scraping/scrape"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -65,19 +59,19 @@ Firehose::Application.routes.draw do
 
   #resources :scraping
   #resources :scraping, :only => [:create], :as => "scraping_rules"
-  resources :scraping_corrections, :except => [:show, :index]
-  resources :scraping_rules, :except => :index
-  resources :product_types
-  resources :category_id_product_type_maps, :path=>"category_ids"
-  resources :layout_editor
+  
+  root :to => "scraping#index"
+  
+  resources :product_type, path: "/" do
+    resources :facets, only: [:index, :new, :create], path: "layout_editor"
+    resources :scraping_corrections, :except => [:show, :index]
+    resources :scraping_rules
+    match "datafeed" => "scraping#datafeed"
+    match "results" => "scraping#results"
+  end
 
   match 'scrape/:id' => 'scraping#scrape'
-  match "rules" => "scraping#rules"
-  match "datafeed" => "scraping#datafeed"
-  match "results" => "scraping#results"
   match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
   match "featured" => "featured#index"
-
-
-  root :to => "scraping#index"
+  
 end

@@ -1,13 +1,8 @@
-class LayoutEditorController < ApplicationController
+class FacetsController < ApplicationController
+  layout "application", except: [:new]
+
   def index
     pid = Session.product_type
-    respond_to do |format|
-      format.html { redirect_to :action => 'show', :id => pid }
-    end
-  end
-  
-  def show
-    pid = params[:id]
 
     @db_filters = Facet.find_all_by_product_type_and_used_for(pid, 'filter').sort_by!{|f| f.value }
     @db_sortby = Facet.find_all_by_product_type_and_used_for(pid, 'sortby').sort_by!{|f| f.value }
@@ -29,4 +24,21 @@ class LayoutEditorController < ApplicationController
     Facet.update_layout(product_type, 'show', params[:compare_set])
     render :nothing => true
   end
+  
+  def new
+    if params[:type] =~ /Heading|Spacer/
+      @new_facet = Facet.new(:product_type => Session.product_type, 
+                :name => params[:type],
+                :feature_type => params[:type],
+                :used_for => params[:used_for])
+    else
+      f_type = ScrapingRule.find_all_by_product_type_and_local_featurename(Session.product_type, params[:name]).map{ |sr|
+        sr.rule_type}.compact
+      @new_facet = Facet.new(:product_type => Session.product_type, 
+                :name => params[:name],
+                :feature_type => f_type.first,
+                :used_for => params[:used_for])
+    end
+  end
+  
 end

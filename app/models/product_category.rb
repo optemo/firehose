@@ -73,5 +73,3 @@ class ProductCategory < ActiveRecord::Base
     end
   end
 end
-
-
