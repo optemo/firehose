@@ -1,0 +1,3 @@
+<li>
+  <%= link_to "#{name} -- #{value}", "#", {:class => "title_link mytitle", :title => "Click for overlay", data: {rf: CGI::escape((prestring + [name]).join(".")), spec: (value.to_s.length < 255 ? value : nil), url: new_product_type_scraping_rule_path(Session.product_type)}} %>  
+</li>

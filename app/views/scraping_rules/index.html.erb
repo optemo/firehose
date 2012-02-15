@@ -25,7 +25,7 @@
     		  Coverage: <span class="bold"><%= @coverage[rule.id] %>/<%= @products_count %></span>&nbsp;&nbsp;&nbsp;
     		<% end %>
     	</a>
-    	<%= link_to "Edit Rule", "#", :class => "edit_rule_dropdown", :"data-id" => rule.id, :"data-pt" => Session.product_type %>
+    	<%= link_to "Edit Rule", edit_product_type_scraping_rule_path(Session.product_type,rule), :class => "edit_rule_dropdown" %>
     	<%= link_to "Destroy", product_type_scraping_rule_path(Session.product_type, rule), :class => "delete_scraping_rule", :method => :delete, :remote => :true %>
     	
     	<div class="contentholder">Processing...</div>

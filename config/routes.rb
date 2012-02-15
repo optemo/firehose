@@ -60,9 +60,9 @@ Firehose::Application.routes.draw do
   #resources :scraping
   #resources :scraping, :only => [:create], :as => "scraping_rules"
   
-  root :to => "scraping#index"
+  root :to => "b_bproducts#blank"
   
-  resources :product_type, path: "/" do
+  resources :product_types, path: "/" do
     resources :facets, only: [:index, :new, :create], path: "layout_editor"
     resources :scraping_corrections, :except => [:show, :index]
     resources :scraping_rules
