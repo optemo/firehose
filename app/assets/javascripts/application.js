@@ -128,8 +128,9 @@ $(document).ready(function(){
 			    success: function(data) {
 					switch(value) {
 						case "Correct":
-						    removeSilkScreen();
-                	        alert_substitute("Correction Processed");
+						  //Scraping Correction
+              removeSilkScreen();
+              alert_substitute("Correction Processed");
 							break;
 						case "Update Rule":
 							removeSilkScreen();
@@ -165,7 +166,7 @@ $(document).ready(function(){
       		  alert_substitute("Item has been removed.");
       		  return false;
       		}
-      		else if (t.attr('data-method') == "delete" && !t.hasClass('redirect_delete'))
+      		else if (t.attr('data-method') == "delete")
       		{
       		  if (confirm("Are you sure you want to delete this item?")) {
       			  $.ajax({
@@ -194,7 +195,7 @@ $(document).ready(function(){
 		myparams = [];
 		var t = $(this);
 		if (t.html() === "Update Correction") {
-			myurl = "/scraping_corrections/" + t.siblings(".parsed").attr("data-sc") + "/edit";
+			myurl = $("h3").attr("data-correctionsurl") + "/" + t.siblings(".parsed").attr("data-sc") + "/edit";
 		}
 		else {
 			elem = t.parents(".contentholder").siblings(".edit_rule_dropdown"); //Single rule definition
@@ -203,7 +204,6 @@ $(document).ready(function(){
 				elem = t.parents(".contentholder").parent().find(".edit_rule_dropdown");
 			}
 			params = {"sc[product_id]" : t.siblings(".expandable_sku").attr('data-id'),
-				"sc[product_type]" : elem.attr("data-pt"),
 				"sc[raw]" : t.siblings(".raw").attr("data-rawhash") || t.siblings(".raw").html(),
 				"sc[scraping_rule_id]" : elem.attr("data-id")};
 			
@@ -213,7 +213,7 @@ $(document).ready(function(){
 					myparams.push(escape(i)+"="+escape(params[i]));
 				}
 			}
-        	myurl = "/scraping_corrections/new?" + myparams.join('&');
+        	myurl = $("h3").attr("data-correctionsurl") + "/new?" + myparams.join('&');
 		}
         t.toggle().siblings(".parsed").load(myurl);
 		

@@ -4,8 +4,8 @@
 	<=&nbsp;&nbsp; <span class="raw"<%= "data-rawhash='#{Digest::MD5.hexdigest(candidate.raw.to_s)}'" if candidate.raw.size > 20 %>><%= candidate.raw %></span>&nbsp;&nbsp;&nbsp;
 	<% if candidate.scraping_correction #Is there a correction? %>
 		<%= link_to "Update Correction", "#", :class => "correction" %>
+		<%= link_to "Remove correction", product_type_scraping_correction_path(Session.product_type, candidate.scraping_correction), :method => :delete %>
 	<% else %>
 		<%= link_to "Correction", "#", :class => "correction" %>
 	<% end %>
-	<%= link_to "Remove correction", candidate.scraping_correction, :method => :delete if candidate.scraping_correction %>
 </div>

@@ -76,7 +76,7 @@ class ScrapingRulesController < ApplicationController
       if @scraping_rule.save
         format.html { render text: "[REDIRECT]#{ rules_url }" }
       else
-        format.html { head 412 }
+        format.html { head :bad_request }
       end
     end
   end
@@ -88,7 +88,7 @@ class ScrapingRulesController < ApplicationController
       if succeeded
         format.html { render text: "[REDIRECT]#{ rules_url }" }
       else
-        format.html { head 412 }
+        format.html { head :bad_request }
       end
     end
   end
