@@ -1,7 +1,4 @@
 <%= link_to "Product " + @id, "#", :class => "closed togglable" %>
 <div class = "contentholder">
-	<div class="available_features">
-	    <%= link_to "Available Features", "#", :class => "closed togglable" %>
-	    <div><%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %></div>
-	</div>
+  <%= render :partial => 'raw_features', :locals => {:featurehash => @raw_info, :prefix => []} %>
 </div>

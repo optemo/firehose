@@ -30,7 +30,7 @@ $(document).ready(function(){
 				myparams.push(escape(i)+"="+escape(params[i]));
 			}
 		}
-        myurl = "/scraping_rules/new?" + myparams.join('&');
+        myurl = ($(this).attr('data-url') || window.location + "/new") + "?" + myparams.join('&');
 
         rule_adder_div.load(myurl, (function () {
             // The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
@@ -49,9 +49,7 @@ $(document).ready(function(){
         var t = $(this);
         var el_to_insert_after = t.next(); // The "destroy" link
         $.ajax({
-            url: "/scraping_rules/"+t.attr('data-id')+"/edit", // Get the form
-		    data: null, 
-			type: "GET",
+            url: t.attr('href'),
 		    success: function(data) {
                 // Insert the editing fields directly below
 		        el_to_insert_after.after(data);
@@ -98,20 +96,16 @@ $(document).ready(function(){
         }); 
     });
 
-    // Scrape the first SKU from the category list
-    var t = $('.skus_to_fetch').first();
-	t.load("/scrape/" + t.attr('data-id'), function(){
-		$(this).find('.togglable').each(function(){addtoggle($(this));});
-		$(this).removeClass('expandable_sku');
-	});
-
     $('.expandable_sku').live("click", function () {
-		$(this).load("/scrape/" + $(this).attr('data-id'), function(){
+		$(this).load(window.location + "/" + $(this).attr('data-id'), function(){
 			$(this).find('.togglable').each(function(){addtoggle($(this));});
 			$(this).removeClass('bold').removeClass('expandable_sku');
 			return false;
 		});
     });
+    
+    // Scrape the first SKU from the category list
+    $('.skus_to_fetch').first().click();
 
     function addtoggle(item){
 		var closed = item.hasClass("closed");
