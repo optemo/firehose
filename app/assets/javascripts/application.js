@@ -71,28 +71,70 @@ $(document).ready(function(){
     };
     
     var dropdown_categories = function() {
-        var t = $(this);
-        var el_to_insert_after = t.next(); // The "destroy" link
-        $.ajax({
-            url: "/category_ids/show", // Get the form
-		    data: null, 
-			type: "GET",
-		    success: function(data) {
-                // Insert the editing fields directly below
-		        el_to_insert_after.after(data);
-			},
-			error: function() {
-		        alert_substitute("There is an error in the call to categories");
-		    }
-        });
-        // t.text('Hide Rule').unbind('click').click(function() {
-        //     t.text('Edit Rule');
-        //     el_to_insert_after.next().remove();
-        //     t.unbind('click').click(dropdown_function);
-        //     return false;
-        // });
-        return false;
+      var dropdown_div = $('<div></div>');
+      dropdown_div.attr("id", "dropdown_div");
+       
+       var element = $(this);
+       $('#header').append(dropdown_div);
+       //dropdown_div.css("top", $(window).scrollTop() + 200);
+       //applySilkScreen();
+       dropdown_div.load("/category_ids/show");
+       load_tree();
+       
+      // var t = $(this);
+      // var el_to_insert_after = t.next(); // The "destroy" link
+      // applySilkScreen();
+      // $.ajax({
+      //       url: "/category_ids/show", // Get the form
+      //       data: null, 
+      //       type: "GET",
+      //         success: function(data) {
+      //                 // Insert the editing fields directly below
+      //            el_to_insert_after.after(data);
+      //         },
+      //         error: function() {
+      //            alert_substitute("There is an error in the call to categories");
+      //         }
+      //         });
+      //           // t.text('Hide Rule').unbind('click').click(function() {
+      //               //     t.text('Edit Rule');
+      //               //     el_to_insert_after.next().remove();
+      //               //     t.unbind('click').click(dropdown_function);
+      //               //     return false;
+      //               // });
+                    return false;
     };
+    
+    function load_tree() {
+      alert('in here!');
+    	$("#tree_categories")
+    	.bind("loaded.jstree", function (event, data) {
+  		  alert("TREE IS LOADED");
+  			// you get two params - event & data - check the core docs for a detailed description
+  		})
+    		.jstree({
+    			//"plugins" : ["themes","html_data","ui","crrm"],
+    			"plugins" : ["themes","html_data"],
+    			"themes" : { "theme" : "classic" },
+    		});
+    		// EVENTS
+    		// each instance triggers its own events - to process those listen on the container
+    		// all events are in the `.jstree` namespace
+    		// so listen for `function_name`.`jstree` - you can function names from the docs
+
+
+       $("#tree_categories").bind("open_node.jstree", function (event, data) { 
+         var id = data.rslt.obj.attr("id");
+         var product_type_id = $('#top_type').attr('data-id');
+         $.ajax({
+           url: "/category_ids/new",
+           data: {id: id, product_type: product_type_id},
+           success: function(data) {
+             $('#' + id).replaceWith(data);
+           }
+           });
+      });
+    }
     
     $('.edit_rule_dropdown').click(dropdown_function);
     

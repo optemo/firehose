@@ -13,7 +13,7 @@ class CategoryIdProductTypeMapsController < ApplicationController
   #
   def show
     debugger
-    render :nothing => true
+    render :partial => 'tree'
   end
 
   # DELETE /category_ids/1
