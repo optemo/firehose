@@ -26,7 +26,6 @@ class ApplicationController < ActionController::Base
     return true if request.host == "localhost" #Don't authenticate for development
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]
-
     end
   end
 end

@@ -5,7 +5,7 @@
     <div id='filters_body' class="sortable">
       <% @db_filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
       <div class="draggable">
-        <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+        <%= render :partial => 'facet_display', :locals => {:f => f} %>
       </div>
       <% end -%>
     </div>
@@ -27,7 +27,7 @@
 	<div id='sorting_body' class="sortable">
     <% @db_sortby.each do |f| -%>
     <div class="draggable">
-      <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+      <%= render :partial => 'facet_display', :locals => {:f => f} %>
     </div>
     <% end -%>
 	</div>
@@ -47,7 +47,7 @@
 	<div id='compare_body' class="sortable">
     <% @db_compare.each do |f| -%>
     <div class="draggable">
-      <%= render :partial => '/facet/facet_display', :locals => {:f => f} %>
+      <%= render :partial => 'facet_display', :locals => {:f => f} %>
     </div>
     <% end -%>
 	</div>

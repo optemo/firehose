@@ -68,7 +68,8 @@ Firehose::Application.routes.draw do
     resources :scraping_rules
     resources :b_bproducts, only: [:index, :show]
     match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
-  end
+  end  
+  resources :category_id_product_type_maps, only: [:new, :show], :path=>"category_ids"
   
   match "featured" => "featured#index"
 end
