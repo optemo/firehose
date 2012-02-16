@@ -10,6 +10,7 @@
 
 $(document).ready(function(){
 
+
     // Turn on overlay links for adding rules
     $('.title_link, .new_rule').live('click', function() {
         // Pop up the "rule adder" in the body
@@ -47,7 +48,6 @@ $(document).ready(function(){
     
     var dropdown_function = function() {
         var t = $(this);
-        debugger;
         var el_to_insert_after = t.next(); // The "destroy" link
         $.ajax({
             url: t.attr('href'),
@@ -68,47 +68,19 @@ $(document).ready(function(){
         return false;
     };
     
-    var dropdown_categories = function() {
-      var dropdown_div = $('<div></div>');
-      dropdown_div.attr("id", "dropdown_div");
-       
-       var element = $(this);
-       $('#header').append(dropdown_div);
-       //dropdown_div.css("top", $(window).scrollTop() + 200);
-       //applySilkScreen();
+    function dropdown_categories() {       
+       var dropdown_div = $('#tree_categories');   
        dropdown_div.load("/category_ids/show");
+       $('#header').append(dropdown_div);
        load_tree();
-       
-      // var t = $(this);
-      // var el_to_insert_after = t.next(); // The "destroy" link
-      // applySilkScreen();
-      // $.ajax({
-      //       url: "/category_ids/show", // Get the form
-      //       data: null, 
-      //       type: "GET",
-      //         success: function(data) {
-      //                 // Insert the editing fields directly below
-      //            el_to_insert_after.after(data);
-      //         },
-      //         error: function() {
-      //            alert_substitute("There is an error in the call to categories");
-      //         }
-      //         });
-      //           // t.text('Hide Rule').unbind('click').click(function() {
-      //               //     t.text('Edit Rule');
-      //               //     el_to_insert_after.next().remove();
-      //               //     t.unbind('click').click(dropdown_function);
-      //               //     return false;
-      //               // });
-                    return false;
+       return false;
     };
     
     function load_tree() {
-      alert('in here!');
+      alert('Navigate and click on a category');
     	$("#tree_categories")
     	.bind("loaded.jstree", function (event, data) {
-  		  alert("TREE IS LOADED");
-  			// you get two params - event & data - check the core docs for a detailed description
+  			// you get two params - event & data - check the core docs ftor a detailed description
   		})
     		.jstree({
     			//"plugins" : ["themes","html_data","ui","crrm"],
@@ -119,8 +91,6 @@ $(document).ready(function(){
     		// each instance triggers its own events - to process those listen on the container
     		// all events are in the `.jstree` namespace
     		// so listen for `function_name`.`jstree` - you can function names from the docs
-
-
        $("#tree_categories").bind("open_node.jstree", function (event, data) { 
          var id = data.rslt.obj.attr("id");
          var product_type_id = $('#top_type').attr('data-id');
@@ -136,7 +106,13 @@ $(document).ready(function(){
     
     $('.edit_rule_dropdown').click(dropdown_function);
     
-    $('#open_category_tree').click(dropdown_categories);
+    // $(function () {
+    //   load_tree();
+    // });
+    
+    $('#open_category_tree').click(function() {
+      dropdown_categories();
+      });
     
     $('.raise_rule_priority').click(function() {
         var t = $(this), form = t.parents("form");
@@ -228,6 +204,17 @@ $(document).ready(function(){
 
     $("a").live('click',function(){
       		t = $(this), form = t.parents("form");
+      		
+      		if (t.hasClass('catnav')) {
+      		  var cat_id = t.parent().attr('id');
+      		  var parts = $(location).attr('href').split('/');
+      		  parts[3] = parts[3][0] + cat_id
+      		  address = parts.join('/');
+      		  alert("Selected to go to" + address);
+      		  
+      		  window.location = address;
+      		  return true;
+      		}
       		
       		if (t.hasClass('category_id-delete') || t.hasClass('delete_scraping_rule')) {
       		  t.parent().remove();

@@ -33,10 +33,6 @@ $('#save_type').live("click",function(){
   });
 });
 
-// $(function () {
-//   load_tree();
-// });
-
 function get_selected(){
   var selected = [];
   $(':checked').each (function (index) {

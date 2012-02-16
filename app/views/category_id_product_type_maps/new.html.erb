@@ -3,7 +3,7 @@
 <% parent_id = parent.keys.first %>
 <% parent_name = parent.values.first %>
 <% top_category = "Departments" %>
-<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="jstree-open 
+<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="catnav jstree-open 
   <% unless children.length > 0 -%>
   jstree-leaf
   <% end -%>
@@ -23,7 +23,7 @@
   		  <% category_name = child.last -%>
   			  <li id="<%= category_id %>" data-name="<%= category_name %>" class="jstree-closed">
   			    <ins class="jstree-icon">&nbsp;</ins>
-  				  <a class="" href="#"> 
+  				  <a class="catnav" href="#"> 
   				    <ins class="jstree-icon">&nbsp;</ins>
   				    <%= category_id %> <%= category_name %>
   				  </a>

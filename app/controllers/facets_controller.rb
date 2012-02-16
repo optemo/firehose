@@ -2,7 +2,9 @@ class FacetsController < ApplicationController
   layout "application", except: [:new]
 
   def index
-    pid = Session.product_type
+    debugger
+    pid = params["product_type_id"]
+    #pid = Session.product_type
 
     @db_filters = Facet.find_all_by_product_type_and_used_for(pid, 'filter').sort_by!{|f| f.value }
     @db_sortby = Facet.find_all_by_product_type_and_used_for(pid, 'sortby').sort_by!{|f| f.value }
