@@ -34,6 +34,7 @@ def import_data(raw)
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
       puts 'making records for date ' + date.to_s
       # import data from the snapshot to the temp database
+      #puts "mysql -u marc -p keiko2010 -h jaguar temp < #{directory}/#{snapshot}"
       %x[mysql -u optemo -p***REMOVED*** temp < #{directory}/#{snapshot}]
 
       #username and password cannot be company's (optemo, tiny******)
@@ -45,6 +46,8 @@ def import_data(raw)
       when false
         specs = get_instock_factors()
       end
+      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "localhost",
+        :username => "optemo", :password => "***REMOVED***")
       update_daily_specs(date, specs, raw)
     end
   end

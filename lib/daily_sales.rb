@@ -61,8 +61,6 @@ def save_daily_sales
           
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           orders_map = {} # map of sku => orders
-                    
-          cumullative=File.open("./log/Daily_Data/Cumullative_Data_sales.txt",'a')
           
           File.open(csvfile, 'r') do |f|
             f.each do |line|
@@ -79,11 +77,8 @@ def save_daily_sales
             orders = (orders_spec.nil?) ? "0" : orders_spec
             # write orders to daily_sales for the date and the sku
             ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "orders", :value_flt => orders, :product_type => product_type, :date => then_date.prev_day().strftime("%Y-%m-%d"))
-            to_write=sku.to_s+" "+orders.to_s + " " + product_type + "\n"
-            cumullative.write(then_date.prev_day().strftime("%Y-%m-%d")+" "+to_write)
             ds.save
           end
-          cumullative.close()
         end
   # ******************************************
       end 
