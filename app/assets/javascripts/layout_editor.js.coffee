@@ -1,4 +1,4 @@
-make_editable = ->
+make_editable = ->  
   $('.edit-translation').each ->
     $(this).removeClass('edit-translation').editable ((value, settings) ->
       return(value)
@@ -10,11 +10,11 @@ make_editable = ->
 
 $(document).ready ->
   $(".sortable").sortable
-  	revert: true
+    revert: true
   $("#draggable").draggable
     connectToSortable: "#sortable"
-  	helper: "original"
-  	revert: "invalid"
+    helper: "original"
+    revert: "invalid"
   make_editable()
 
 $('#submit_layout').live "click", ->
@@ -28,7 +28,7 @@ $('#submit_layout').live "click", ->
   else
     $.ajax
       type: 'POST'
-      url: "/layout_editor"
+      url: window.location.pathname
       data:
         locale: locale
         filter_set: ordered_filters
@@ -60,7 +60,7 @@ $('select#new_filter').live 'change', ->
     alert('Element already exists in the layout')
   else 
     $.ajax
-      url: "/facet/new"
+      url: window.location.pathname + "/new"
       data: 
         name: selected_type
         used_for: 'filter'
@@ -76,7 +76,7 @@ $('select#new_sorting').live 'change', ->
   if selected_type is "none"
     return false
   $.ajax
-    url: "/facet/new"
+    url: window.location.pathname + "/new"
     data:
       name: selected_type
       used_for: 'sortby'
@@ -96,7 +96,7 @@ $('select#new_compare').live 'change', ->
     alert('Element already exists in the layout')
   else
     $.ajax
-      url: "/facet/new",
+      url: window.location.pathname + "/new"
       data:
         name: selected_type
         used_for: 'show'
@@ -109,7 +109,7 @@ $('select#new_compare').live 'change', ->
 
 $('#add_header').live "click", ->
   $.ajax
-    url: "/facet/new"
+    url: window.location.pathname + "/new"
     data:
       type: 'Heading'
       used_for: 'filter'
@@ -122,7 +122,7 @@ $('#add_header').live "click", ->
 
 $('#add_spacer').live "click", ->
   $.ajax
-    url: "/facet/new"
+    url: window.location.pathname + "/new"
     data:
       type: 'Spacer'
       used_for: 'filter'

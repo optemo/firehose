@@ -5,6 +5,6 @@
     <%= @scraping_rule.remote_featurename %> : <%= @raw %>
 </div>
 <% end %>
-<%= form_for [Session.product_type, @scraping_rule], :url => new_product_type_scraping_rule_path, :remote => true, :html => { :class => "edit_scraping_rule" } do |f| %>
+<%= form_for [Session.product_type, @scraping_rule], :url => product_type_scraping_rules_path, :remote => true, :html => { :class => "edit_scraping_rule" } do |f| %>
   <%= render partial: 'form', locals: {f: f} %>
 <% end %>

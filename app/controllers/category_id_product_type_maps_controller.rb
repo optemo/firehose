@@ -12,7 +12,6 @@ class CategoryIdProductTypeMapsController < ApplicationController
   end
   #
   def show
-    debugger
     render :partial => 'tree'
   end
 
