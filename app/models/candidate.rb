@@ -23,7 +23,7 @@ class Candidate
   
   def initialize(params={})
     @scraping_rule_id = params[:scraping_rule_id]
-    @scraping_correction_idparams = [:scraping_correction_id]
+    @scraping_correction_id = params[:scraping_correction_id]
     @model = params[:model]
     @name = params[:name]
     @sku = params[:sku]

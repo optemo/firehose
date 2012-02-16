@@ -45,10 +45,10 @@ class ScrapingCorrectionsController < ApplicationController
 
     respond_to do |format|
       if @scraping_correction.save
-        format.html { render :text => "You have successfully created a correction" }
+        format.html { head :ok }
         format.xml  { render :xml => @scraping_correction, :status => :created, :location => @scraping_correction }
       else
-        format.html { render :action => "new" }
+        format.html { head :bad_request }
         format.xml  { render :xml => @scraping_correction.errors, :status => :unprocessable_entity }
       end
     end
@@ -61,10 +61,10 @@ class ScrapingCorrectionsController < ApplicationController
 
     respond_to do |format|
       if @scraping_correction.update_attributes(params[:scraping_correction])
-        format.html { render :text => "You have successfully updated a correction" }
+        format.html { head :ok }
         format.xml  { head :ok }
       else
-        format.html { render :action => "edit" }
+        format.html { head :bad_request }
         format.xml  { render :xml => @scraping_correction.errors, :status => :unprocessable_entity }
       end
     end
