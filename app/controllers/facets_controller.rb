@@ -2,7 +2,6 @@ class FacetsController < ApplicationController
   layout "application", except: [:new]
 
   def index
-    debugger
     pid = params["product_type_id"]
     #pid = Session.product_type
 

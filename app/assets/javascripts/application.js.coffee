@@ -89,31 +89,31 @@ $(document).ready ->
     return false
     
   dropdown_categories = ->
-    dropdown_div = $('#tree_categories')   
-    dropdown_div.load("/category_ids/show")
-    $('#header').append(dropdown_div)
-    load_tree()
+    dropdown_div = $('#tree_categories')
+    dropdown_div.load "/category_ids/show", ->
+      $("#product_type_menu").append dropdown_div
+      setTimeout(load_tree(),1000)
     return false
 
-    load_tree = ->
-      alert('Navigate and click on a category')
-      $("#tree_categories").bind("loaded.jstree", (event, data) ->
-      # you get two params - event & data - check the core docs ftor a detailed description
-      ).jstree("plugins" : ["themes","html_data"], "themes" : { "theme" : "classic" })
-      # EVENTS
-      # each instance triggers its own events - to process those listen on the container
-      # all events are in the `.jstree` namespace
-      # so listen for `function_name`.`jstree` - you can function names from the docs
-      $("#tree_categories").bind "open_node.jstree", (event, data) ->
-       id = data.rslt.obj.attr("id")
-       product_type_id = $('#top_type').attr('data-id')
-       $.ajax
-         url: "/category_ids/new"
-         data:
-           id: id
-           product_type: product_type_id
-         success: (data) ->
-           $('#' + id).replaceWith(data)
+  load_tree = ->
+    # alert('Navigate and click on a category')
+    $("#tree_categories").bind("loaded.jstree", (event, data) ->
+    # you get two params - event & data - check the core docs ftor a detailed description
+    ).jstree("plugins" : ["themes","html_data"], "themes" : { "theme" : "classic" })
+    # EVENTS
+    # each instance triggers its own events - to process those listen on the container
+    # all events are in the `.jstree` namespace
+    # so listen for `function_name`.`jstree` - you can function names from the docs
+    $("#tree_categories").bind "open_node.jstree", (event, data) ->
+     id = data.rslt.obj.attr("id")
+     product_type_id = $('#top_type').attr('data-id')
+     $.ajax
+       url: "/category_ids/new"
+       data:
+         id: id
+         product_type: product_type_id
+       success: (data) ->
+         $('#' + id).replaceWith(data)
 
   $('.edit_rule_dropdown').click(dropdown_function)
 
@@ -203,6 +203,14 @@ $(document).ready ->
   	  t.parent().remove()
   	  alert_substitute("Item has been removed.")
   	  return false
+    else if t.hasClass("catnav")
+      cat_id = t.parent().attr("id")
+      parts = $(location).attr("href").split("/")
+      parts[3] = parts[3][0] + cat_id
+      address = parts.join("/")
+      alert "Selected to go to" + address
+      window.location.replace(address)
+      return true
   	else if t.attr('data-method') is "delete"
   	  if confirm("Are you sure you want to delete this item?") 
   		  $.ajax
