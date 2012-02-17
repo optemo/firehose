@@ -46,8 +46,6 @@ def import_data(raw)
       when false
         specs = get_instock_factors()
       end
-      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "localhost",
-        :username => "optemo", :password => "***REMOVED***")
       update_daily_specs(date, specs, raw)
     end
   end
