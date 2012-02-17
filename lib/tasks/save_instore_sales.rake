@@ -1,18 +1,16 @@
-task :save_instore_daily_sales, [:start_date, :end_date] => :environment do |t, args|
-  save_instore_daily_sales(Date.strptime(args.start_date, '%Y%m%d'), Date.strptime(args.end_date, '%Y%m%d'))
+#example call: bundle exec rake save_instore_daily_sales["20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
+task :save_instore_daily_sales, [:start_date, :end_date, :directory] => :environment do |t, args|
+  save_instore_daily_sales(Date.strptime(args.start_date, '%Y%m%d'), Date.strptime(args.end_date, '%Y%m%d'), args.directory)
 end
-
-##### SPECIFY DIRECTORY IN WHICH FILES LOCATED #####
-DIRECTORY = "/BestBuy_Data"
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
 # files sent by bestbuy (.csv), stores the daily sales in the all_daily_spec table (firehose_development)
-def save_instore_daily_sales (start_date, end_date)
+def save_instore_daily_sales (start_date, end_date, directory)
   require 'date'
   month_sales = {}
   start_time = Time.now
   
-  Dir.foreach(DIRECTORY) do |file|
+  Dir.foreach(directory) do |file|
     month_sales = {}  
     #only process bestbuy data files
     if file =~ /B_\d{8}_\d{8}\.csv/
@@ -22,7 +20,7 @@ def save_instore_daily_sales (start_date, end_date)
       #only process files within specified time frame
       if start_date <= file_start_date && end_date >= file_end_date
         before = Time.now
-        csvfile = File.new(DIRECTORY+"/"+file)
+        csvfile = File.new(directory+"/"+file)
         month = file_start_date..file_end_date
           
       # GET ALL INSTOCK ITEM SKUS/DATES FOR THE MONTH IN QUESTION FROM ALL_DAILY_SPEC TABLE
