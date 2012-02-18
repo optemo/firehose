@@ -21,7 +21,7 @@ task :import_daily_factors => :environment do
   import_data(raw)
 end
 
-def save_daily_data
+def save_daily_data(raw)
   specs = get_instock_attributes()
   update_daily_specs(Date.today, specs, raw)
 end
