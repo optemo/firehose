@@ -9,10 +9,21 @@ task :import_daily_attributes => :environment do
   import_data(raw)
 end
 
+task :save_daily_attributes => :environment do
+  # get historical data on raw product attributes data and write to daily specs
+  raw = true
+  save_daily_data(raw)
+end
+
 task :import_daily_factors => :environment do
   # get historical factors data and write to daily specs
   raw = false
   import_data(raw)
+end
+
+def save_daily_data
+  specs = get_instock_attributes()
+  update_daily_specs(Date.today, specs, raw)
 end
 
 def import_data(raw)
