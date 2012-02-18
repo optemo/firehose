@@ -28,8 +28,7 @@ removeSilkScreen = ->
     'left' : ''
     'width' : ''
   ).fadeTo(0, 0).hide()
-  # outsidecontainer in the other project is the pop-up window. it's rule_adder_div in this project
-
+  # outsidecontainer in the other project is the pop-up window. its rule_adder_div in this project
 
 applySilkScreen= -> 
   # This is used to get the document height for doing layout properly. 
@@ -42,7 +41,7 @@ applySilkScreen= ->
       Math.max(D.body.clientHeight, D.documentElement.clientHeight))
   )
   $('#silkscreen').css({'height' : current_height+'px', 'display' : 'inline'}).fadeTo(0, 0.5)
-	
+
 $(document).ready ->
 
   # Turn on overlay links for adding rules
@@ -79,7 +78,7 @@ $(document).ready ->
       success: (data) ->
         # Insert the editing fields directly below
         el_to_insert_after.after(data)
-  	  error: ->
+      error: ->
         alert_substitute("There is an error in fetching the form")
     t.text('Hide Rule').unbind('click').click ->
       t.text('Edit Rule')
@@ -90,30 +89,54 @@ $(document).ready ->
     
   dropdown_categories = ->
     dropdown_div = $('#tree_categories')
+    nodes = []
+    nodes_path = $('#tree_categories').attr('data-path').split('"')
+    for node, i in nodes_path
+      nodes.push node.substr(1) if i % 2 == 1
     dropdown_div.load "/category_ids/show", ->
       $("#product_type_menu").append dropdown_div
-      setTimeout(load_tree(),1000)
+      setTimeout load_tree(nodes), 1000
+      setTimeout load_nodes(nodes), 1500
     return false
 
-  load_tree = ->
-    # alert('Navigate and click on a category')
-    $("#tree_categories").bind("loaded.jstree", (event, data) ->
-    # you get two params - event & data - check the core docs ftor a detailed description
-    ).jstree("plugins" : ["themes","html_data"], "themes" : { "theme" : "classic" })
-    # EVENTS
-    # each instance triggers its own events - to process those listen on the container
-    # all events are in the `.jstree` namespace
-    # so listen for `function_name`.`jstree` - you can function names from the docs
+  load_tree = (nodes) ->
+    $("#tree_categories").jstree
+      plugins: [ "themes", "html_data", "ui" ]
+      themes:
+        theme: "classic"
+      core:
+        animation: 0
     $("#tree_categories").bind "open_node.jstree", (event, data) ->
-     id = data.rslt.obj.attr("id")
-     product_type_id = $('#top_type').attr('data-id')
-     $.ajax
-       url: "/category_ids/new"
-       data:
-         id: id
-         product_type: product_type_id
-       success: (data) ->
-         $('#' + id).replaceWith(data)
+      id = data.rslt.obj.attr("id")
+      product_type_id = $('#top_type').attr('data-id')
+      $.ajax
+        url: "/category_ids/new"
+        data:
+          id: id
+          product_type: product_type_id
+        success: (data) ->
+          $('#' + id).replaceWith(data)
+
+  load_nodes = (nodes) ->
+    setTimeout (->
+      $("#tree_categories").jstree "set_focus"
+    ), 500
+    alert('jstree not loaded') unless $.jstree._reference("#tree_categories")?
+    i = 0
+    timeo = 0
+    for nx, ix in nodes[0..nodes.length-2]
+      timeo = timeo + 1000
+      setTimeout (->
+        to_open = "#" + nodes[i]
+        #alert('opening' + to_open)
+        $.jstree._reference("#tree_categories").open_node to_open
+        i += 1
+      ), timeo
+      
+    #$.jstree._reference("#tree_categories").open_node "#20001"
+    setTimeout (->
+      $.jstree._focused().select_node '#' + nodes[nodes.length-1]
+    ), timeo + 1000
 
   $('.edit_rule_dropdown').click(dropdown_function)
 
@@ -208,7 +231,6 @@ $(document).ready ->
       parts = $(location).attr("href").split("/")
       parts[3] = parts[3][0] + cat_id
       address = parts.join("/")
-      alert "Selected to go to" + address
       window.location.replace(address)
       return true
   	else if t.attr('data-method') is "delete"

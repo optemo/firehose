@@ -17,6 +17,10 @@ class Session
   def self.product_type_branch
     ProductCategory.get_ancestors(product_type)+[product_type]+ProductCategory.get_children(product_type)
   end
+  
+  def self.product_type_path
+    ProductCategory.get_ancestors(product_type).reverse + [product_type]
+  end
 
   def self.retailer
     product_type[0]
