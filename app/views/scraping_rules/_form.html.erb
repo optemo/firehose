@@ -1,18 +1,20 @@
-<fieldset>
-  <legend><b>Parsing Rule</b></legend>
-  <%= f.label :rule_type, "Type" %> <div class="rule_type_button"><%= f.radio_button(:rule_type, "Continuous", :class => "required") %> Cont</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Categorical", :class => "required") %> Cat</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Binary", :class => "required") %> Bin</div>
-  <div class="rule_type_button"><%= f.radio_button(:rule_type, "Text", :class => "required") %> Text</div>
-  <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %>
-  <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %>
- <%= f.label :regex, "Regular Expression" %> <div style="float: left;"><%= select "scraping_rule", "regex", ScrapingRule::REGEXES, {:include_blank=>false}, {:class=>"require regex scraping_rule_regex"} %><input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" class="require regexp scraping_rule_regex_option" style="display:none;"  value='<%= @scraping_rule.regex %>' /><br style="clear: both;" /><span style="float: left;">Custom Regex</span><input type="checkbox" class="custom_regex" /></div>
-  <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %>
-  <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %>
-  <%= f.label :valid_inputs, "Valid Inputs \n(* seperated)" %> <%= f.text_field(:valid_inputs, :size => 35) %>
-<%= f.label :french, "French" %>
-<%= f.check_box(:french) %>
-  <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id, :class => "scraping_rule_submit", :style => "clear: left; margin-left: 200px" %>
-  <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
-  <p style="float: left; margin-bottom: 0">For the valid inputs field use the '*' as a separator.</p>
-</fieldset>
+<%= form_for [Session.product_type, @scraping_rule], :url => product_type_scraping_rules_path, :remote => true, :html => { :class => "edit_scraping_rule" } do |f| %>
+  <fieldset>
+    <legend><b>Parsing Rule</b></legend>
+    <%= f.label :rule_type, "Type" %> <div class="rule_type_button"><%= f.radio_button(:rule_type, "Continuous", :class => "required") %> Cont</div>
+    <div class="rule_type_button"><%= f.radio_button(:rule_type, "Categorical", :class => "required") %> Cat</div>
+    <div class="rule_type_button"><%= f.radio_button(:rule_type, "Binary", :class => "required") %> Bin</div>
+    <div class="rule_type_button"><%= f.radio_button(:rule_type, "Text", :class => "required") %> Text</div>
+    <%= f.label :remote_featurename, "Remote Feature" %> <%= f.text_field(:remote_featurename, :size => 35, :class => "required") %>
+    <%= f.label :local_featurename, "Local Feature" %> <%= f.text_field(:local_featurename, :size => 35, :class => "required") %>
+   <%= f.label :regex, "Regular Expression" %> <div style="float: left;"><%= select "scraping_rule", "regex", ScrapingRule::REGEXES, {:include_blank=>false}, {:class=>"require regex scraping_rule_regex"} %><input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" class="require regexp scraping_rule_regex_option" style="display:none;"  value='<%= @scraping_rule.regex %>' /><br style="clear: both;" /><span style="float: left;">Custom Regex</span><input type="checkbox" class="custom_regex" /></div>
+    <%= f.label :min, "Min" %> <%= f.text_field(:min, :size => 35, :class => "ifcont") %>
+    <%= f.label :max, "Max" %> <%= f.text_field(:max, :size => 35, :class => "ifcont") %>
+    <%= f.label :valid_inputs, "Valid Inputs \n(* seperated)" %> <%= f.text_field(:valid_inputs, :size => 35) %>
+  <%= f.label :french, "French" %>
+  <%= f.check_box(:french) %>
+    <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id, :class => "scraping_rule_submit", :style => "clear: left; margin-left: 200px" %>
+    <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
+    <p style="float: left; margin-bottom: 0">For the valid inputs field use the '*' as a separator.</p>
+  </fieldset>
+<% end %>
