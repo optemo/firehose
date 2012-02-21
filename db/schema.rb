@@ -13,6 +13,20 @@
 
 ActiveRecord::Schema.define(:version => 20120207232035) do
 
+  create_table "all_daily_specs", :id => false, :force => true do |t|
+    t.integer  "id",           :default => 0, :null => false
+    t.string   "sku"
+    t.string   "name"
+    t.string   "spec_type"
+    t.string   "value_txt"
+    t.float    "value_flt"
+    t.boolean  "value_bin"
+    t.string   "product_type"
+    t.date     "date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
     t.string   "name"
@@ -135,15 +149,6 @@ ActiveRecord::Schema.define(:version => 20120207232035) do
   end
 
   add_index "product_siblings", ["product_id"], :name => "index_product_siblings_on_product_id"
-
-  create_table "product_types", :force => true do |t|
-    t.string   "name",                             :null => false
-    t.string   "layout",     :default => "assist"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "product_types", ["name"], :name => "index_product_types_on_name", :unique => true
 
   create_table "products", :force => true do |t|
     t.string  "sku"
