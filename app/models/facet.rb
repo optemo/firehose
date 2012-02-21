@@ -37,7 +37,7 @@ class Facet < ActiveRecord::Base
      # update the facets given the input from the page
      facet_set.each_pair do |index, vals|
        id = vals[0]
-       if Facet.exists?(id)
+       if Facet.exists?(id) and Facet.find(id).product_type == product_type
          fn = Facet.find(id)
        else
          fn = Facet.new()

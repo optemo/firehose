@@ -20,7 +20,7 @@ class FacetsControllerTest < ActionController::TestCase
    assert_equal prod_type, session[:current_product_type], "The session should be stored in a cookie"
    assert_equal prod_type, Session.product_type, "The product type should be stored in the session object"
   end
-  
+
   test "getting feature names to add from the scraping rules" do
    
    sr1 = create(:scraping_rule, rule_type: "Continuous")
