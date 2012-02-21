@@ -1,11 +1,12 @@
 # Returns array containing top co-purchased products (for recommended products/accessories)
 task :recommended_products, [:start_date, :end_date, :directory]=> :environment do |t, args|
-  products = ["10164172","10176955"]
-#  products = []
-#  FeaturedController.new.index.each do |product|
-#    products.push(product.sku)  # Get products from Featured Controller
-#  end
-#  products.uniq!  # Remove bundle duplicates
+#  products = ["10164172","10176955"]
+  products = []
+  FeaturedController.new.index.each do |product|
+    products.push(product.sku)  # Get products from Featured Controller
+  end
+  debugger
+  products.uniq!  # Remove bundle duplicates
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
   find_recommendations(products, start_date, end_date, args.directory)
@@ -83,7 +84,9 @@ def find_recommendations (products, start_date, end_date, directory)
       text += (index[0].to_s+"-"+index[1][1].to_s+"-")
     end
     text.chop!
+    debugger
     row = TextSpec.find_or_initialize_by_product_id_and_name(product_id,"top_copurchases")
+    row.update_attributes(:value => text)
   end
 
  after = Time.now

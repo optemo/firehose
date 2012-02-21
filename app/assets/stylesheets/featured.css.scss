@@ -8,7 +8,6 @@
   border-radius: 10px;
   display: inline-block;
   margin-left: 10px;
-  margin-top: 15px;
   padding: 9px;
   vertical-align: top;
 }
@@ -24,4 +23,22 @@
   padding: 2px 5px 0;
   position: absolute;
   right: 0;
+}
+.accessories .sku {
+	position: absolute;
+	bottom: 0;
+	margin-left: 5px
+}
+
+.featured .product{
+	width: 150px;
+	float: left;
+}
+
+.featured .title {
+	width: 150px;
+	float:left;
+	margin-top: auto;
+	margin-bottom: auto;
+	text-align: center;
 }

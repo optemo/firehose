@@ -1,4 +1,5 @@
-<div style="position:relative; display:inline-block;">
+<div style="position:relative; display:inline-block; height: 95px;">
   <span class="num"><%= accessory.second %></span>
-  <%= image_tag Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("img150url")).value, class: "productimg", title: Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("title")).value, alt: Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("title")).value %>
+  <%= image_tag "http://www.bestbuy.ca/multimedia/Products/150x150/#{accessory.first[0..2]}/#{accessory.first[0..4]}/#{accessory.first}.jpg", class: "productimg", title: "Recommended", alt: "Accessory" %>
+	<span class="sku"><%= accessory.first %></span>
 </div>
