@@ -1,15 +1,12 @@
 def save_daily_sales
-  ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "jaguar",
-    :username => "marc", :password => "keiko2010")
-  
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
-  
+  only_last=true    #only process the last email
   # All msgs in a folder 
-  msgs = imap.search(["BEFORE", "11-Feb-2012","SINCE", "18-Jul-2011"])  #"SINCE", "9-Sep-2011"]) -> initial starting date
+  msgs = imap.search(["SINCE", "9-Sep-2011"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -56,9 +53,6 @@ def save_daily_sales
         
         unless csvfile.blank? || weekly
           
-          #./log/Daily_Data may not exist as a directory
-          FileUtils.mkdir_p("./log/Daily_Data") unless File.directory?("./log/Daily_Data")
-          
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           orders_map = {} # map of sku => orders
           
@@ -82,9 +76,9 @@ def save_daily_sales
         end
   # ******************************************
       end 
-      #unless weekly
-      #  break; #Only process the first email, unless that email is a weekly email
-      #end
+      if only_last
+        break; #Only process the first email, unless that email is a weekly email
+      end
     end 
   end 
   imap.close

@@ -1,4 +1,4 @@
-<%= form_for(@scraping_correction) do |f| %>
-  <%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :product_type %> <%= f.hidden_field :raw %> <%= f.hidden_field :scraping_rule_id %>
+<%= form_for [Session.product_type, @scraping_correction], :url => (@scraping_correction.id.nil? ? product_type_scraping_corrections_path : product_type_scraping_correction_path) do |f| %>
+  <%= f.text_field :corrected, :size => 8, :class => "correction_field" %> <%= f.hidden_field :product_id %> <%= f.hidden_field :raw %> <%= f.hidden_field :scraping_rule_id %>
 <%= f.submit "Correct", :class => "correction_submit" %>
 <% end %>

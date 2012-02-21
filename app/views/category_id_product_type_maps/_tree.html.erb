@@ -1,0 +1,11 @@
+<% top_category = "Departments" %>
+<ul>
+  <% nodes = BestBuyApi.get_subcategories(top_category) -%>
+  <% root = nodes.keys.first -%>
+  <% children = nodes.values.first -%>
+  <% category_id = root.keys.first -%>
+  <% category_name = root.values.first -%>
+	<li id="<%= category_id %>" class="jstree-closed">
+		<a class="catnav" href="#" ><%= category_id %> <%= category_name %></a>
+	</li>
+</ul>

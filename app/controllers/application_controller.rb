@@ -15,22 +15,17 @@ class ApplicationController < ActionController::Base
   end
   
   def set_Session
-    if params[:product_type]
-      Session.new params[:product_type]
-      session[:current_product_type_id] = params[:product_type] #Save as cookie
-    elsif session[:current_product_type_id] #Load from cookie if present
-      Session.new session[:current_product_type_id]
+    if params[:product_type_id]
+      Session.new params[:product_type_id]
     else
-      default_type = ProductType.first.id
-      Session.new default_type
-      session[:current_product_type_id] = default_type
+      Session.new ProductCategory.first.product_type
     end
   end
 
   def authenticate
+    return true if request.host == "localhost" #Don't authenticate for development
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]
-
     end
   end
 end

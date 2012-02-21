@@ -9,10 +9,21 @@ task :import_daily_attributes => :environment do
   import_data(raw)
 end
 
+task :save_daily_attributes => :environment do
+  # get historical data on raw product attributes data and write to daily specs
+  raw = true
+  save_daily_data(raw)
+end
+
 task :import_daily_factors => :environment do
   # get historical factors data and write to daily specs
   raw = false
   import_data(raw)
+end
+
+def save_daily_data(raw)
+  specs = get_instock_attributes()
+  update_daily_specs(Date.today, specs, raw)
 end
 
 def import_data(raw)
@@ -46,8 +57,6 @@ def import_data(raw)
       when false
         specs = get_instock_factors()
       end
-      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "daily", :host => "localhost",
-        :username => "optemo", :password => "***REMOVED***")
       update_daily_specs(date, specs, raw)
     end
   end

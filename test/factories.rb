@@ -9,7 +9,7 @@ FactoryGirl.define do
   factory :scraping_rule do
     sequence(:local_featurename) {|n| "title#{n}"}
     remote_featurename "title"
-    product_type "camera_bestbuy"
+    product_type "B20218"
     sequence(:rule_type) {|n|
       case n % 3
       when 0
@@ -20,11 +20,10 @@ FactoryGirl.define do
         "Binary"
       end}
     regex ".*"
-    active true
   end
   
   factory :facet do
-    product_type_id 2
+    product_type "B20218"
     sequence(:name) {|n| "facet#{n}"}
     sequence(:feature_type) {|n|
       case n % 3
@@ -55,8 +54,6 @@ FactoryGirl.define do
     total 0
   end
   factory :product do
-    title {|n| "Product#{n}"}
-    product_type "camera_bestbuy"
     instock true
   end
   factory :product_type do
@@ -67,7 +64,6 @@ FactoryGirl.define do
   end
   factory :scraping_correction do
     #association :scraping_rule
-    product_type "camera_bestbuy"
     raw "error--"
     corrected "good to go"
     product_id "100000B" #SKU
@@ -77,7 +73,6 @@ FactoryGirl.define do
   end
   factory :cat_spec do
     association :product
-    product_type "camera_bestbuy"
   end
   factory :bin_spec do
     association :product
@@ -87,7 +82,6 @@ FactoryGirl.define do
   end
   factory :text_spec do
     association :product
-    product_type "camera_bestbuy"
   end
   factory :search_product do
     association :product
@@ -97,5 +91,9 @@ FactoryGirl.define do
   end
   factory :product_bundle do
     association :product
+  end
+  factory :product_category do
+    retailer "bestbuy"
+    feed_id 0
   end
 end

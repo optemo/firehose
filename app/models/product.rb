@@ -22,23 +22,21 @@ class Product < ActiveRecord::Base
   end
   
   scope :instock, :conditions => {:instock => true}
-  scope :current_type, lambda {
-    {:conditions => {:product_type => Session.product_type}}
-  }
+  scope :current_type, joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})
   
   def self.feed_update
-    raise ValidationError unless Session.category_id
-    product_skus = BestBuyApi.category_ids(Session.category_id)
+    raise ValidationError unless Session.product_type
+    product_skus = BestBuyApi.category_ids(Session.product_type)
     #product_skus.uniq!{|a|a.id} #Uniqueness check
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     #Reset the instock flags
-    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
+    Product.current_type.update_all(instock: false)
     
     products_to_save = {}
     product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
+      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
     end
     specs_to_save = {}
     
@@ -65,18 +63,17 @@ class Product < ActiveRecord::Base
       else
         p.instock = true
         spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.product_type = Session.product_type
         spec.value = candidate.parsed
         specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
       end
     end
     # Bulk insert/update for efficiency
-    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
+    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :instock]
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
     end
     Result.upkeep_pre
-    Result.find_bundles
+    ProductBundle.get_relations
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded
@@ -150,13 +147,6 @@ class Product < ActiveRecord::Base
 
     # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
     ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-
-    #Clear the search_product cache in the database
-    SearchProduct.transaction do
-      SearchProduct.delete_all(["search_id = ?",Session.product_type_id])
-      # Bulk insert for efficiency. 
-      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => Session.product_type_id)})
-    end
   end
   
   

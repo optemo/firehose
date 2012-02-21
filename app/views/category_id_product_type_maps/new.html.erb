@@ -3,7 +3,7 @@
 <% parent_id = parent.keys.first %>
 <% parent_name = parent.values.first %>
 <% top_category = "Departments" %>
-<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="jstree-open 
+<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="catnav jstree-open 
   <% unless children.length > 0 -%>
   jstree-leaf
   <% end -%>
@@ -12,9 +12,6 @@
   <a class="" href="#">
     <ins class="jstree-icon">&nbsp;</ins>
     <%= parent_id %> <%= parent_name %></a>
-    <% unless parent_id == top_category -%>
-      <input type="checkbox" class="category_selection"/>
-    <% end -%>
     <% if children.length > 0 %>
   		<ul>
   		  <% children.each do |c| -%>
@@ -23,11 +20,10 @@
   		  <% category_name = child.last -%>
   			  <li id="<%= category_id %>" data-name="<%= category_name %>" class="jstree-closed">
   			    <ins class="jstree-icon">&nbsp;</ins>
-  				  <a class="" href="#"> 
+  				  <a class="catnav" href="#"> 
   				    <ins class="jstree-icon">&nbsp;</ins>
   				    <%= category_id %> <%= category_name %>
   				  </a>
-      			<input type="checkbox" class="category_selection"/>
     			  </li>
   			<% end -%>
   		</ul>
