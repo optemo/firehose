@@ -2,8 +2,10 @@ class BestBuyApi
   require 'net/http'
   class RequestError < StandardError; end
   class FeedDownError < StandardError; end
+  class TimeoutError < StandardError; end
   class << self
-    BESTBUY_URL = "http://www.bestbuy.ca/api/v2"
+    URL = {"B" => "http://www.bestbuy.ca/api/v2",
+           "F" => "http://www.futureshop.ca/api/v2"}
     DEBUG = false
     
     #Find BestBuy products
@@ -32,12 +34,17 @@ class BestBuyApi
       q[:id] = id
       subcats = {}
       #puts "#{q}"
-      res = cached_request('category',q)
-
-        children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
-        subcats = {{res["id"] => res["name"]} => children}  
-    
+      res = cached_request('category',q)      
+      children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
+      subcats = {{res["id"] => res["name"]} => children}
       subcats
+    end
+    
+    def get_category(id, english = true)
+      q = english ? {:lang => "en"} : {:lang => "fr"}
+      q[:id] = id
+      res = cached_request('category',q)
+      res
     end
     
     def get_tree(root_id, english = true)
@@ -64,7 +71,6 @@ class BestBuyApi
       
       # for each child, call get_tree to get its children structure and then add the result to this tree, then return 
       # this tree
-      # puts 'x'
       subcats = {{res["id"] => res["name"]} => children}
     end
     
@@ -135,7 +141,11 @@ class BestBuyApi
       request_url = prepare_url(type,params)
       #puts "#{request_url}"
       log "Request URL: #{request_url}"
-      res = Net::HTTP.get_response(URI::parse(request_url))
+      begin
+        res = Net::HTTP.get_response(URI::parse(request_url))
+      rescue Timeout::Error
+        raise BestBuyApi::TimeoutError
+      end
       #puts "#{res.body}"
       unless res.kind_of? Net::HTTPSuccess
         #if res.code == 302
@@ -174,10 +184,12 @@ class BestBuyApi
           v = v.join(',') if v.is_a? Array
           qs << "&#{k.to_s}=#{URI.encode(v.to_s)}"
         }
+        url = URL[Session.retailer]
+        raise RequestError, "Base url not specified for retailer: #{Session.retailer}" if url.blank?
         if params[:id]
-            "#{BESTBUY_URL}/json/#{type}/#{params[:id]}?#{qs}"
+            "#{url}/json/#{type}/#{params[:id]}?#{qs}"
         else
-            "#{BESTBUY_URL}/json/#{type}?#{qs}"
+            "#{url}/json/#{type}?#{qs}"
         end
       end
    end

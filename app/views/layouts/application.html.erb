@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Firehose</title>
+  <title>Firehose - Env: <%= Rails.env.to_s %></title>
   <%= stylesheet_link_tag "application" %>
   <%= stylesheet_link_tag "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" %>
   <%= javascript_include_tag "jquery" %>
@@ -10,31 +10,10 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
-  <div id="server_environment_reminder"> Server Environment: <%= Rails.env.to_s %></div>
-    <div id="header">
-      <div id="actions">
-        <%= link_to "datafeed", "/datafeed" %> | 
-        <%= link_to "rules", "/rules" %> | 
-        <%= link_to "results", "/results" %> | 
-        <%= link_to "product_types", "/product_types" %> |
-        <%= link_to "layout_editor", "/layout_editor" %>
-      </div>
-        <h2>
-          
-          <form id="filter_form">
-            Product type
-            <% @slt = params[:product_type].nil? ? Session.product_type_id : params[:product_type] %>
-            <select id="type_filter" name="product_type">
-              <% ProductType.all.collect do |p| %>
-                <option value=<%= p.id %> <%= @slt.nil??    "":((@slt.to_s==p.id.to_s)? " selected='selected'" : "")    %>><%= p.name %></option>
-              <% end %>
-            </select>
-          </form>
-        </h2>
-    </div>
-    <div id="content">
-    <%= yield %>
-    </div>
-<div id="silkscreen">&nbsp;</div>
+  <%= render partial: 'header' %>
+  <div id="content">
+  <%= yield %>
+  </div>
+  <div id="silkscreen">&nbsp;</div>
 </body>
 </html>

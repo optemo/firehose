@@ -9,20 +9,12 @@ html, body {
     padding: 0;
     margin: 0;
 }
-#server_environment_reminder {
-    position: absolute;
-    top: 8px;
-    left: 10px;
-    font-weight: bold;
-    padding:5px;
-    border: 1px solid black;
-    background: #FFF;
-}
 #header {
     width: 100%;
     background: #b6c4c5;
     padding: 12px 0 12px;
     margin: 0;
+    height: 50px;
 }
 
 #content {
@@ -30,6 +22,8 @@ html, body {
     margin-left: auto;
     margin-right: auto;
 }
+
+
 
 .skus_to_fetch {
     -moz-border-radius: 8px 8px 8px 8px;
@@ -40,6 +34,35 @@ html, body {
     padding: 10px;
     width: 800px;
     margin: 5px;
+}
+
+.product_type_menu {
+  padding: 0 20px;
+  position: absolute;
+  .btn {
+    box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+    background: none repeat scroll 0 0 #FFFFFF;
+    float: left;
+    padding: 5px 8px;
+    position: relative;
+    width: 100px;
+    text-align: center;
+  }
+  .btn:hover {
+    background-color: #F6F6F6;
+  }
+  .current_product_type {
+    float: left;
+    margin: 9px 9px 9px 0;
+    padding: 6px 9px;
+    background: #EEE;
+    border-radius: 0 5px 5px 0;
+  }
+  p {
+    margin: 0;
+    font-size: 12pt;
+    font-weight: bold;
+  }
 }
 
 a.mytitle {
