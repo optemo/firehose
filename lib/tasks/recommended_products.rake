@@ -89,4 +89,4 @@ def find_recommendations (products, start_date, end_date, directory)
  after = Time.now
  p "Time taken for task: "+(after-before).to_s
 
-end  
+end
