@@ -1,6 +1,6 @@
 class ScrapingRule < ActiveRecord::Base
   #Validation for remote_featurename, local_featurename
-  validates :local_featurename,  :presence => true, :format => { :with => /^(\w|_)*$/}
+  validates :local_featurename,  :presence => true, :format => { :with => /^(\w|_)+$/}
   validates :remote_featurename, :presence => true
   validates :regex, :presence => true
   validates :product_type, :presence => true

@@ -4,8 +4,14 @@ class Session
   cattr_accessor :ab_testing_type # Categorizes new users for AB testing
   cattr_accessor :features # Gets the feature customizations which allow the site to be configured
 
-  def initialize (product_type = ProductCategory.first.product_type)
-    self.product_type = product_type
+  def initialize (product_type = nil)
+    #Check that product type exists
+    if product_type && ProductCategory.find_by_product_type(product_type)
+      self.product_type = product_type
+    else
+      #Default
+      self.product_type = ProductCategory.first.product_type
+    end
     self.features = Hash.new{|h,k| h[k] = []} #This get configured by the set_features function
     Session.set_features #In firehouse there are no dynamic facets
   end

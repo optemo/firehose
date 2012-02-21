@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :candidate do
-    association :scraping_rule
-    association :scraping_correction
+    scraping_rule
+    #association :scraping_correction, scraping_rule: scraping_rule
     sku "100000A"
     parsed "value"
     raw "rawvalue"
@@ -60,10 +60,10 @@ FactoryGirl.define do
     name {|n| "test_type#{n}"}
   end
   factory :category_id_product_type_map do
-    association :product_type
+    product_type
   end
   factory :scraping_correction do
-    #association :scraping_rule
+    scraping_rule
     raw "error--"
     corrected "good to go"
     product_id "100000B" #SKU
@@ -72,25 +72,25 @@ FactoryGirl.define do
      created_at {|d| "2011-11-#{d}"}
   end
   factory :cat_spec do
-    association :product
+    product
   end
   factory :bin_spec do
-    association :product
+    product
   end
   factory :cont_spec do
-    association :product
+    product
   end
   factory :text_spec do
-    association :product
+    product
   end
   factory :search_product do
-    association :product
+    product
   end
   factory :product_sibling do
-    association :product
+    product
   end
   factory :product_bundle do
-    association :product
+    product
   end
   factory :product_category do
     retailer "bestbuy"

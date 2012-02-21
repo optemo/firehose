@@ -1,23 +1,13 @@
 require 'test_helper'
 
-class LayoutEditorControllerTest < ActionController::TestCase
-  
-  test 'index should redirect to show' do
-   get :index
-   assert_redirected_to(layout_editor_path(Session.product_type))
-  end
-  
-  test 'change locale' do
-   get :index, :locale => :en
-   assert_equal :en, I18n.locale
-   get :index, :locale => :fr
-   assert_equal :fr, I18n.locale
+class FacetsControllerTest < ActionController::TestCase
+  setup do
+    @pt_id = "B20218"
   end
   
   test "should show layout for the right product category" do
    # make scraping rules
-   prod_type = product_categories(:cameras).product_type
-   get :show, id: prod_type
+   get :index, product_type_id: @pt_id
    assert_template('show')
    assert_response :success
    
@@ -37,9 +27,7 @@ class LayoutEditorControllerTest < ActionController::TestCase
    sr2 = create(:scraping_rule, rule_type: "Categorical")
    sr3 = create(:scraping_rule, rule_type: "Binary")
    
-   prod_type = sr1.product_type
-   
-   get :show, id: prod_type
+   get :index, product_type_id: @pt_id
    
    filters = assigns("sr_filters")
    sortby = assigns("sr_sortby")
@@ -55,7 +43,7 @@ class LayoutEditorControllerTest < ActionController::TestCase
    f2 = create(:facet, used_for: "filter")
    f3 = create(:facet, used_for: "show")
    
-   get :show, id: f1.product_type
+   get :index, product_type_id: @pt_id
    filters = assigns("db_filters")
    sortby = assigns("db_sortby")
    compare = assigns("db_compare")
@@ -68,7 +56,7 @@ class LayoutEditorControllerTest < ActionController::TestCase
    assert_equal f3, compare[0], "Existing compare features should be same as those in the database"
    
    f4 = create(:facet, used_for: "sortby")
-   get :show, id: f1.product_type
+   get :index, product_type_id: @pt_id
    sortby = assigns("db_sortby")
    assert_equal f4, sortby[0], "Existing sorby features should be same as those in the database"
   end
@@ -95,7 +83,7 @@ class LayoutEditorControllerTest < ActionController::TestCase
    original_filters = Facet.find_all_by_used_for("filter")
    original_sorting = Facet.find_all_by_used_for("sortby")
    original_compare = Facet.find_all_by_used_for("show")
-   post :create, request_data
+   post :create, request_data.merge(product_type_id: @pt_id)
    assert_response :success
    assert_template(nil)
    
@@ -120,4 +108,38 @@ class LayoutEditorControllerTest < ActionController::TestCase
    assert_equal "Top Rated", I18n.t("B20218.filter.toprated.name"), 'should save translation for facet name'
    assert_equal "stars", I18n.t("B20218.filter.toprated.unit"), 'should save translation for facet unit'
   end
+  
+  test "should get new" do
+    get :new, product_type_id: @pt_id
+    assert_response :success
+    assert_template('new') 
+  end
+
+  test "adding a heading to the layout" do
+    get :new, product_type_id: @pt_id, type: 'Heading', used_for: 'filter'
+    facet = assigns(:new_facet)
+    assert_equal 'B20218', facet.product_type
+    assert_equal 'Heading', facet.feature_type
+    assert_equal 'filter', facet.used_for
+  end
+
+  test "adding a compare facet to the layout" do
+    sr = create(:scraping_rule, local_featurename: "saleprice", rule_type: "Continuous")
+    get :new, product_type_id: @pt_id, name: 'saleprice', used_for: 'show'
+    facet = assigns(:new_facet)
+    assert_equal 'B20218', facet.product_type
+    assert_equal 'saleprice', facet.name
+    assert_equal 'Continuous', facet.feature_type
+    assert_equal 'show', facet.used_for
+  end
+  
+  test "adding a sortby element to the layout" do
+    sr = create(:scraping_rule, local_featurename: "opticalzoom", rule_type: "Continuous")
+    get :new, product_type_id: @pt_id, name: 'opticalzoom', used_for: 'filter'
+    facet = assigns(:new_facet)
+    assert_equal 'B20218', facet.product_type
+    assert_equal 'Continuous', facet.feature_type
+    assert_equal 'filter', facet.used_for
+  end
+
 end
