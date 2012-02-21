@@ -1,6 +1,7 @@
 #Here is where scripts required for a migration task go
 desc "Assigns the proper leaf nodes given the current tree nodes"
 task :assign_leafs => :environment do
+  Session.new("B20218") #Set session to BB product
   Product.all.each do |p|
     #Old category id
     product_type = CatSpec.find_by_name_and_product_id("product_type",p.id)

@@ -47,7 +47,7 @@ class ChangeProductType < ActiveRecord::Migration
       drop_table :surveys
       drop_table :search_products
       drop_table :category_id_product_type_maps
-      #drop_table :product_types
+      drop_table :product_types
     end
   
     def down
