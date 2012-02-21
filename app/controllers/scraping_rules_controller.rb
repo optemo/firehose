@@ -74,7 +74,7 @@ class ScrapingRulesController < ApplicationController
 
     respond_to do |format|
       if @scraping_rule.save
-        format.html { render text: "[REDIRECT]#{ rules_url }" }
+        format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
       else
         format.html { head :bad_request }
       end
@@ -86,7 +86,7 @@ class ScrapingRulesController < ApplicationController
     
     respond_to do |format|
       if succeeded
-        format.html { render text: "[REDIRECT]#{ rules_url }" }
+        format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
       else
         format.html { head :bad_request }
       end
