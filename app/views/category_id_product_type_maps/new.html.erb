@@ -3,13 +3,13 @@
 <% parent_id = parent.keys.first %>
 <% parent_name = parent.values.first %>
 <% top_category = "Departments" %>
-<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="catnav jstree-open 
+<li id="<%= parent_id %>" data-name="<%= parent_name %>" class="jstree-open 
   <% unless children.length > 0 -%>
   jstree-leaf
   <% end -%>
   ">
   <ins class="jstree-icon">&nbsp;</ins>
-  <a class="" href="#">
+  <a class="catnav" href="#">
     <ins class="jstree-icon">&nbsp;</ins>
     <%= parent_id %> <%= parent_name %></a>
     <% if children.length > 0 %>
