@@ -10,6 +10,8 @@ def save_instore_daily_sales (start_date, end_date, directory)
   month_sales = {}
   start_time = Time.now
   
+  newfile = "/Users/marc/Documents/cumullative_data.txt"
+  
   Dir.foreach(directory) do |file|
     month_sales = {}  
     #only process bestbuy data files
@@ -24,7 +26,8 @@ def save_instore_daily_sales (start_date, end_date, directory)
         month = file_start_date..file_end_date
           
       # GET ALL INSTOCK ITEM SKUS/DATES FOR THE MONTH IN QUESTION FROM ALL_DAILY_SPEC TABLE
-        instock = AllDailySpec.select("sku,date").where(:name=>"price", :date=>month).order(:date)
+        instock = AllDailySpec.select("sku,date").where(:name=>"store_orders", :value_flt=>(1..9999), :date=>month).order(:date)
+        #instock = AllDailySpec.select("sku,date").where(:name=>"price", :date=>month).order(:date)
         #create a hash of {date=>{sku=>0}} to later store sales numbers
         instock.each do |product|
           date = product.date
@@ -34,6 +37,15 @@ def save_instore_daily_sales (start_date, end_date, directory)
           end
           month_sales[date].store(product.sku,0)
         end
+        
+      #  Function to write all instock products sold to a file 
+      #  File.open(newfile, 'a') do |f|
+      #    instock.each do |product|
+      #      date = product.date.strftime("%d %b %Y")
+      #      f.puts "#{date}\t#{product.sku}"
+      #      
+      #    end
+      #  end
        
       # GO THROUGH THE FILE, ONLY ADDING PRODUCTS IN MONTH_SALES HASH MADE ABOVE
         File.open(csvfile, 'r') do |f|
