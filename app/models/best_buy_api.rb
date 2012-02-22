@@ -79,13 +79,13 @@ class BestBuyApi
       cached_request('search',{:page => page, :categoryid => id})
     end
     
-    def some_ids(id)
+    def some_ids(id,num = 10)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
-        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
+        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => num})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
        #puts "#{ids.to_s}"

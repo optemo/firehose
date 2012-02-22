@@ -317,12 +317,11 @@ $(document).ready ->
 
   $('.coverage_submit').live 'click', ->
     $(this).parent().submit()
-  #  $.post(location.href, {coverage: 1})
 
   $('.fetch_candidates').live 'click', ->
     contentbox = $(this).siblings('div')
     if contentbox.html() is "Processing..."
-      $.get (window.location+"/"+$(this).parent().attr('data-id')), (data) ->
+      $.get window.location.pathname+"/"+$(this).parent().attr('data-id'), (data) ->
         contentbox.html(data)
 
   $(".custom_regex").live 'click', ->
