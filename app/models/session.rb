@@ -34,10 +34,6 @@ class Session
     product_type[0]
   end
   
-  def self.feed_id
-    product_type[1..-1]
-  end
-  
   def self.set_features(categories = [])
     #if an array of categories is given, dynamic features which apply only to those categories are shown
     dynamically_excluded = []

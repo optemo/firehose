@@ -1,6 +1,6 @@
 class BBproductsController < ApplicationController  
   def index
-    @product_skus = BestBuyApi.category_ids(Session.feed_id)
+    @product_skus = BestBuyApi.category_ids(Session.product_type)
   end
 
   def show

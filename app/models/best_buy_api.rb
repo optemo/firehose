@@ -85,6 +85,8 @@ class BestBuyApi
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
+        #Check if ProductType or feed_id
+        my_id = my_id[1..-1] if /^[BF]/ =~ my_id
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => num})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
@@ -98,6 +100,8 @@ class BestBuyApi
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
+        #Check if ProductType or feed_id
+        my_id = my_id[1..-1] if /^[BF]/ =~ my_id
         page = 1
         totalpages = nil
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
