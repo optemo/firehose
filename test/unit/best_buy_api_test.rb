@@ -6,17 +6,22 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
   test "Best buy API" do
     assert( BestBuyApi.product_search(id = 28381, includeall = false, english = true))
     assert BestBuyApi.listing (21344)
- end   
- test "get some ids" do
-    ids= BestBuyApi.some_ids(id = 28381)
-    res = ids.inject([]){|res,ele| res << ele.id unless res.include?(ele.id)}
-    assert_equal(ids.size, res.size,"there is no duplicate in skus")
-    
-    ids = BestBuyApi.some_ids([30442,28381])
-    res = ids.inject([]){|res,ele| res << ele.id unless res.include?(ele.id)}
-    assert_equal(ids.size, res.size,"there is no duplicate in skus")
-    #assert BestBuyApi.search("camera")
- end
+  end   
+  test "get some ids" do
+     ids= BestBuyApi.some_ids(id = 28381)
+     res = ids.inject([]){|res,ele| res << ele.id unless res.include?(ele.id)}
+     assert_equal(ids.size, res.size,"there is no duplicate in skus")
+     
+     ids = BestBuyApi.some_ids([30442,28381])
+     res = ids.inject([]){|res,ele| res << ele.id unless res.include?(ele.id)}
+     assert_equal(ids.size, res.size,"there is no duplicate in skus")
+     #assert BestBuyApi.search("camera")
+  end
+  
+  test "get fewer ids" do
+    ids= BestBuyApi.some_ids(id = 28381,5)
+    assert_equal(5, ids.size, "We should be able to specify the number of results")
+  end
  
   test "get subcategories" do  
     subcats = BestBuyApi.get_subcategories(id= 20243, english = true)

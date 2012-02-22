@@ -94,7 +94,18 @@ class ScrapingRulesController < ApplicationController
   end
   
   def show
-    products = request.referer =~ /full/ ? BestBuyApi.category_ids(Session.feed_id) : BestBuyApi.some_ids(Session.feed_id)
+    if request.referer =~ /full/
+      #Results, so get all products
+      products = Session.product_type_leaves.inject([]) do |res, leaf|
+        res + BestBuyApi.category_ids(leaf[1..-1])
+      end
+    else
+      #Rules, so only show a few 
+      leaves = Session.product_type_leaves
+      products = leaves[0..9].inject([]) do |res, leaf|
+        res + BestBuyApi.some_ids(leaf[1..-1],[10/leaves.size,1].max)
+      end
+    end
     scraping_rules = Maybe(params[:id]).split('-')
     @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
     if scraping_rules.length > 1
