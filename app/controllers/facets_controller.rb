@@ -2,22 +2,21 @@ class FacetsController < ApplicationController
   layout "application", except: [:new]
 
   def index
-    Session.product_type = params[:product_type_id] unless params[:product_type_id].nil?
     parent_types = Session.product_type_path.reverse
     # if the facets for this product_type are empty, default to the nearest ancestor with facets
     i = 0
     f_type = nil
-    p_type = parent_types[i]
+    @p_type = parent_types[i]
     while i <= parent_types.length - 1
-      p_type = parent_types[i]
-      no_facets = Facet.find_all_by_product_type_and_used_for(p_type, 'filter').empty? and Facet.find_all_by_product_type_and_used_for(p_type, 'sortby').empty? and Facet.find_all_by_product_type_and_used_for(p_type, 'show').empty?
+      @p_type = parent_types[i]
+      no_facets = Facet.find_all_by_product_type_and_used_for(@p_type, 'filter').empty? and Facet.find_all_by_product_type_and_used_for(@p_type, 'sortby').empty? and Facet.find_all_by_product_type_and_used_for(@p_type, 'show').empty?
       break unless no_facets
       i += 1
     end
     
-    @db_filters = Facet.find_all_by_product_type_and_used_for(p_type, 'filter').sort_by!{|f| f.value }
-    @db_sortby = Facet.find_all_by_product_type_and_used_for(p_type, 'sortby').sort_by!{|f| f.value }
-    @db_compare = Facet.find_all_by_product_type_and_used_for(p_type, 'show').sort_by!{|f| f.value }    
+    @db_filters = Facet.find_all_by_product_type_and_used_for(@p_type, 'filter').sort_by!{|f| f.value }
+    @db_sortby = Facet.find_all_by_product_type_and_used_for(@p_type, 'sortby').sort_by!{|f| f.value }
+    @db_compare = Facet.find_all_by_product_type_and_used_for(@p_type, 'show').sort_by!{|f| f.value }    
     
     # also inherit ancestors' scraping rules
     current_and_parents_rules = ScrapingRule.where(:product_type => parent_types)
@@ -40,7 +39,6 @@ class FacetsController < ApplicationController
   end
   
   def new
-    
     if params[:type] =~ /Heading|Spacer/
       @new_facet = Facet.new(:product_type => Session.product_type, 
                 :name => params[:type],

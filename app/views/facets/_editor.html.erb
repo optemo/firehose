@@ -1,11 +1,12 @@
 <div class='layout'>
   <div class="centered">
   <input type="button" id="submit_layout" value="Save">
+  &nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="reset_layout" value="Reset">
   </div>
   <div class='column' id='filters'>
     <h2>Filters</h2>
     <div id='filters_body' class="sortable">
-      <% @db_filters.each do |f| -%> <!-- todo: get the list in the right ordering -->
+      <% @db_filters.each do |f| -%>
       <div class="draggable">
         <%= render :partial => 'facet_display', :locals => {:f => f} %>
       </div>

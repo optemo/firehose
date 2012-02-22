@@ -17,6 +17,22 @@ $(document).ready ->
     revert: "invalid"
   make_editable()
 
+$('#reset_layout').live "click", ->
+  locale = $(location).attr('search').split('=')[1]
+  $.ajax
+    type: 'POST'
+    url: window.location.pathname
+    data:
+      locale: locale
+      filter_set: null
+      sorting_set: null
+      compare_set: null
+    success: (data) ->
+      alert("Finished resetting layout")
+      window.location.reload()
+    error: (jqXHR, textStatus, errorThrown) ->
+      alert(jqXHR.statusText + " in resetting layout")
+
 $('#submit_layout').live "click", ->
   ordered_filters = collect_attributes('.filter_box')
   ordered_sorting = collect_attributes('.sortby_box')

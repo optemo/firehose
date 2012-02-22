@@ -28,9 +28,14 @@ class Facet < ActiveRecord::Base
    end
    
    def self.update_layout(product_type, used_for, facet_set)
+     existing_facets = Facet.find_all_by_used_for_and_product_type(used_for, product_type)
+     if facet_set == "null"
+       existing_facets.each{|d| d.destroy}
+       return
+     end
+     
      # determine which facets are in the facets table but not in the page and delete them
      page_facet_ids = facet_set.values.map{|f|f[0].to_i}
-     existing_facets = Facet.find_all_by_used_for_and_product_type(used_for, product_type)
      to_delete = existing_facets.select{|f| !page_facet_ids.include?(f.id)}
      to_delete.each {|d| d.destroy}
      

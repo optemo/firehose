@@ -56,11 +56,7 @@ FactoryGirl.define do
   factory :product do
     instock true
   end
-  factory :product_type do
-    name {|n| "test_type#{n}"}
-  end
   factory :category_id_product_type_map do
-    product_type
   end
   factory :scraping_correction do
     scraping_rule
@@ -95,5 +91,8 @@ FactoryGirl.define do
   factory :product_category do
     retailer "bestbuy"
     feed_id 0
+    l_id 0
+    r_id 0
+    level 0
   end
 end
