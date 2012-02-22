@@ -39,6 +39,7 @@ class FacetsController < ApplicationController
   end
   
   def new
+    @p_type = Session.product_type
     if params[:type] =~ /Heading|Spacer/
       @new_facet = Facet.new(:product_type => Session.product_type, 
                 :name => params[:type],
