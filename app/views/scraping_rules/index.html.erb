@@ -4,6 +4,11 @@
     <%= check_box_tag :coverage, 1, @coverage.present?, class: "coverage_submit" %> Coverage
   <% end %>
 </div>
+<% if @rules.empty? %>
+  <div>
+    <%= link_to "New Rule", "#", :class => "new_rule" %>
+  </div>
+<% end %>
 <% @rules.each_pair do |local_feature,rules| %>
 	<div style="margin-bottom: 1em;">
 		<a href="#" class="togglable open mytitle">
