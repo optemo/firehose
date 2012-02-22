@@ -11,7 +11,7 @@ class ScrapingRulesController < ApplicationController
     
     if params[:coverage] || params[:full]
       @coverage = {}
-      products = params[:full] ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
+      products = params[:full] ? BestBuyApi.category_ids(Session.feed_id) : BestBuyApi.some_ids(Session.feed_id)
       @products_count = products.count
       ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
         groups = candidates.group_by(&:scraping_rule_id)
@@ -94,7 +94,7 @@ class ScrapingRulesController < ApplicationController
   end
   
   def show
-    products = request.referer =~ /results/ ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
+    products = request.referer =~ /full/ ? BestBuyApi.category_ids(Session.feed_id) : BestBuyApi.some_ids(Session.feed_id)
     scraping_rules = Maybe(params[:id]).split('-')
     @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
     if scraping_rules.length > 1

@@ -16,16 +16,16 @@ class ScrapingRulesControllerTest < ActionController::TestCase
     assert_response :success
   end
   
-  #test "should get multi-rules" do
-  #  sr = create(:scraping_rule)
-  #  c1 = build(:candidate, scraping_rule: sr)
-  #  c2 = build(:candidate, scraping_rule: @scraping_rule)
-  #  get :show, product_type_id: @pt_id, id: [@scraping_rule.id,sr.id].join("-")
-  #  assert_response :success
-  #  #Check the colors
-  #  assert_equal ["#4F3333","green"], assigns[:colors].values, "Color coding isn't right"
-  #  assert_equal 10, assigns[:candidates].length
-  #end
+  test "should get multi-rules" do
+    sr = create(:scraping_rule)
+    c1 = build(:candidate, scraping_rule: sr)
+    c2 = build(:candidate, scraping_rule: @scraping_rule)
+    get :show, product_type_id: @pt_id, id: [@scraping_rule.id,sr.id].join("-")
+    assert_response :success
+    #Check the colors
+    assert_equal ["#4F3333","green"], assigns[:colors].values, "Color coding isn't right"
+    assert_equal 10, assigns[:candidates].length
+  end
 
   test "should create scraping_rule" do
     assert_difference('ScrapingRule.count') do
