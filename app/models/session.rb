@@ -25,7 +25,9 @@ class Session
   end
   
   def self.product_type_path
-    ProductCategory.get_ancestors(product_type).reverse + [product_type]
+    ancestors = ProductCategory.get_ancestors(product_type)
+    ancestors = [] if ancestors.nil?
+    ancestors.reverse + [product_type]
   end
 
   def self.retailer

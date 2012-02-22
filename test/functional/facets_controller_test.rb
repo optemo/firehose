@@ -2,30 +2,55 @@ require 'test_helper'
 
 class FacetsControllerTest < ActionController::TestCase
   setup do
-    @pt_id = "B20218"
+    @pt_id = product_categories(:cameras).product_type
+    create(:scraping_rule, rule_type: "Continuous")
+    create(:scraping_rule, rule_type: "Categorical")
+    create(:scraping_rule, rule_type: "Binary")
+    
+    @f1 = create(:facet, used_for: "filter")
+    @f2 = create(:facet, used_for: "sortby")    
+    @f3 = create(:facet, used_for: "show")
   end
   
   test "should show layout for the right product category" do
-   # make scraping rules
+   
    get :index, product_type_id: @pt_id
-   assert_template('show')
+   assert_template('editor')
    assert_response :success
    
-   assert_not_nil assigns("db_filters")
-   assert_not_nil assigns("db_sortby")
-   assert_not_nil assigns("db_compare")
-   assert_not_nil assigns("sr_filters")
-   assert_not_nil assigns("sr_sortby")
-   assert_not_nil assigns("sr_compare")
-   assert_equal prod_type, session[:current_product_type], "The session should be stored in a cookie"
-   assert_equal prod_type, Session.product_type, "The product type should be stored in the session object"
+   assert_not_equal [], assigns("db_filters")
+   assert_not_equal [], assigns("db_sortby")
+   assert_not_equal [], assigns("db_compare")
+   assert_not_equal [], assigns("sr_filters")
+   assert_not_equal [], assigns("sr_sortby")
+   assert_not_equal [], assigns("sr_compare")
+   assert_equal @pt_id, Session.product_type, "The product type should be stored in the session object"
+  end
+  
+  test "should get default layout and sr when scraping rules for an ancestor" do
+   
+   Session.product_type = "B22474"
+   get :index, product_type_id: "B22474"
+   assert_template('editor')
+   assert_response :success
+      
+   assert_not_equal [], assigns("db_filters")
+   assert_not_equal [], assigns("db_sortby")
+   assert_not_equal [], assigns("db_compare")
+   assert_not_equal [], assigns("sr_filters")
+   assert_not_equal [], assigns("sr_sortby")
+   assert_not_equal [], assigns("sr_compare")
+  end
+  
+   
+  test "should get blank layout and scraping rules when none defined for an ancestor" do   
+   Session.product_type = "B20007"
+   get :index, product_type_id: "B20007"
+   assert_response :success
+   assert_equal [], assigns("db_filters"), "should have no facets of its own nor do its ancestors"
   end
 
   test "getting feature names to add from the scraping rules" do
-   
-   sr1 = create(:scraping_rule, rule_type: "Continuous")
-   sr2 = create(:scraping_rule, rule_type: "Categorical")
-   sr3 = create(:scraping_rule, rule_type: "Binary")
    
    get :index, product_type_id: @pt_id
    
@@ -39,9 +64,10 @@ class FacetsControllerTest < ActionController::TestCase
   end
   
   test "retrieving existing facets to display" do
-   f1 = create(:facet, used_for: "filter")
-   f2 = create(:facet, used_for: "filter")
-   f3 = create(:facet, used_for: "show")
+   # f1 = create(:facet, used_for: "filter")
+   # f2 = create(:facet, used_for: "filter")
+   # f3 = create(:facet, used_for: "show")
+   f0 = create(:facet, used_for: "filter")
    
    get :index, product_type_id: @pt_id
    filters = assigns("db_filters")
@@ -50,15 +76,15 @@ class FacetsControllerTest < ActionController::TestCase
        
    assert_equal 2, filters.length, "Should get filters values from facets in the database"
    assert_equal 1, compare.length, "Should get compare values from facets in the database"
-   assert_equal 0, sortby.length, "Should get sortby values from facets in the database"
-   assert_equal f1, filters[0], "Existing filters should be same as those in the database"
-   assert_equal f2, filters[1], "Existing filters should be same as those in the database"
-   assert_equal f3, compare[0], "Existing compare features should be same as those in the database"
+   assert_equal 1, sortby.length, "Should get sortby values from facets in the database"
+   assert_equal @f1, filters[0], "Existing filters should be same as those in the database"
+   assert_equal @f2, sortby[0], "Existing sortby should be same as those in the database"
+   assert_equal @f3, compare[0], "Existing compare features should be same as those in the database"
    
    f4 = create(:facet, used_for: "sortby")
    get :index, product_type_id: @pt_id
    sortby = assigns("db_sortby")
-   assert_equal f4, sortby[0], "Existing sorby features should be same as those in the database"
+   assert_equal f4, sortby[1], "Existing sorby features should be same as those in the database"
   end
   
   test "saving a new layout" do
@@ -75,10 +101,10 @@ class FacetsControllerTest < ActionController::TestCase
      {"0"=>["105", "Categorical", "color", "color", "", ""]}
     }
    
-   f1 = create(:facet, used_for: "filter")
-   f2 = create(:facet, used_for: "filter")
-   f3 = create(:facet, used_for: "show")
-   f3 = create(:facet, used_for: "sortby", id: 104)
+   # f1 = create(:facet, used_for: "filter")
+   # f2 = create(:facet, used_for: "filter")
+   # f3 = create(:facet, used_for: "show")
+   f4 = create(:facet, used_for: "sortby", id: 104)
    
    original_filters = Facet.find_all_by_used_for("filter")
    original_sorting = Facet.find_all_by_used_for("sortby")
@@ -107,12 +133,6 @@ class FacetsControllerTest < ActionController::TestCase
    
    assert_equal "Top Rated", I18n.t("B20218.filter.toprated.name"), 'should save translation for facet name'
    assert_equal "stars", I18n.t("B20218.filter.toprated.unit"), 'should save translation for facet unit'
-  end
-  
-  test "should get new" do
-    get :new, product_type_id: @pt_id
-    assert_response :success
-    assert_template('new') 
   end
 
   test "adding a heading to the layout" do
