@@ -37,6 +37,9 @@ class Product < ActiveRecord::Base
     products_to_save = {}
     product_skus.each do |bb_product|
       products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
+      #Set new products to out of stock
+      products_to_save[bb_product.id].instock = false
+      products_to_save[bb_product.id].save
     end
     specs_to_save = {}
     
@@ -50,11 +53,6 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       p = products_to_save[candidate.sku]
-      
-      if p.new_record?
-        p.instock = false
-        p.save
-      end
       
       if candidate.delinquent
         #This is a feature which was removed
