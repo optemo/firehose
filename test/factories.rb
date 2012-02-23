@@ -56,6 +56,11 @@ FactoryGirl.define do
   factory :product do
     instock true
   end
+  factory :typed_product, :parent => :product do
+    after_create do |product, evaluator|
+      FactoryGirl.create :cat_spec, {name: "product_type", value: (Session.product_type_leaves || [ProductCategory.first.product_type]).first, product: product}
+    end
+  end
   factory :category_id_product_type_map do
   end
   factory :scraping_correction do

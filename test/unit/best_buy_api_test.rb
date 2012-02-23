@@ -28,7 +28,7 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
     assert_equal(5, ids.size, "Some_ids should accept product type")
   end
   
-  test "some ids should work with product_type too" do
+  test "category ids should work with product_type too" do
     ids= BestBuyApi.category_ids(id = "B28381")
     assert(!ids.empty?, "Category ids should accept product type")
   end

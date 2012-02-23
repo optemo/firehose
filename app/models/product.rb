@@ -22,7 +22,7 @@ class Product < ActiveRecord::Base
   end
   
   scope :instock, :conditions => {:instock => true}
-  scope :current_type, joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})
+  scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
   def self.feed_update
     raise ValidationError unless Session.product_type
@@ -107,7 +107,7 @@ class Product < ActiveRecord::Base
         end
         records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
         factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f.name+"_factor")
+        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(product_id: product.id, name: f.name+"_factor")
         if records[f.name][product.id]
           record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
           fVal = records[f.name][product.id].first.value 
@@ -138,7 +138,7 @@ class Product < ActiveRecord::Base
       end 
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
       product_utility.value = utility.sum
       cont_activerecords << product_utility
     end

@@ -1,25 +1,25 @@
 price:
   id: 100
-  product_id: 95
+  product_id: 1
   name: price
   value: 279.97
 saleprice:
   id: 101
-  product_id: 95
+  product_id: 1
   name: saleprice
   value: 249.97
 rating:
   id: 102
-  product_id: 95
+  product_id: 1
   name: customerRating
   value: 3.75
 zoom:
   id: 103
-  product_id: 95
+  product_id: 1
   name: opticalzoom
   value: 14
 maxresolution:
   id: 105
-  product_id: 95
+  product_id: 1
   name: maxresolution
   value: 14.1

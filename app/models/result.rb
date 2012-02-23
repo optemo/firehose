@@ -27,7 +27,7 @@ class Result < ActiveRecord::Base
     (featured+Product.current_type.instock).each do |product|
       saleEnd = CatSpec.find_by_product_id_and_name(product.id,"saleEndDate",Session.product_type)
       if saleEnd && saleEnd.value && (Time.parse(saleEnd.value) - 4.hours) > Time.now
-        binspec = BinSpec.find_by_product_id_and_name(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
+        binspec = BinSpec.find_or_initialize_by_product_id_and_name(product.id,"onsale")
         binspec.value = true
         binspecs << binspec
       else
