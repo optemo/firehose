@@ -33,6 +33,6 @@ load 'config/deploy/recipes'
 
 before 'deploy:update', :set_umask
 before "deploy:assets:precompile", :serversetup
-before 'deplay:symlink', :db_migrate
+after 'deploy:update_code', :db_migrate
 after "deploy:symlink", :restartmemcached
 after :restartmemcached, :redopermissions
