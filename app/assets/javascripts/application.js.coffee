@@ -93,7 +93,10 @@ $(document).ready ->
     nodes_path = $('#tree_categories').attr('data-path').split('"')
     for node, i in nodes_path
       nodes.push node.substr(1) if i % 2 == 1
-    dropdown_div.load "/category_ids/show", ->
+    // TODO: make this work :D
+    cur_product_type = $.trim($('.current_product_type').html())
+    dropdown_div.load "FDepartments/category_ids/FDepartments", ->
+      debugger
       $("#product_type_menu").append dropdown_div
       setTimeout load_tree(nodes), 1000
       setTimeout load_nodes(nodes), 1500

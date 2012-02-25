@@ -64,12 +64,12 @@ Firehose::Application.routes.draw do
   
   resources :product_types, path: "/" do
     resources :facets, only: [:index, :new, :create], path: "layout_editor"
-    resources :scraping_corrections, :except => [:show, :index]
-    resources :scraping_rules
-    resources :b_bproducts, only: [:index, :show]
+    resources :scraping_corrections, :except => [:show, :index], id: /\d+/
+    resources :scraping_rules, id: /[\d-]+/
+    resources :b_bproducts, only: [:index, :show], id: /\w+/
+    resources :category_id_product_type_maps, only: [:new, :show], :path=>"category_ids"
     match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
   end  
-  resources :category_id_product_type_maps, only: [:new, :show], :path=>"category_ids"
   
   match "featured" => "featured#index"
 end
