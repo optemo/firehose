@@ -1,6 +1,11 @@
 
 brand:
   id: 1
-  product_id: 95
+  product_id: 1
   name: brand
   value: CANON
+product_type:
+  id: 2
+  product_id: 1
+  name: product_type
+  value: B22474

@@ -10,19 +10,19 @@ class ProductBundle < ActiveRecord::Base
         data.map{|d|d["sku"]}.each do |sku|
           p_copy = Product.find_by_sku(sku)
           #Filtering out accessories
-          if p_copy && p_copy.product_type == CatSpec.find_by_name_and_product_id("product_type", bundle.product_id).value
+          if p_copy && CatSpec.find_by_name_and_product_id("product_type", p_copy.id).try(:value) == CatSpec.find_by_name_and_product_id("product_type", bundle.product_id).try(:value)
             # Get or create new product bundle
-            p = ProductBundle.find_or_initialize(bundle_id: bundle.product_id)
+            p = ProductBundle.find_or_initialize_by_bundle_id(bundle.product_id)
             if p.product_id != p_copy.id
               p.product_id = p_copy.id
               product_bundles << p
             end
-        
+
             #Copy over all the products specs
             [ContSpec,BinSpec,CatSpec,TextSpec].each do |s_class|
               s_class.find_all_by_product_id(p_copy.id).each do |spec|
                 unless spec.name =="featured" || spec.name =="featured_factor" || spec.name =="next_featured"
-                  copiedspec = s_class.find_or_initialize_by_product_id_and_name(p.id,spec.name)
+                  copiedspec = s_class.find_or_initialize_by_product_id_and_name(bundle.product_id,spec.name)
                   if copiedspec.modified || copiedspec.updated_at.nil? || copiedspec.value.blank?
                     copiedspec.value = spec.value
                     copiedspec.modified = true

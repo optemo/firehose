@@ -22,6 +22,16 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
     ids= BestBuyApi.some_ids(id = 28381,5)
     assert_equal(5, ids.size, "We should be able to specify the number of results")
   end
+  
+  test "some ids should work with product_type too" do
+    ids= BestBuyApi.some_ids(id = "B28381",5)
+    assert_equal(5, ids.size, "Some_ids should accept product type")
+  end
+  
+  test "category ids should work with product_type too" do
+    ids= BestBuyApi.category_ids(id = "B28381")
+    assert(!ids.empty?, "Category ids should accept product type")
+  end
  
   test "get subcategories" do  
     subcats = BestBuyApi.get_subcategories(id= 20243, english = true)

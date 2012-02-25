@@ -33,8 +33,16 @@ task :update => :environment do
   end
   
   start = Time.now
-  Product.feed_update
-
+  leaves = Session.product_type_leaves
+  if leaves.nil? || leaves.empty?
+    raise "Product type: #{ENV["product_type"]} not found"
+  end
+  leaves.each do |node|
+    #Run the update task for this leaf node
+    Session.new node
+    Product.feed_update
+  end
+  Session.new ENV["product_type"] #Reset session
   #clean up inactive scraping rules not used any more
   Facet.check_active
   Search.cleanup_history_data(7)

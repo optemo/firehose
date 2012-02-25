@@ -1,13 +1,13 @@
 require 'test_helper'
 
-class TextSpecTest < ActiveSupport::TestCase
+class ProductSiblingTest < ActiveSupport::TestCase
   
   setup do
      Session.new
-     create(:product, id: 10, sku:10159584, instock:1)
-     create(:product, id: 11, sku:10159585, instock:1)
-     create(:product, id: 12, sku:10159586, instock:1)
-     create(:product, id: 13, sku:10159587, instock:1)
+     create(:typed_product, id: 10, sku:10159584)
+     create(:typed_product, id: 11, sku:10159585)
+     create(:typed_product, id: 12, sku:10159586)
+     create(:typed_product, id: 13, sku:10159587)
      create(:cat_spec, product_id:10, name:"color", value:"www.bestby.ca/purple")
      create(:cat_spec, product_id:11, name:"color", value:"www.bestby.ca/red")
      create(:cat_spec, product_id:12, name:"color", value:"www.bestby.ca/yellow")

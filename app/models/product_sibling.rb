@@ -12,7 +12,7 @@ class ProductSibling < ActiveRecord::Base
         #Check if the product is in our database
         sibs = skus.map{|sku|Product.find_by_sku(sku).try(:id)}.compact
         sibs.each do |sib_id|
-          ps = ProductSibling.find_or_initialize(product_id: p_id)
+          ps = ProductSibling.find_or_initialize_by_product_id(p_id)
           if ps.sibling_id != sib_id
             ps.sibling_id = sib_id
             ps.name = "color"
@@ -30,7 +30,7 @@ class ProductSibling < ActiveRecord::Base
     # make sure color relationship is symmetric (R(a,b) => R(b,a))
     (siblings_unchanged + siblings_activerecords).each do |p|
        unless (siblings_unchanged + siblings_activerecords).inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id) }
-         ps = ProductSibling.find_or_initialize(product_id: p.sibling_id)
+         ps = ProductSibling.find_or_initialize_by_product_id(p.sibling_id)
          if ps.sibling_id != p.product_id
            ps.sibling_id = p.product_id
            ps.name = "color"
@@ -47,7 +47,7 @@ class ProductSibling < ActiveRecord::Base
       siblings = (siblings_unchanged + siblings_activerecords).map{|s| s if s.product_id == s1.product_id}.compact
       siblings.each do |s2|
         unless (siblings_unchanged + siblings_activerecords).inject(false){|res,sib| res || s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id)}
-          ps = ProductSibling.find_or_initialize(product_id: s1.sibling_id)
+          ps = ProductSibling.find_or_initialize_by_product_id(s1.sibling_id)
           if ps.sibling_id != s2.sibling_id
             ps.sibling_id = s2.sibling_id
             ps.name = "color"

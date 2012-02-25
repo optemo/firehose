@@ -11,7 +11,7 @@ class ScrapingRulesController < ApplicationController
     
     if params[:coverage] || params[:full]
       @coverage = {}
-      products = params[:full] ? BestBuyApi.category_ids(Session.feed_id) : BestBuyApi.some_ids(Session.feed_id)
+      products = params[:full] ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
       @products_count = products.count
       ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
         groups = candidates.group_by(&:scraping_rule_id)
@@ -97,13 +97,13 @@ class ScrapingRulesController < ApplicationController
     if request.referer =~ /full/
       #Results, so get all products
       products = Session.product_type_leaves.inject([]) do |res, leaf|
-        res + BestBuyApi.category_ids(leaf[1..-1])
+        res + BestBuyApi.category_ids(leaf)
       end
     else
       #Rules, so only show a few 
       leaves = Session.product_type_leaves
       products = leaves[0..9].inject([]) do |res, leaf|
-        res + BestBuyApi.some_ids(leaf[1..-1],[10/leaves.size,1].max)
+        res + BestBuyApi.some_ids(leaf,[10/leaves.size,1].max)
       end
     end
     scraping_rules = Maybe(params[:id]).split('-')

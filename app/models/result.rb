@@ -15,23 +15,6 @@ class Result < ActiveRecord::Base
     removedproducts = old_c-c
     "New: <span style='color: green'>[#{newproducts.join(" , ")}]</span> Removed: <span style='color: red'>[#{removedproducts.join(" , ")}]</span>"
   end
-
-  
-  def create_from_current
-
-    raise ValidationError unless category
-    product_skus = BestBuyApi.category_ids(YAML.load(category))
-    self.nonuniq = product_skus.count
-    product_skus.uniq!{|a|a.id}
-    self.total = product_skus.count
-    save
-    
-    candidate_records = ScrapingRule.scrape(product_skus).each{|c|c.result_id = id}
-    # Bulk insert
-    Candidate.import candidate_records
-
-
-  end
   
   def self.upkeep_pre
 
@@ -44,7 +27,7 @@ class Result < ActiveRecord::Base
     (featured+Product.current_type.instock).each do |product|
       saleEnd = CatSpec.find_by_product_id_and_name(product.id,"saleEndDate",Session.product_type)
       if saleEnd && saleEnd.value && (Time.parse(saleEnd.value) - 4.hours) > Time.now
-        binspec = BinSpec.find_by_product_id_and_name(product.id,"onsale",Session.product_type) || BinSpec.new(:name => "onsale", :product_type => Session.product_type, :product_id => product.id)
+        binspec = BinSpec.find_or_initialize_by_product_id_and_name(product.id,"onsale")
         binspec.value = true
         binspecs << binspec
       else
