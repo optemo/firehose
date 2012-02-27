@@ -63,14 +63,24 @@ class ProductTest < ActiveSupport::TestCase
   end 
   
   test "Product and Spec import from BBY API" do
-    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription", rule_type: "Categorical")
+    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription", rule_type: "Text")
     Product.feed_update
     # 20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 20 products created in the database"
     assert_equal false, Product.first.instock
-    assert_equal true, Product.all[1..-1].map(&:instock).inject(true){|res,el|res && el}, "All new products should be instock"
-    assert !Product.all[1].cat_specs.empty?, "New products should have one catspec"
-    assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the long description is available"
+    assert_equal true, Product.all[1..-1].inject(true){|res,el|res && (el.instock || /^B/ =~ el.sku)}, "All new products should be instock (unless they're bundles)"
+    assert !Product.all[1].text_specs.empty?, "New products should have one texttspec"
+  end
+  
+  test "Product and Spec import for bundles from BBY API" do
+    sr = create(:scraping_rule, local_featurename: "price", remote_featurename: "regularPrice", rule_type: "Continuous")
+    Product.feed_update
+    # 20 created(Current BB page size), and 1 in the fixtures
+    assert_equal 21, Product.count, "There should be 20 products created in the database"
+    assert_equal false, Product.first.instock
+    assert_equal true, Product.all[1..-1].inject(true){|res,el|res && el.instock}, "All new products should be instock"
+    assert !Product.all[1].cont_specs.empty?, "New products should have one texttspec"
+    assert_equal ["price"]*20, Product.all[1..-1].map{|p|p.cont_specs.first.try(:name)}, "Test that the long price is available"
   end
   
   test "Get Rules" do
