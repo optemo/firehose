@@ -24,13 +24,6 @@ class Product < ActiveRecord::Base
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
-  def compute_custom_specs(skus, product_type)
-    # go to customizations, call
-    Customization.compute_specs(skus, product_type)
-    # structure of the list to return:
-    # a spec model instance with .value
-  end
-  
   def self.feed_update
     raise ValidationError unless Session.product_type
     product_skus = BestBuyApi.category_ids(Session.product_type)
@@ -49,9 +42,6 @@ class Product < ActiveRecord::Base
       products_to_save[bb_product.id].save
     end
     specs_to_save = {}
-    
-    #custom_specs_to_save = compute_custom_specs(product_skus, Session.product_type)
-    # TODO: add the custom_specs_to_save to specs_to_save
     
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     candidates.each do |candidate|
@@ -88,6 +78,8 @@ class Product < ActiveRecord::Base
     ProductSibling.get_relations
     Equivalence.fill
     Result.upkeep_post
+    
+    Product.compute_custom_specs(product_skus, Session.product_type)    
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
@@ -95,6 +87,13 @@ class Product < ActiveRecord::Base
       puts "Memcache not available"
     end
     
+  end
+  
+  def self.compute_custom_specs(bb_prods, product_type)
+    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id), product_type)
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+    end
   end
   
   def self.calculate_factors
