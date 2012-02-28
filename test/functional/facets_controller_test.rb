@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class FacetControllerTest < ActionController::TestCase
+class FacetsControllerTest < ActionController::TestCase
   setup do
   end
   

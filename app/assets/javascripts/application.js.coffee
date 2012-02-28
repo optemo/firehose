@@ -1,5 +1,4 @@
 #= require_self
-#= require categories
 #= require layout_editor
 #= require jquery.jeditable.min
 #= require jquery_ujs
@@ -8,7 +7,6 @@
 
 # The ajax handler takes data from the ajax call and inserts the data into the #main part and then the #filtering part. 
 ajaxhandler = (data) ->
-  rdr
   if rdr = /\[REDIRECT\](.*)/.exec(data)
     window.location.replace(rdr[1])
   else 
@@ -229,10 +227,10 @@ $(document).ready ->
     else if t.hasClass("catnav")
       cat_id = t.parent().attr("id")
       parts = $(location).attr("href").split("/")
-      parts[3] = parts[3][0] + cat_id
+      parts[3] = $.trim($('.current_product_type').html())[0] + cat_id
       address = parts.join("/")
-      window.location.replace(address)
-      return true
+      window.location = address
+      return false
   	else if t.attr('data-method') is "delete"
   	  if confirm("Are you sure you want to delete this item?") 
   		  $.ajax
