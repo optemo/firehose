@@ -67,8 +67,7 @@ class ProductTest < ActiveSupport::TestCase
     Product.feed_update
     # 20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 20 products created in the database"
-    assert_equal false, Product.first.instock
-    assert_equal true, Product.all[1..-1].inject(true){|res,el|res && (el.instock || /^B/ =~ el.sku)}, "All new products should be instock (unless they're bundles)"
+    assert_equal true, Product.all.inject(true){|res,el|res && (el.instock || /^B/ =~ el.sku)}, "All products should be instock (unless they're bundles)"
     assert !Product.all[1].text_specs.empty?, "New products should have one texttspec"
   end
   
@@ -77,10 +76,10 @@ class ProductTest < ActiveSupport::TestCase
     Product.feed_update
     # 20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 20 products created in the database"
-    assert_equal false, Product.first.instock
-    assert_equal true, Product.all[1..-1].inject(true){|res,el|res && el.instock}, "All new products should be instock"
+    assert_equal true, Product.all.inject(true){|res,el|res && el.instock}, "All products should be instock"
     assert !Product.all[1].cont_specs.empty?, "New products should have one texttspec"
-    assert_equal ["price"]*20, Product.all[1..-1].map{|p|p.cont_specs.first.try(:name)}, "Test that the long price is available"
+    assert_equal ["price"]*20, Product.all[1..-1].map{|p|p.cont_specs.first.try(:name)}, "Test that the price is available"
+    assert_match /\d+(\.\d+)?/, Product.first.cont_specs.first.try(:value).to_s, "Prices are actually recorded correctly"
   end
   
   test "Get Rules" do

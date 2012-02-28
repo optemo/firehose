@@ -35,14 +35,12 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
  
   test "get subcategories" do  
     subcats = BestBuyApi.get_subcategories(id= 20243, english = true)
-    puts "#{subcats}"
     keys = subcats.keys
     assert_equal(3, subcats.values_at("20243"=> keys[0].values_at("20243")[0])[0].to_a.length, "there should be 3 subcategories for 'the USB Flash Drivers' category")
   end
  
   test "keyword search" do
     skus = BestBuyApi.keyword_search ("Camera")
-    puts "#{skus.size}"
     assert_equal(skus.size, skus.uniq.size,"there is no duplicate in skus")
   end
   
