@@ -26,9 +26,10 @@ def save_instore_daily_sales (start_date, end_date, directory)
         month = file_start_date..file_end_date
           
       # GET ALL INSTOCK ITEM SKUS/DATES FOR THE MONTH IN QUESTION FROM ALL_DAILY_SPEC TABLE
-        instock = AllDailySpec.select("sku,date").where(:name=>"store_orders", :value_flt=>(1..9999), :date=>month).order(:date)
-        #instock = AllDailySpec.select("sku,date").where(:name=>"price", :date=>month).order(:date)
-        #create a hash of {date=>{sku=>0}} to later store sales numbers
+        # Uncomment this line (and comment line below) to write products sold to a file
+        #instock = AllDailySpec.select("sku,date").where(:name=>"store_orders", :value_flt=>(1..9999), :date=>month).order(:date)
+        instock = AllDailySpec.select("sku,date").where(:name=>"price", :date=>month).order(:date)
+        # Create a hash of {date=>{sku=>0}} to later store sales numbers
         instock.each do |product|
           date = product.date
           #create new date key unless it already exists

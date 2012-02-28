@@ -26,22 +26,28 @@ class Product < ActiveRecord::Base
   
   def self.feed_update
     raise ValidationError unless Session.product_type
-    product_skus = BestBuyApi.category_ids(Session.product_type)
-    #product_skus.uniq!{|a|a.id} #Uniqueness check
-    #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
-    candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
-    candidates = ScrapingRule.scrape(product_skus,false,[],false)
-    #Reset the instock flags
-    Product.current_type.update_all(instock: false)
+    begin
+      product_skus = BestBuyApi.category_ids(Session.product_type)
+      #product_skus.uniq!{|a|a.id} #Uniqueness check
+      #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
+      candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
+      candidates = ScrapingRule.scrape(product_skus,false,[],false)
+      #Reset the instock flags
+      Product.current_type.update_all(instock: false)
     
-    products_to_save = {}
-    product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
-      #Set new products to out of stock
-      products_to_save[bb_product.id].instock = false
-      products_to_save[bb_product.id].save
+      products_to_save = {}
+      product_skus.each do |bb_product|
+        products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
+        #Set new products to out of stock
+        products_to_save[bb_product.id].instock = false
+        products_to_save[bb_product.id].save
+      end
+      specs_to_save = {}
+    rescue
+      puts 'got timeout; waiting and trying again'
+      sleep(60)
+      retry
     end
-    specs_to_save = {}
     
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     candidates.each do |candidate|

@@ -18,8 +18,9 @@ def traverse(root_node, i, level)
   
   begin
     french_name = BestBuyApi.get_category(catid, false)["name"]
-  rescue
+  rescue BestBuyApi::TimeoutError
     puts 'got timeout; waiting and trying again'
+    puts catid
     sleep(60)
     retry
   end

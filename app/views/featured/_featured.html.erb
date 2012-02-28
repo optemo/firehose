@@ -1,15 +1,30 @@
 <div class="featured">
-	<div class="title">		
-		<%= featured.cat_specs.find_by_name("title").try(:value)%>
-		<br>
-		<%= "SKU: #{featured.sku}" %>
-	</div>
-  <div class="product">
-		<%= image_tag featured.cat_specs.find_by_name("img150url").value, :class => "productimg", title: "SKU:#{featured.sku}" %> 	
-	</div>
-  <div class="accessories">
-    <div>Accessories:</div>
-    <% acc = Hash[*featured.text_specs.find_by_name("top_copurchases",).try(:value).try(:split,"-")] %>
-    <%= render partial: "accessory", collection: acc.keys.zip(acc.values) %>
-  </div>
+	<table>
+		<tr>
+			<td class="bestseller">
+				<div class="title">		
+					<%= featured.cat_specs.find_by_name("title").try(:value)%>
+					<br>
+					<%= "SKU: #{featured.sku}" %>
+					<br><br>
+				</div>
+			  <div class="product">
+			    <span class="num" style="background-color:#66FFFF"><%= featured.cont_specs.find_by_name("sum_store_sales").try(:value).to_i %></span>
+					<%= image_tag "http://www.bestbuy.ca/multimedia/Products/150x150/#{featured.sku[0..2]}/#{featured.sku[0..4]}/#{featured.sku}.jpg", :class => "productimg", title: "SKU:#{featured.sku}" %> 	
+				</div>
+			</td>
+			<td class="accessories">
+		    <div style="margin-bottom:2px;">Recommended Accessories:</div>
+		    <% lines = featured.text_specs.find_by_name("top_copurchases",).try(:value).try(:split,"%")%>
+		    <% lines.each do |category|%>
+		      <% acc = Hash[*category.try(:split,"~")] %>
+		      <div class="cat_name"><%= acc.first[0]+"  (#{acc.first[1]})"%></div>
+		      <% acc.select!{|key| key =~ /^\d/}%>
+		      <%= render partial: "accessory", collection: acc.keys.zip(acc.values) %>
+		      <br><br>
+		    <% end %>  
+		  </td>
+		</tr>
+	</table>	
+
 </div>
