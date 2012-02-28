@@ -1,6 +1,5 @@
 <% top_category = "Departments" %>
 <ul>
-  <% debugger %>
   <% nodes = BestBuyApi.get_subcategories(top_category) -%>
   <% root = nodes.keys.first -%>
   <% children = nodes.values.first -%>
