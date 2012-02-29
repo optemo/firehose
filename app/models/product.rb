@@ -32,23 +32,29 @@ class Product < ActiveRecord::Base
       #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
       candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
       candidates = ScrapingRule.scrape(product_skus,false,[],false)
-      #Reset the instock flags
-      Product.current_type.update_all(instock: false)
-    
-      products_to_save = {}
-      product_skus.each do |bb_product|
-        products_to_save[bb_product.id] = Product.find_or_initialize_by_sku(bb_product.id)
-        #Set new products to out of stock
-        products_to_save[bb_product.id].instock = false
-        products_to_save[bb_product.id].save
-      end
-      specs_to_save = {}
     rescue
       puts 'got timeout; waiting and trying again'
       sleep(60)
       retry
     end
     
+    #Reset the instock flags
+    Product.current_type.find_each do |p|
+      p.instock = false
+      products_to_update[p.sku] = p
+    end
+  
+    products_to_update = {}
+    products_to_save = {}
+    specs_to_save = {}
+    specs_to_delete = []
+    product_skus.each do |bb_product|
+      unless products_to_update[bb_product.id]
+        products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false
+      end
+    end
+    
+    #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     candidates.each do |candidate|
       spec_class = case candidate.model
@@ -58,24 +64,43 @@ class Product < ActiveRecord::Base
         when "Text" then TextSpec
         else CatSpec # This should never happen
       end
-      p = products_to_save[candidate.sku]
+      #p = products_to_save[candidate.sku] || 
       
-      if candidate.delinquent
+      if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
-        spec.destroy if spec && !spec.modified
+        specs_to_delete << spec if spec && !spec.modified
       else
-        p.instock = true
-        spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.value = candidate.parsed
-        specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+        if p = products_to_update[candidate.sku]
+          #Product is already in the database
+          p.instock = true
+          spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
+          spec.value = candidate.parsed
+          specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+        else
+          #Product is new
+          p = products_to_save[candidate.sku]
+          p.instock = true
+          myspecs = case candidate.model
+            when "Categorical" then p.cat_specs
+            when "Continuous" then p.cont_specs
+            when "Binary" then p.bin_specs
+            when "Text" then p.text_specs
+          end
+          myspecs << spec_class.new(name: candidate.name, value: candidate.parsed)
+        end
       end
     end
+
+    raise ValidationError, "No products are instock" if specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0
     # Bulk insert/update for efficiency
-    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :instock]
+    Product.import products_to_update.values, :on_duplicate_key_update=> [:sku]
     specs_to_save.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name] # Bulk insert/update for efficiency
     end
+    specs_to_delete.each(&:destroy)
+    products_to_save.values.each(&:save) #Save products and associated specs
+    
     Result.upkeep_pre
     ProductBundle.get_relations
     #Calculate new spec factors

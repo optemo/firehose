@@ -84,14 +84,14 @@ $(document).ready ->
       t.unbind('click').click(dropdown_function)
       return false
     return false
-    
+
   dropdown_categories = ->
     dropdown_div = $('#tree_categories')
     nodes = []
     nodes_path = $('#tree_categories').attr('data-path').split('"')
     for node, i in nodes_path
       nodes.push node.substr(1) if i % 2 == 1
-    dropdown_div.load "/category_ids/show", ->
+    dropdown_div.load "category_ids", ->
       $("#product_type_menu").append dropdown_div
       setTimeout load_tree(nodes), 1000
       setTimeout load_nodes(nodes), 1500
@@ -108,7 +108,7 @@ $(document).ready ->
       id = data.rslt.obj.attr("id")
       product_type_id = $('#top_type').attr('data-id')
       $.ajax
-        url: "/category_ids/new"
+        url: "category_ids/new"
         data:
           id: id
           product_type: product_type_id
