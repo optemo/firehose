@@ -38,16 +38,17 @@ class Product < ActiveRecord::Base
       retry
     end
     
+    products_to_update = {}
+    products_to_save = {}
+    specs_to_save = {}
+    specs_to_delete = []
+    
     #Reset the instock flags
     Product.current_type.find_each do |p|
       p.instock = false
       products_to_update[p.sku] = p
     end
   
-    products_to_update = {}
-    products_to_save = {}
-    specs_to_save = {}
-    specs_to_delete = []
     product_skus.each do |bb_product|
       unless products_to_update[bb_product.id]
         products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false
