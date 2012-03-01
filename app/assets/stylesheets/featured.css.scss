@@ -2,6 +2,57 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+.category {
+  border: 1px solid #888;
+  border-radius: 10px;
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0px;
+}
+
+.cat_name {
+  font-size:16px;
+  margin-left:5px;
+  border-bottom-style:solid;
+  border-bottom-width:1px;
+  border-bottom-color:#888;
+}
+
+table {
+  table-layout:fixed;
+  height:300px;
+}
+
+.bestseller {
+  width:150px;
+}
+
+.first_featured{
+  position:relative;
+  display:inline-block;
+  width:150px;
+  padding:3px;
+  vertical-align:top;
+}
+
+.featured, .product {
+  padding: 5px;
+
+  .product{
+    position:relative;
+    width: 150px;
+    float: left;
+  }
+
+  .title {
+    width: 150px;
+    float:left;
+    margin-top: auto;
+    margin-bottom: auto;
+    text-align: center;
+  }
+}
+
 .accessories {
   display:inline-block;
   border: 1px solid #888;
@@ -26,55 +77,22 @@
   }
 }
 
-.category {
-  border: 1px solid #888;
-  border-radius: 10px;
-  display: inline-block;
-  margin-left: 5px;
-  padding: 0px;
-}
-
-.featured {
-  padding: 5px;
-
-  .product{
-    position:relative;
-    width: 150px;
-    float: left;
-  }
-
-  .title {
-    width: 150px;
-    float:left;
-    margin-top: auto;
-    margin-bottom: auto;
-    text-align: center;
-  }
-}
-
 .num {
   background-color: pink;
   border-radius: 10px;
   padding: 2px 5px 0;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 3px;
+  top: 3;
   font-size:14px;
 }
 
-table {
-  table-layout:fixed;
-  height:300px;
+.link {
+  color:purple;
 }
 
-.bestseller {
-  width:150px;
-}
-
-.cat_name {
-  font-size:16px;
-  margin-left:5px;
-  border-bottom-style:solid;
-  border-bottom-width:1px;
-  border-bottom-color:#888;
+.product .bestseller {
+  border-right-style:solid;
+  border-right-width:1px;
+  border-right-color:#888;
 }

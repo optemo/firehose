@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  product_id: 
+  accessory_id: 
+  count: 
+
+two:
+  product_id: 
+  accessory_id: 
+  count: 

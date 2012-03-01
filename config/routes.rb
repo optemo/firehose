@@ -62,7 +62,7 @@ Firehose::Application.routes.draw do
   
   root :to => "b_bproducts#blank"
   
-  match "featured" => "featured#index"
+  resources :featured, only: [:index, :show], id: /\w+/i
   resources :product_types, path: "/", id: /[BF]\w+/i, only: [:show] do
     resources :facets, only: [:index, :new, :create], path: "layout_editor"
     resources :scraping_corrections, :except => [:show, :index], id: /\d+/

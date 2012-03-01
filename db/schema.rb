@@ -11,7 +11,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120207232035) do
+ActiveRecord::Schema.define(:version => 20120301002150) do
+
+  create_table "accessories", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "accessory_id"
+    t.integer  "count"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "all_daily_specs", :id => false, :force => true do |t|
     t.integer  "id",           :default => 0, :null => false
