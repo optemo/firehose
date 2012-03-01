@@ -26,7 +26,14 @@ class Product < ActiveRecord::Base
   
   def self.feed_update
     raise ValidationError unless Session.product_type
-    product_skus = BestBuyApi.category_ids(Session.product_type)
+    
+    begin
+      product_skus = BestBuyApi.category_ids(Session.product_type)
+    rescue BestBuyApi::TimeoutError
+      puts "Timeout"
+      sleep 30
+      retry
+    end
     #product_skus.uniq!{|a|a.id} #Uniqueness check
     products_to_update = {}
     products_to_save = {}
