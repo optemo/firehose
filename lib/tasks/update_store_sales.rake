@@ -7,13 +7,8 @@ task :update_store_sales, [:product_type, :start_date, :end_date, :directory] =>
   end_date = Date.strptime(args.end_date, '%Y%m%d')
   # Get all leaf nodes within product_type specified
   Session.new(args.product_type)
-  if Session.product_type_leaves.empty?
-    product_types = args.product_type
-  else
-    product_types = Session.product_type_leaves 
-  end
   debugger
-  update_store_sales(product_types, start_date, end_date, args.directory)
+  update_store_sales(Session.product_type_leaves, start_date, end_date, args.directory)
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
