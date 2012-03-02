@@ -103,7 +103,7 @@ class Product < ActiveRecord::Base
     Equivalence.fill
     Result.upkeep_post
     
-    Product.compute_custom_specs(product_skus, Session.product_type)    
+    Product.compute_custom_specs(product_skus)    
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
@@ -113,8 +113,8 @@ class Product < ActiveRecord::Base
     
   end
   
-  def self.compute_custom_specs(bb_prods, product_type)
-    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id), product_type)
+  def self.compute_custom_specs(bb_prods)
+    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
     end
