@@ -26,18 +26,16 @@ class Product < ActiveRecord::Base
   
   def self.feed_update
     raise ValidationError unless Session.product_type
+    
     begin
       product_skus = BestBuyApi.category_ids(Session.product_type)
-      #product_skus.uniq!{|a|a.id} #Uniqueness check
-      #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
-      candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
-      candidates = ScrapingRule.scrape(product_skus,false,[],false)
-    rescue
-      puts 'got timeout; waiting and trying again'
-      sleep(60)
+    rescue BestBuyApi::TimeoutError
+      puts "Timeout"
+      sleep 30
       retry
     end
-    
+    #product_skus.uniq!{|a|a.id} #Uniqueness check
+
     products_to_update = {}
     products_to_save = {}
     specs_to_save = {}
