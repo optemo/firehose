@@ -49,6 +49,7 @@ class Product < ActiveRecord::Base
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
+    
     candidates.each do |candidate|
       spec_class = case candidate.model
         when "Categorical" then CatSpec
@@ -58,6 +59,7 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       #p = products_to_save[candidate.sku] || 
+      debugger if (candidate.parsed.nil? && !candidate.delinquent)
       
       if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
@@ -70,9 +72,8 @@ class Product < ActiveRecord::Base
           spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
           spec.value = candidate.parsed
           specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
-        else
+        elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
           #Product is new
-          p = products_to_save[candidate.sku]
           p.instock = true
           myspecs = case candidate.model
             when "Categorical" then p.cat_specs
@@ -84,7 +85,7 @@ class Product < ActiveRecord::Base
         end
       end
     end
-
+    
     raise ValidationError, "No products are instock" if specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=> [:sku]
