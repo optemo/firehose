@@ -20,19 +20,19 @@ class Result < ActiveRecord::Base
 
   end
     
-  def self.upkeep_post
+  def self.upkeep_post 
     #Set onsale binary because it's not in the feed
     binspecs = [] # For bulk insert
-    featured = BinSpec.find_all_by_name(Session.product_type,"featured").map(&:product)
+    featured = BinSpec.where(name: "featured").joins("INNER JOIN cat_specs ON `bin_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type", value: Session.product_type_leaves}).map(&:product)
     (featured+Product.current_type.instock).each do |product|
-      saleEnd = CatSpec.find_by_product_id_and_name(product.id,"saleEndDate",Session.product_type)
+      saleEnd = CatSpec.find_by_product_id_and_name(product.id,"saleEndDate")
       if saleEnd && saleEnd.value && (Time.parse(saleEnd.value) - 4.hours) > Time.now
         binspec = BinSpec.find_or_initialize_by_product_id_and_name(product.id,"onsale")
         binspec.value = true
         binspecs << binspec
       else
         #Remove sale item if it is there
-        binspec = BinSpec.find_by_product_id_and_name(product.id,"onsale",Session.product_type)
+        binspec = BinSpec.find_by_product_id_and_name(product.id,"onsale")
         binspec.destroy if binspec
       end
       
