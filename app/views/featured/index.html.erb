@@ -1,10 +1,9 @@
-<!--<h1>Featured Cameras</h1> -->
-<%= 
-=begin
-	render partial: "featured", collection: @products  
-=end 
-%>
-<div style="font-family:arial">
-<h2>Top Purchases</h2>
-<%= render partial: "featured", collection: @topperformers %>
+<div>
+<h2>Best Selling Products<h2>
+<%@topperformers.each_pair do |category,products|%>
+  <h3 style="margin-left:20px"><%= t(category+".name") %></h3>
+  <div>
+    <%= debugger; render partial: "temp", collection: products%>
+  </div>
+<% end %>
 </div>

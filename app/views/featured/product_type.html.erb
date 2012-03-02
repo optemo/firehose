@@ -1,0 +1,9 @@
+<div style="font-family:arial">
+<h2>Top Purchases</h2>
+<% @topperformers.each_pair do |category,products| %>
+		<h3 style="margin-left:20px; margin-bottom:3px;"><%= t(category+".name") %></h3>
+		<div class="category">
+			<%= render partial: "featured", collection: products, locals: {cat:category}%>
+		</div>
+<% end %>
+</div>
