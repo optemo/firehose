@@ -48,7 +48,7 @@ class Product < ActiveRecord::Base
       p.instock = false
       products_to_update[p.sku] = p
     end
-    
+
     product_skus.each do |bb_product|
       unless products_to_update[bb_product.id]
         products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false
