@@ -28,15 +28,6 @@ class RuleNew < Customization
   @product_type = 'F1127'
   @needed_features = ['displayDate', 'preorderDate']
   @rule_type = 'Binary'
-  # compute functionality:
-  # for the needed_features, get their values from the DB
-  # then execute the function's own computation for calculating the value
-  # then *save* the value in the table represented by @rule_type, under name @feature_name
-  # def RuleNew.compute(skus, spec_features)
-  # 
-  #   
-  #   specs_to_save
-  # end
 
   def RuleNew.compute_feature(values, pid)
     # assumption: the values are in the same order as the needed_features, but this doesn't matter for this rule
@@ -57,7 +48,7 @@ class RuleNew < Customization
 end
 
 class RuleOnSale < Customization
-  @feature_name = 'onsale'
+  @feature_name = 'newonsale'
   @product_type = 'F1127'
   @needed_features = ['saleEndDate']
   @rule_type = 'Binary'
@@ -88,15 +79,6 @@ end
 #   @product_type = 'F1127'
 #   @needed_features = ['orders']
 #   @rule_type = 'Binary'
-#   # compute functionality:
-#   # for the needed_features, get their values from the DB
-#   # then execute the function's own computation for calculating the value
-#   # then *save* the value in the table represented by @rule_type, under name @feature_name
-#   # def RuleNew.compute(skus, spec_features)
-#   # 
-#   #   
-#   #   specs_to_save
-#   # end
 # 
 #   def RuleNew.compute_feature(values, pid)
 #     # assumption: the values are in the same order as the needed_features, but this doesn't matter for this rule

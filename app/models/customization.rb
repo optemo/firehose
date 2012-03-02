@@ -19,21 +19,18 @@ class Customization
     Customization.all.select{ |x| product_types.include?(x.product_type) }
   end
   
-  def Customization.get_needed_features(features, product_type)
-    # for each of the features,
-    # look it up for the product type with ancestors under ScrapingRules.remote_featurename, find the local_featurename and rule_type
-    # then according to the rule_type, go to one of the _specs tables and look up the feature value
-    # then add the feature value to a hash by the original feature [name]
+  def Customization.get_needed_features(features)
+    # look up the spec type of a feature for the product type with ancestors under ScrapingRules.local_featurename
+    # and build an array of spec_class to feature name hashes
     local_features = []
     features.each do |local_feature|
-      debugger
       sr = ScrapingRule.find_by_local_featurename_and_product_type(local_feature, Session.product_type_path)
-      
       if sr.nil?
         # This is only for DailySpecs orders
         if local_feature == 'orders'
           spec_class = DailySpec
         else
+          debugger
           raise 'No scraping rule found matching feature ' + local_feature
         end
       else
@@ -60,7 +57,7 @@ class Customization
     results = {}
     # execute each of the rules
     rules.each do |rule|
-      spec_features = Customization.get_needed_features(rule.needed_features, product_type)
+      spec_features = Customization.get_needed_features(rule.needed_features)
       #rule_results = rule.compute(skus, spec_features)
       # RuleNew.compute(skus, spec_features)
       rule_results = []
