@@ -11,21 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120207232035) do
-
-  create_table "all_daily_specs", :id => false, :force => true do |t|
-    t.integer  "id",           :default => 0, :null => false
-    t.string   "sku"
-    t.string   "name"
-    t.string   "spec_type"
-    t.string   "value_txt"
-    t.float    "value_flt"
-    t.boolean  "value_bin"
-    t.string   "product_type"
-    t.date     "date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
+ActiveRecord::Schema.define(:version => 20120302211829) do
 
   create_table "bin_specs", :force => true do |t|
     t.integer  "product_id"
@@ -74,8 +60,7 @@ ActiveRecord::Schema.define(:version => 20120207232035) do
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
-  create_table "daily_specs", :id => false, :force => true do |t|
-    t.integer  "id",           :default => 0, :null => false
+  create_table "daily_specs", :force => true do |t|
     t.string   "sku"
     t.string   "name"
     t.string   "spec_type"
@@ -153,21 +138,19 @@ ActiveRecord::Schema.define(:version => 20120207232035) do
   create_table "products", :force => true do |t|
     t.string  "sku"
     t.boolean "instock"
-    t.string  "small_title"
-  end
-
-  create_table "results_scraping_rules", :id => false, :force => true do |t|
-    t.integer "result_id"
-    t.integer "scraping_rule_id"
+    t.string  "imgsurl"
+    t.string  "imgmurl"
+    t.string  "imglurl"
+    t.string  "retailer"
   end
 
   create_table "scraping_corrections", :force => true do |t|
     t.string   "product_id"
     t.string   "raw"
     t.text     "corrected"
+    t.integer  "scraping_rule_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "scraping_rule_id"
   end
 
   add_index "scraping_corrections", ["product_id"], :name => "index_scraping_corrections_on_product_id"
@@ -244,7 +227,6 @@ ActiveRecord::Schema.define(:version => 20120207232035) do
 
   create_table "users", :force => true do |t|
     t.datetime "created_at"
-    t.integer  "ab_testing_type", :default => 0, :null => false
   end
 
 end
