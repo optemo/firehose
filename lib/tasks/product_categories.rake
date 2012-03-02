@@ -1,8 +1,12 @@
 desc "Traverse the hierachy of categories from the API and store it in the database"
 task :fill_categories => :environment do
   ProductCategory.where(:retailer => ENV["retailer"]).delete_all
-  traverse({'Departments'=>'Departments'}, 1, 1)
-  puts 'Done saving categories!'
+  ['F','B'].each do |retailer|
+    ENV["retailer"] = retailer
+    ProductCategory.where(:retailer => retailer).delete_all
+    traverse({'Departments'=>'Departments'}, 1, 1)
+    p "Done saving categories for "+ ENV["retailer"]
+  end
 end
 
 def traverse(root_node, i, level)
@@ -15,6 +19,8 @@ def traverse(root_node, i, level)
   
   retailer = ENV["retailer"]
   Session.product_type = retailer
+  
+  puts catid
   
   begin
     french_name = BestBuyApi.get_category(catid, false)["name"]
@@ -38,7 +44,6 @@ def traverse(root_node, i, level)
   begin
     children = BestBuyApi.get_subcategories(catid).values.first
   rescue BestBuyApi::TimeoutError
-    puts catid
     puts 'got timeout; waiting and trying again'
     sleep(60)
     retry

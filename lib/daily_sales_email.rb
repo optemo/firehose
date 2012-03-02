@@ -70,7 +70,6 @@ def read_daily_sales
           # Changed: instead of looking at instock, get and look up
           # in the daily_specs table which skus are listed for the given date
           instock = DailySpec.where(:date => then_date).select("DISTINCT(sku)")    
-                debugger      
           instock.each do |daily_spec|
             sku = daily_spec.sku
             product = Product.find_by_sku(sku)
