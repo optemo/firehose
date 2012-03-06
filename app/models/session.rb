@@ -17,7 +17,12 @@ class Session
   end
   
   def self.product_type_leaves
-    ProductCategory.get_leaves(product_type)
+    leaves = ProductCategory.get_leaves(product_type)
+    if leaves.empty?
+      Array(product_type)
+    else
+      leaves
+    end
   end
   
   def self.product_type_branch

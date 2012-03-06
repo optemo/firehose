@@ -30,11 +30,7 @@ class FeaturedController < ApplicationController
         cat_ids[cat_id] = ["B29059","B20356","B31040","B31042","B32300"] # Only the actual tablets (non-accessory)
       else
         Session.new(cat_id)          # is it possible to create a session with multiple ids to avoid this?
-        if Session.product_type_leaves.empty?
-          cat_ids[cat_id] = cat_id
-        else
-          cat_ids[cat_id] = Session.product_type_leaves 
-        end
+        cat_ids[cat_id] = Session.product_type_leaves
       end
     end
     cat_ids.each_pair do |cat,leaves|  # Cycle through the leaf nodes wanted

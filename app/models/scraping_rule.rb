@@ -75,7 +75,6 @@ class ScrapingRule < ActiveRecord::Base
                 firstregex = false
               end
               parsed = current_text
-              
               #Validation Tests
               parsed = "**LOW" if r[:rule].min && parsed && parsed.to_f < r[:rule].min
               parsed = "**HIGH" if r[:rule].max && parsed && parsed.to_f > r[:rule].max

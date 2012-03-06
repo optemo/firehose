@@ -11,12 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120301002150) do
+ActiveRecord::Schema.define(:version => 20120302211829) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
-    t.integer  "accessory_id"
+    t.string   "name"
+    t.string   "value"
     t.integer  "count"
+    t.string   "acc_type"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -161,7 +163,7 @@ ActiveRecord::Schema.define(:version => 20120301002150) do
   create_table "products", :force => true do |t|
     t.string  "sku"
     t.boolean "instock"
-    t.string  "small_title"
+    t.string  "retailer"
   end
 
   create_table "results_scraping_rules", :id => false, :force => true do |t|
