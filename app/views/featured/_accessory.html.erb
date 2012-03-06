@@ -1,5 +1,5 @@
 <div style="position:relative; display:inline-block; height: 95px; margin-top:3px;">
-  <span class="num"><%= accessory.second %></span>
+  <span class="num"><%= accessory.count %></span>
   <% # require "open-uri"
 		#  begin
 		# 	open("http://www.bestbuy.ca/multimedia/Products/150x150/#{accessory.first[0..2]}/#{accessory.first[0..4]}/#{accessory.first}.jpg")
@@ -8,7 +8,8 @@
 		#  else
 		#  	image_url = "http://www.bestbuy.ca/multimedia/Products/150x150/#{accessory.first[0..2]}/#{accessory.first[0..4]}/#{accessory.first}.jpg"
 		#  end
+		  #sku = get_sku(accessory.value)
 		%>
-	<%= image_tag "http://www.bestbuy.ca/multimedia/Products/150x150/#{accessory.first[0..2]}/#{accessory.first[0..4]}/#{accessory.first}.jpg", class: "productimg", title: "Recommended", alt: "Accessory" %>
-	<div class="sku"><%= accessory.first %></div>
+	<%= image_tag accessory.img_url, class: "productimg", title: "Recommended", alt: "Accessory" %>
+	<div class="sku"><%= accessory.sku %></div>
 </div>

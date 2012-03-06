@@ -5,15 +5,23 @@ task :update_store_sales, [:product_type, :start_date, :end_date, :directory] =>
   args.with_defaults(:start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
+  if args.product_type =~ /^[Bb]/
+    store = 'B'
+  elsif args.product_type =~ /^[Ff]/
+    store = 'F'
+  else
+    raise "Unrecognized Product Type and Store"
+  end
   # Get all leaf nodes within product_type specified
   Session.new(args.product_type)
   debugger
-  update_store_sales(Session.product_type_leaves, start_date, end_date, args.directory)
+  update_store_sales(Session.product_type_leaves, store, start_date, end_date, args.directory)
+
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
 # files sent by bestbuy (.csv), stores the daily sales in the all_daily_spec table (firehose_development)
-def update_store_sales (product_types, start_date, end_date, directory)
+def update_store_sales (product_types, store, start_date, end_date, directory)
   require 'date'
   ids = []
   prods = {}
@@ -26,8 +34,9 @@ def update_store_sales (product_types, start_date, end_date, directory)
   end
   debugger
   Dir.foreach(directory) do |file|
-    #only process bestbuy data files
-    if file =~ /B_\d{8}_\d{8}\.csv/
+    #only process bestbuy/futureshop data files
+    if file =~ /#{store}_\d{8}_\d{8}\.csv/
+      
       /(\d{8})_(\d{8})\.csv$/.match(file)
       file_start_date = Date.strptime($1, '%Y%m%d')
       file_end_date = Date.strptime($2, '%Y%m%d') 
@@ -40,18 +49,16 @@ def update_store_sales (product_types, start_date, end_date, directory)
       # GO THROUGH THE FILE, ONLY ADDING PRODUCTS IN PRODS HASH MADE ABOVE
         File.open(csvfile, 'r') do |f|
           f.each do |line|
-            m = /^0,\d+,(\d+),(\d+),\d+\.?\d*,(\d+).*/.match(line)
+            m = /^0,\d+,(\d+),([-\d]+),\d+\.?\d*,(\d+).*/.match(line)
             #only continue if line has format of regex
             if m != nil
               sku = $1
               sales = $2.to_i
-              if sku == "M2192735"
-                debugger
-              end
               if prods.key?(sku)
-                debugger
                 prods[sku][1] += sales
               end
+            else
+              #p "Could no match line: #{line}"
             end
           end
         end

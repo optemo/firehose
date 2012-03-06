@@ -1,8 +1,14 @@
 <div>
-<h2>Best Selling Products</h2>
+<div class="retailer">  
+  
+  <!-- <a href="/B/featured">BestBuy</a> | <a href="/F/featured">FutureShop</a> -->
+</div>
+<br>
+<h2 class="heading">Best Selling Products</h2>
+<h4 class="subheading">BestBuy or FutureShop</h4>
 <% best_sellers.each_pair do |category,products| %>
   <h4 style="margin-left:20px; margin-bottom:3px;">
-    <%= link_to t(category+".name"), featured_path(category), {:class => "link"} %>
+    <%= link_to t(category+".name"), featured_path(category, :acc_cat => "Top #{@accessories_per_product_type}"), {:class => "link"} %>
   </h4>
   <div class="category">
     <%= render partial: "featured_list", collection: products, :locals => {:cat => category}%>

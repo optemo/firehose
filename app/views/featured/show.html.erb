@@ -4,7 +4,7 @@
   <% cat_prods.each_pair do |category,products|%>
 		<h4 style="margin-left:20px; margin-bottom:3px;"><%= t(category+".name") %></h4>
 		<div class="category">
-			<%= render partial: "featured", collection: products %>
+			<%= render partial: "featured", collection: products , locals: {:cat => category, :prod_acc_cats => prod_acc_cats, :count => count} %>
 		</div>
 <% end %>
 </div>

@@ -1,0 +1,9 @@
+<div style="font-family:arial">
+<h2 class="heading"><%= product.cat_specs.find_by_name("title").try(:value) %></h2>
+<h4 class="subheading"><%= t(cat+".name") %></h4>
+<h4 style="margin-left:20px;"><%= link_to "All Best-Selling Products", featured_index_path %></h4>
+	<h4 style="margin-left:20px; margin-bottom:3px;"><%= product.cat_specs.find_by_name("title").try(:value) %></h4>
+	<div class="category">
+		<%= render partial: "product", :locals => {:product => product} %>
+	</div>
+</div>

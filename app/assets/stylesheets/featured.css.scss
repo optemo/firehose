@@ -18,7 +18,7 @@
   border-bottom-color:#888;
 }
 
-table {
+.single_product table {
   table-layout:fixed;
   height:300px;
 }
@@ -35,10 +35,10 @@ table {
   vertical-align:top;
 }
 
-.featured, .product {
+.featured, .single_product {
   padding: 5px;
 
-  .product{
+  .bestseller .product{
     position:relative;
     width: 150px;
     float: left;
@@ -46,7 +46,6 @@ table {
 
   .title {
     width: 150px;
-    float:left;
     margin-top: auto;
     margin-bottom: auto;
     text-align: center;
@@ -55,11 +54,9 @@ table {
 
 .accessories {
   display:inline-block;
-  border: 1px solid #888;
-  border-radius: 10px;
   display: inline-block;
-  margin-left: 10px;
-  padding: 9px;
+  margin-left: 5px;
+  padding: 5px;
   vertical-align: top;
 
   .sku {
@@ -89,10 +86,55 @@ table {
 
 .link {
   color:purple;
+  text-decoration:none;
 }
 
-.product .bestseller {
-  border-right-style:solid;
-  border-right-width:1px;
-  border-right-color:#888;
+.featured, {
+  table {
+    padding:5px;
+    table-layout:fixed;
+    height:275px;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color:#888;
+  }
+  .bestseller, .sorting {
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color:#888;
+    padding:5px;
+    padding-top:5px;
+    vertical-align:top;
+  }
+}
+
+.single_product {
+  .bestseller {
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color:#888;
+  }
+}
+
+.sorting {
+  width:275px;
+}
+
+.heading {
+  padding:5px;
+  margin-bottom:0;
+  margin-top:10px;
+}
+
+.subheading {
+  text-align:center;
+  padding:5px;
+  margin-top:0;
+}
+
+.retailer {
+  float:right;
+  margin-right:5px;
+  margin-top:5px;
+  color:purple;
 }

@@ -1,9 +1,7 @@
 <div class="first_featured">
-  <span class="num" style="background-color:#66FFFF"><%= featured_list.cont_specs.find_by_name("sum_store_sales").try(:value).to_i %></span>
-	<%= image_tag "http://www.bestbuy.ca/multimedia/Products/150x150/#{featured_list.sku[0..2]}/#{featured_list.sku[0..4]}/#{featured_list.sku}.jpg", class: "productimg", title: "Product", alt: "#{featured_list.sku}"%>
+  <span class="num" style="background-color:#66FFFF"><%= featured_list.store_sales.to_i %></span>
+	<%= image_tag featured_list.img_url, class: "productimg", title: "Product", alt: "#{featured_list.sku}"%>
 	<div style="text-align:center;">
-	  <% info = featured_list.cat_specs.find_by_name("title").try(:value)+"\n"+featured_list.sku %>
-	  <%= link_to info, featured_path(featured_list.sku,:cat => cat), {:class => "link"} %>
-
+	  <%= link_to featured_list.name, featured_path(featured_list.id,:cat => cat), {:class => "link"} %>
 	</div>
 </div>

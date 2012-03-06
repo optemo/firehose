@@ -1,4 +1,5 @@
 class Product < ActiveRecord::Base
+  has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
   has_many :cont_specs, :dependent=>:delete_all
@@ -194,6 +195,31 @@ class Product < ActiveRecord::Base
     # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
     ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
   end
+  
+  def name
+    cat_specs.find_by_name("title").try(:value)+"\n"+sku
+  end
+  
+  def img_url
+    retailer = cat_specs.find_by_name_and_product_id("product_type",id).try(:value)
+    if retailer =~ /^B/
+      url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
+    elsif retailer =~ /^F/
+      url = "http://www.futureshop.ca/multimedia/Products/150x150/"
+    else
+      raise "No known image link for product: #{sku}"
+    end
+    url += sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
+  end
+  
+  def store_sales
+    cont_specs.find_by_name("sum_store_sales").try(:value)
+  end
+  
+  def total_acc_sales
+    Accessory.where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_type'").sum("count")
+  end
+  
   
   
   private

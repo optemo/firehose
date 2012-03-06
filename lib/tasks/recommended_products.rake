@@ -1,7 +1,7 @@
 # Returns array containing top co-purchased products (for recommended products/accessories)
 task :recommended_products, [:start_date, :end_date, :directory]=> :environment do |t, args|
   #--- Choose product type and grouping type ---#
-  product_types=["B21344"]
+  product_types=["F29958"]
   grouping_type = "table" # Saves data to accessory table
 #  grouping_type = "fixed_categories" # User determines accessory categories to be filled below as constant
 #  grouping_type = "numerical" # Chooses the top categories in terms of numbers of products sold
@@ -9,6 +9,13 @@ task :recommended_products, [:start_date, :end_date, :directory]=> :environment 
   args.with_defaults(:start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
+  if product_types.first =~ /^B/
+    store = 'B'
+  elsif product_types.first =~ /^F/
+    store = 'F'
+  else
+    raise "Invalid product type and/or store"
+  end
   products = []
   FeaturedController.new.get_products(product_types).each do |product|
     product[1].each do |sku|
@@ -18,19 +25,16 @@ task :recommended_products, [:start_date, :end_date, :directory]=> :environment 
   debugger
   products.uniq!  # Remove bundle duplicates
   p "Best Selling Products: #{products}"
-  find_recommendations(grouping_type, products, start_date, end_date, args.directory)
+  find_recommendations(grouping_type, store, products, start_date, end_date, args.directory)
 end
 
 ACCESSORIES_PER_PRODUCT_TYPE = 10
 ACCESSORY_TYPES_PER_BESTSELLING = 5
 ACCESSORY_CATEGORIES = ["B20001a","B29578","B21202","B20330"] # Laptops  ["B20206","B21245","B21310","B21976"] # TVS
 
-# Note: function can both find only the accessory categories selected above, or choose the top n (Accessory_types_per_bestselling) categories
-# Must (un)comment appropriate block below to choose
-
 # Goes through files in directory, temporarily stores all products bought in same purchase as featured products, 
 # then writes the top sold accessories to text spec table under 'top_copurchases'
-def find_recommendations (grouping_type, products, start_date, end_date, directory)
+def find_recommendations (grouping_type, store, products, start_date, end_date, directory)
   recommended = {}
   purchase = {}
   prev_purchase_id = nil
@@ -40,9 +44,8 @@ def find_recommendations (grouping_type, products, start_date, end_date, directo
   end
   
   before = Time.now
-  
   Dir.foreach(directory) do |file| 
-    if file =~ /B_(\d{8})_(\d{8})\.csv$/  # Only process bestbuy data files
+    if file =~ /#{store}_(\d{8})_(\d{8})\.csv$/  # Only process bestbuy/futureshop data files
       file_start_date = Date.strptime($1, '%Y%m%d')
       file_end_date = Date.strptime($2, '%Y%m%d') 
       
@@ -51,6 +54,7 @@ def find_recommendations (grouping_type, products, start_date, end_date, directo
         
         # Go through file, grouping products into purchases. If a purchase contains a wanted item, add the other purchased items to the item's hash
         File.open(csvfile, 'r') do |f|
+          p "Getting sales from #{csvfile}"
           f.each do |line|
             if line =~ /\d+,(\d+),(\d{8}),(\d+)/
               purchase_id = $1
@@ -88,55 +92,81 @@ def find_recommendations (grouping_type, products, start_date, end_date, directo
     end
   end
   
-  # Print top 10 recommended products
-  # For testing -> useless afterwards -> remove
-  #recommended.each_pair do |sku,recommendations|  
-  #  p "Product #{sku} accessories (sorted by presence)"+recommendations.sort_by{|a,b| b[1]}.reverse.first(10).to_s
-  #end
+  # Sorts the accessories into categories, then stores the data in the manner dictated above
+  recommended.each_pair do |sku,recommendations|      
+    product_id = Product.select(:id).where("sku=?",sku.to_s).first.id # This line may be problematic if products have more than one product_id (bundles)
   
-  case grouping_type
-  when "table"
-    # Test this function when duplicates problem solved
-    # Write the number of times a product is sold with the desired item
-    recommended.each_pair  do |sku, skus_hash|
-      sku_id = Product.select(:id).where(:sku => sku)
-      skus_hash.each_pair do |acc_sku, sales|
-        acc_id = Product.select(:id).where(:sku => acc_sku)
-        unless acc_id.empty?
-          ################
-          # Will need to change this to accommodate either new product distinction in db or choosing different shop's products
-          ################
-          accessory = Accessory.find_or_initialize_by_product_id_and_accessory_id(sku_id.first.id,acc_id.first.id)
-          accessory.update_attribute(:count, sales[0])
-          accessory.save
+    # Get presence numbers and top n products for each product_type
+    acc_cats = {}
+    count = 0
+    p "Sorting recommendations for #{sku}"
+    recommendations.sort_by{|a,b| b[1]}.reverse.each do |sku|
+      begin
+        cat_id = ""
+        CatSpec.select(:value).joins("INNER JOIN `products` ON `cat_specs`.product_id = `products`.id").where(products: {sku:sku[0]}, cat_specs: {name:"product_type"}).each do |cat|
+          if cat.value =~ /^#{store}/
+            cat_id = cat.value
+          end
         end
+        if acc_cats.key?(cat_id)
+          acc_cats[cat_id][0] += sku[1][1]  # Add the number of sales this item has to the product_type total
+          
+          #check if works properly for all options like this (commented)
+          #if acc_cats[cat_id][1].length < ACCESSORIES_PER_PRODUCT_TYPE  # Limit the number of entries one product_type can hold
+            acc_cats[cat_id][1].store(sku[0],sku[1][1])
+          #end
+        else
+          acc_cats[cat_id] = [sku[1][1],{sku[0]=>sku[1][1]}]
+        end
+        count += sku[1][1]
+      rescue
+        p "Product #{sku[0]} does not exist in the database"  # When database is filled this should rarely be an issue
       end
     end
-  when "fixed_categories","numerical"
-    # Creates/Updates a database entry for the product, writing the 10 most popular accessories and the number of purchases in which they are present
-    recommended.each_pair do |sku,recommendations|      
-      product_id = Product.select(:id).where("sku=?",sku.to_s).first.id # This line may be problematic if products have more than one product_id (bundles)
-    
-      # Get presence numbers and top n products for each product_type
-      acc_cats = {}
-      count = 0
-      recommendations.sort_by{|a,b| b[1]}.reverse.each do |sku|
-        begin
-          cat_id = CatSpec.select(:value).joins("INNER JOIN `products` ON `cat_specs`.product_id = `products`.id").where(products: {sku:sku[0]}, cat_specs: {name:"product_type"}).first.value
-          if acc_cats.key?(cat_id)
-            acc_cats[cat_id][0] += sku[1][1]  # Add the number of sales this item has to the product_type total
-            if acc_cats[cat_id][1].length < ACCESSORIES_PER_PRODUCT_TYPE  # Limit the number of entries one product_type can hold
-              acc_cats[cat_id][1].store(sku[0],sku[1][1])
+
+    case grouping_type
+    # Writes data to accessories table (each accessory has sales numbers linked to main product)
+    when "table"
+      # Test this function when duplicates problem solved
+      p "Saving recommendations for #{sku}"
+      sku_id = ""
+      sku_ids = Product.select(:id).where(:sku => sku)
+      # Check in case there are duplicates in the db
+      sku_ids.each do |product|
+        unless 0 == ContSpec.joins("INNER JOIN `cat_specs` ON `cont_specs`.product_id = `cat_specs`.product_id").where("`cont_specs`.product_id = ? AND `cat_specs`.name = ? AND `cat_specs`.value REGEXP ?",product.id,'product_type',store).count("*")
+          sku_id = product.id
+        end
+      end
+      unless sku_id == ""
+        # Write the number of times a product is sold with the desired item
+        acc_cats.each_pair  do |cat, data|
+          accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_type",cat,cat)
+          accessory.update_attribute(:count, data[0])
+          accessory.save
+          data[1].each_pair do |acc_sku, sales|
+            acc_id = ""
+            acc_ids = Product.select(:id).where(:sku => acc_sku)
+            # Check in case there are duplicates in the db
+            acc_ids.each do |accessory|
+              unless 0 == CatSpec.where("`cat_specs`.product_id = ? AND `cat_specs`.name = ? AND `cat_specs`.value REGEXP ?",accessory.id,'product_type',store).count("*")
+                acc_id = accessory.id
+              end
             end
-          else
-            acc_cats[cat_id] = [sku[1][1],{sku[0]=>sku[1][1]}]
+            unless acc_id == ""
+              accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_id",acc_id,cat)
+              #if accessory.count == nil
+                accessory.count = sales
+              #else
+              #  accessory.count += sales
+              #end
+              accessory.save
+            end
           end
-          count += sku[1][1]
-        rescue
-          p "Product #{sku[0]} does not exist in the database"  # When database is filled this should rarely be an issue
         end
       end
     
+    # Writes data to text_specs table -> data is hardcoded -> need to run task again to change it
+    when "fixed_categories","numerical"
       # Add top n purchased accessories to string
       text = "Top #{ACCESSORIES_PER_PRODUCT_TYPE}~#{count}~"
       products = recommendations.sort_by{|a,b| b[1]}.reverse.first(ACCESSORIES_PER_PRODUCT_TYPE)
@@ -189,8 +219,8 @@ def find_recommendations (grouping_type, products, start_date, end_date, directo
         end
       end
       # Write text string to text spec table
- #     row = TextSpec.find_or_initialize_by_product_id_and_name(product_id,"top_copurchases")
- #     row.update_attributes(:value => text)
+      row = TextSpec.find_or_initialize_by_product_id_and_name(product_id,"top_copurchases")
+      row.update_attributes(:value => text)
     end
   end
 
