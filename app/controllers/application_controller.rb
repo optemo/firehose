@@ -23,6 +23,7 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate
+    return true if params[:controller] == 'featured'
     return true if request.host == "localhost" #Don't authenticate for development
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]

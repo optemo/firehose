@@ -1,4 +1,4 @@
-class FeaturedController < ApplicationController
+class AccessoriesController < ApplicationController
   layout "plain"
 
   def initialize_constants
