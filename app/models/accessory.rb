@@ -6,7 +6,7 @@ class Accessory < ActiveRecord::Base
     if retailer =~ /^B/
       url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
     elsif retailer =~ /^F/
-      url = "http://www.futureshop.ca/multimedia/Products/150x150/"
+      url = "http://www.futureshop.ca/multimedia/Products/250x250/"
     else
       raise "No known image link for product: #{sku}"
     end

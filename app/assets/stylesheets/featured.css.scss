@@ -35,6 +35,13 @@
   vertical-align:top;
 }
 
+.first_featured, .bestseller {
+  .productimg {
+    width: 150px;
+    display: block;
+  }
+}
+
 .featured, .single_product {
   padding: 5px;
 

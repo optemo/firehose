@@ -1,7 +1,7 @@
 # Returns array containing top co-purchased products (for recommended products/accessories)
 task :recommended_products, [:start_date, :end_date, :directory]=> :environment do |t, args|
   #--- Choose product type and grouping type ---#
-  product_types=["F29958"]
+  product_types=["F1953"]
   grouping_type = "table" # Saves data to accessory table
 #  grouping_type = "fixed_categories" # User determines accessory categories to be filled below as constant
 #  grouping_type = "numerical" # Chooses the top categories in terms of numbers of products sold
@@ -140,26 +140,28 @@ def find_recommendations (grouping_type, store, products, start_date, end_date, 
       unless sku_id == ""
         # Write the number of times a product is sold with the desired item
         acc_cats.each_pair  do |cat, data|
-          accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_type",cat,cat)
-          accessory.update_attribute(:count, data[0])
-          accessory.save
-          data[1].each_pair do |acc_sku, sales|
-            acc_id = ""
-            acc_ids = Product.select(:id).where(:sku => acc_sku)
-            # Check in case there are duplicates in the db
-            acc_ids.each do |accessory|
-              unless 0 == CatSpec.where("`cat_specs`.product_id = ? AND `cat_specs`.name = ? AND `cat_specs`.value REGEXP ?",accessory.id,'product_type',store).count("*")
-                acc_id = accessory.id
+          unless cat == "" # This means the product no longer exists on the site
+            accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_type",cat,cat)
+            accessory.update_attribute(:count, data[0])
+            accessory.save
+            data[1].each_pair do |acc_sku, sales|
+              acc_id = ""
+              acc_ids = Product.select(:id).where(:sku => acc_sku)
+              # Check in case there are duplicates in the db
+              acc_ids.each do |accessory|
+                unless 0 == CatSpec.where("`cat_specs`.product_id = ? AND `cat_specs`.name = ? AND `cat_specs`.value REGEXP ?",accessory.id,'product_type',store).count("*")
+                  acc_id = accessory.id
+                end
               end
-            end
-            unless acc_id == ""
-              accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_id",acc_id,cat)
-              #if accessory.count == nil
-                accessory.count = sales
-              #else
-              #  accessory.count += sales
-              #end
-              accessory.save
+              unless acc_id == ""
+                accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_id",acc_id,cat)
+                #if accessory.count == nil
+                  accessory.count = sales
+                #else
+                #  accessory.count += sales
+                #end
+                accessory.save
+              end
             end
           end
         end

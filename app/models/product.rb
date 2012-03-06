@@ -197,7 +197,11 @@ class Product < ActiveRecord::Base
   end
   
   def name
-    cat_specs.find_by_name("title").try(:value)+"\n"+sku
+    name = cat_specs.find_by_name("title").try(:value)
+    if name.nil?  
+      name = "Unknown Name / Name Not In Database"
+    end
+    name += "\n"+sku
   end
   
   def img_url
@@ -205,7 +209,7 @@ class Product < ActiveRecord::Base
     if retailer =~ /^B/
       url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
     elsif retailer =~ /^F/
-      url = "http://www.futureshop.ca/multimedia/Products/150x150/"
+      url = "http://www.futureshop.ca/multimedia/Products/250x250/"
     else
       raise "No known image link for product: #{sku}"
     end

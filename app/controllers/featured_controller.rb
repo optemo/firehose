@@ -13,10 +13,11 @@ class FeaturedController < ApplicationController
   def index
     initialize_constants()
     #----- change/add categories to be analyzed here -----#
+    # Both FS and BB
+    product_types = ["B20352","B21344","B30297"]
     # For Best Buy
     #product_types = ["B20352","B21344","B30297"] #B21344 for tvs, B20352 for laptops, B30297 for tablets
     # For Future Shop
-    product_types = ["F1002"]
     #product_types = ["F1002","F29958","Ftvs","F1953"]
     ids = get_products(product_types)
     render "index", :locals => {:best_sellers => ids}
@@ -24,7 +25,6 @@ class FeaturedController < ApplicationController
   
   def show
     initialize_constants()
-    debugger
     #product_types = [params[:id]]
     if params[:id] =~ /^[BF]/
       ids = get_products([params[:id]])
