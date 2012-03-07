@@ -8,20 +8,22 @@ module FeaturedHelper
     leaves_included = []
     Accessory.select("value,count").where(:name => "accessory_type", :product_id => product.id).order("count DESC").limit(@accessory_types_per_bestselling).each do |cat|
       accessories = Accessory.select("value,count").where(:acc_type => cat.value, :name => "accessory_id", :product_id => product.id).order("count DESC").limit(@accessories_per_product_type)
-      # Only add products from leaves that are not already added
-      unless leaves_included.include?(cat.value) 
-        # Go to the parent node if this check passes, otherwise continue with leaf node
-        if accessories.length < @accessories_per_product_type || accessories.last.count < @selling_threshold
-          parent = ProductCategory.get_parent(cat.value)
-          leaves = ProductCategory.get_leaves(parent)
-          leaves.each do |leaf|
-            leaves_included.push(leaf)
+      unless cat.value == "B0000" # Category for products with unknown category 
+        # Only add products from leaves that are not already added
+        unless leaves_included.include?(cat.value) 
+          # Go to the parent node if this check passes, otherwise continue with leaf node
+          if accessories.length < @accessories_per_product_type || accessories.last.count < @selling_threshold
+            parent = ProductCategory.get_parent(cat.value)
+            leaves = ProductCategory.get_leaves(parent)
+            leaves.each do |leaf|
+              leaves_included.push(leaf)
+            end
+            parent_purchases = Accessory.where(:product_id => product.id, :name => 'accessory_type', :value => leaves).sum("count")
+            acc[t("#{parent.first}.name")] = [parent_purchases,Accessory.select("value,count").where(:acc_type => leaves, :name => "accessory_id", :product_id => product.id).order("count DESC").limit(@accessories_per_product_type)]
+          else
+            acc[t(cat.value+".name")] = [cat.count,accessories]
+            leaves_included.push(cat.value)
           end
-          parent_purchases = Accessory.where(:product_id => product.id, :name => 'accessory_type', :value => leaves).sum("count")
-          acc[t("#{parent.first}.name")] = [parent_purchases,Accessory.select("value,count").where(:acc_type => leaves, :name => "accessory_id", :product_id => product.id).order("count DESC").limit(@accessories_per_product_type)]
-        else
-          acc[t(cat.value+".name")] = [cat.count,accessories]
-          leaves_included.push(cat.value)
         end
       end
     end
@@ -48,7 +50,7 @@ module FeaturedHelper
   def get_top_limited (product)
     product_accessories = []
     cats_included = {}
-    accessories = Accessory.where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type*3)
+    accessories = Accessory.where(:product_id => product.id, :name => "accessory_id").order("count DESC")
     accessories.each do |accessory|
       unless cats_included.key?(accessory.acc_type)
         cats_included[accessory.acc_type] = 0

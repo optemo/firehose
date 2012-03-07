@@ -63,6 +63,8 @@ Firehose::Application.routes.draw do
   root :to => "b_bproducts#blank"
   #resources :retailer, only: [:show], id: /[BF]/i, path: "/" do
     resources :featured, only: [:index, :show], id: /\w+/i
+    resources :futureshop, only: [:index, :show], id: /\w+/i
+    resources :bestbuy, only: [:index, :show], id: /\w+/i
   #end
   resources :product_types, path: "/", id: /[BF]\w+/i, only: [:show] do
     resources :facets, only: [:index, :new, :create], path: "layout_editor"

@@ -1,7 +1,7 @@
 # Returns array containing top co-purchased products (for recommended products/accessories)
 task :recommended_products, [:start_date, :end_date, :directory]=> :environment do |t, args|
   #--- Choose product type and grouping type ---#
-  product_types=["F1953"]
+  product_types=["F22553"]
   grouping_type = "table" # Saves data to accessory table
 #  grouping_type = "fixed_categories" # User determines accessory categories to be filled below as constant
 #  grouping_type = "numerical" # Chooses the top categories in terms of numbers of products sold
