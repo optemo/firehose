@@ -1,0 +1,12 @@
+<div>
+<br>
+<h2 class="heading">Best Selling Products</h2>
+<% best_sellers.each_pair do |category,products| %>
+  <h4 style="margin-left:20px; margin-bottom:3px;">
+    <%= link_to t(category+".name"), futureshop_path(category, :acc_cat => "Top #{@accessories_per_product_type}"), {:class => "link"} %>
+  </h4>
+  <div class="category">
+    <%= render partial: "featured_list", collection: products, :locals => {:cat => category}%>
+  </div>
+<% end %>
+</div>
