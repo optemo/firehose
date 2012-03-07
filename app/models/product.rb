@@ -3,7 +3,6 @@ class Product < ActiveRecord::Base
   has_many :bin_specs, :dependent=>:delete_all
   has_many :cont_specs, :dependent=>:delete_all
   has_many :text_specs, :dependent=>:delete_all
-  has_many :search_products, :dependent => :delete_all
   has_many :product_siblings
   has_many :product_bundles
 
@@ -111,7 +110,6 @@ class Product < ActiveRecord::Base
     ProductSibling.get_relations
     Equivalence.fill
     Result.upkeep_post
-    
     Product.compute_custom_specs(product_skus)
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin

@@ -1,3 +1,4 @@
+# FIXME: this function seems to not be called from anywhere. File should probably be removed.
 def read_daily_sales
   require 'net/imap'
   require 'zip/zip'
