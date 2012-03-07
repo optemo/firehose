@@ -3,7 +3,6 @@ class Product < ActiveRecord::Base
   has_many :bin_specs, :dependent=>:delete_all
   has_many :cont_specs, :dependent=>:delete_all
   has_many :text_specs, :dependent=>:delete_all
-  has_many :search_products, :dependent => :delete_all
   has_many :product_siblings
   has_many :product_bundles
 
@@ -103,15 +102,12 @@ class Product < ActiveRecord::Base
     specs_to_delete.each(&:destroy)
     products_to_save.values.each(&:save) #Save products and associated specs
     
-    Result.upkeep_pre
     ProductBundle.get_relations
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
-    Result.upkeep_post
-    
     Product.compute_custom_specs(product_skus)
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin

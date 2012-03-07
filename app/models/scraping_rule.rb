@@ -29,6 +29,10 @@ class ScrapingRule < ActiveRecord::Base
           rescue BestBuyApi::RequestError
             next
           end
+        rescue BestBuyApi::TimeoutError
+          puts "TimeoutError"
+          sleep 30
+          retry
         end
 
         unless raw_info.nil?

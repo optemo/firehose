@@ -7,24 +7,8 @@ class CustomizationTest < ActiveSupport::TestCase
     # FIXME: following are now required because error thrown if no sr found for any of the custom rules 
     create(:scraping_rule, local_featurename: "saleEndDate", rule_type: 'Categorical', product_type: 'F1127')
     create(:scraping_rule, local_featurename: "displayDate", rule_type: 'Categorical', product_type: 'F1127')
-    create(:scraping_rule, local_featurename: "preorderDate", rule_type: 'Categorical', product_type: 'F1127')
+    create(:scraping_rule, local_featurename: "preorderReleaseDate", rule_type: 'Categorical', product_type: 'F1127')
     Session.new('F1127')
-  end
-  
-  test "get needed features" do
-    features = ['string', 'bool', 'number']
-    a = create(:scraping_rule, local_featurename: "string", rule_type: 'Categorical', product_type: 'F1127')
-    create(:scraping_rule, local_featurename: "bool", rule_type: 'Binary', product_type: 'F1127')
-    create(:scraping_rule, local_featurename: "number", rule_type: 'Continuous', product_type: 'F1127')
-        
-    result = Customization.get_needed_features(features)
-    assert_not_nil result
-    assert_equal CatSpec, result[0].keys.first
-    assert_equal 'string', result[0].values.first
-    assert_equal BinSpec, result[1].keys.first
-    assert_equal 'bool', result[1].values.first
-    assert_equal ContSpec, result[2].keys.first    
-    assert_equal 'number', result[2].values.first
   end
   
   test "compute specs" do
@@ -34,9 +18,8 @@ class CustomizationTest < ActiveSupport::TestCase
     CatSpec.create(:product_id => p1.id, :name => 'saleEndDate', :value => Date.today.to_s)
     CatSpec.create(:product_id => p2.id, :name => 'saleEndDate', :value => (Date.today-10).to_s)
     results = Customization.compute_specs([p1.sku, p2.sku])[BinSpec]
-    assert_equal 1, results.length
-    assert_equal RuleOnSale.feature_name, results[0].name
-    assert results[0].value
+    assert_not_empty results.select{|spec| spec.name == "onsale" && spec.product_id = p1.id && spec.value == true}
+    assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
   end
   
   test "Coming Soon Rule" do
@@ -164,5 +147,9 @@ class CustomizationTest < ActiveSupport::TestCase
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_nil saved_spec, 'BinSpec for new should not be present for product that is not new'
+  end
+  
+  test "Rule Bestseller" do
+    flunk
   end
 end
