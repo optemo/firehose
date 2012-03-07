@@ -1,6 +1,6 @@
 class Featured < ActiveRecord::Base
   def name
-    cat_specs.find_by_name("title").try(:value)+"\n"+sku)
+    cat_specs.find_by_name("title").try(:value)+"\n"+sku
   end
   
   def self.get_sku(product_id)
