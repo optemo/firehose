@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120302211829) do
+ActiveRecord::Schema.define(:version => 20120307235338) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -215,7 +215,7 @@ ActiveRecord::Schema.define(:version => 20120302211829) do
     t.boolean  "modified"
   end
 
-  add_index "text_specs", ["product_id", "name"], :name => "index_text_specs_on_product_id_and_name", :unique => true
+  add_index "text_specs", ["product_id", "name"], :name => "index_text_specs_on_product_id_and_name"
 
   create_table "translations", :force => true do |t|
     t.string   "locale"
