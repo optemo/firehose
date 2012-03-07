@@ -1,4 +1,4 @@
-module FeaturedHelper
+module AccessoriesHelper
   
   # Returns accessories for a given product
   def get_accessories (product)

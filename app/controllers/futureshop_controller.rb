@@ -1,4 +1,4 @@
-class FutureshopController < FeaturedController
+class FutureshopController < AccessoriesController
   layout "plain"
 
   def initialize_constants

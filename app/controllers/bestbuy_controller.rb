@@ -1,4 +1,4 @@
-class BestbuyController < FeaturedController
+class BestbuyController < AccessoriesController
   layout "plain"
 
   def initialize_constants

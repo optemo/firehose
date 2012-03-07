@@ -17,7 +17,7 @@ task :recommended_products, [:start_date, :end_date, :directory]=> :environment 
     raise "Invalid product type and/or store"
   end
   products = []
-  FeaturedController.new.get_products(product_types).each do |product|
+  AccessoriesController.new.get_products(product_types).each do |product|
     product[1].each do |sku|
       products.push(sku.sku)  # Get products from Featured Controller
     end

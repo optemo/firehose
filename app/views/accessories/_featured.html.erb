@@ -7,19 +7,19 @@
 					<%= image_tag featured.img_url, :class => "productimg", title: "SKU:#{featured.sku}" %> 	
 					<div class="title">		
 
-        	  <%= link_to featured.name, featured_path(featured.id,:cat => cat), {:class => "link", :style =>"color:black;"} %>
+        	  <%= link_to featured.name, accessory_path(featured.id,:cat => cat), {:class => "link", :style =>"color:black;"} %>
   				</div>
 				</div>
 			</td>
 			<td class="sorting">
 			  <div style="margin-bottom:2px;top:0;">Accessory Categories:</div>
 			  <% total = featured.total_acc_sales %>
-			  <%= link_to "Top #{@accessories_per_product_type} (#{total})", featured_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}", :count => total), {:class => "link"} %>
+			  <%= link_to "Top #{@accessories_per_product_type} (#{total})", accessory_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}", :count => total), {:class => "link"} %>
 			  <br>
-			  <%= link_to "Top #{@accessories_per_product_type}: Limited (#{total})", featured_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}: Limited", :count => total), {:class => "link"} %>
+			  <%= link_to "Top #{@accessories_per_product_type}: Limited (#{total})", accessory_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}: Limited", :count => total), {:class => "link"} %>
 			  <br>
 			  <% get_cats_and_counts(featured).each do |acc_cats|%>
-			    <%= link_to t(acc_cats.value+".name")+"  (#{acc_cats.count})", featured_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => acc_cats.value, :count => acc_cats.count), {:class => "link"} %>
+			    <%= link_to t(acc_cats.value+".name")+"  (#{acc_cats.count})", accessory_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => acc_cats.value, :count => acc_cats.count), {:class => "link"} %>
 			    <br>
 			  <% end %>  
 			</td>
