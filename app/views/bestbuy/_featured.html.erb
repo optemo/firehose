@@ -3,7 +3,7 @@
 		<tr>
 			<td class="bestseller">
 			  <div class="product">
-			    <span class="num" style="background-color:#66FFFF"><%= featured.cont_specs.find_by_name("sum_store_sales").try(:value).to_i %></span>
+			    <span class="num" style="background-color:#66FFFF"><%= featured.store_sales.to_i %></span>
 					<%= image_tag featured.img_url, :class => "productimg", title: "SKU:#{featured.sku}" %> 	
 					<div class="title">		
 

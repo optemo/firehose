@@ -1,13 +1,15 @@
 class AccessoriesController < ApplicationController
   layout "plain"
 
+  # Instance variables are initialized here. Change the number of accessories per product... here
   def initialize_constants
+    @number_of_products = 5 # Number of products (bestselling) displayed for the categories wanted
     @accessories_per_product_type = 10
     @accessory_types_per_bestselling = 5
     @top_n_limit_number = 2 # Number of items that can come from the same leaf node
+    @top_n_limit_percent = 0.005 # Percentage of total accessory sales for product an accessory needs to be included in Top N
     @selling_threshold = 10 # Number of sales the last item in a leaf node's display (top ten sold) must 
       #have in order for the leaf node to remain its own category (otherwise the category is bumped to its parent)
-    @number_of_products = 5 # Number of products (bestselling) displayed for the categories wanted
   end
   
   def index
@@ -54,6 +56,7 @@ class AccessoriesController < ApplicationController
     end
   end
   
+  # Returns all top selling products within the categories given (according to the @number_of_products)
   def get_products(product_types)
     initialize_constants()
     cat_ids = {}
@@ -73,6 +76,7 @@ class AccessoriesController < ApplicationController
     ids
   end
   
+  # Returns the product with the given id
   def get_product(id)
     prod = Product.where(:id => id)
   end

@@ -50,7 +50,8 @@ module AccessoriesHelper
   def get_top_limited (product)
     product_accessories = []
     cats_included = {}
-    accessories = Accessory.where(:product_id => product.id, :name => "accessory_id").order("count DESC")
+    sales_needed = product.total_acc_sales*@top_n_limit_percent
+    accessories = Accessory.where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type*5)
     accessories.each do |accessory|
       unless cats_included.key?(accessory.acc_type)
         cats_included[accessory.acc_type] = 0
@@ -58,7 +59,7 @@ module AccessoriesHelper
     end
     accessories.each do |accessory|
       if product_accessories.length < @accessories_per_product_type
-        if cats_included[accessory.acc_type] < @top_n_limit_number
+        if accessory.count >= sales_needed && cats_included[accessory.acc_type] < @top_n_limit_number
           product_accessories.push(accessory)
           cats_included[accessory.acc_type] += 1
         end
@@ -70,6 +71,10 @@ module AccessoriesHelper
   def get_cats_and_counts (product)
     types = Accessory.select("value,count").where(:name => "accessory_type", :product_id => product.id).order("count DESC").limit(@accessory_types_per_bestselling*2)
   end
+  
+  
+  
+  #still working on this
   
   def get_accessory_parents (product)
     parent_nodes = {}

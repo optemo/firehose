@@ -1,7 +1,7 @@
 # Returns array containing top co-purchased products (for recommended products/accessories)
 task :recommended_products, [:start_date, :end_date, :directory]=> :environment do |t, args|
   #--- Choose product type and grouping type ---#
-  product_types=["F22553"]
+  product_types=["F1127"]
   grouping_type = "table" # Saves data to accessory table
 #  grouping_type = "fixed_categories" # User determines accessory categories to be filled below as constant
 #  grouping_type = "numerical" # Chooses the top categories in terms of numbers of products sold
@@ -91,7 +91,7 @@ def find_recommendations (grouping_type, store, products, start_date, end_date, 
       
     end
   end
-  
+  debugger
   # Sorts the accessories into categories, then stores the data in the manner dictated above
   recommended.each_pair do |sku,recommendations|      
     product_id = Product.select(:id).where("sku=?",sku.to_s).first.id # This line may be problematic if products have more than one product_id (bundles)
@@ -123,7 +123,7 @@ def find_recommendations (grouping_type, store, products, start_date, end_date, 
         p "Product #{sku[0]} does not exist in the database"  # When database is filled this should rarely be an issue
       end
     end
-
+    debugger
     case grouping_type
     # Writes data to accessories table (each accessory has sales numbers linked to main product)
     when "table"
@@ -140,7 +140,7 @@ def find_recommendations (grouping_type, store, products, start_date, end_date, 
       unless sku_id == ""
         # Write the number of times a product is sold with the desired item
         acc_cats.each_pair  do |cat, data|
-          unless cat == "" # This means the product no longer exists on the site
+          unless cat == "" # This means the product no longer exists on the site (I think)
             accessory = Accessory.find_or_initialize_by_product_id_and_name_and_value_and_acc_type(sku_id,"accessory_type",cat,cat)
             accessory.update_attribute(:count, data[0])
             accessory.save
