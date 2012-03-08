@@ -10,7 +10,7 @@ class Session
       self.product_type = product_type
     else
       #Default
-      self.product_type = ProductCategory.first.product_type
+      self.product_type = ProductCategory.find_by_product_type("B20218").try(:product_type) || ProductCategory.first.product_type
     end
     self.features = Hash.new{|h,k| h[k] = []} #This get configured by the set_features function
     Session.set_features #In firehouse there are no dynamic facets
