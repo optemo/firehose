@@ -18,12 +18,12 @@ class ApplicationController < ActionController::Base
     if params[:product_type_id]
       Session.new params[:product_type_id]
     else
-      Session.new ProductCategory.first.product_type
+      Session.new
     end
   end
 
   def authenticate
-    return true if params[:controller] == 'accessories' || params[:controller] == 'bestbuy' || params[:controller] == 'futureshop'
+    #return true if params[:controller] == 'accessories' || params[:controller] == 'bestbuy' || params[:controller] == 'futureshop'
     return true if request.host == "localhost" #Don't authenticate for development
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]
