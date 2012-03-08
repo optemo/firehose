@@ -100,7 +100,7 @@ class RuleBestSeller < Customization
     # have a hash of sku->week_orders which stores the sum
     # the dates were changed here for testing
     
-    set = DailySpec.where(:name => 'orders', :date => (last..td)) # this set is inclusive!
+    set = DailySpec.where(:name => 'orders', :date => (lastFriday..today)) # this set is inclusive!
     skus.each do |sku|
       raise 'attempting to re-add sku' unless weekly_orders[sku].nil?
       weekly_orders[sku] = set.where(:sku => sku).inject(0) {|sum, spec| sum += spec.value_flt}
