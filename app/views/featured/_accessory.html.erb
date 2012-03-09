@@ -1,4 +1,0 @@
-<div style="position:relative; display:inline-block;">
-  <span class="num"><%= accessory.second %></span>
-  <%= image_tag Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("img150url")).value, class: "productimg", title: Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("title")).value, alt: Maybe(Maybe(Product.find_by_sku(accessory.first)).cat_specs.find_by_name("title")).value %>
-</div>

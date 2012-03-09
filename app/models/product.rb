@@ -1,9 +1,9 @@
 class Product < ActiveRecord::Base
+  has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
   has_many :cont_specs, :dependent=>:delete_all
   has_many :text_specs, :dependent=>:delete_all
-  has_many :search_products, :dependent => :delete_all
   has_many :product_siblings
   has_many :product_bundles
 
@@ -22,27 +22,42 @@ class Product < ActiveRecord::Base
   end
   
   scope :instock, :conditions => {:instock => true}
-  scope :current_type, lambda {
-    {:conditions => {:product_type => Session.product_type}}
-  }
+  scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
   def self.feed_update
-    raise ValidationError unless Session.category_id
-    product_skus = BestBuyApi.category_ids(Session.category_id)
+    raise ValidationError unless Session.product_type
+    
+    begin
+      product_skus = BestBuyApi.category_ids(Session.product_type)
+    rescue BestBuyApi::TimeoutError
+      puts "Timeout"
+      sleep 30
+      retry
+    end
     #product_skus.uniq!{|a|a.id} #Uniqueness check
+
+    products_to_update = {}
+    products_to_save = {}
+    specs_to_save = {}
+    specs_to_delete = []
+    
+    #Reset the instock flags
+    Product.current_type.find_each do |p|
+      p.instock = false
+      products_to_update[p.sku] = p
+    end
+
+    product_skus.each do |bb_product|
+      unless products_to_update[bb_product.id]
+        products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false
+      end
+    end
+    
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
-    #Reset the instock flags
-    Product.update_all(['instock=false'], ['product_type=?', Session.product_type])
-    
-    products_to_save = {}
-    product_skus.each do |bb_product|
-      products_to_save[bb_product.id] = Product.find_or_initialize_by_sku_and_product_type(bb_product.id, Session.product_type)
-    end
-    specs_to_save = {}
-    
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
+    
     candidates.each do |candidate|
       spec_class = case candidate.model
         when "Categorical" then CatSpec
@@ -51,45 +66,70 @@ class Product < ActiveRecord::Base
         when "Text" then TextSpec
         else CatSpec # This should never happen
       end
-      p = products_to_save[candidate.sku]
+      #p = products_to_save[candidate.sku] || 
+      debugger if (candidate.parsed.nil? && !candidate.delinquent)
       
-      if p.new_record?
-        p.instock = false
-        p.save
-      end
-      
-      if candidate.delinquent
+      if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
-        spec.destroy if spec && !spec.modified
+        specs_to_delete << spec if spec && !spec.modified
       else
-        p.instock = true
-        spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
-        spec.product_type = Session.product_type
-        spec.value = candidate.parsed
-        specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+        if p = products_to_update[candidate.sku]
+          #Product is already in the database
+          p.instock = true
+          spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
+          spec.value = candidate.parsed
+          specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
+        elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
+          #Product is new
+          p.instock = true
+          myspecs = case candidate.model
+            when "Categorical" then p.cat_specs
+            when "Continuous" then p.cont_specs
+            when "Binary" then p.bin_specs
+            when "Text" then p.text_specs
+          end
+          myspecs << spec_class.new(name: candidate.name, value: candidate.parsed)
+        end
       end
     end
+    
+    raise ValidationError, "No products are instock" if specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0
     # Bulk insert/update for efficiency
-    Product.import products_to_save.values, :on_duplicate_key_update=> [:sku, :product_type, :title, :model, :mpn, :instock]
+    Product.import products_to_update.values, :on_duplicate_key_update=> [:sku]
     specs_to_save.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified] # Bulk insert/update for efficiency
+      s_class.import v, :on_duplicate_key_update=>[:product_id, :name] # Bulk insert/update for efficiency
     end
-    Result.upkeep_pre
-    Result.find_bundles
+    specs_to_delete.each(&:destroy)
+    products_to_save.values.each(&:save) #Save products and associated specs
+    
+    ProductBundle.get_relations
     #Calculate new spec factors
     Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
-    Result.upkeep_post
+    Product.compute_custom_specs(Product.current_type)
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
     rescue Dalli::NetworkError
       puts "Memcache not available"
     end
-    
+  end
+  
+  def self.compute_custom_specs(bb_prods)
+    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+    end
+  end
+  
+  def self.compute_custom_specs(bb_prods)
+    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+    end
   end
   
   def self.calculate_factors
@@ -112,7 +152,7 @@ class Product < ActiveRecord::Base
         end
         records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
         factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(:product_id => product.id, :product_type => Session.product_type, :name => f.name+"_factor")
+        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(product_id: product.id, name: f.name+"_factor")
         if records[f.name][product.id]
           record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
           fVal = records[f.name][product.id].first.value 
@@ -143,21 +183,43 @@ class Product < ActiveRecord::Base
       end 
       #Add the static calculated utility
       utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new({:product_id => product.id, :product_type => Session.product_type, :name => "utility"})
+      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
       product_utility.value = utility.sum
       cont_activerecords << product_utility
     end
 
     # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
     ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-
-    #Clear the search_product cache in the database
-    SearchProduct.transaction do
-      SearchProduct.delete_all(["search_id = ?",Session.product_type_id])
-      # Bulk insert for efficiency. 
-      SearchProduct.import(Product.instock.current_type.map{|product| SearchProduct.new(:product_id => product.id, :search_id => Session.product_type_id)})
-    end
   end
+  
+  def name
+    name = cat_specs.find_by_name("title").try(:value)
+    if name.nil?  
+      name = "Unknown Name / Name Not In Database"
+    end
+    name += "\n"+sku
+  end
+  
+  def img_url
+    retailer = cat_specs.find_by_name_and_product_id("product_type",id).try(:value)
+    if retailer =~ /^B/
+      url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
+    elsif retailer =~ /^F/
+      url = "http://www.futureshop.ca/multimedia/Products/250x250/"
+    else
+      raise "No known image link for product: #{sku}"
+    end
+    url += sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
+  end
+  
+  def store_sales
+    cont_specs.find_by_name("sum_store_sales").try(:value)
+  end
+  
+  def total_acc_sales
+    Accessory.where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_type'").sum("count")
+  end
+  
   
   
   private

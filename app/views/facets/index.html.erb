@@ -1,0 +1,13 @@
+<div class="centered">
+<h1>Layout</h1>
+<% if I18n.locale == :fr -%>
+<%= link_to('English', product_type_facets_url(Session.product_type, :locale => 'en')) %>
+<span>French</span>
+<% else %>
+<span>English</span>
+  <%= link_to('French', product_type_facets_url(Session.product_type, :locale => 'fr')) %>
+<% end %>
+</div>
+
+<%= render 'editor' %>
+<div style="clear:both;"></div>

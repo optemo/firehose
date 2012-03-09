@@ -63,13 +63,23 @@ class ProductTest < ActiveSupport::TestCase
   end 
   
   test "Product and Spec import from BBY API" do
-    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
+    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription", rule_type: "Text")
     Product.feed_update
-    # 20 created(Current BB page size), and 1 in the fixtures Note: this seems to be 19 now
-    assert_equal 20, Product.count, "There should be 20 products created in the database" 
-    assert_equal false, Product.first.instock
-    assert_equal true, Product.all[1..-1].map(&:instock).inject(true){|res,el|res && el}, "All products should be instock"
-    assert_equal ["longDescription"]*20, Product.all[1..-1].map{|p|p.cat_specs.first.name}, "Test that the price is available" #FIXME: fix this test
+    # 20 created(Current BB page size), and 1 in the fixtures
+    assert_equal 21, Product.count, "There should be 20 products created in the database"
+    assert_equal true, Product.all.inject(true){|res,el|res && (el.instock || /^B/ =~ el.sku)}, "All products should be instock (unless they're bundles)"
+    assert !Product.all[1].text_specs.empty?, "New products should have one texttspec"
+  end
+  
+  test "Product and Spec import for bundles from BBY API" do
+    sr = create(:scraping_rule, local_featurename: "price", remote_featurename: "regularPrice", rule_type: "Continuous")
+    Product.feed_update
+    # 20 created(Current BB page size), and 1 in the fixtures
+    assert_equal 21, Product.count, "There should be 20 products created in the database"
+    assert_equal true, Product.all.inject(true){|res,el|res && el.instock}, "All products should be instock"
+    assert !Product.all[1].cont_specs.empty?, "New products should have one texttspec"
+    assert_equal ["price"]*20, Product.all[1..-1].map{|p|p.cont_specs.first.try(:name)}, "Test that the price is available"
+    assert_match /\d+(\.\d+)?/, Product.first.cont_specs.first.try(:value).to_s, "Prices are actually recorded correctly"
   end
   
   test "Get Rules" do

@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :candidate do
-    association :scraping_rule
-    association :scraping_correction
+    scraping_rule
+    #association :scraping_correction, scraping_rule: scraping_rule
     sku "100000A"
     parsed "value"
     raw "rawvalue"
@@ -9,7 +9,7 @@ FactoryGirl.define do
   factory :scraping_rule do
     sequence(:local_featurename) {|n| "title#{n}"}
     remote_featurename "title"
-    product_type "camera_bestbuy"
+    product_type "B20218"
     sequence(:rule_type) {|n|
       case n % 3
       when 0
@@ -20,11 +20,10 @@ FactoryGirl.define do
         "Binary"
       end}
     regex ".*"
-    active true
   end
   
   factory :facet do
-    product_type_id 2
+    product_type "B20218"
     sequence(:name) {|n| "facet#{n}"}
     sequence(:feature_type) {|n|
       case n % 3
@@ -55,19 +54,17 @@ FactoryGirl.define do
     total 0
   end
   factory :product do
-    title {|n| "Product#{n}"}
-    product_type "camera_bestbuy"
     instock true
   end
-  factory :product_type do
-    name {|n| "test_type#{n}"}
+  factory :typed_product, :parent => :product do
+    after_create do |product, evaluator|
+      FactoryGirl.create :cat_spec, {name: "product_type", value: (Session.product_type_leaves || [ProductCategory.first.product_type]).first, product: product}
+    end
   end
   factory :category_id_product_type_map do
-    association :product_type
   end
   factory :scraping_correction do
-    #association :scraping_rule
-    product_type "camera_bestbuy"
+    scraping_rule
     raw "error--"
     corrected "good to go"
     product_id "100000B" #SKU
@@ -76,26 +73,31 @@ FactoryGirl.define do
      created_at {|d| "2011-11-#{d}"}
   end
   factory :cat_spec do
-    association :product
-    product_type "camera_bestbuy"
+    product
   end
   factory :bin_spec do
-    association :product
+    product
   end
   factory :cont_spec do
-    association :product
+    product
   end
   factory :text_spec do
-    association :product
-    product_type "camera_bestbuy"
+    product
   end
   factory :search_product do
-    association :product
+    product
   end
   factory :product_sibling do
-    association :product
+    product
   end
   factory :product_bundle do
-    association :product
+    product
+  end
+  factory :product_category do
+    retailer "bestbuy"
+    feed_id 0
+    l_id 0
+    r_id 0
+    level 0
   end
 end

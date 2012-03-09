@@ -52,7 +52,8 @@ module Firehose
     
     # Load the usernames and passwords
     credentials_file = YAML.load_file("#{Rails.root}/config/credentials.yml")
-    ACCESS_UNAME = credentials_file['access']['username']
-    ACCESS_PASSWORD = credentials_file['access']['password']
+    machine = credentials_file[`hostname`.strip == "jaguar" ? 'jaguar' : 'access']
+    ACCESS_UNAME = machine['username']
+    ACCESS_PASSWORD = machine['password']
   end
 end

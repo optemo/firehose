@@ -2,26 +2,146 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-.accessories {
-  display:inline-block;
+.category {
   border: 1px solid #888;
   border-radius: 10px;
   display: inline-block;
-  margin-left: 10px;
-  margin-top: 15px;
-  padding: 9px;
+  margin-left: 5px;
+  padding: 0px;
+}
+
+.cat_name {
+  font-size:16px;
+  margin-left:5px;
+  border-bottom-style:solid;
+  border-bottom-width:1px;
+  border-bottom-color:#888;
+}
+
+.single_product table {
+  table-layout:fixed;
+  height:300px;
+}
+
+.bestseller {
+  width:150px;
+}
+
+.first_featured{
+  position:relative;
+  display:inline-block;
+  width:150px;
+  padding:3px;
+  vertical-align:top;
+}
+
+.first_featured, .bestseller {
+  .productimg {
+    width: 150px;
+    display: block;
+  }
+}
+
+.featured, .single_product {
+  padding: 5px;
+
+  .bestseller .product{
+    position:relative;
+    width: 150px;
+    float: left;
+  }
+
+  .title {
+    width: 150px;
+    margin-top: auto;
+    margin-bottom: auto;
+    text-align: center;
+  }
+}
+
+.accessories {
+  display:inline-block;
+  display: inline-block;
+  margin-left: 5px;
+  padding: 5px;
   vertical-align: top;
+
+  .sku {
+    width:75px;
+    text-align:center;
+    font-size:14px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+
+  .productimg {
+    width: 75px;
+    display: block;
+  }
 }
-.featured {
-  padding: 10px;
-}
-.accessories .productimg {
-  width: 75px;
-}
+
 .num {
   background-color: pink;
   border-radius: 10px;
   padding: 2px 5px 0;
   position: absolute;
-  right: 0;
+  right: 3px;
+  top: 3;
+  font-size:14px;
+}
+
+.link {
+  color:purple;
+  text-decoration:none;
+}
+
+.featured, {
+  table {
+    padding:5px;
+    table-layout:fixed;
+    height:275px;
+    border-bottom-style:solid;
+    border-bottom-width:1px;
+    border-bottom-color:#888;
+  }
+  .bestseller, .sorting {
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color:#888;
+    padding:5px;
+    padding-top:5px;
+    vertical-align:top;
+  }
+}
+
+.single_product {
+  .bestseller {
+    border-right-style:solid;
+    border-right-width:1px;
+    border-right-color:#888;
+  }
+}
+
+.sorting {
+  width:275px;
+}
+
+.heading {
+  padding:5px;
+  margin-bottom:0;
+  margin-top:10px;
+}
+
+.subheading {
+  text-align:center;
+  padding:5px;
+  margin-top:0;
+}
+
+.retailer {
+  float:right;
+  margin-right:5px;
+  margin-top:5px;
+  color:purple;
 }

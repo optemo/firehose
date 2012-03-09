@@ -2,15 +2,10 @@ class BestBuyApi
   require 'net/http'
   class RequestError < StandardError; end
   class FeedDownError < StandardError; end
+  class TimeoutError < StandardError; end
   class << self
-    
-    if ENV["retailer"].nil?
-      URL = "http://www.bestbuy.ca/api/v2"
-    elsif ENV["retailer"] == 'bestbuy'
-      URL = "http://www.bestbuy.ca/api/v2"
-    else
-      URL = "http://www.futureshop.ca/api/v2"
-    end
+    URL = {"B" => "http://www.bestbuy.ca/api/v2",
+           "F" => "http://www.futureshop.ca/api/v2"}
     DEBUG = false
     
     #Find BestBuy products
@@ -84,13 +79,15 @@ class BestBuyApi
       cached_request('search',{:page => page, :categoryid => id})
     end
     
-    def some_ids(id)
+    def some_ids(id,num = 10)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
-        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => 10})
+        #Check if ProductType or feed_id
+        my_id = my_id.to_s[1..-1] if /^[BF]/ =~ my_id.to_s
+        res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => num})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
        #puts "#{ids.to_s}"
@@ -103,6 +100,8 @@ class BestBuyApi
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
+        #Check if ProductType or feed_id
+        my_id = my_id.to_s[1..-1] if /^[BF]/ =~ my_id.to_s
         page = 1
         totalpages = nil
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
@@ -149,7 +148,7 @@ class BestBuyApi
       begin
         res = Net::HTTP.get_response(URI::parse(request_url))
       rescue Timeout::Error
-        raise BestBuyApi::RequestError, "Timeout Error"
+        raise BestBuyApi::TimeoutError
       end
       #puts "#{res.body}"
       unless res.kind_of? Net::HTTPSuccess
@@ -189,10 +188,12 @@ class BestBuyApi
           v = v.join(',') if v.is_a? Array
           qs << "&#{k.to_s}=#{URI.encode(v.to_s)}"
         }
+        url = URL[Session.retailer]
+        raise RequestError, "Base url not specified for retailer: #{Session.retailer}" if url.blank?
         if params[:id]
-            "#{URL}/json/#{type}/#{params[:id]}?#{qs}"
+            "#{url}/json/#{type}/#{params[:id]}?#{qs}"
         else
-            "#{URL}/json/#{type}?#{qs}"
+            "#{url}/json/#{type}?#{qs}"
         end
       end
    end

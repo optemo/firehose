@@ -1,0 +1,210 @@
+/*
+*= require_self
+*= require_tree .
+*/
+h2 {
+    text-align:center;
+}
+html, body {
+    padding: 0;
+    margin: 0;
+}
+#header {
+    width: 100%;
+    background: #b6c4c5;
+    padding: 12px 0 12px;
+    margin: 0;
+    height: 50px;
+}
+
+#content {
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
+.skus_to_fetch {
+    -moz-border-radius: 8px 8px 8px 8px;
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    width: 800px;
+    margin: 5px;
+}
+
+.product_type_menu {
+  padding: 0 20px;
+  position: absolute;
+  .btn {
+    box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+    background: none repeat scroll 0 0 #FFFFFF;
+    float: left;
+    padding: 5px 8px;
+    position: relative;
+    width: 100px;
+    text-align: center;
+  }
+  .btn:hover {
+    background-color: #F6F6F6;
+  }
+  .current_product_type {
+    float: left;
+    margin: 9px 9px 9px 0;
+    padding: 6px 9px;
+    background: #EEE;
+    border-radius: 0 5px 5px 0;
+  }
+  p {
+    margin: 0;
+    font-size: 12pt;
+    font-weight: bold;
+  }
+}
+
+a.mytitle {
+    text-decoration:none;
+}
+
+.featurehash li, a.mytitle, .expandable_sku {
+	color: #4F3333;
+}
+
+.featurehash li:hover, a.mytitle:hover, .expandable_sku:hover {
+    color: #B50A05;
+}
+
+a.expandable_sku {
+    font-size: 0.8em;
+}
+
+#rule_adder_div {
+    position: absolute;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 400px;
+    background: #FFF;
+    padding: 5px;
+    -moz-border-radius: 8px;
+    border: 1px solid black;
+    top:100px;
+    left: 0;
+    right: 0;
+    z-index: 4;
+}
+
+#rule_adder_div h4 {
+    margin-bottom:10px;
+}
+#rule_creation_key_value_display {
+    background: none repeat scroll 0 0 #DDDDDD;
+    border: 1px solid black;
+    margin: 5px;
+    padding: 3px;
+}
+
+/* New Scraping Rule Pop-up */
+.edit_scraping_rule {
+    margin-top:5px;
+}
+
+.edit_scraping_rule label
+{
+width: 130px;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block;
+clear: left;
+}
+
+.edit_scraping_rule input {
+    border: 1px solid #000;
+    float: left;
+}
+.edit_scraping_rule fieldset {
+    border: 1px solid #000;
+    width: 450px;
+}
+
+.edit_scraping_rule legend {
+border: 1px solid #000;
+padding: 2px 6px
+}
+
+/* Silkscreen from main application */
+div#silkscreen {
+	background-color: black;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 5000px;
+	z-index: 3;
+	opacity: 0.50;
+	filter: alpha(opacity = 50);
+	display: none;
+	border-radius: 0 0 5px 5px;
+	-moz-border-radius: 0 0 5px 5px;
+	-webkit-border-radius: 0 0 5px 5px;
+}
+
+.closed {
+	background: url("data:image/gif;base64,R0lGODlhBgAHAPMKAI2Njb6+vq6urp6enoWFhaampt7e3u/v787Ozn19ff///wAAAAAAAAAAAAAAAAAAACH5BAUAAAoALAAAAAAGAAcAQAQUECBFVbok2JvEAUa1DeHGAVdxUBEAOw==") no-repeat left center;
+	padding-left: 13px;
+}
+
+.open {
+	background: url("data:image/gif;base64,R0lGODlhBwAGALMKAM7Ozr6+vq6urp6enoWFhaampt7e3u/v742NjX19ff///wAAAAAAAAAAAAAAAAAAACH5BAEAAAoALAAAAAAHAAYAAAQWEKU5kaETqEKHUgcxGZ8SJEL5IccXAQA7") no-repeat left center;
+	padding-left: 13px;
+}
+.bold
+{
+	font-weight: bold;
+}
+.edit_scraping_rule label.error { 
+    float: none; 
+    color: red; 
+    padding-left: .5em; 
+    vertical-align: top;     
+    position: absolute;
+    right: 130px;
+    width: 150px;
+}
+.contentholder {
+	margin-left: 10px;
+}
+.edit_scraping_rule_form, .new_scraping_correction, .edit_scraping_correction {
+	display: inline;
+}
+.rule_type_button {
+    float: left;
+    padding: 0 2px 0 2px;
+}
+.warning {
+	color: red;
+}
+
+#actions {
+    text-align:center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.global_popup {
+    background: #FFFFFF;
+    border: 2px solid black;
+    position: fixed;
+    padding: 5px;
+    width: 200px;
+	top: 100px;
+	left: 50%;
+	margin-left: -100px;
+}
+
+.raise_rule_priority {
+	text-decoration: none;
+	margin-left: -20px;
+}

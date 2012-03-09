@@ -1,9 +1,0 @@
-<div class="strong" id="num_skus_found">
-    Total of <%=@product_skus.length%> SKUs found
-</div>
-<% @product_skus.each do |s| %>
-    <div class="skus_to_fetch expandable_sku" data-id=<%=s.id.to_s + ',' +
-    s.category.to_s %>>
-        Click to load data for sku <%=s.id%>
-    </div>
-<% end %>

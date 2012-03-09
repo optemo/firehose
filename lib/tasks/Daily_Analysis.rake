@@ -1,8 +1,8 @@
 
 task :daily_data_collection => :environment do
   Session.new
-  require 'daily_sales_email'
-  read_daily_sales()
+  require 'daily_sales'
+  save_daily_sales()
   #generate_daily_graphs()
 end  
  

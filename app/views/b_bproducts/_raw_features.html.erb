@@ -1,0 +1,21 @@
+<ul class="featurehash">
+<% featurehash.each_pair do |k,v| %>
+    <% unless k == "specs" || k == "French Specs" %>
+        <%= render partial: "kvlink", locals: {name: k, value: v, prestring: prefix} %>
+    <% else %>
+		<% currentgroup = "" %>
+		<% v.each do |hash| %>
+			<% if hash["group"] != currentgroup %>
+				<% if currentgroup != "" %>
+					</ul>
+				<% end %>
+				<li><%= hash["group"] %></li>
+				<ul class="featurehash">
+			<% end %>
+			<%= render partial: "kvlink", locals: {name: hash["name"], value: hash["value"], prestring: [k.gsub("French Specs","specs"),hash["group"]]} %>
+			<% currentgroup = hash["group"] %>
+		<% end %>
+		</ul>
+    <% end %>
+<% end %>
+</ul>

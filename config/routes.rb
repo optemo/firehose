@@ -1,10 +1,4 @@
 Firehose::Application.routes.draw do
-  
-  get "facet/new"
-
-#  get "scraping/index"
-
-#  get "scraping/scrape"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -65,19 +59,23 @@ Firehose::Application.routes.draw do
 
   #resources :scraping
   #resources :scraping, :only => [:create], :as => "scraping_rules"
-  resources :scraping_corrections, :except => [:show, :index]
-  resources :scraping_rules, :except => :index
-  resources :product_types
-  resources :category_id_product_type_maps, :path=>"category_ids"
-  resources :layout_editor
+  
+  root :to => "b_bproducts#blank"
 
-  match 'scrape/:id' => 'scraping#scrape'
-  match "rules" => "scraping#rules"
-  match "datafeed" => "scraping#datafeed"
-  match "results" => "scraping#results"
-  match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
-  match "featured" => "featured#index"
+  resources :futureshop, only: [:index, :show], id: /\w+/i
+  resources :bestbuy, only: [:index, :show], id: /\w+/i
+  resources :accessories, only: [:index, :show], id: /\w+/i
 
-
-  root :to => "scraping#index"
+  resources :product_types, path: "/", id: /[BF]\w+/i, only: [:show] do
+    resources :facets, only: [:index, :new, :create], path: "layout_editor"
+    resources :scraping_corrections, :except => [:show, :index], id: /\d+/
+    resources :scraping_rules, id: /[\d-]+/
+    resources :b_bproducts, only: [:index, :show], id: /\w+/
+    resources :category_id_product_type_maps, only: [:new], :path=>"category_ids"
+    match "category_ids" => "category_id_product_type_maps#show"
+    match "scraping_rules/raisepriority" => "scraping_rules#raisepriority"
+    match "/" => "b_bproducts#blank"
+  end  
+  
+  
 end

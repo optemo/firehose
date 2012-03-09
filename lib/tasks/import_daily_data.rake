@@ -33,7 +33,7 @@ def import_data(raw)
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
       puts 'making records for date ' + date.to_s
       # import data from the snapshot to the temp database
-      puts "mysql -u monir -pm_222978 -h jaguar temp < #{directory}/#{snapshot}"
+      puts "mysql -u monir -p m_222978 -h jaguar temp < #{directory}/#{snapshot}"
       %x[mysql -u monir -pm_222978 -h jaguar temp < #{directory}/#{snapshot}]
 
       #username and password cannot be company's (optemo, tiny******)

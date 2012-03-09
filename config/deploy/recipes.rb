@@ -37,3 +37,11 @@ end
 task :set_umask do
   run "umask 0002"
 end
+
+task :db_migrate do
+  run "cd #{release_path};\
+       if [ `bundle exec rake -f #{release_path}/Rakefile db:migrate:status RAILS_ENV=production | awk '{ print $1 }' | grep down | head -1` ]; then\
+          /u/apps/scripts/db_backup;\
+          bundle exec rake -f #{release_path}/Rakefile db:migrate RAILS_ENV=production;\
+       fi"
+end

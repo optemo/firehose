@@ -5,11 +5,10 @@ task :upkeep => :environment do
   if !ENV.include?("product_type")
     Session.new
   else
-    id = ProductType.find_by_name(ENV["product_type"])
-    if id
-      Session.new id
+    if /[BF]\w+/ =~ ENV["product_type"]
+      Session.new ENV["product_type"]
     else
-      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
+      raise "usage: rake update product_type=? # where product_type is a Bestbuy hierarchy number, e.g. B20218 or F1084."
     end
   end
   #!!!!!! For testing only
@@ -23,43 +22,34 @@ end
 
 desc "Update data automatically"
 task :update => :environment do
+  require 'ruby-debug'
+  
   if !ENV.include?("product_type")
     Session.new
   else
-    id = ProductType.find_by_name(ENV["product_type"])
-    if id
-      Session.new id
+    if /[BF]\w+/ =~ ENV["product_type"]
+      Session.new ENV["product_type"]
     else
-      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
+      raise "usage: rake update product_type=? # where product_type is a Bestbuy hierarchy number, e.g. B20218 or F1084."
     end
   end
   
   start = Time.now
-  Product.feed_update
-
+  leaves = Session.product_type_leaves
+  if leaves.nil? || leaves.empty?
+    raise "Product type: #{ENV["product_type"]} not found"
+  end
+  leaves.each do |node|
+    #Run the update task for this leaf node
+    Session.new node
+    Product.feed_update
+  end
+  Session.new ENV["product_type"] #Reset session
   #clean up inactive scraping rules not used any more
   Facet.check_active
-  ScrapingRule.cleanup
   Search.cleanup_history_data(7)
   #Report problem with script if it finishes too fast
   `touch tmp/r_updateproblem.txt` if (Time.now - start < 1.minute)
-end
-
-#Here is where general upkeep scripts are
-desc "Process product relationships and fill up prduct siblings table"
-task :bundles => :environment do
-  if !ENV.include?("product_type")
-    Session.new
-  else
-    id = ProductType.find_by_name(ENV["product_type"])
-    if id
-      Session.new id
-    else
-      raise "usage: rake update product_type=? # product_type is a valid product type name from product_types table; sets product_type."
-    end
-  end
-
-  Result.find_bundles
 end
 
 namespace :cache do
@@ -71,7 +61,8 @@ end
 
 
 desc "Set performance factors"
-task :set_performance_scores => :environment do 
+task :set_performance_scores => :environment do
+  exit #this code needs to be updated
   if !ENV.include?("product_type")
     Session.new
   else

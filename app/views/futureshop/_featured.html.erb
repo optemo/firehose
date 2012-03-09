@@ -1,0 +1,38 @@
+<div class="featured">
+	<table>
+		<tr>
+			<td class="bestseller">
+			  <div class="product">
+			    <span class="num" style="background-color:#66FFFF"><%= featured.store_sales.to_i %></span>
+					<%= image_tag featured.img_url, :class => "productimg", title: "SKU:#{featured.sku}" %> 	
+					<div class="title">		
+
+        	  <%= link_to featured.name, futureshop_path(featured.id,:cat => cat), {:class => "link", :style =>"color:black;"} %>
+  				</div>
+				</div>
+			</td>
+			<td class="sorting">
+			  <div style="margin-bottom:2px;top:0;">Accessory Categories:</div>
+			  <% total = featured.total_acc_sales %>
+			  <%= link_to "Top #{@accessories_per_product_type} (#{total})", futureshop_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}", :count => total), {:class => "link"} %>
+			  <br>
+			  <%= link_to "Top #{@accessories_per_product_type}: Limited (#{total})", futureshop_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => "Top #{@accessories_per_product_type}: Limited", :count => total), {:class => "link"} %>
+			  <br>
+			  <% get_cats_and_counts(featured).each do |acc_cats|%>
+			    <%= link_to t(acc_cats.value+".name")+"  (#{acc_cats.count})", futureshop_path(cat, :sku => featured.sku, :prod_acc_cats => prod_acc_cats, :acc_cat => acc_cats.value, :count => acc_cats.count), {:class => "link"} %>
+			    <br>
+			  <% end %>  
+			</td>
+			<td class="accessories">
+		    <div style="margin-bottom:2px;">Recommended Accessories:</div>
+        <% acc = get_select_accessories(featured, prod_acc_cats[featured.sku][0], prod_acc_cats[featured.sku][1]) %>
+          <% acc.each_pair do |title,data| %>
+            <div class="cat_name"><%= title+"  (#{data[0]})"%></div>
+            <%= render partial: "accessory", collection: data[1] %>
+            <br><br>
+          <% end %>
+		  </td>
+		</tr>
+	</table>	
+
+</div>

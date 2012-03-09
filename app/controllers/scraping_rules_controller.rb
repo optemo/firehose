@@ -1,9 +1,32 @@
 class ScrapingRulesController < ApplicationController
-  layout false
+  layout "application", only: :index
+  
+  def index
+    @rules = ScrapingRule.order('priority').find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
+    @colors = {}
+    @rules.each_pair do |lf, rs|
+      @colors.merge! Hash[*rs.map(&:id).zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
+    end
+    #Calculate Coverage
+    
+    if params[:coverage] || params[:full]
+      @coverage = {}
+      products = params[:full] ? BestBuyApi.category_ids(Session.product_type) : BestBuyApi.some_ids(Session.product_type)
+      @products_count = products.count
+      ScrapingRule.scrape(products).group_by{|c|c.scraping_rule.local_featurename}.each_pair do |lf, candidates| 
+        groups = candidates.group_by(&:scraping_rule_id)
+        if groups.keys.length > 1
+          @coverage[lf] = covered(Candidate.multi(candidates))
+        end
+        groups.each_pair{|sr_id, candidates| @coverage[sr_id] = covered(candidates)}
+      end
+    end
+  end
+  
   def new
     @raw = params[:raw]
     #Fix utf-8 encoding
-    params[:rule][:remote_featurename] = CGI::unescape(params[:rule][:remote_featurename]) if params[:rule][:remote_featurename]
+    params[:rule][:remote_featurename] = CGI::unescape(params[:rule][:remote_featurename]) if params[:rule] && params[:rule][:remote_featurename] 
     @scraping_rule = ScrapingRule.new(params[:rule])
   end
   
@@ -51,9 +74,9 @@ class ScrapingRulesController < ApplicationController
 
     respond_to do |format|
       if @scraping_rule.save
-        format.html { render text: "[REDIRECT]#{ rules_url }" }
+        format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
       else
-        format.html { head 412 }
+        format.html { head :bad_request }
       end
     end
   end
@@ -63,15 +86,26 @@ class ScrapingRulesController < ApplicationController
     
     respond_to do |format|
       if succeeded
-        format.html { render text: "[REDIRECT]#{ rules_url }" }
+        format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
       else
-        format.html { head 412 }
+        format.html { head :bad_request }
       end
     end
   end
   
   def show
-    products = request.referer =~ /results/ ? BestBuyApi.category_ids(Session.category_id) : BestBuyApi.some_ids(Session.category_id)
+    if request.referer =~ /full/
+      #Results, so get all products
+      products = Session.product_type_leaves.inject([]) do |res, leaf|
+        res + BestBuyApi.category_ids(leaf)
+      end
+    else
+      #Rules, so only show a few 
+      leaves = Session.product_type_leaves
+      products = leaves[0..9].inject([]) do |res, leaf|
+        res + BestBuyApi.some_ids(leaf,[10/leaves.size,1].max)
+      end
+    end
     scraping_rules = Maybe(params[:id]).split('-')
     @colors = Hash[*scraping_rules.zip(%w(#4F3333 green blue purple pink yellow orange brown black)).flatten]
     if scraping_rules.length > 1
@@ -82,11 +116,18 @@ class ScrapingRulesController < ApplicationController
       #Check single rules
       @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id])).sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
     end
+    render :partial => 'candidate', :collection => @candidates
   end
   
   def destroy
     ScrapingCorrection.delete_all(["scraping_rule_id = ?",params[:id]])
     ScrapingRule.find(params[:id]).destroy
     render :nothing => true
+  end
+  
+  private
+  def covered(array)
+    #Used to calculate feed coverage
+    array.inject(0){|res,elem|elem.delinquent ? res : res+1}
   end
 end

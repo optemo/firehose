@@ -1,0 +1,7 @@
+<div class="first_featured">
+  <span class="num" style="background-color:#66FFFF"><%= featured_list.store_sales.to_i %></span>
+	<%= image_tag featured_list.img_url, class: "productimg", title: "Product", alt: "#{featured_list.sku}"%>
+	<div style="text-align:center;">
+	  <%= link_to featured_list.name, accessory_path(featured_list.id,:cat => cat), {:class => "link"} %>
+	</div>
+</div>

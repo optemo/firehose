@@ -1,0 +1,25 @@
+<div class="single_product">
+	<table>
+		<tr>
+			<td class="bestseller">
+			  <div class="product">
+			    <span class="num" style="background-color:#66FFFF"><%= product.store_sales.to_i %></span>
+					<%= image_tag product.img_url, :class => "productimg", title: "SKU:#{product.sku}" %> 	
+					<div class="title">		
+  					<%= product.name %>
+  				</div>
+				</div>
+			</td>
+			<td class="accessories">
+		    <div style="margin-bottom:2px;">Recommended Accessories:</div>
+        <% acc = get_accessories(product)%>
+	      <% acc.each_pair do |title,data| %>
+		      <div class="cat_name"><%= title+"  (#{data[0]})"%></div>
+		      <%= render partial: "accessory", collection: data[1] %>
+		      <br><br>
+		    <% end %>
+		  </td>
+		</tr>
+	</table>	
+
+</div>

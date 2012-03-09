@@ -34,7 +34,6 @@ class ChangeProductType < ActiveRecord::Migration
       remove_column :searches, :groupby
       remove_column :searches, :searchpids
       remove_column :searches, :searchterm
-      remove_column :searches, :seesim
       remove_column :searches, :session_id
       add_column :searches, :product_type, :string #Will get tree nodes
       
@@ -47,7 +46,7 @@ class ChangeProductType < ActiveRecord::Migration
       drop_table :surveys
       drop_table :search_products
       drop_table :category_id_product_type_maps
-      #drop_table :product_types
+      drop_table :product_types
     end
   
     def down
@@ -79,7 +78,6 @@ class ChangeProductType < ActiveRecord::Migration
       add_column :searches, :groupby, :string
       add_column :searches, :searchpids, :string
       add_column :searches, :searchterm, :string
-      add_column :searches, :seesim, :string
       add_column :searches, :session_id, :integer
       remove_column :searches, :product_type
     end

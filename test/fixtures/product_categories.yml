@@ -1,0 +1,16 @@
+cameras:
+  id: 2
+  product_type: B20218
+  feed_id: 20218
+  retailer: B
+  l_id: 869
+  r_id: 878
+  level: 3
+point_and_shoot:
+  id: 4
+  product_type: B22474
+  feed_id: 22474
+  retailer: B
+  l_id: 870
+  r_id: 871
+  level: 4
