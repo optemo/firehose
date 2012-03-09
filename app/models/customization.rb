@@ -1,6 +1,3 @@
-# TODO: add the capability for a subclass of customization to be set for several product_types
-# right now setting it on the topmost FutureShop category
-
 class Customization
   class << self 
     attr_accessor :feature_name
@@ -20,7 +17,7 @@ class Customization
   
   def Customization.find_all_by_product_type(product_types)
     product_types = [product_types] unless product_types.class == Array
-    Customization.all.select{ |x| product_types.include?(x.product_type) }
+    Customization.all.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
   end
   
   def Customization.rule_type_to_class(type)
@@ -33,7 +30,6 @@ class Customization
   end
   
   def Customization.compute_specs(pids)
-    debugger
     # get all the customizations applicable to this product_type
     product_type = Session.product_type
     rules = Customization.find_all_by_product_type(Session.product_type_path)
@@ -75,126 +71,6 @@ class Customization
         results.has_key?(spec_class) ? results[spec_class] += rule_results : results[spec_class] = rule_results
       end
     end
-    debugger
     results
   end
 end
-
-class RuleBestSeller < Customization
-  @feature_name = 'bestseller'
-  @product_type = 'FDepartments'
-  @needed_features = [{DailySpec => 'orders'}]
-  @rule_type = 'Binary'
-
-  def RuleBestSeller.group_computation(pids)
-    today = Date.today # getting the weekday today
-    lastFriday = Date.today - ((Date.today.wday - 5) % 7) # getting the date of the last friday, including today if friday
-    
-    weekly_orders = {}
-    res_specs = []
-    set = DailySpec.where(:name => 'orders', :date => (lastFriday..today)) # this set is inclusive!
-    pids.each do |pid|
-      prod = Product.find(pid) # will raise 
-      raise 'attempting to re-add pid' unless weekly_orders[pid].nil?
-      weekly_orders[pid] = set.where(:sku => prod.sku).inject(0) {|sum, spec| sum += spec.value_flt}
-    end
-    
-    sorted_orders = weekly_orders.sort_by {|pid, sum| sum}
-    sorted_orders.reverse!
-    
-    index = (sorted_orders.count * 0.2).to_i
-    threshold = sorted_orders[index][1]
-    
-    top_20 = sorted_orders.select{|pid,val| (val >= threshold and val > 0)}
-    bottom_80 = sorted_orders.select{|pid,val| (val < threshold or val == 0)}
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    
-    top_20.each do |pid, sum|
-      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
-      spec.value = 1
-      res_specs += [spec]
-    end
-    bottom_80.each do |pid, sum|
-      prod = Product.find(pid)
-      spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
-      spec_class.delete(spec) unless spec.nil?
-    end
-    res_specs
-  end
-end
-
-class RuleComingSoon < Customization
-  @feature_name = 'comingSoon'
-  @needed_features = [{CatSpec => 'preorderReleaseDate'}]
-  @product_type = 'FDepartments'
-  @rule_type = 'Binary'
-  
-  def RuleComingSoon.compute_feature(values, pid)
-    preoder_val = values[0]
-    return nil if preoder_val == nil
-    derived_value = (Date.parse(preoder_val) - Date.today > 0)
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
-    spec = nil
-    if derived_value == false
-      spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
-      spec_class.delete(spec) unless spec.nil?
-    else
-      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
-      spec.value = derived_value
-    end
-    spec
-  end
-end
-
-class RuleNew < Customization
-  @feature_name = 'isNew'
-  @product_type = 'FDepartments'
-  @needed_features = [{CatSpec => 'displayDate'}, {CatSpec => 'preorderReleaseDate'}]
-  @rule_type = 'Binary'
-
-  def RuleNew.compute_feature(values, pid)
-    # assumption: the values are in the same order as the needed_features, but this doesn't matter for this rule
-    # if either of the values (dates) are within 30 days of today, make a spec with a true value
-    derived_value = values.inject(false) { |result,val| result or val.nil? ? false : (Date.today >= Date.parse(val) and Date.today - Date.parse(val) <= 30) }
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
-    spec = nil
-    if derived_value == false
-      spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
-      spec_class.delete(spec) unless spec.nil?
-    else
-      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
-      spec.value = derived_value
-    end
-    spec
-  end
-end
-
-class RuleOnSale < Customization
-  @feature_name = 'onsale'
-  @product_type = 'FDepartments'
-  @needed_features = [{CatSpec => 'saleEndDate'}]
-  @rule_type = 'Binary'
-  
-  def RuleOnSale.compute_feature(values, pid)
-    val = values[0]
-    return nil if val == nil
-    # FIXME: don't we want when sale ends today, to still be on sale? used to be:
-    # derived_value = (Time.parse(val) - 4.hours) > Time.now
-    derived_value = (Date.parse(val) - Date.today >= 0)
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
-    spec = nil
-    
-    if derived_value == false
-      spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
-      spec_class.delete(spec) unless spec.nil?
-    else
-      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
-      spec.value = derived_value
-    end
-    spec
-  end
-end
-

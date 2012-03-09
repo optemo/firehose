@@ -118,7 +118,6 @@ class Product < ActiveRecord::Base
   end
   
   def self.compute_custom_specs(bb_prods)
-    debugger
     custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
