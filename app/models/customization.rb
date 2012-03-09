@@ -1,3 +1,5 @@
+# TODO: add the capability for a subclass of customization to be set for several product_types
+# right now setting it on the topmost FutureShop category
 
 class Customization
   class << self 
@@ -30,7 +32,8 @@ class Customization
     end
   end
   
-  def Customization.compute_specs(skus)
+  def Customization.compute_specs(pids)
+    debugger
     # get all the customizations applicable to this product_type
     product_type = Session.product_type
     rules = Customization.find_all_by_product_type(Session.product_type_path)
@@ -38,26 +41,20 @@ class Customization
     # execute each of the rules
     rules.each do |rule|
       if rule == RuleBestSeller
-        rule_results = RuleBestSeller.group_computation(skus)
+        rule_results = RuleBestSeller.group_computation(pids)
       else
         spec_features = rule.needed_features
         #spec_features = Customization.get_needed_features(rule.needed_features)
         rule_results = []
         # if an sku doesn't have a required spec value in the table, passing nil value to feature computation
-        skus.each do |sku|
-          # find the product id for this sku
-          prod = Product.find_by_sku(sku)
-          if prod.nil?
-            raise 'SKU ' + sku + ' not found in Products'
-          end
-          pid = prod.id
+        pids.each do |pid|
           values = []
           spec_features.each do |spec_feature|
             table_name = spec_feature.keys[0]
             feature_name = spec_feature.values[0]
             # This is only for DailySpecs orders
             if table_name == DailySpec
-              spec_row = table_name.find_by_sku_and_name(sku, feature_name)
+              spec_row = table_name.find_by_sku_and_name(Product.find(pid).sku, feature_name)
             else
               spec_row = table_name.find_by_product_id_and_name(pid, feature_name)
             end
@@ -72,55 +69,55 @@ class Customization
           rule_results += [spec] unless spec.nil?
         end
       end
-      
       unless rule_results.empty?
         spec_class = rule_results[0].class
         results
         results.has_key?(spec_class) ? results[spec_class] += rule_results : results[spec_class] = rule_results
       end
     end
-    # debugger
+    debugger
     results
   end
 end
 
 class RuleBestSeller < Customization
   @feature_name = 'bestseller'
-  @product_type = 'F1127'
+  @product_type = 'FDepartments'
   @needed_features = [{DailySpec => 'orders'}]
   @rule_type = 'Binary'
 
-  def RuleBestSeller.group_computation(skus)
+  def RuleBestSeller.group_computation(pids)
     today = Date.today # getting the weekday today
-    lastFriday = Date.today - (Date.today.wday - 5) # getting the date of the last friday, including today if friday
+    lastFriday = Date.today - ((Date.today.wday - 5) % 7) # getting the date of the last friday, including today if friday
+    
     weekly_orders = {}
     res_specs = []
-    
-    # get all the dates between today and last friday, including today and including last Friday
-    # have a hash of sku->week_orders which stores the sum
-    # the dates were changed here for testing
-    
     set = DailySpec.where(:name => 'orders', :date => (lastFriday..today)) # this set is inclusive!
-    skus.each do |sku|
-      raise 'attempting to re-add sku' unless weekly_orders[sku].nil?
-      weekly_orders[sku] = set.where(:sku => sku).inject(0) {|sum, spec| sum += spec.value_flt}
+    pids.each do |pid|
+      prod = Product.find(pid) # will raise 
+      raise 'attempting to re-add pid' unless weekly_orders[pid].nil?
+      weekly_orders[pid] = set.where(:sku => prod.sku).inject(0) {|sum, spec| sum += spec.value_flt}
     end
     
-    sorted_orders = weekly_orders.sort_by {|sku, sum| sum}
+    sorted_orders = weekly_orders.sort_by {|pid, sum| sum}
     sorted_orders.reverse!
     
     index = (sorted_orders.count * 0.2).to_i
     threshold = sorted_orders[index][1]
-    top_20 = sorted_orders.select{|sku,val| val >= threshold}
+    
+    top_20 = sorted_orders.select{|pid,val| (val >= threshold and val > 0)}
+    bottom_80 = sorted_orders.select{|pid,val| (val < threshold or val == 0)}
     spec_class = Customization.rule_type_to_class(@rule_type)
     
-    top_20.each do |sku, sum|
-      prod = Product.find_by_sku(sku)
-      unless prod.nil?
-        spec = spec_class.find_or_initialize_by_product_id_and_name(prod.id, @feature_name)
-        spec.value = 1
-        res_specs += [spec]
-      end
+    top_20.each do |pid, sum|
+      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
+      spec.value = 1
+      res_specs += [spec]
+    end
+    bottom_80.each do |pid, sum|
+      prod = Product.find(pid)
+      spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
+      spec_class.delete(spec) unless spec.nil?
     end
     res_specs
   end
@@ -129,7 +126,7 @@ end
 class RuleComingSoon < Customization
   @feature_name = 'comingSoon'
   @needed_features = [{CatSpec => 'preorderReleaseDate'}]
-  @product_type = 'F1127'
+  @product_type = 'FDepartments'
   @rule_type = 'Binary'
   
   def RuleComingSoon.compute_feature(values, pid)
@@ -152,7 +149,7 @@ end
 
 class RuleNew < Customization
   @feature_name = 'isNew'
-  @product_type = 'F1127'
+  @product_type = 'FDepartments'
   @needed_features = [{CatSpec => 'displayDate'}, {CatSpec => 'preorderReleaseDate'}]
   @rule_type = 'Binary'
 
@@ -176,10 +173,10 @@ end
 
 class RuleOnSale < Customization
   @feature_name = 'onsale'
-  @product_type = 'F1127'
+  @product_type = 'FDepartments'
   @needed_features = [{CatSpec => 'saleEndDate'}]
   @rule_type = 'Binary'
-
+  
   def RuleOnSale.compute_feature(values, pid)
     val = values[0]
     return nil if val == nil
@@ -189,6 +186,7 @@ class RuleOnSale < Customization
     spec_class = Customization.rule_type_to_class(@rule_type)
     # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
     spec = nil
+    
     if derived_value == false
       spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
       spec_class.delete(spec) unless spec.nil?

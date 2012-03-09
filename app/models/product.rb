@@ -108,7 +108,7 @@ class Product < ActiveRecord::Base
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
-    Product.compute_custom_specs(product_skus)
+    Product.compute_custom_specs(Product.current_type)
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
@@ -118,6 +118,7 @@ class Product < ActiveRecord::Base
   end
   
   def self.compute_custom_specs(bb_prods)
+    debugger
     custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
