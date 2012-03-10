@@ -2,7 +2,7 @@ set :application, "firehose"
 set :repository,  "git@jaguar:firehose.git"
 set :domain, "linode"
 set :branch, "master"
-set :user, "#{ `whoami`.chomp }"
+set :user, "#{ `whoami`.chomp.downcase }"
 
 # If you aren't deploying to /u/apps/#{application} on the target
 # servers (which is the default), you can specify the actual location
