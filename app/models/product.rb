@@ -35,28 +35,47 @@ class Product < ActiveRecord::Base
       retry
     end
     #product_skus.uniq!{|a|a.id} #Uniqueness check
-
+    
     products_to_update = {}
     products_to_save = {}
     specs_to_save = {}
     specs_to_delete = []
     
-    #Reset the instock flags
-    Product.current_type.find_each do |p|
-      p.instock = false
-      products_to_update[p.sku] = p
-    end
-
-    product_skus.each do |bb_product|
-      unless products_to_update[bb_product.id]
-        products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false
-      end
-    end
-    
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
     candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
+    
+    # before putting a product into products_to_update vs products_to_save, check whether it is in the products table
+    # and has a different catspec
+    all_products_from_retailer = Product.joins(:cat_specs).where(cat_specs: {name: "product_type"}, products: {retailer: Session.retailer})    
+    
+    all_products_from_retailer.find_each do |p|
+      type_spec = p.cat_specs.where(name: "product_type").first
+      if Session.product_type_leaves.include? type_spec.value
+        p.instock = false
+        p.retailer = Session.retailer
+        products_to_update[p.sku] = p
+      else
+        unless all_products_from_retailer.find_by_sku(p.sku).nil?
+          p.retailer = Session.retailer
+          p.instock = false
+          products_to_update[p.sku] = p
+        end
+      end
+    end
+    
+    #Reset the instock flags
+    # Product.current_type.find_each do |p|
+    #   p.instock = false
+    #   products_to_update[p.sku] = p
+    # end
+    
+    product_skus.each do |bb_product|
+      unless products_to_update[bb_product.id]
+        products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
+      end
+    end
     
     candidates.each do |candidate|
       spec_class = case candidate.model
@@ -66,8 +85,7 @@ class Product < ActiveRecord::Base
         when "Text" then TextSpec
         else CatSpec # This should never happen
       end
-      #p = products_to_save[candidate.sku] || 
-      debugger if (candidate.parsed.nil? && !candidate.delinquent)
+      raise ValidationError, "Failed to set candidate as delinquent" if (candidate.parsed.nil? && !candidate.delinquent)
       
       if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
@@ -77,7 +95,12 @@ class Product < ActiveRecord::Base
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
-          spec = spec_class.find_or_initialize_by_product_id_and_name(p.id,candidate.name)
+          # check here whether a spec with product_type exists
+          if candidate.name == "product_type"
+            spec = spec_class.find_or_initialize_by_product_id_and_name_and_value(p.id, candidate.name, candidate.parsed)
+          else
+            spec = spec_class.find_or_initialize_by_product_id_and_name(p.id, candidate.name)
+          end
           spec.value = candidate.parsed
           specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
         elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
