@@ -3,7 +3,7 @@ module AccessoriesHelper
   # Returns accessories for a given product
   def get_accessories (product)
     acc = {}
-    total_purchases = Accessory.where("`accessories`.`product_id` = #{product.id} AND `accessories`.`name` = 'accessory_type'").sum("count")
+    total_purchases = product.total_acc_sales
     acc["Top #{@accessories_per_product_type}"] = [total_purchases,Accessory.select("value,count").where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type)]
     leaves_included = []
     Accessory.select("value,count").where(:name => "accessory_type", :product_id => product.id).order("count DESC").limit(@accessory_types_per_bestselling).each do |cat|
@@ -49,6 +49,7 @@ module AccessoriesHelper
   # Gets the top n accessories, limiting the number of times products from a category show up
   def get_top_limited (product)
     product_accessories = []
+    backup_accessories = []
     cats_included = {}
     sales_needed = product.total_acc_sales*@top_n_limit_percent
     accessories = Accessory.where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type*5)
@@ -57,15 +58,32 @@ module AccessoriesHelper
         cats_included[accessory.acc_type] = 0
       end
     end
+    
     accessories.each do |accessory|
       if product_accessories.length < @accessories_per_product_type
-        if accessory.count >= sales_needed && cats_included[accessory.acc_type] < @top_n_limit_number
-          product_accessories.push(accessory)
-          cats_included[accessory.acc_type] += 1
+        if accessory.count >= sales_needed 
+          if cats_included[accessory.acc_type] < @top_n_limit_number
+            product_accessories.push(accessory)
+            cats_included[accessory.acc_type] += 1
+          elsif backup_accessories.length < @accessories_per_product_type
+            backup_accessories.push(accessory)
+          end
         end
       end
     end
-    product_accessories
+    if product_accessories.length < @accessories_per_product_type
+      backup_accessories.each do |accessory|
+        if product_accessories.length < @accessories_per_product_type
+          if accessory.count >= sales_needed 
+            if cats_included[accessory.acc_type] < @top_n_limit_number+1
+              product_accessories.push(accessory)
+              cats_included[accessory.acc_type] += 1
+            end
+          end
+        end
+      end
+    end
+    product_accessories.sort_by{|acc| acc.count}.reverse
   end
   
   def get_cats_and_counts (product)

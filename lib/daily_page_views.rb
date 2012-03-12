@@ -1,12 +1,13 @@
-def save_daily_sales
+def save_daily_pageviews
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
-  imap.login('auto@optemo.com', '***REMOVED***') 
-  imap.select('Inbox') 
-  only_last=true    #only process the last email
+  imap.login('files@optemo.com', '***REMOVED***') 
+  imap.select('INBOX') 
+  only_last=false    #only process the last email
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "9-Sep-2011","BEFORE", "19-Feb-2012"])
+  # Oct 29, 2011 is the earliset date for page views
+  msgs = imap.search(["SINCE", "29-Jan-2012","BEFORE", "30-Jan-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -21,7 +22,7 @@ def save_daily_sales
         next unless body.parts[i-1].media_type == "APPLICATION"
         then_date = Date.parse(msg.attr["ENVELOPE"].date)
         #then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
+        cName = "#{Rails.root}/tmp/pageviews-#{then_date}.zip" 
         
   # fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
@@ -34,7 +35,7 @@ def save_daily_sales
         csvfile = ""
         Zip::ZipFile.open(cName) do |zip_file|
            zip_file.each do |f|
-             f_path=File.join("#{Rails.root}/tmp/", f.name)
+             f_path=File.join("#{Rails.root}/tmp/pageviews/", f.name)
              csvfile = f_path
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
@@ -49,43 +50,28 @@ def save_daily_sales
           weekly=true
         end
         
-        orders_map = {} # map of sku => orders
-        
         unless csvfile.blank? || weekly
           
           #### THIS DOES THE PROCESSING OF THE CSV FILE
-          orders_map = {} # map of sku => orders
+          views_map = {} # map of sku => views
           
           File.open(csvfile, 'r') do |f|
             f.each do |line|
-              /\d+\.,,(?<sku>[^,]+),,(?<rev>"?\$\d+(,\d+)?"?),,,,[^,]+,,(?<orders>\d+)/ =~ line
-              orders_map[sku] = orders if sku
+              /\d+\.,,(?<sku>[^,N]{8}),,"?(?<views>\d+(,\d+)*)"?.+/ =~ line
+              views_map[sku] = views if sku
             end
           end
-          # Only select the products that have some existing spec in the daily spec table for that day
-          # For addition to DailySpec  
-       #   products = DailySpec.where(:date => then_date.prev_day().strftime("%Y-%m-%d")).select("DISTINCT(sku)")
-       #   products.each do |prod_sku|
-       #     sku = prod_sku.sku
-       #     product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-       #     orders_spec = orders_map[sku]
-       #     orders = (orders_spec.nil?) ? "0" : orders_spec
-       #     # write orders to daily_sales for the date and the sku
-       #     ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "orders", :value_flt => orders, :product_type => product_type, :date => then_date.prev_day().strftime("%Y-%m-%d"))
-       #     ds.save
-       #   end
-          
-          # For addition to AllDailySpec
           date = then_date.prev_day().strftime("%Y-%m-%d")
-          products = AllDailySpec.where(:date => date).select("DISTINCT(sku)")
-          products.each do |prod|
-            sku = prod.sku
-            product_type = AllDailySpec.find_by_sku_and_date(sku, date).product_type
-            orders_spec = orders_map[sku].delete!(',') # Not so much an issue here
-            orders = (orders_spec.nil?) ? "0" : orders_spec
-            # write orders to daily_sales for the date and the sku
-            ds = AllDailySpec.find_or_initialize_by_sku_and_name_and_date(sku,'online_orders',date)
-            ds.update_attributes(:spec_type => "cont", :value_flt => orders, :product_type => product_type)
+          #only select the products that have some existing spec in the daily spec table for that day
+          products = DailySpec.where(:date => date).select("DISTINCT(sku)")
+          products.each do |prod_sku|
+            sku = prod_sku.sku
+            product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+            views_spec = views_map[sku]
+            views = (views_spec.nil?) ? "0" : views_spec.delete(',') # Otherwise to_i will only return characters before first comma
+            # write views to daily_sales for the date and the sku
+            ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "pageviews", :value_flt => views, :product_type => product_type, :date => date)
+            ds.save
           end
         end
   # ******************************************
