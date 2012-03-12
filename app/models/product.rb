@@ -46,34 +46,30 @@ class Product < ActiveRecord::Base
     candidates = ScrapingRule.scrape(product_skus,false,[],false)
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     
-    # before putting a product into products_to_update vs products_to_save, check whether it is in the products table
-    # and has a different catspec
-    all_products_from_retailer = Product.joins(:cat_specs).where(cat_specs: {name: "product_type"}, products: {retailer: Session.retailer})    
-    
-    all_products_from_retailer.find_each do |p|
-      type_spec = p.cat_specs.where(name: "product_type").first
-      if Session.product_type_leaves.include? type_spec.value
-        p.instock = false
-        p.retailer = Session.retailer
-        products_to_update[p.sku] = p
-      else
-        unless all_products_from_retailer.find_by_sku(p.sku).nil?
-          p.retailer = Session.retailer
-          p.instock = false
-          products_to_update[p.sku] = p
-        end
-      end
+    # Reset the instock flags
+    Product.current_type.find_each do |p|
+      p.instock = false
+      products_to_update[p.sku] = p
     end
     
-    #Reset the instock flags
-    # Product.current_type.find_each do |p|
-    #   p.instock = false
-    #   products_to_update[p.sku] = p
-    # end
-    
+    all_products_from_retailer = Product.joins(:cat_specs).where(cat_specs: {name: "product_type"}, products: {retailer: Session.retailer})
     product_skus.each do |bb_product|
-      unless products_to_update[bb_product.id]
-        products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
+      # before putting a product into products_to_save, check whether it is in the products table and has a different category
+      sku = bb_product.id
+      existing_product = products_to_update[sku]
+      if existing_product.nil?
+        same_sku_products = all_products_from_retailer.where(:sku => sku)
+        unless same_sku_products.empty?
+          same_sku_different_product_type = same_sku_products.first.cat_specs.where('name = ? AND value NOT IN (?)', "product_type", Session.product_type_leaves)
+          unless same_sku_different_product_type.empty?
+            puts sku + ' is an SKU that was found to be under two different product categories'
+            products_to_update[bb_product.id] = same_sku_different_product_type
+          else
+            products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
+          end
+        else
+          products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
+        end
       end
     end
     
@@ -93,6 +89,7 @@ class Product < ActiveRecord::Base
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
         specs_to_delete << spec if spec && !spec.modified
       else
+        raise ValidationError, "Parsed value should not be false " if (candidate.parsed == "false" && spec_class == BinSpec)
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
