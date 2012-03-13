@@ -233,11 +233,11 @@ class Product < ActiveRecord::Base
   end
   
   def store_sales
-    cont_specs.find_by_name("sum_store_sales").try(:value)
+    cont_specs.find_by_name("bestseller_store_sales").try(:value)
   end
   
   def total_acc_sales
-    Accessory.where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_type'").sum("count")
+    Accessory.select(:count).where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_sales_total'").first.count
   end
   
   

@@ -4,10 +4,11 @@ class AccessoriesController < ApplicationController
   # Instance variables are initialized here. Change the number of accessories per product... here
   def initialize_constants
     @number_of_products = 5 # Number of products (bestselling) displayed for the categories wanted
+      # Must be less than the NUM_PRODUCTS value in 'update_store_sales.rake'
     @accessories_per_product_type = 10
     @accessory_types_per_bestselling = 5
     @top_n_limit_number = 2 # Number of items that can come from the same leaf node
-    @top_n_limit_percent = 0.005 # Percentage of total accessory sales for product an accessory needs to be included in Top N
+    @top_n_limit_percent = 0.007 # Percentage of total accessory sales for product an accessory needs to be included in Top N
     @selling_threshold = 10 # Number of sales the last item in a leaf node's display (top ten sold) must 
       #have in order for the leaf node to remain its own category (otherwise the category is bumped to its parent)
   end
@@ -71,7 +72,7 @@ class AccessoriesController < ApplicationController
     end
     cat_ids.each_pair do |cat,leaves|  # Cycle through the leaf nodes wanted
       p_ids = []  
-      ids[cat] = Product.joins("INNER JOIN `cat_specs` ON `products`.id = `cat_specs`.product_id").joins("INNER JOIN `cont_specs` ON `products`.id = `cont_specs`.product_id").where(cat_specs: {name:'product_type', value:leaves}, cont_specs: {name:'sum_store_sales'}).order("`cont_specs`.value DESC").limit(@number_of_products)
+      ids[cat] = Product.joins("INNER JOIN `cat_specs` ON `products`.id = `cat_specs`.product_id").joins("INNER JOIN `cont_specs` ON `products`.id = `cont_specs`.product_id").where(cat_specs: {name:'product_type', value:leaves}, cont_specs: {name:'bestseller_store_sales'}).order("`cont_specs`.value DESC").limit(@number_of_products)
     end
     ids
   end

@@ -20,8 +20,10 @@ task :import_daily_factors => :environment do
 end
 
 def import_data(raw)
-  directory = "/mysql_backup/slicehost"
-  #directory = "/Users/Monir/optemo/mysql_backup"
+  #for local runs (change to own directory)
+  #directory = "/optemo/snapshots/slicehost"
+  #for runs on jaguar
+  directory = "/mysql_backup/slicehost/linode"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|

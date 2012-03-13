@@ -1,3 +1,4 @@
+NUM_PRODUCTS = 20
 #                               Product Type ID (can be parent or leaf)
 #                                                   |
 #example call: bundle exec rake find_bestselling["B29361"","20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
@@ -16,7 +17,6 @@ task :update_store_sales, [:product_type, :start_date, :end_date, :directory] =>
   Session.new(args.product_type)
   debugger
   update_store_sales(Session.product_type_leaves, store, start_date, end_date, args.directory)
-
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
@@ -32,7 +32,7 @@ def update_store_sales (product_types, store, start_date, end_date, directory)
   skus.each do |product|
     prods[product.sku] = [product.product_id, 0]
   end
-  debugger
+
   Dir.foreach(directory) do |file|
     #only process bestbuy/futureshop data files
     if file =~ /#{store}_\d{8}_\d{8}\.csv/
@@ -68,11 +68,12 @@ def update_store_sales (product_types, store, start_date, end_date, directory)
     end
   end
   
+  # May eventually need to add function to erase old sales/sales of items that no longer exist or are not in category
   # Create or update a row in ContSpec for sum of instore sales for a product
-  prods.each do |product|
+  prods.sort_by{|sku,value| value[1]}.reverse.first(NUM_PRODUCTS).each do |product|
     p_id = product[1][0]
     sales = product[1][1]
-    row = ContSpec.find_or_create_by_product_id_and_name(p_id,"sum_store_sales")
+    row = ContSpec.find_or_create_by_product_id_and_name(p_id,"bestseller_store_sales")
     row.update_attributes(:value => sales)
   end
   
