@@ -10,6 +10,9 @@ task :import_daily_attributes => :environment do
   import_data(raw)
 end
 
+task :import_coeffs => :environment do
+ insert_regression_coefficient
+end
 task :import_daily_factors => :environment do
   # get historical factors data and write to daily specs
   raw = false
@@ -267,6 +270,21 @@ def write_instock_skus_into_file(produtct_type= "camera_bestbuy")
     out_file.write(line.join(" ")+"\n")
   end
 end
+
+def insert_regression_coefficient
+  data_path =  "/Users/Monir/optemo/data_analysis/Outputs&Inputs/"
+  fname = "camera_bestbuy_lr_coeffs.txt"
+  product_type= "B20218"
+  f = File.open(data_path + fname, 'r')
+  lines = f.readlines
+  coeffs =[]
+  lines.each do |line|
+      a = line.split
+      puts "#{a[0]} #{a[1]}"
+      coeffs << Facet.new(name: a[0].to_str, feature_type: "Continuous", used_for: "utility", value: a[1].to_f, active: 1, product_type: product_type)     
+  end
+  Facet.import coeffs
+end
 #ORIGINAL CODE
 #def analyze_daily_raw_specs
 #  product_type = "camera_bestbuy"
@@ -391,14 +409,14 @@ end
 #  return specs
 #end
 
-def add_daily_spec(sku, spec_type, name, value, product_type, date)
-  case spec_type
-  when "cont"
-    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_flt => value, :product_type => product_type, :date => date)
-  when "cat"
-    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_txt => value, :product_type => product_type, :date => date)
-  when "bin"
-    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_bin => value, :product_type => product_type, :date => date)
-  end
-  ds.save
-end
+#def add_daily_spec(sku, spec_type, name, value, product_type, date)
+#  case spec_type
+#  when "cont"
+#    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_flt => value, :product_type => product_type, :date => date)
+#  when "cat"
+#    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_txt => value, :product_type => product_type, :date => date)
+#  when "bin"
+#    ds = AllDailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_bin => value, :product_type => product_type, :date => date)
+#  end
+#  ds.save
+#end

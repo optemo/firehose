@@ -221,4 +221,16 @@ class CustomizationTest < ActiveSupport::TestCase
     inexistant_pid = p6.id*100+1
     assert_raise(ActiveRecord::RecordNotFound) { RuleBestSeller.group_computation([inexistant_pid])}
   end
+  test "Rule Utility" do
+    p1 = create(:product, sku: 901)
+    #p2 = create(:product, sku: 902)
+    
+    create(:cat_spec, product_id: p1.id, name: "brand", value: "NIKON")
+    create(:bin_spec, product_id: p1.id, name: "hdmi", value: 1)
+    create(:cont_spec, product_id: p1.id, name: "customerRating", value: 4)
+    create(:facet, name: "brand_NIKON", feature_type: "Continuous", used_for: "utility", value: 0.4, product_type: "B20218")
+    create(:facet, name: "hdmi", feature_type: "Continuous", used_for: "utility", value: -1.3, product_type: "B20218")
+    create(:facet, name: "customerRating", feature_type: "Continuous", used_for: "utility", value: 0.3, product_type: "B20218")
+    assert RuleUtility.compute_feature(p1.id)
+  end
 end
