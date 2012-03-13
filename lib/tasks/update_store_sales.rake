@@ -1,6 +1,4 @@
-
 NUM_PRODUCTS = 20
-
 #                               Product Type ID (can be parent or leaf)
 #                                                   |
 #example call: bundle exec rake find_bestselling["B29361"","20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
@@ -19,7 +17,6 @@ task :update_store_sales, [:product_type, :start_date, :end_date, :directory] =>
   Session.new(args.product_type)
   debugger
   update_store_sales(Session.product_type_leaves, store, start_date, end_date, args.directory)
-
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
@@ -35,7 +32,7 @@ def update_store_sales (product_types, store, start_date, end_date, directory)
   skus.each do |product|
     prods[product.sku] = [product.product_id, 0]
   end
-  
+
   Dir.foreach(directory) do |file|
     #only process bestbuy/futureshop data files
     if file =~ /#{store}_\d{8}_\d{8}\.csv/

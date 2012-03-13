@@ -71,6 +71,7 @@ module AccessoriesHelper
         end
       end
     end
+    # If there aren't N products in the top-N, boost the limit number to try to fill it in more
     if product_accessories.length < @accessories_per_product_type
       backup_accessories.each do |accessory|
         if product_accessories.length < @accessories_per_product_type
@@ -93,7 +94,7 @@ module AccessoriesHelper
   
   
   #still working on this
-  
+  #Maybe don't need this with the check in get_accessories
   def get_accessory_parents (product)
     parent_nodes = {}
     accessory_types = Accessory.select("value,count").where(:name=>"accessory_type",:product_id=>product.id)
