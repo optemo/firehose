@@ -25,10 +25,6 @@ class Session
     end
   end
   
-  def self.product_type_branch
-    ProductCategory.get_ancestors(product_type)+[product_type]+ProductCategory.get_children(product_type)
-  end
-  
   def self.product_type_path
     ancestors = ProductCategory.get_ancestors(product_type)
     ancestors = [] if ancestors.nil?

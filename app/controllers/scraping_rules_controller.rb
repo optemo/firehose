@@ -57,25 +57,31 @@ class ScrapingRulesController < ApplicationController
     respond_to {|format| format.html { head :ok }}
   end
 
-  def create
+  def create    
     # Creates a new scraping rule.
     # There are four kinds of rules: continuous, binary, categorical, and intrinsic.
     # The first three kinds end up being specs bound to the product, e.g. ContSpec, 
     # while the last kind of rule inserts values directly into the product row.
     @scraping_rule = ScrapingRule.new(params[:scraping_rule])
-    @scraping_rule.product_type = Session.product_type
-    # For priority, find all the scraping rules that share that local featurename (for that product type)
-    potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.product_type)
-    # If there are any, get the highest priority and increment it for the new rule.
-    # This gives all new rules a lower priority (lower priority number means higher priority).
-    unless potential_previous_scraping_rules.empty?
-      @scraping_rule.priority = (potential_previous_scraping_rules.map(&:priority).max + 1)
-    end
-
-    respond_to do |format|
-      if @scraping_rule.save
-        format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
-      else
+    if ScrapingRule.find_all_by_product_type_and_local_featurename(ProductCategory.get_ancestors(Session.product_type), @scraping_rule.local_featurename).empty?
+      @scraping_rule.product_type = Session.product_type
+      # For priority, find all the scraping rules that share that local featurename (for that product type)
+      potential_previous_scraping_rules = ScrapingRule.find_all_by_local_featurename_and_product_type(@scraping_rule.local_featurename, Session.product_type)
+      # If there are any, get the highest priority and increment it for the new rule.
+      # This gives all new rules a lower priority (lower priority number means higher priority).
+      unless potential_previous_scraping_rules.empty?
+        @scraping_rule.priority = (potential_previous_scraping_rules.map(&:priority).max + 1)
+      end
+      respond_to do |format|
+        if @scraping_rule.save
+          format.html { render text: "[REDIRECT]#{ product_type_scraping_rules_url(Session.product_type) }" }
+        else
+          format.html { head :bad_request }
+        end
+      end
+    else
+      # error
+      respond_to do |format|
         format.html { head :bad_request }
       end
     end

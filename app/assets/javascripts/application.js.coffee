@@ -209,7 +209,7 @@ $(document).ready ->
               removeSilkScreen()
         error: ->
           removeSilkScreen()
-          alert_substitute("There is an error in the fields")
+          alert_substitute("Error in adding rule")
     return false
 
   alert_substitute = (msg) ->

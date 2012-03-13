@@ -40,7 +40,6 @@ class Customization
         rule_results = RuleBestSeller.group_computation(pids)
       else
         spec_features = rule.needed_features
-        debugger
         #spec_features = Customization.get_needed_features(rule.needed_features)
         rule_results = []
         # if an sku doesn't have a required spec value in the table, passing nil value to feature computation

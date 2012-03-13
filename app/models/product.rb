@@ -82,13 +82,12 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       raise ValidationError, "Failed to set candidate as delinquent" if (candidate.parsed.nil? && !candidate.delinquent)
-      
       if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
         specs_to_delete << spec if spec && !spec.modified
       else
-        raise ValidationError, "Parsed value should not be false " if (candidate.parsed == "false" && spec_class == BinSpec)
+        raise ValidationError, ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
@@ -135,13 +134,6 @@ class Product < ActiveRecord::Base
       Rails.cache.clear
     rescue Dalli::NetworkError
       puts "Memcache not available"
-    end
-  end
-  
-  def self.compute_custom_specs(bb_prods)
-    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
-    custom_specs_to_save.each do |spec_class, spec_values|
-      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
     end
   end
   
