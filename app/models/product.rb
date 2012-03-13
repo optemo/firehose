@@ -63,7 +63,7 @@ class Product < ActiveRecord::Base
           same_sku_different_product_type = same_sku_products.first.cat_specs.where('name = ? AND value NOT IN (?)', "product_type", Session.product_type_leaves)
           unless same_sku_different_product_type.empty?
             puts sku + ' is an SKU that was found to be under two different product categories'
-            products_to_update[bb_product.id] = same_sku_different_product_type
+            products_to_update[bb_product.id] = Product.find(same_sku_different_product_type.first.product_id)
           else
             products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
           end

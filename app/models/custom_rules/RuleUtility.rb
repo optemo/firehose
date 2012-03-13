@@ -1,9 +1,9 @@
 class RuleUtility < Customization
   @feature_name = 'utility'
-  @product_type = ['B20218']
+  @product_type = ['xx']
   @rule_type = 'Continuous'
   
-  def RuleUtility.compute_feature(pids)
+  def RuleUtility.compute_feature(values = [], pids)
     
       cont_activerecords = [] # For bulk insert/update
       records = {}
