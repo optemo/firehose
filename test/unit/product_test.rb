@@ -82,6 +82,15 @@ class ProductTest < ActiveSupport::TestCase
     assert_match /\d+(\.\d+)?/, Product.first.cont_specs.first.try(:value).to_s, "Prices are actually recorded correctly"
   end
   
+  test "Product and spec update for special SKUs" do
+    # feed_update again on skus which already exists in the products table and is for the proper retailer and product category
+    # TODO: Product.feed_update twice, but with the products
+    sr = create(:scraping_rule, local_featurename: 'product_type', remote_featurename: 'category_id', rule_type: "Categorical", regex: "(.*)/B\1")
+    Product.feed_update
+    Product.feed_update
+    assert_equal 21, Product.count, "should have the same number of products after re-running the feed update with an unchanged feed"
+  end
+  
   test "Get Rules" do
     sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
     myrules = ScrapingRule.get_rules([],false)
