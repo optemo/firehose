@@ -74,6 +74,7 @@ class Product < ActiveRecord::Base
     end
     
     candidates.each do |candidate|
+      debugger if candidate.sku == 10162174
       spec_class = case candidate.model
         when "Categorical" then CatSpec
         when "Continuous" then ContSpec

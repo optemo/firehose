@@ -1,3 +1,15 @@
+#***********Choose task to carry through***********#
+task :analyze_bestbuy_data => :environment do
+  #bb_multiple_same_items_same_purchase()
+  #diff_store_ids()
+  #find_zeroes()
+  #unique_purchase_ids()
+  #count_lines()
+  #find_out_of_month_sales()
+  #find_sku_length(7)
+  in_month_vs_out_of_month_sales()
+end
+
 #************************************************#
 #****************SET FILE TO TEST****************#
 #************************************************#
@@ -65,8 +77,7 @@ def bb_multiple_same_items_same_purchase
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Twin Item Purchases: "+ count.to_s() + "\n\n"
-  # debugger
-  "The Data is available in the 'multi_item_purchases' hash in the function. Otherwise, quit debugger (q)"
+  "The Data is available in the 'multi_item_purchases' hash in the function."
 end
 
 # Searches a BestBuy/FutureShop file and extracts the unique store ids
@@ -96,8 +107,7 @@ def diff_store_ids
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Stores: "+store_ids.size().to_s()
-  
-  "The data is available in the 'store_ids' array in the function. Otherwise, quit debugger (q)" 
+  "The data is available in the 'store_ids' array in the function." 
 end
 
 # Function finds all purchases in file that have 0 as the sale price
@@ -126,8 +136,7 @@ def find_zeroes
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Invalid Sales: "+ zero_price_purchases.length().to_s()
-  
-  "The Data is available in the 'zero_price_purchases' array in the function. Otherwise, quit debugger (q)"
+  "The Data is available in the 'zero_price_purchases' array in the function."
 end
 
 # Finds all unique purchase ids. Assumes that no purchase id can be used non-consecutively (unique to a single purchase)
@@ -157,8 +166,7 @@ def unique_purchase_ids
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Separate Sales: "+ purchase_ids.length().to_s()
-  
-  "The Data is available in the 'purchase_ids' array in the function. Otherwise, quit debugger (q)"
+  "The Data is available in the 'purchase_ids' array in the function."
 end
 #Displays the number of lines in the file. This corresponds to the number of transactions completed. A transaction here 
 #is considered as buying one or many of the same product (this counts as one transaction). Combined purchases are considered
@@ -185,7 +193,6 @@ def count_lines()
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Different Products Sold: "+ count.to_s()+"\n"
 end
-
 
 def find_out_of_month_sales
   previous_sales = {}
@@ -218,8 +225,7 @@ def find_out_of_month_sales
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Separate, Out of Month Sales: #{count}"
-  
-  "The Data is available in the 'previous_sales' hash in the function. Otherwise, quit debugger (q)"
+  "The Data is available in the 'previous_sales' hash in the function."
 end
 
 def find_sku_length (length)
@@ -245,6 +251,96 @@ def find_sku_length (length)
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of skus of length #{length}: #{count}"
+  "The Data is available in the 'wanted_skus' hash in the function."
+end
+
+def in_month_vs_out_of_month_sales() 
+  require 'date'
   
-  "The Data is available in the 'wanted_skus' hash in the function. Otherwise, quit debugger (q)"
+  csvfile = File.new(TESTFILE)
+  months_sales = {}
+  other_sales = {}
+  
+  file_dates = /(\d{8})_(\d{8})\.\w{2,3}$/.match(TESTFILE)
+  month = Date.strptime($1, '%Y%m%d')..Date.strptime($2, '%Y%m%d')
+  
+  File.open(csvfile, 'r') do |f|
+    f.each do |line|
+      m = /^[^0]\d+,\d+,(\d+),(-?\d+),\d+\.?\d*,(\d+).*/.match(line)
+      if m != nil
+        sku = $1
+        sales = $2
+        date = Date.strptime($3, '%Y%m%d')
+        #check if date falls within timeframe of file
+        if month === date
+          #create a new key value pair for the given date if it does not already exist
+          unless months_sales.key?(date)
+            months_sales[date] = Hash.new()
+          end
+          #if the given date already has the specified sku/sales number stored, add the new sales number to the previous one
+          if months_sales[date].key?(sku)
+            new_order = months_sales[date][sku].to_i() + sales.to_i()
+            months_sales[date].store(sku,new_order.to_s())
+          else  
+            months_sales[date].store(sku,sales)
+          end
+        else
+          unless other_sales.key?(date)                      #this is almost a repetition of the corresponding
+            other_sales[date] = Hash.new()                   # 'if' above. Is there some way to avoid this? 
+          end
+          if other_sales[date].key?(sku)
+            new_order = other_sales[date][sku].to_i() + sales.to_i()
+            other_sales[date].store(sku,new_order.to_s())
+          else  
+            other_sales[date].store(sku,sales)
+          end
+        end
+        
+      end
+    end
+  end 
+  
+  other_sales_number = count_products_sold(other_sales)
+  months_sales_number = count_products_sold(months_sales)
+  total = other_sales_number + months_sales_number
+  percent_other = 100.0*other_sales_number/total
+  percent_months = 100.0*months_sales_number/total
+  transactions = return_lines
+  
+  puts "File directory and name: #{TESTFILE}"
+  puts "Products sold outside file's timeframe (#{month}): #{other_sales_number}"
+  puts "Percentage of products sold outside of timeframe: #{percent_other}"
+  puts "Products sold within file's timeframe (#{month}): #{months_sales_number}"
+  puts "Percentage of products sold within timeframe: #{percent_months}"
+  puts "Total products sold in file: #{total}"
+  puts "\tThis means different products sold in a day, summed over the days in the file"
+  puts "Total transactions in file: #{transactions}"
+  puts "\tThis is the number of lines in the file that fit the online sale pattern"
+  puts "List of days in file not within timeframe: "+other_sales.keys.sort.to_s
+    
+end
+
+def count_products_sold (input_hash)
+  prods_sold = 0
+  input_hash.each_pair do |day,sales|
+    prods_sold += sales.length
+  end
+  return prods_sold
+end
+
+def return_lines 
+  count = 0
+  csvfile = File.new(TESTFILE)
+  
+  File.open(csvfile, 'r') do |f|
+    f.each do |line|
+       m = /^[^0]/.match(line)
+        # Only continue if line correctly parsed  
+        if /^[^0]/.match(line)      
+        #if m != nil
+          count += 1
+        end
+    end
+  end
+  return count
 end

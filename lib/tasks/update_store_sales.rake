@@ -1,11 +1,18 @@
 NUM_PRODUCTS = 20
+
 #                               Product Type ID (can be parent or leaf)
 #                                                   |
 #example call: bundle exec rake find_bestselling["B29361"","20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
-task :update_store_sales, [:product_type, :start_date, :end_date, :directory] => :environment do |t, args|
-  args.with_defaults(:start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
+
+# If give :do_all_products = true , will save sales for all products under store_sales. Otherwise only saves top NUM_PRODUCTS sales under bestseller_store_sales
+task :update_store_sales, [:product_type, :do_all_products, :start_date, :end_date, :directory] => :environment do |t, args|
+  args.with_defaults(:do_all_products=>"false", :start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
+  do_all_products = case args.do_all_products
+    when "true" then true
+    else false
+  end
   if args.product_type =~ /^[Bb]/
     store = 'B'
   elsif args.product_type =~ /^[Ff]/
@@ -15,13 +22,12 @@ task :update_store_sales, [:product_type, :start_date, :end_date, :directory] =>
   end
   # Get all leaf nodes within product_type specified
   Session.new(args.product_type)
-  debugger
-  update_store_sales(Session.product_type_leaves, store, start_date, end_date, args.directory)
+  update_store_sales(Session.product_type_leaves, do_all_products, store, start_date, end_date, args.directory)
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 
 # files sent by bestbuy (.csv), stores the daily sales in the all_daily_spec table (firehose_development)
-def update_store_sales (product_types, store, start_date, end_date, directory)
+def update_store_sales (product_types, do_all_products, store, start_date, end_date, directory)
   require 'date'
   ids = []
   prods = {}
@@ -70,11 +76,20 @@ def update_store_sales (product_types, store, start_date, end_date, directory)
   
   # May eventually need to add function to erase old sales/sales of items that no longer exist or are not in category
   # Create or update a row in ContSpec for sum of instore sales for a product
-  prods.sort_by{|sku,value| value[1]}.reverse.first(NUM_PRODUCTS).each do |product|
-    p_id = product[1][0]
-    sales = product[1][1]
-    row = ContSpec.find_or_create_by_product_id_and_name(p_id,"bestseller_store_sales")
-    row.update_attributes(:value => sales)
+  if do_all_products
+    prods.sort_by{|sku,value| value[1]}.reverse.each do |product|
+      p_id = product[1][0]
+      sales = product[1][1]
+      row = ContSpec.find_or_create_by_product_id_and_name(p_id,"store_sales")
+      row.update_attributes(:value => sales)
+    end
+  else
+    prods.sort_by{|sku,value| value[1]}.reverse.first(NUM_PRODUCTS).each do |product|
+      p_id = product[1][0]
+      sales = product[1][1]
+      row = ContSpec.find_or_create_by_product_id_and_name(p_id,"bestseller_store_sales")
+      row.update_attributes(:value => sales)
+    end
   end
   
   end_time = Time.now

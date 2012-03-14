@@ -34,7 +34,6 @@ task :recommended_products, [:product_type, :start_date, :end_date, :directory]=
     end
   end
   
-   # Just to check products are correct
   products.uniq!  # Remove bundle duplicates
   p "Best Selling Products: #{products}"
   find_recommendations(grouping_type, store, products, start_date, end_date, args.directory)

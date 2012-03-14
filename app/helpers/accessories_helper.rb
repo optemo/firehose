@@ -90,32 +90,5 @@ module AccessoriesHelper
   def get_cats_and_counts (product)
     types = Accessory.select("value,count").where(:name => "accessory_type", :product_id => product.id).order("count DESC").limit(@accessory_types_per_bestselling*2)
   end
-  
-  
-  
-  #still working on this
-  #Maybe don't need this with the check in get_accessories
-  def get_accessory_parents (product)
-    parent_nodes = {}
-    accessory_types = Accessory.select("value,count").where(:name=>"accessory_type",:product_id=>product.id)
-    accessory_types.each do |accessory_type|
-      acc_type = accessory_type.value
-      parent = ProductCategory.get_ancestors(acc_type).first
-      if parent_nodes.key?(parent)
-        # if parent == nil
-        #   debugger
-        # end
-        parent_nodes[parent][0] += accessory_type.count
-        # if parent == nil
-        #   debugger
-        # end
-        parent_nodes[parent][1].push(acc_type)
-      else
-        parent_nodes[parent] = [accessory_type.count,[acc_type]]
-      end
-    end
-    # debugger
-    parent_nodes.sort_by!{|parent,data| data[0]}
-    parent_nodes
-  end
+
 end
