@@ -102,19 +102,19 @@ module AccessoriesHelper
       acc_type = accessory_type.value
       parent = ProductCategory.get_ancestors(acc_type).first
       if parent_nodes.key?(parent)
-        if parent == nil
-          debugger
-        end
+        # if parent == nil
+        #   debugger
+        # end
         parent_nodes[parent][0] += accessory_type.count
-        if parent == nil
-          debugger
-        end
+        # if parent == nil
+        #   debugger
+        # end
         parent_nodes[parent][1].push(acc_type)
       else
         parent_nodes[parent] = [accessory_type.count,[acc_type]]
       end
     end
-    debugger
+    # debugger
     parent_nodes.sort_by!{|parent,data| data[0]}
     parent_nodes
   end

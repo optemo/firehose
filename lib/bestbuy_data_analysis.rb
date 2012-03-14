@@ -65,7 +65,7 @@ def bb_multiple_same_items_same_purchase
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Twin Item Purchases: "+ count.to_s() + "\n\n"
-  debugger
+  # debugger
   "The Data is available in the 'multi_item_purchases' hash in the function. Otherwise, quit debugger (q)"
 end
 
@@ -96,7 +96,7 @@ def diff_store_ids
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Stores: "+store_ids.size().to_s()
-  debugger
+  
   "The data is available in the 'store_ids' array in the function. Otherwise, quit debugger (q)" 
 end
 
@@ -126,7 +126,7 @@ def find_zeroes
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Invalid Sales: "+ zero_price_purchases.length().to_s()
-  debugger
+  
   "The Data is available in the 'zero_price_purchases' array in the function. Otherwise, quit debugger (q)"
 end
 
@@ -157,7 +157,7 @@ def unique_purchase_ids
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Separate Sales: "+ purchase_ids.length().to_s()
-  debugger
+  
   "The Data is available in the 'purchase_ids' array in the function. Otherwise, quit debugger (q)"
 end
 #Displays the number of lines in the file. This corresponds to the number of transactions completed. A transaction here 
@@ -218,7 +218,7 @@ def find_out_of_month_sales
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of Separate, Out of Month Sales: #{count}"
-  debugger
+  
   "The Data is available in the 'previous_sales' hash in the function. Otherwise, quit debugger (q)"
 end
 
@@ -245,6 +245,6 @@ def find_sku_length (length)
   
   print "\nFile path: "+csvfile.path()
   print "\nNumber of skus of length #{length}: #{count}"
-  debugger
+  
   "The Data is available in the 'wanted_skus' hash in the function. Otherwise, quit debugger (q)"
 end

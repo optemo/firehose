@@ -16,7 +16,7 @@ def set_missing_ids ()
  #only alters rows with id = 0
  
  for i in DailySpec.find_all_by_id(0)
-   debugger  
+     
    ds = i
    ds = DailySpec.new(i.attributes)
    ds.id = new_id    #id is not being set! (works if only 1 zero row, not if multiple)

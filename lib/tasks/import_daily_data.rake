@@ -1,5 +1,5 @@
 task :get_daily_specs => :environment do
-  require 'ruby-debug'
+  #require 'ruby-debug'
   write_instock_skus_into_file
   #analyze_daily_raw_specs
 end
