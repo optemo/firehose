@@ -87,7 +87,8 @@ class Product < ActiveRecord::Base
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
         specs_to_delete << spec if spec && !spec.modified
       else
-        raise ValidationError, ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
+        puts ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
+        #raise ValidationError, ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
