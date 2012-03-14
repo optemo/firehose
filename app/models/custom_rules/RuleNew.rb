@@ -1,7 +1,7 @@
 
 class RuleNew < Customization
   @feature_name = 'isNew'
-  @product_type = ['FDepartments']
+  @product_type = ['BDepartments','FDepartments']
   @needed_features = [{CatSpec => 'displayDate'}, {CatSpec => 'preorderReleaseDate'}]
   @rule_type = 'Binary'
 

@@ -1,7 +1,7 @@
 
 class RuleOnSale < Customization
   @feature_name = 'onsale'
-  @product_type = ['FDepartments']
+  @product_type = ['BDepartments', 'FDepartments']
   @needed_features = [{CatSpec => 'saleEndDate'}]
   @rule_type = 'Binary'
   

@@ -1,6 +1,6 @@
 class RuleBestSeller < Customization
   @feature_name = 'bestseller'
-  @product_type = ['FDepartments']
+  @product_type = ['BDepartments','FDepartments']
   @needed_features = [{DailySpec => 'orders'}]
   @rule_type = 'Binary'
 
