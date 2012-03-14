@@ -124,7 +124,6 @@ class Product < ActiveRecord::Base
     
     ProductBundle.get_relations
     #Calculate new spec factors
-    Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill

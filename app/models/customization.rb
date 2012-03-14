@@ -1,4 +1,11 @@
+
 class Customization
+  require 'custom_rules/RuleBestSeller'
+  require 'custom_rules/RuleComingSoon'
+  require 'custom_rules/RuleNew'
+  require 'custom_rules/RuleOnSale'
+  require 'custom_rules/RuleUtility'
+  
   class << self 
     attr_accessor :feature_name
     attr_accessor :needed_features
@@ -30,8 +37,7 @@ class Customization
   end
   
   def Customization.compute_specs(pids)
-    # get all the customizations applicable to this product_type
-    product_type = Session.product_type
+    # get all the customizations applicable to this product_type and ancestors
     rules = Customization.find_all_by_product_type(Session.product_type_path)
     results = {}
     # execute each of the rules
