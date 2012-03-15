@@ -1,5 +1,5 @@
 
-task :daily_data_collection => :environment do
+task :daily_sales_collection => :environment do
   Session.new
   require 'daily_sales'
   save_daily_sales()
