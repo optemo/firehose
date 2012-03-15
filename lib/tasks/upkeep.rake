@@ -22,7 +22,6 @@ end
 
 desc "Update data automatically"
 task :update => :environment do
-  require 'ruby-debug'
   
   if !ENV.include?("product_type")
     Session.new

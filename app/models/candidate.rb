@@ -62,16 +62,16 @@ class Candidate
   end
   
   def self.multi(candidates,sort = true)
-    res = {}
+    res = Hash.new{|h,k| h[k] = Hash.new}
     #Assign candidates by scraping rule priority
     candidates.each do |c|
-      res[c.sku] = c unless res[c.sku] && (c.delinquent || (!res[c.sku].delinquent && res[c.sku].scraping_rule.priority < c.scraping_rule.priority))
+      res[c.sku][c.name] = c unless res[c.sku][c.name] && (c.delinquent || (!res[c.sku][c.name].delinquent && res[c.sku][c.name].scraping_rule.priority < c.scraping_rule.priority))
     end
     #Order candidates by delinquents & corrections
     if sort
-      res.values.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
+      res.values.map(&:values).flatten.sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
     else
-      res.values
+      res.values.map(&:values).flatten
     end
   end
 end

@@ -66,11 +66,7 @@ class RuleUtility < Customization
         product_utility.value = (utility.sum).to_f
         puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
         cont_activerecords << product_utility
-      end
-    
-     # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
-     #ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-     
+      end    
      cont_activerecords  
   end
   def self.calculateFactor_sale(fVal1, fVal2) 

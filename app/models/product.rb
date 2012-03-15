@@ -62,8 +62,8 @@ class Product < ActiveRecord::Base
         unless same_sku_products.empty?
           same_sku_different_product_type = same_sku_products.first.cat_specs.where('name = ? AND value NOT IN (?)', "product_type", Session.product_type_leaves)
           unless same_sku_different_product_type.empty?
-            puts sku + ' is an SKU that was found to be under two different product categories'
-            products_to_update[bb_product.id] = same_sku_different_product_type
+            #puts sku + ' is an SKU that was found to be under two different product categories'
+            products_to_update[bb_product.id] = Product.find(same_sku_different_product_type.first.product_id)
           else
             products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
           end
@@ -74,6 +74,7 @@ class Product < ActiveRecord::Base
     end
     
     candidates.each do |candidate|
+      debugger if candidate.sku == 10162174
       spec_class = case candidate.model
         when "Categorical" then CatSpec
         when "Continuous" then ContSpec
@@ -82,13 +83,13 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       raise ValidationError, "Failed to set candidate as delinquent" if (candidate.parsed.nil? && !candidate.delinquent)
-      
       if candidate.delinquent && (p = products_to_update[candidate.sku])
         #This is a feature which was removed
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
         specs_to_delete << spec if spec && !spec.modified
       else
-        raise ValidationError, "Parsed value should not be false " if (candidate.parsed == "false" && spec_class == BinSpec)
+        puts ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
+        #raise ValidationError, ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
@@ -124,8 +125,6 @@ class Product < ActiveRecord::Base
     products_to_save.values.each(&:save) #Save products and associated specs
     
     ProductBundle.get_relations
-    #Calculate new spec factors
-    #Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
@@ -145,12 +144,6 @@ class Product < ActiveRecord::Base
     end
   end
   
-  def self.compute_custom_specs(bb_prods)
-    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
-    custom_specs_to_save.each do |spec_class, spec_values|
-      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-    end
-  end  
   def name
     name = cat_specs.find_by_name("title").try(:value)
     if name.nil?  
@@ -172,11 +165,11 @@ class Product < ActiveRecord::Base
   end
   
   def store_sales
-    cont_specs.find_by_name("sum_store_sales").try(:value)
+    cont_specs.find_by_name("bestseller_store_sales").try(:value)
   end
   
   def total_acc_sales
-    Accessory.where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_type'").sum("count")
+    Accessory.select(:count).where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_sales_total'").first.count
   end
   
 =begin 

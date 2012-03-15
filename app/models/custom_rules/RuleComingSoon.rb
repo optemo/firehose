@@ -1,7 +1,7 @@
 class RuleComingSoon < Customization
   @feature_name = 'comingSoon'
   @needed_features = [{CatSpec => 'preorderReleaseDate'}]
-  @product_type = ['FDepartments']
+  @product_type = ['BDepartments','FDepartments']
   @rule_type = 'Binary'
   
   def RuleComingSoon.compute_feature(values, pid)

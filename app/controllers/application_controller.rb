@@ -23,8 +23,9 @@ class ApplicationController < ActionController::Base
   end
 
   def authenticate
+    #return true
     #return true if params[:controller] == 'accessories' || params[:controller] == 'bestbuy' || params[:controller] == 'futureshop'
-    return true if request.host == "localhost" #Don't authenticate for development
+    return true if request.host == "localhost" #Don't authenticate for development 
     authenticate_or_request_with_http_digest(REALM) do |username|
       USERS[username]
     end

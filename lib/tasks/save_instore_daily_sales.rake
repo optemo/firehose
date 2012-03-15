@@ -10,12 +10,12 @@ def save_instore_daily_sales (start_date, end_date, directory)
   month_sales = {}
   start_time = Time.now
   
-  newfile = "/Users/marc/Documents/cumullative_data.txt"
+  #newfile = "/Users/marc/Documents/cumulative_data.txt"
   
   Dir.foreach(directory) do |file|
     month_sales = {}  
     #only process bestbuy data files
-    if file =~ /B_\d{8}_\d{8}\.csv/
+    if file =~ /B_\d{8}_\d{8}\.csv/             #if need to, change to process FS files
       /(\d{8})_(\d{8})\.csv$/.match(file)
       file_start_date = Date.strptime($1, '%Y%m%d')
       file_end_date = Date.strptime($2, '%Y%m%d') 
@@ -72,7 +72,7 @@ def save_instore_daily_sales (start_date, end_date, directory)
       # WRITE SALES NUMBERS FOR PRODUCTS IN ALL_DAILY_SPECS TABLE  
         month_sales.each_pair do |date, product|
           product.each_pair do |sku, orders|
-            AllDailySpec.create(:sku => sku, :name => 'store_orders', :spec_type => 'cont', :value_flt => orders, :product_type => 'camera_bestbuy', :date => date)
+            AllDailySpec.create(:sku => sku, :name => 'store_orders', :spec_type => 'cont', :value_flt => orders, :product_type => 'drive_bestbuy', :date => date)
           end
         end
         after = Time.now
