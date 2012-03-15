@@ -3,9 +3,9 @@ require 'test_helper'
 class FacetsControllerTest < ActionController::TestCase
   setup do
     @pt_id = product_categories(:cameras).product_type
-    create(:scraping_rule, rule_type: "Continuous")
-    create(:scraping_rule, rule_type: "Categorical")
-    create(:scraping_rule, rule_type: "Binary")
+    @cont_sr = create(:scraping_rule, rule_type: "Continuous")
+    @cat_sr = create(:scraping_rule, rule_type: "Categorical")
+    @bin_sr = create(:scraping_rule, rule_type: "Binary")
     
     @f1 = create(:facet, used_for: "filter")
     @f2 = create(:facet, used_for: "sortby")    
@@ -48,16 +48,16 @@ class FacetsControllerTest < ActionController::TestCase
   end
 
   test "getting feature names to add from the scraping rules" do
-     
+     # FIXME: also test the features from applicable custom rules being in the filters, etc.
      get :index, product_type_id: @pt_id
      
      filters = assigns("sr_filters")
      sortby = assigns("sr_sortby")
      compare = assigns("sr_compare")
      
-     assert_equal 3, filters.length, "Should get features to add for filters from scraping rules"
-     assert_equal 3, compare.length, "Should get features to add for compare from scraping rules"
-     assert_equal 1, sortby.length, "Should get features to add forsortby from scraping rules"
+     assert filters.include?(@bin_sr.local_featurename), "Should get features to add for filters from scraping rules"
+     assert sortby.include?(@cont_sr.local_featurename), "Should get features to add for compare from scraping rules"
+     assert compare.include?(@cat_sr.local_featurename), "Should get features to add forsortby from scraping rules"
     end
     
     test "retrieving existing facets to display" do
