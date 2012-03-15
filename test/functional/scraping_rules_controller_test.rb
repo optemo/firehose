@@ -24,7 +24,7 @@ class ScrapingRulesControllerTest < ActionController::TestCase
     assert_response :success
     #Check the colors
     assert_equal ["#4F3333","green"], assigns[:colors].values, "Color coding isn't right"
-    assert_equal 10, assigns[:candidates].length
+    assert_equal 20, assigns[:candidates].length
   end
 
   test "should create scraping_rule" do

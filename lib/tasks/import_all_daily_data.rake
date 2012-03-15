@@ -186,7 +186,6 @@ def get_all_features
    products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='20243'").map(&:sku)
    skus = products.join(", ")
    puts "skus #{skus}"
-  ************ 
    cont_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'cont'").map(&:name)
     cont_sp.each do |r|
      features[r] = 0
