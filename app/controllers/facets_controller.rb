@@ -22,11 +22,17 @@ class FacetsController < ApplicationController
     current_and_parents_rules = ScrapingRule.where(:product_type => parent_types)
     type_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (type_rules.nil? or type_rules.empty?) ? [] : type_rules.map(&:local_featurename).uniq
+    # add custom rules
+    custom_rules = Customization.find_all_by_product_type(parent_types)
+    type_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
+    results += (type_custom_rules.nil? or type_custom_rules.empty?) ? [] : type_custom_rules.map(&:feature_name).uniq
     @sr_filters = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters
     
     cont_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous/}  
+    cont_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous/}
     results = (cont_rules.nil? or cont_rules.empty?) ? [] : cont_rules.map(&:local_featurename).uniq
+    results += (cont_custom_rules.nil? or cont_custom_rules.empty?) ? [] : cont_custom_rules.map(&:feature_name).uniq
     @sr_sortby = results.nil? ? [] : results.sort
   end
   
@@ -51,17 +57,22 @@ class FacetsController < ApplicationController
       i = 0
       f_type = nil
       
-      while (f_type.nil? or f_type.empty?)
-        raise "NotFound" if i > product_path.length - 1
-        p_type = product_path[i]        
-        f_type = ScrapingRule.find_all_by_product_type_and_local_featurename(p_type, params[:name]).map{ |sr|
-          sr.rule_type}.compact
-        i += 1
+      custom_rule = Customization.find_all_by_product_type(product_path).select{ |cr| cr.feature_name == params[:name]}
+      unless custom_rule.empty?
+        f_type = custom_rule.first.rule_type
+      else
+        while (f_type.nil? or f_type.empty?)
+          raise "NotFound" if i > product_path.length - 1
+          p_type = product_path[i]        
+          f_type = ScrapingRule.find_all_by_product_type_and_local_featurename(p_type, params[:name]).map{ |sr|
+            sr.rule_type}.compact
+          i += 1
+        end
+        f_type = f_type.first
       end
-      
       @new_facet = Facet.new(:product_type => Session.product_type, 
                 :name => params[:name],
-                :feature_type => f_type.first,
+                :feature_type => f_type,
                 :used_for => params[:used_for])
     end
   end
