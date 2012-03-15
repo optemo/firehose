@@ -19,7 +19,8 @@ class Customization
   end
   
   def Customization.all
-    Customization.subclasses
+    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller]
+    #Customization.subclasses
   end
   
   def Customization.find_all_by_product_type(product_types)
@@ -54,12 +55,7 @@ class Customization
           spec_features.each do |spec_feature|
             table_name = spec_feature.keys[0]
             feature_name = spec_feature.values[0]
-            # This is only for DailySpecs orders
-            if table_name == DailySpec
-              spec_row = table_name.find_by_sku_and_name(Product.find(pid).sku, feature_name)
-            else
-              spec_row = table_name.find_by_product_id_and_name(pid, feature_name)
-            end
+            spec_row = table_name.find_by_product_id_and_name(pid, feature_name)
             if spec_row.nil?
               values += [nil]
             else
