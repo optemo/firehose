@@ -125,7 +125,7 @@ class Product < ActiveRecord::Base
     
     ProductBundle.get_relations
     #Calculate new spec factors
-    Product.calculate_factors
+    #Product.calculate_factors
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
@@ -150,68 +150,7 @@ class Product < ActiveRecord::Base
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
     end
-  end
-  
-  def self.calculate_factors
-    cont_activerecords = [] # For bulk insert/update
-    #cat_activerecords =[]
-    #bin_activerecords = []
-    records = {}
-    record_vals = {}
-    factors = {}
-    all_products = Product.instock.current_type
-    prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
-    all_products.each do |product|
-      utility = []
-      Maybe(Session.features["utility"]).each do |f|
-        model = case f.feature_type
-          when "Categorical" then CatSpec
-          when "Continuous" then ContSpec
-          when "Binary" then BinSpec
-          else raise ValidationError
-        end
-        records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
-        factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
-        factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(product_id: product.id, name: f.name+"_factor")
-        if records[f.name][product.id]
-          record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
-          fVal = records[f.name][product.id].first.value 
-          if f.name=="onsale"
-            ori_price = prices[product.id].first.value
-            sale_price = records["saleprice"][product.id].first.value
-            factorRow.value = Product.calculateFactor_sale(ori_price, sale_price)
-          elsif f.name == "customerRating"
-            factorRow.value = Product.calculateFactor_rating(fVal)
-          elsif f.feature_type == "Binary"
-            factorRow.value = 1 if fVal
-          elsif f.feature_type == "Continuous"
-            factorRow.value = Product.calculateFactor(fVal, f, record_vals[f.name])
-          elsif f.feature_type == "Categorical"
-            unless CategoricalFacetValue.where(["facet_id =? and name=?", f.id, fVal]).empty?
-              factorRow.value = 1 
-            else
-              factorRow.value = 0  
-            end  
-          else  
-            raise ValidationError  
-          end    
-        else
-          factorRow.value = 0    
-        end
-        utility << factorRow.value*Product.utility_weights(f.name) if factorRow.value
-        cont_activerecords << factorRow if factorRow.value
-      end 
-      #Add the static calculated utility
-      utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
-      product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
-      product_utility.value = utility.sum
-      cont_activerecords << product_utility
-    end
-
-    # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
-    ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
-  end
-  
+  end  
   def name
     name = cat_specs.find_by_name("title").try(:value)
     if name.nil?  
@@ -240,8 +179,66 @@ class Product < ActiveRecord::Base
     Accessory.where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_type'").sum("count")
   end
   
-  
-  
+=begin 
+  def self.calculate_factors
+   cont_activerecords = [] # For bulk insert/update
+   #cat_activerecords =[]
+   #bin_activerecords = []
+   records = {}
+   record_vals = {}
+   factors = {}
+   all_products = Product.instock.current_type
+   prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
+   all_products.each do |product|
+     utility = []
+     Maybe(Session.features["utility"]).each do |f|
+       model = case f.feature_type
+         when "Categorical" then CatSpec
+         when "Continuous" then ContSpec
+         when "Binary" then BinSpec
+         else raise ValidationError
+       end
+       records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
+       factors[f.name] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, f.name+"_factor"]).group_by(&:product_id)
+       factorRow = factors[f.name][product.id] ? factors[f.name][product.id].first : ContSpec.new(product_id: product.id, name: f.name+"_factor")
+       if records[f.name][product.id]
+         record_vals[f.name] ||= records[f.name].values.map{|i|i.first.value}
+         fVal = records[f.name][product.id].first.value 
+         if f.name=="onsale"
+           ori_price = prices[product.id].first.value
+           sale_price = records["saleprice"][product.id].first.value
+           factorRow.value = Product.calculateFactor_sale(ori_price, sale_price)
+         elsif f.name == "customerRating"
+           factorRow.value = Product.calculateFactor_rating(fVal)
+         elsif f.feature_type == "Binary"
+           factorRow.value = 1 if fVal
+         elsif f.feature_type == "Continuous"
+           factorRow.value = Product.calculateFactor(fVal, f, record_vals[f.name])
+         elsif f.feature_type == "Categorical"
+           unless CategoricalFacetValue.where(["facet_id =? and name=?", f.id, fVal]).empty?
+             factorRow.value = 1 
+           else
+             factorRow.value = 0  
+           end  
+         else  
+           raise ValidationError  
+         end    
+       else
+         factorRow.value = 0    
+       end
+       utility << factorRow.value*Product.utility_weights(f.name) if factorRow.value
+       cont_activerecords << factorRow if factorRow.value
+     end 
+     #Add the static calculated utility
+     utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
+     product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
+     product_utility.value = utility.sum
+     cont_activerecords << product_utility
+   end
+
+   # Do all record saving at the end for efficiency. :on_duplicate_key_update only works in mysql database
+   ContSpec.import cont_activerecords, :on_duplicate_key_update=>[:product_id, :name, :value, :modified]
+ end 
   private
   
   def self.utility_weights(f_name)
@@ -270,6 +267,7 @@ class Product < ActiveRecord::Base
   def self.calculateFactor_rating(fVal)
     fVal >= 4.0 ? 1 : 0
   end
-  
+=end  
 end
+
 class ValidationError < ArgumentError; end
