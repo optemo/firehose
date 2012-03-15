@@ -1,8 +1,8 @@
 
-task :daily_sales_collection => :environment do
+task :daily_sales_collection, [:table] => :environment do |t,args|
   Session.new
   require 'daily_sales'
-  save_daily_sales()
+  save_daily_sales(args.table)
   #generate_daily_graphs()
 end  
  

@@ -1,12 +1,15 @@
-def save_daily_sales
+def save_daily_sales (table)
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
-  only_last=true    #only process the last email
+  
+  # Reset this to true afterwards
+  
+  only_last=false    #only process the last email
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "9-Sep-2011","BEFORE", "19-Feb-2012"])
+  msgs = imap.search(["SINCE", "01-Mar-2012","BEFORE", "02-Mar-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -62,30 +65,35 @@ def save_daily_sales
               orders_map[sku] = orders if sku
             end
           end
-          # Only select the products that have some existing spec in the daily spec table for that day
-          # For addition to DailySpec  
-       #   products = DailySpec.where(:date => then_date.prev_day().strftime("%Y-%m-%d")).select("DISTINCT(sku)")
-       #   products.each do |prod_sku|
-       #     sku = prod_sku.sku
-       #     product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-       #     orders_spec = orders_map[sku]
-       #     orders = (orders_spec.nil?) ? "0" : orders_spec
-       #     # write orders to daily_sales for the date and the sku
-       #     ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "orders", :value_flt => orders, :product_type => product_type, :date => then_date.prev_day().strftime("%Y-%m-%d"))
-       #     ds.save
-       #   end
-          
-          # For addition to AllDailySpec
-          date = then_date.prev_day().strftime("%Y-%m-%d")
-          products = AllDailySpec.where(:date => date).select("DISTINCT(sku)")
-          products.each do |prod|
-            sku = prod.sku
-            product_type = AllDailySpec.find_by_sku_and_date(sku, date).product_type
-            orders_spec = orders_map[sku].delete!(',') # Not so much an issue here
-            orders = (orders_spec.nil?) ? "0" : orders_spec
-            # write orders to daily_sales for the date and the sku
-            ds = AllDailySpec.find_or_initialize_by_sku_and_name_and_date(sku,'online_orders',date)
-            ds.update_attributes(:spec_type => "cont", :value_flt => orders, :product_type => product_type)
+          case table
+          when "daily_specs"
+            # Only select the products that have some existing spec in the daily spec table for that day
+            # For addition to DailySpec  
+            date = then_date.prev_day().strftime("%Y-%m-%d")
+            products = DailySpec.where(:date => date).select("DISTINCT(sku)")
+            products.each do |prod|
+              sku = prod.sku
+              product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+              orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
+              orders = (orders_spec.nil?) ? "0" : orders_spec
+              # write orders to daily_sales for the date and the sku
+              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'orders',orders,date,product_type)
+              ds.save if ds.new_record?
+            end
+          when "all_daily_specs"
+            # For addition to AllDailySpec
+            date = then_date.prev_day().strftime("%Y-%m-%d")
+            products = AllDailySpec.where(:date => date).select("DISTINCT(sku)")
+            products.each do |prod|
+              sku = prod.sku
+              product_type = AllDailySpec.find_by_sku_and_date(sku, date).product_type
+              orders_spec = orders_map[sku].try(:delete,',') # Not so much an issue here
+              orders = (orders_spec.nil?) ? "0" : orders_spec
+              # write orders to daily_sales for the date and the sku
+              debugger # have not yet been able to test this
+              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
+              ds.save if ds.new_record?
+            end
           end
         end
   # ******************************************

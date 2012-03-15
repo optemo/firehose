@@ -4,10 +4,13 @@ def save_daily_pageviews
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('files@optemo.com', '***REMOVED***') 
   imap.select('INBOX') 
+  
+  #Reset to true afterwards
+  
   only_last=false    #only process the last email
   # All msgs in a folder 
-  # Oct 29, 2011 is the earliset date for page views
-  msgs = imap.search(["SINCE", "29-Jan-2012","BEFORE", "30-Jan-2012"])
+  # Oct 29, 2011 is the earliset possible date for page views
+  msgs = imap.search(["SINCE", "01-Mar-2012","BEFORE", "02-Mar-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -70,8 +73,8 @@ def save_daily_pageviews
             views_spec = views_map[sku]
             views = (views_spec.nil?) ? "0" : views_spec.delete(',') # Otherwise to_i will only return characters before first comma
             # write views to daily_sales for the date and the sku
-            ds = DailySpec.new(:spec_type => "cont", :sku => sku, :name => "pageviews", :value_flt => views, :product_type => product_type, :date => date)
-            ds.save
+            ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'pageviews',views,date,product_type)
+            ds.save if ds.new_record?
           end
         end
   # ******************************************
