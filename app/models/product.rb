@@ -196,7 +196,7 @@ class Product < ActiveRecord::Base
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     
     #Reindex sunspot
-    Sunspot.index(products_to_save)
+    Sunspot.index(products_to_save.values)
     Sunspot.index(products_to_update.values)
     Sunspot.commit
     
