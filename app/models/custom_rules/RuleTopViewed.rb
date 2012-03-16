@@ -1,6 +1,6 @@
 class RuleTopViewed < Customization
   @feature_name = 'bestseller'
-  @product_type = ['BDepartments','FDepartments']
+  @product_type = []
   @needed_features = [{DailySpec => 'pageviews'}]
   @rule_type = 'Binary'
 
