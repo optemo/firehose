@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120307235338) do
+ActiveRecord::Schema.define(:version => 20120316193144) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -84,8 +84,20 @@ ActiveRecord::Schema.define(:version => 20120307235338) do
   add_index "cont_specs", ["product_id"], :name => "index_cont_specs_on_product_id"
   add_index "cont_specs", ["value"], :name => "index_cont_specs_on_value"
 
-  create_table "daily_specs", :id => false, :force => true do |t|
-    t.integer  "id",           :default => 0, :null => false
+  create_table "daily_specs", :force => true do |t|
+    t.string   "sku"
+    t.string   "name"
+    t.string   "spec_type"
+    t.string   "value_txt"
+    t.float    "value_flt"
+    t.boolean  "value_bin"
+    t.string   "product_type"
+    t.date     "date"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "daily_specs_new", :force => true do |t|
     t.string   "sku"
     t.string   "name"
     t.string   "spec_type"
@@ -117,7 +129,7 @@ ActiveRecord::Schema.define(:version => 20120307235338) do
     t.string  "name",                                    :null => false
     t.string  "feature_type", :default => "Categorical", :null => false
     t.string  "used_for",     :default => "show"
-    t.integer "value"
+    t.float   "value"
     t.string  "style",        :default => ""
     t.boolean "active",       :default => true
     t.string  "product_type"
