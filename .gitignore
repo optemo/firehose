@@ -3,6 +3,7 @@ log/
 tmp/**/*
 tmp/*
 config/database.yml
+config/sunspot.yml
 .bundle
 db/*.sqlite3
 db/sphinx
