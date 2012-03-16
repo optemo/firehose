@@ -1,10 +1,10 @@
-task :get_daily_specs => :environment do
+task :get_all_daily_specs => :environment do
   require 'ruby-debug'
   write_instock_skus_into_file ("drive_bestbuy")
   analyze_daily_raw_specs("drive_bestbuy")
 end
 
-task :import_daily_attributes => :environment do
+task :import_all_daily_attributes => :environment do
   # get historical data on raw product attributes data and write to daily specs
   raw = true
   import_data(raw)
