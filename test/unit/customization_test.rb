@@ -222,15 +222,44 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_raise(ActiveRecord::RecordNotFound) { RuleBestSeller.group_computation([inexistant_pid])}
   end
   test "Rule Utility" do
-    p1 = create(:product, sku: 901)
-    #p2 = create(:product, sku: 902)
+    create(:product_category, product_type: 'BDepartments', l_id: 10, r_id: 5000)
+    create(:product_category, product_type: 'B20218', l_id: 600, r_id: 1200)
+    create(:product_category, product_type: 'B20282', l_id: 650, r_id: 710)
+    create(:product_category, product_type: 'B20232', l_id: 700, r_id: 701)
     
+    Session.new('B20232')
+    p1 = create(:product, sku: 901)
+    p2 = create(:product, sku: 902)
+    p3= create(:product, sku:903, instock: 0)
     create(:cat_spec, product_id: p1.id, name: "brand", value: "NIKON")
     create(:bin_spec, product_id: p1.id, name: "hdmi", value: 1)
     create(:cont_spec, product_id: p1.id, name: "customerRating", value: 4)
-    create(:facet, name: "brand_NIKON", feature_type: "Continuous", used_for: "utility", value: 0.4, product_type: "B20218")
-    create(:facet, name: "hdmi", feature_type: "Continuous", used_for: "utility", value: -1.3, product_type: "B20218")
-    create(:facet, name: "customerRating", feature_type: "Continuous", used_for: "utility", value: 0.3, product_type: "B20218")
-    assert RuleUtility.compute_feature(p1.id)
+    create(:cont_spec, product_id: p1.id, name: "price", value: 99.99)
+    create(:cont_spec, product_id: p1.id, name: "saleprice", value: 69.99)
+    create(:cat_spec, product_id: p1.id, name: "displayDate", value: "2011-05-12")
+    create(:cat_spec, product_id: p1.id, name: "saleEndDate", value: "2012-05-20")
+    
+    create(:cat_spec, product_id: p2.id, name: "brand", value: "SONY")
+    create(:cat_spec, product_id: p2.id, name: "color", value: "RED")
+    create(:bin_spec, product_id: p2.id, name: "frontlcd", value: 1)
+    create(:cont_spec, product_id: p2.id, name: "customerRating", value: 2)
+    create(:cont_spec, product_id: p2.id, name: "price", value: 400.99)
+    create(:cont_spec, product_id: p2.id, name: "saleprice", value: 400.99)
+    create(:cat_spec, product_id: p2.id, name: "displayDate", value: "2011-11-12")
+    
+    create(:cont_spec, product_id: p3.id, name: "price", value: 300.99)
+    create(:cont_spec, product_id: p3.id, name: "saleprice", value: 280.99)
+    create(:cat_spec, product_id: p3.id, name: "saleEndDate", value: "2012-03-20")
+
+    create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")
+    create(:facet, name: "frontlcd", feature_type: "Binary", used_for: "utility", value: 0.4, product_type: "B20218")
+    
+    result = RuleUtility.compute_utility([p1.id,p2.id, p3.id])
+    #result.save unless result.nil?
+    #computing utility for instock products
+    assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p1.id}.map(&:value)
+    assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p2.id}.map(&:value)
+    #utility is not calculated for non instock products
+    assert_empty result.select{|spec| spec.name="utility" && spec.product_id == p3.id}
   end
 end

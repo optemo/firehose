@@ -45,6 +45,8 @@ class Customization
     rules.each do |rule|
       if rule == RuleBestSeller
         rule_results = RuleBestSeller.group_computation(pids)
+      elsif rule == RuleUtility
+        rule_results = RuleUtility.compute_utility(pids)
       else
         spec_features = rule.needed_features
         #spec_features = Customization.get_needed_features(rule.needed_features)

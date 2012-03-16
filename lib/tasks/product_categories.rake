@@ -1,6 +1,5 @@
 desc "Traverse the hierachy of categories from the API and store it in the database"
 task :fill_categories => :environment do
-  ProductCategory.where(:retailer => ENV["retailer"]).delete_all
   ['F','B'].each do |retailer|
     ENV["retailer"] = retailer
     ProductCategory.where(:retailer => retailer).delete_all

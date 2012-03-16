@@ -26,6 +26,17 @@ task :multi_cat_items,[:cat_to_find] => :environment do |t,args|
   analyze_cat_items(args.cat_to_find)
 end
 
+task :get_rid_of_pens_category => :environment do
+  pids = CatSpec.where(:value => 'F29089').map(&:product_id)
+  pids.each do |pid|
+  	the_cats = CatSpec.find_all_by_product_id_and_name(pid, 'product_type').map(&:value).uniq
+  	if the_cats.length == 1
+  		Product.find(pid).destroy
+	  end
+  end
+  CatSpec.where(:value => 'F29089').map(&:destory)
+end
+
 def analyze_cat_items(cat_to_find)
   
   # Get the products in category wanted (according to feed)

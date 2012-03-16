@@ -1,11 +1,10 @@
-
-onsale:
+onsale_factor:
   id: 1
   product_type: B20218
-  name: onsale
-  feature_type: Binary
+  name: onsale_factor
+  feature_type: Continuous
   used_for: utility
-  value: 751
+  value: 5.7
   active: 1
 customerRating:
   id: 2
@@ -13,7 +12,7 @@ customerRating:
   name: customerRating
   feature_type: Continuous
   used_for: utility
-  value: 38
+  value: -0.15
   active: 1
 saleprice:
   id: 3
@@ -21,7 +20,7 @@ saleprice:
   name: saleprice
   feature_type: Continuous
   used_for: utility
-  value: 1
+  value: -0.009
   active: 1
 maxresolution:
   id: 4
@@ -29,7 +28,7 @@ maxresolution:
   name: maxresolution
   feature_type: Continuous
   used_for: utility
-  value: 30
+  value: 0
   active: 1
 opticalzoom:
   id: 5
@@ -38,20 +37,87 @@ opticalzoom:
   feature_type: Continuous
   used_for: utility
   value: 4
-  active: 1
-brand:
+  active: 0.1
+brand_NIKON:
   id: 6
   product_type: B20218
-  name: brand
+  name: brand_NIKON
+  feature_type: Categorical
+  used_for: utility
+  value: -0.2
+  active: 1
+brand_SONY:
+  id: 7
+  product_type: B20218
+  name: brand_SONY
+  feature_type: Categorical
+  used_for: utility
+  value: -1.7
+  active: 1  
+brand_HIP_STREET:
+  id: 8
+  product_type: B20218
+  name: brand_HIP_STREET
   feature_type: Categorical
   used_for: utility
   value: 35
   active: 1
+color_RED:
+  id: 9
+  product_type: B20218
+  name: color_RED
+  feature_type: Categorical
+  used_for: utility
+  value: -0.2
+  active: 1  
+
+color_SILVER:
+  id: 10
+  product_type: B20218
+  name: color_SILVER
+  feature_type: Categorical
+  used_for: utility
+  value: -1
+  active: 1  
+color_na:
+  id: 11
+  product_type: B20218
+  name: color_na
+  feature_type: Categorical
+  used_for: utility
+  value: -0.1
+  active: 1
 featured:
-  id: 7
+  id: 12
   product_type: B20218
   name: featured
   feature_type: Binary
   used_for: utility
   value: 0
+  active: 1
+  
+displayDate:
+  id: 13
+  product_type: B20218
+  name: displayDate
+  feature_type: Categorical
+  used_for: utility
+  value: -0.001
+  active: 1  
+
+saleEndDate:
+  id: 14
+  product_type: B20218
+  name: saleEndDate
+  feature_type: Categorical
+  used_for: utility
+  value: 0.7
+  active: 1  
+Intercept:
+  id: 15
+  product_type: B20218
+  name: Intercept
+  feature_type: Continuous
+  used_for: utility
+  value: 4.26
   active: 1
