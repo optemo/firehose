@@ -9,7 +9,8 @@ def save_daily_sales (table)
   
   only_last=false    #only process the last email
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "09-Mar-2012","BEFORE", "16-Mar-2012"])
+  # 09-Sep-2011 is earliest possible date for online sales data (daily)
+  msgs = imap.search(["SINCE", "09-Sep-2011","BEFORE", "01-Jan-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -77,7 +78,7 @@ def save_daily_sales (table)
               orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
               orders = (orders_spec.nil?) ? "0" : orders_spec
               # write orders to daily_sales for the date and the sku
-              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'orders',orders,date,product_type)
+              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
               ds.save if ds.new_record?
             end
           when "all_daily_specs"
@@ -91,7 +92,7 @@ def save_daily_sales (table)
               orders = (orders_spec.nil?) ? "0" : orders_spec
               # write orders to daily_sales for the date and the sku
               debugger # have not yet been able to test this
-              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
+              ds = AllDailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
               ds.save if ds.new_record?
             end
           end
