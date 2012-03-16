@@ -9,7 +9,7 @@ def save_daily_sales (table)
   
   only_last=false    #only process the last email
   # All msgs in a folder 
-  msgs = imap.search(["SINCE", "01-Mar-2012","BEFORE", "02-Mar-2012"])
+  msgs = imap.search(["SINCE", "09-Mar-2012","BEFORE", "16-Mar-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
