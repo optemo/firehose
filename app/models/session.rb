@@ -17,18 +17,13 @@ class Session
   end
   
   def self.product_type_leaves
-    leaves = ProductCategory.get_leaves(product_type)
-    if leaves.empty?
-      Array(product_type)
-    else
-      leaves
-    end
+    ProductCategory.get_leaves(product_type)
   end
   
   def self.product_type_path
     ancestors = ProductCategory.get_ancestors(product_type)
     ancestors = [] if ancestors.nil?
-    ancestors.reverse + [product_type]
+    ancestors.reverse << product_type
   end
 
   def self.retailer

@@ -1,4 +1,5 @@
 class Product < ActiveRecord::Base
+  require 'sunspot_autocomplete'
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
@@ -46,14 +47,14 @@ class Product < ActiveRecord::Base
   
   def first_ancestors
     if pt = cat_specs.find_by_name(:product_type)
-      list = Session.product_type_ancestors(pt.value, 3)
+      list = ProductCategory.get_ancestors(pt.value, 3)
       list.join("") if list
     end
   end
   
   def second_ancestors
     if pt = cat_specs.find_by_name(:product_type)
-      list = Session.product_type_ancestors(pt.value, 4)
+      list = ProductCategory.get_ancestors(pt.value, 4)
       list.join("") if list
     end
   end
@@ -195,7 +196,7 @@ class Product < ActiveRecord::Base
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     
     #Reindex sunspot
-    Sunspot.index(products_to_save)
+    Sunspot.index(products_to_save.values)
     Sunspot.index(products_to_update.values)
     Sunspot.commit
     

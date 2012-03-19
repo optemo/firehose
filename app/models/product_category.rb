@@ -59,7 +59,7 @@ class ProductCategory < ActiveRecord::Base
     end
     
     def get_leaves (nodes)
-      multi_node("Leaves",nodes, left="l_id > ", right="r_id < ") do |query|
+      multi_node("Leaves",nodes, left="l_id >= ", right="r_id <= ") do |query|
         query + "AND l_id=(r_id-1)"
       end
     end

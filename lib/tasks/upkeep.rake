@@ -38,10 +38,17 @@ task :update => :environment do
   if leaves.nil? || leaves.empty?
     raise "Product type: #{ENV["product_type"]} not found"
   end
+  
   leaves.each do |node|
     #Run the update task for this leaf node
     Session.new node
-    Product.feed_update
+    begin 
+      Product.feed_update
+      puts 'Finished scraping category ' + node.to_s
+    rescue BestBuyApi::RequestError => error
+      puts 'Got the following error in scraping current category: '
+      puts error.to_s
+    end
   end
   Session.new ENV["product_type"] #Reset session
   #clean up inactive scraping rules not used any more
