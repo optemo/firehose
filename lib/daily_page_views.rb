@@ -1,16 +1,31 @@
-def save_daily_pageviews
+def save_daily_pageviews (start_date,end_date)
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('files@optemo.com', '***REMOVED***') 
   imap.select('INBOX') 
   
-  #Reset to true afterwards
+  # Get the messages wanted
+  if start_date || end_date # If a date is given...
+    only_last=false  
+    if start_date 
+      since = Date.strptime(start_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+      if end_date # If end date given read emails in range
+        before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+        msgs = imap.search(["SINCE", since,"BEFORE", before])
+      else # If no end date specified, go to last email received (today)
+        msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
+      end
+    elsif end_date # If no start date given, but end date is, go from first email to end_date
+      before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y") 
+      msgs = imap.search(["SINCE", "29-Oct-2011","BEFORE", before])
+    end
+  else
+    only_last=true  #only process the last email
+    # 28-Oct-2011 is earliest possible date for online sales data (daily)
+    msgs = imap.search(["SINCE", "29-Oct-2011"])
+  end
   
-  only_last=false    #only process the last email
-  # All msgs in a folder 
-  # Oct 29, 2011 is the earliset possible date for page views
-  msgs = imap.search(["SINCE", "01-Mar-2012","BEFORE", "02-Mar-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]

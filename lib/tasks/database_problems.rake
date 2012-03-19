@@ -1,6 +1,16 @@
 # Put code for getting info about (or figuring out) database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
+# Not really a problem , just quick change
+task :replace_orders => :environment do 
+  #get all entries in table with name 'orders'
+  entries = DailySpec.where(:name => 'orders')
+  #iterate through and change name to 'online_orders'
+  entries.each do |entry|
+    entry.update_attribute(:name, 'online_orders')
+  end
+end
+
 
 #******* RESOLVED *******#
 # 13/03/2012: Certain items were missing crucial specs

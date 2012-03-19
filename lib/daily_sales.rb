@@ -1,16 +1,32 @@
-def save_daily_sales (table)
+def save_daily_sales (table,start_date,end_date)
   require 'net/imap'
   require 'zip/zip'
+  #require 'date'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
+
+  # Get the messages wanted
+  if start_date || end_date # If a date is given...
+    only_last=false  
+    if start_date 
+      since = Date.strptime(start_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+      if end_date # If end date given read emails in range
+        before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+        msgs = imap.search(["SINCE", since,"BEFORE", before])
+      else # If no end date specified, go to last email received (today)
+        msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
+      end
+    elsif end_date # If no start date given, but end date is, go from first email to end_date
+      before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y") 
+      msgs = imap.search(["SINCE", "09-Sep-2011","BEFORE", before])
+    end
+  else
+    only_last=true  #only process the last email
+    # 09-Sep-2011 is earliest possible date for online sales data (daily)
+    msgs = imap.search(["SINCE", "09-Sep-2011"])
+  end
   
-  # Reset this to true afterwards
-  
-  only_last=false    #only process the last email
-  # All msgs in a folder 
-  # 09-Sep-2011 is earliest possible date for online sales data (daily)
-  msgs = imap.search(["SINCE", "09-Sep-2011","BEFORE", "01-Jan-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -66,6 +82,7 @@ def save_daily_sales (table)
               orders_map[sku] = orders if sku
             end
           end
+          
           case table
           when "daily_specs"
             # Only select the products that have some existing spec in the daily spec table for that day

@@ -1,15 +1,27 @@
 
-task :daily_sales_collection, [:table] => :environment do |t,args|
+task :daily_sales_collection, [:table,:start_date,:end_date] => :environment do |t,args|
   Session.new
   require 'daily_sales'
-  save_daily_sales(args.table)
+  args.with_defaults(:start_date=>false,:end_date=>false)
+  if args.start_date == ""
+    start_date = false
+  else
+    start_date = args.start_date
+  end
+  save_daily_sales(args.table,start_date,args.end_date)
   #generate_daily_graphs()
 end  
  
-task :daily_pageviews_collection => :environment do
+task :daily_pageviews_collection, [:start_date,:end_date] => :environment do |t,args|
   Session.new
   require 'daily_page_views'
-  save_daily_pageviews()
+  args.with_defaults(:start_date=>false,:end_date=>false)
+  if args.start_date == ""
+    start_date = false
+  else
+    start_date = args.start_date
+  end
+  save_daily_pageviews(start_date,args.end_date)
   #generate_daily_graphs()
 end  
   
