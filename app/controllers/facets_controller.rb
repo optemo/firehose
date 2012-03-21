@@ -50,7 +50,6 @@ class FacetsController < ApplicationController
   end
   
   def update
-    puts 'doing update stuff in update'
     product_type = params[:product_type_id]
     facet_name = params[:id]
     getOrdering(facet_name, product_type).each {|instance| instance.destroy}
