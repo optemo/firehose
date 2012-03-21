@@ -105,8 +105,9 @@ class FacetsControllerTest < ActionController::TestCase
     assert_equal 'B20232', product_type
   end
   
-  test "updating an edit category ordering" do
+  test "saving and resetting a category ordering" do
     request_data = {"ordered_names"=>["3.5\"", "2.5\""],
+     "unset_flag"=>"0",
      "action"=>"update",
      "controller"=>"facets",
      "product_type_id"=>"B20232",
@@ -120,6 +121,15 @@ class FacetsControllerTest < ActionController::TestCase
     assert_not_nil first_entry
     assert_not_nil second_entry
     assert_equal first_entry.value+1, second_entry.value
+    
+    request_data.delete("ordered_names")
+    request_data["unset_flag"] = "1"
+    get :update, request_data
+    assert_response :success
+    first_entry = Facet.find_by_name_and_feature_type_and_product_type('3.5"', 'driveSize', 'B20232')
+    second_entry = Facet.find_by_name_and_feature_type_and_product_type('2.5"', 'driveSize', 'B20232')
+    assert_nil first_entry
+    assert_nil second_entry
   end
   
   test "saving a new layout" do

@@ -53,9 +53,11 @@ class FacetsController < ApplicationController
     product_type = params[:product_type_id]
     facet_name = params[:id]
     getOrdering(facet_name, product_type).each {|instance| instance.destroy}
-    # save the new ordering
-    params[:ordered_names].each_with_index do |name, index|  
-      fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
+    if params[:unset_flag] == "0"
+      # save the new ordering
+      params[:ordered_names].each_with_index do |name, index|  
+        fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
+      end
     end
     render :nothing => true
   end
@@ -102,6 +104,8 @@ class FacetsController < ApplicationController
                 :name => params[:name],
                 :feature_type => f_type,
                 :used_for => params[:used_for])
+      @categories_with_order = (getOrdering(params[:name], Session.product_type).empty? ? [] : [params[:name]])
+
     end
   end
   

@@ -9,7 +9,7 @@
       <div>Unit: <span class='edit-translation'><%= t(@p_type+'.'+f.used_for+'.'+f.name+'.unit', :default => '') %></span></div>
       <div>Display: <%= f.get_display %></div>
       <% if f.feature_type == 'Categorical' %>
-    	  <%= link_to (@categories_with_order.include?(f.name) ? 'Update' : 'Set') + ' order of categories', edit_product_type_facet_path(:product_type_id => Session.product_type, :id => f.name) %>
+    	  <%= link_to (@categories_with_order.include?(f.name) ? 'Update' : 'Set') + ' order of categories', edit_product_type_facet_path(:product_type_id => Session.product_type, :id => f.name), :confirm => 'You will use unsaved work in the layout. Press cancel to go back and save, or OK to continue to category ordering' %>
       <% end %>
 	    <div class='check'>Style: <input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
   <% when 'sortby' -%>

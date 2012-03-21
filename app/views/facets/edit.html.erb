@@ -2,6 +2,7 @@
   <h2>Ordering for <%= @facet_name %></h2>
   <div>
     <input type="button" id="save_ordering" value="Save">
+    <input type="button" id="unset_ordering" value="Unset">
   </div>
   <div id='facet_order' class="sortable">
     <% @categories.each do |category_name| -%>
