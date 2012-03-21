@@ -39,7 +39,7 @@ gem 'capistrano-ext'
 gem 'rubyzip'
 gem 'jquery-rails'
 gem 'jstree-rails', :git => 'git://github.com/tristanm/jstree-rails.git'
-gem 'sunspot_rails', :git=> "https://github.com/wildoats/sunspot.git", :branch=>"optemo"
+gem 'sunspot_rails', :git=> "git://github.com/wildoats/sunspot.git", :branch=>"optemo"
 gem 'ruby_core_source'
 gem 'progress_bar'
 

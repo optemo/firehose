@@ -1,24 +1,24 @@
-def save_daily_sales (table,start_date,end_date)
+def save_daily_sales (table,check_exist,start_date,end_date)
   require 'net/imap'
   require 'zip/zip'
   #require 'date'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('auto@optemo.com', '***REMOVED***') 
   imap.select('Inbox') 
-
+  
   # Get the messages wanted
   if start_date || end_date # If a date is given...
     only_last=false  
     if start_date 
       since = Date.strptime(start_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
       if end_date # If end date given read emails in range
-        before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+        before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y")
         msgs = imap.search(["SINCE", since,"BEFORE", before])
       else # If no end date specified, go to last email received (today)
         msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
       end
     elsif end_date # If no start date given, but end date is, go from first email to end_date
-      before = Date.strptime(end_date,"%Y%m%d").next_day.strftime("%d-%b-%Y") 
+      before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y") 
       msgs = imap.search(["SINCE", "09-Sep-2011","BEFORE", before])
     end
   else
@@ -72,31 +72,51 @@ def save_daily_sales (table,start_date,end_date)
         orders_map = {} # map of sku => orders
         
         unless csvfile.blank? || weekly
-          
+          before_whole = Time.now()
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           orders_map = {} # map of sku => orders
-          
+          p "Reading file #{csvfile}"
           File.open(csvfile, 'r') do |f|
             f.each do |line|
               /\d+\.,,(?<sku>[^,]+),,(?<rev>"?\$\d+(,\d+)?"?),,,,[^,]+,,(?<orders>\d+)/ =~ line
               orders_map[sku] = orders if sku
             end
           end
-          
+
           case table
-          when "daily_specs"
+          when "daily_specs"         
             # Only select the products that have some existing spec in the daily spec table for that day
-            # For addition to DailySpec  
+            # For addition to DailySpec 
             date = then_date.prev_day().strftime("%Y-%m-%d")
-            products = DailySpec.where(:date => date).select("DISTINCT(sku)")
-            products.each do |prod|
-              sku = prod.sku
-              product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-              orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
-              orders = (orders_spec.nil?) ? "0" : orders_spec
-              # write orders to daily_sales for the date and the sku
-              ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
-              ds.save if ds.new_record?
+            if !check_exist && !DailySpec.where(:date => date, :name=>'online_orders').empty?
+               p "DailySpec has existing sales for #{date}. Consider changing to a more cautious approach"
+               p "Note: data for this day has not been saved."
+            else
+              p "Getting products from daily_specs..."
+              products = DailySpec.where(:date => date).select("DISTINCT(sku)")
+              p "Saving to daily specs..." 
+              if check_exist # If want to make sure there are no duplicates (To be used if records already exist for date)
+                products.each do |prod|
+                  sku = prod.sku            
+                  product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+                  orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
+                  orders = (orders_spec.nil?) ? "0" : orders_spec
+                  # write orders to daily_sales for the date and the sku 
+                  ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
+                  ds.save if ds.new_record?
+                end
+              else # Bulk insert, duplicates not checked
+                rows = []
+                products.each do |prod|
+                  sku = prod.sku         
+                  product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+                  orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
+                  orders = (orders_spec.nil?) ? "0" : orders_spec
+                  rows.push(["cont",sku,"online_orders",orders,date,product_type])
+                end
+                columns = %W( spec_type sku name value_flt date product_type )
+                DailySpec.import(columns,rows)
+              end
             end
           when "all_daily_specs"
             # For addition to AllDailySpec
@@ -113,6 +133,8 @@ def save_daily_sales (table,start_date,end_date)
               ds.save if ds.new_record?
             end
           end
+          after_whole = Time.now()
+          p "Time for sales of #{date}: #{after_whole-before_whole}"
         end
   # ******************************************
       end 
