@@ -34,6 +34,11 @@ class FacetsController < ApplicationController
     results = (cont_rules.nil? or cont_rules.empty?) ? [] : cont_rules.map(&:local_featurename).uniq
     results += (cont_custom_rules.nil? or cont_custom_rules.empty?) ? [] : cont_custom_rules.map(&:feature_name).uniq
     @sr_sortby = results.nil? ? [] : results.sort
+    @categories_with_order = @sr_filters.select { |f| !getOrdering(f, @p_type).empty? }
+  end
+  
+  def getOrdering(name, product_type)
+    results = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, name)
   end
   
   def create
@@ -42,6 +47,29 @@ class FacetsController < ApplicationController
     Facet.update_layout(product_type, 'sortby', params[:sorting_set])
     Facet.update_layout(product_type, 'show', params[:compare_set])
     render :nothing => true
+  end
+  
+  def update
+    product_type = params[:product_type_id]
+    facet_name = params[:id]
+    getOrdering(facet_name, product_type).each {|instance| instance.destroy}
+    # save the new ordering
+    params[:ordered_names].each_with_index do |name, index|  
+      fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
+    end
+    render :nothing => true
+  end
+  
+  def edit
+    @product_type = params[:product_type_id]
+    @facet_name = params[:id]
+    existing_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', @product_type, @facet_name)
+    unless existing_order.empty?
+      @categories = existing_order.map(&:name)
+    else
+      product_ids = CatSpec.find_all_by_name_and_value("product_type", Session.product_type_leaves).map(&:product_id)
+      @categories = CatSpec.where(:product_id => product_ids, :name => @facet_name).map(&:value).uniq.sort
+    end
   end
   
   def new
