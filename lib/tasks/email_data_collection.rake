@@ -13,16 +13,17 @@ task :daily_sales_collection, [:table,:check_exist,:start_date,:end_date] => :en
   #generate_daily_graphs()
 end  
  
-task :daily_pageviews_collection, [:start_date,:end_date] => :environment do |t,args|
+task :daily_pageviews_collection, [:check_exist,:start_date,:end_date] => :environment do |t,args|
   Session.new
   require 'daily_page_views'
   args.with_defaults(:start_date=>false,:end_date=>false)
+  check_exist = args.check_exist == "true" ? true : false
   if args.start_date == ""
     start_date = false
   else
     start_date = args.start_date
   end
-  save_daily_pageviews(start_date,args.end_date)
+  save_daily_pageviews(check_exist,start_date,args.end_date)
   #generate_daily_graphs()
 end  
   
