@@ -17,6 +17,36 @@ $(document).ready ->
     revert: "invalid"
   make_editable()
 
+$('#save_ordering').live "click", ->
+  # collect the ordering of elements to pass to the controller
+  ordered_values = new Array()
+  $('.cat_option').each (index) ->
+    dbname = $(this).attr('data-name')
+    ordered_values[index] = dbname
+  $.ajax
+    type: 'PUT'
+    url: window.location.pathname.split('/edit')[0]
+    data:
+      unset_flag: 0
+      ordered_names: ordered_values
+    success: (data) ->
+      alert("Finished updating category ordering")
+      window.location.href = window.location.pathname.match(/(.+\/layout_editor)/)[1]
+    error: (jqXHR, textStatus, errorThrown) ->
+      alert(jqXHR.statusText + " in updating category ordering")
+
+$('#unset_ordering').live "click", ->
+  $.ajax
+    type: 'PUT'
+    url: window.location.pathname.split('/edit')[0]
+    data:
+      unset_flag: 1
+    success: (data) ->
+      alert("Removed the category ordering")
+      window.location.href = window.location.pathname.match(/(.+\/layout_editor)/)[1]
+    error: (jqXHR, textStatus, errorThrown) ->
+      alert(jqXHR.statusText + " in updating category ordering")
+
 $('#reset_layout').live "click", ->
   locale = $(location).attr('search').split('=')[1]
   $.ajax

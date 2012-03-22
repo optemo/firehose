@@ -9,10 +9,7 @@ task :update_store_sales, [:product_type, :do_all_products, :start_date, :end_da
   args.with_defaults(:do_all_products=>"false", :start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
-  do_all_products = case args.do_all_products
-    when "true" then true
-    else false
-  end
+  do_all_products = (args.do_all_products == "true") ? true : false
   if args.product_type =~ /^[Bb]/
     store = 'B'
   elsif args.product_type =~ /^[Ff]/
@@ -21,8 +18,12 @@ task :update_store_sales, [:product_type, :do_all_products, :start_date, :end_da
     raise "Unrecognized Product Type and Store"
   end
   # Get all leaf nodes within product_type specified
-  Session.new(args.product_type)
-  update_store_sales(Session.product_type_leaves, do_all_products, store, start_date, end_date, args.directory)
+  if args.product_type == 'B30297' # BB tablets includes its accessories within this category
+    update_store_sales(["B29059","B20356","B31040","B31042","B32300"], do_all_products, store, start_date, end_date, args.directory)
+  else
+    Session.new(args.product_type)
+    update_store_sales(Session.product_type_leaves, do_all_products, store, start_date, end_date, args.directory)
+  end
 end
 
 # Finds all instock products for each day of a given month, looks up the daily sales for these products in the 

@@ -1,15 +1,29 @@
 
-task :daily_sales_collection, [:table] => :environment do |t,args|
+task :daily_sales_collection, [:table,:check_exist,:start_date,:end_date] => :environment do |t,args|
   Session.new
   require 'daily_sales'
-  save_daily_sales(args.table)
+  args.with_defaults(:start_date=>false,:end_date=>false)
+  check_exist = args.check_exist == "true" ? true : false
+  if args.start_date == "" #This lets the user omit inputting a start date. Eg: [daily_spec,false,,20110801]
+    start_date = false
+  else
+    start_date = args.start_date
+  end
+  save_daily_sales(args.table,check_exist,start_date,args.end_date)
   #generate_daily_graphs()
 end  
  
-task :daily_pageviews_collection => :environment do
+task :daily_pageviews_collection, [:check_exist,:start_date,:end_date] => :environment do |t,args|
   Session.new
   require 'daily_page_views'
-  save_daily_pageviews()
+  args.with_defaults(:start_date=>false,:end_date=>false)
+  check_exist = args.check_exist == "true" ? true : false
+  if args.start_date == ""
+    start_date = false
+  else
+    start_date = args.start_date
+  end
+  save_daily_pageviews(check_exist,start_date,args.end_date)
   #generate_daily_graphs()
 end  
   

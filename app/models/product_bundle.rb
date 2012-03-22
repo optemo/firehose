@@ -8,7 +8,7 @@ class ProductBundle < ActiveRecord::Base
       data = JSON.parse(bundle.value.gsub("=>",":"))
       if data && !data.empty?
         data.map{|d|d["sku"]}.each do |sku|
-          p_copy = Product.find_by_sku(sku)
+          p_copy = Product.find_by_sku_and_retailer(sku, Session.retailer)
           #Filtering out accessories
           if p_copy && CatSpec.find_by_name_and_product_id("product_type", p_copy.id).try(:value) == CatSpec.find_by_name_and_product_id("product_type", bundle.product_id).try(:value)
             # Get or create new product bundle
@@ -17,7 +17,6 @@ class ProductBundle < ActiveRecord::Base
               p.product_id = p_copy.id
               product_bundles << p
             end
-
             #Copy over all the products specs
             [ContSpec,BinSpec,CatSpec,TextSpec].each do |s_class|
               s_class.find_all_by_product_id(p_copy.id).each do |spec|

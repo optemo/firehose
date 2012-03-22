@@ -7,23 +7,27 @@ task :get_daily_specs => :environment do
   #analyze_daily_raw_specs
 end
 
-task :import_daily_attributes => :environment do
+task :import_daily_attributes, [:start_date,:end_date] => :environment do |t,args|
   # get historical data on raw product attributes data and write to daily specs
   raw = true
-  import_data(raw)
+  start_date = Date.strptime(args.start_date, "%Y%m%d")
+  end_date = Date.strptime(args.end_date, "%Y%m%d")
+  import_data(raw,start_date,end_date)
 end
 
-task :import_daily_factors => :environment do
+task :import_daily_factors, [:start_date,:end_date] => :environment do
   # get historical factors data and write to daily specs
   raw = false
-  import_data(raw)
+  start_date = Date.strptime(args.start_date, "%Y%m%d")
+  end_date = Date.strptime(args.end_date, "%Y%m%d")
+  import_data(raw,start_date,end_date)
 end
 
-def import_data(raw)
+def import_data(raw,start_date,end_date)
   #for local runs (change to own directory)
   #directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
-  directory = "/mysql_backup/slicehost/linode"
+  directory = "/mysql_backup/slicehost"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -32,25 +36,27 @@ def import_data(raw)
     end
   end
   # loop over each daily snapshot of the database (.sql file),
-  # import it into the temp database, then get attributes for and write them to DailySpecs
+  # if it is in the date range given:import it into the temp database, then get attributes for and write them to DailySpecs
   Dir.foreach(directory) do |snapshot|
     if snapshot =~ /\.sql/
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
-      puts 'making records for date ' + date.to_s
-      # import data from the snapshot to the temp database
-      puts "mysql -u optemo -p ***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
-      %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
-      #username and password cannot be company's (optemo, tiny******) - Must be local user's if run locally
-      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-        :username => "optemo", :password => "***REMOVED***")
-      case raw
-      when true
-        specs = get_instock_attributes()
-      when false
-        specs = get_instock_factors()
+      if (start_date..end_date) === date 
+        puts 'making records for date ' + date.to_s
+        # import data from the snapshot to the temp database
+        puts "mysql -u optemo -p ***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
+        %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
+        # Must be local user's credentials if run locally
+        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
+          :username => "optemo", :password => "***REMOVED***")
+        case raw
+        when true
+          specs = get_instock_attributes()
+        when false
+          specs = get_instock_factors()
+        end
+        ActiveRecord::Base.establish_connection(:development)
+        update_daily_specs(date, specs, raw)
       end
-      ActiveRecord::Base.establish_connection(:development)
-      update_daily_specs(date, specs, raw)
     end
   end
 end
@@ -134,7 +140,6 @@ def get_instock_attributes()
 end
 
 def update_daily_specs(date, specs, raw)
-  debugger
   specs.each do |attributes|
     sku = attributes[:sku]
     if raw == true
@@ -145,14 +150,19 @@ def update_daily_specs(date, specs, raw)
 end
 
 def add_daily_spec(sku, spec_type, name, value, product_type, date)
-  debugger
   case spec_type
   when "cont"
-    ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_flt => value, :product_type => product_type, :date => date)
+    ds = DailySpec.find_or_initialize_by_sku_and_name_and_product_type_and_date(sku,name,product_type,date)
+    ds.update_attributes(:spec_type => spec_type, :value_flt => value)
+    # ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_flt => value, :product_type => product_type, :date => date)
   when "cat"
-    ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_txt => value, :product_type => product_type, :date => date)
+    ds = DailySpec.find_or_initialize_by_sku_and_name_and_product_type_and_date(sku,name,product_type,date)
+    ds.update_attributes(:spec_type => spec_type, :value_txt => value)
+    #ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_txt => value, :product_type => product_type, :date => date)
   when "bin"
-    ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_bin => value, :product_type => product_type, :date => date)
+    ds = DailySpec.find_or_initialize_by_sku_and_name_and_product_type_and_date(sku,name,product_type,date)
+    ds.update_attributes(:spec_type => spec_type, :value_bin => value)
+    #ds = DailySpec.new(:spec_type => spec_type, :sku => sku, :name => name, :value_bin => value, :product_type => product_type, :date => date)
   end
   ds.save
 end

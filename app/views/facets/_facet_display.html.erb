@@ -4,11 +4,14 @@
     <% suffix = (f.style == 'asc' or f.style == 'desc') ? ('_' + f.style) : '' -%>
   	<div>Name: <span class='edit-translation'><%= t(@p_type+'.'+f.used_for+'.'+f.name+suffix+'.name', :default => f.name + suffix) %></span></div>
   	<div>DB name: <%= (f.name + suffix) %></div> 
- 	<% case f.used_for -%> 
+ 	<% case f.used_for -%>
   <% when 'filter' -%>
-      <div>Display: <%= f.get_display %></div>
       <div>Unit: <span class='edit-translation'><%= t(@p_type+'.'+f.used_for+'.'+f.name+'.unit', :default => '') %></span></div>
-	    <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
+      <div>Display: <%= f.get_display %></div>
+      <% if f.feature_type == 'Categorical' %>
+    	  <%= link_to (@categories_with_order.include?(f.name) ? 'Update' : 'Set') + ' order of categories', edit_product_type_facet_path(:product_type_id => Session.product_type, :id => f.name), :confirm => 'You will use unsaved work in the layout. Press cancel to go back and save, or OK to continue to category ordering' %>
+      <% end %>
+	    <div class='check'>Style: <input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
   <% when 'sortby' -%>
 	<div>Ordering: 
 	  <select class="sort_option" id="sorting_<%= f.name %>">

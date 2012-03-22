@@ -4,7 +4,7 @@ class BestbuyController < AccessoriesController
   def index
     initialize_constants()
     # Laptops: B20352, TVs: B21344, Tablets: B30297, Cameras: B20218, DSLRs: B20222
-    product_types = ["B20352","B21344","B30297","B20218","B20222"]
+    product_types = ["B20352","B30297","B21344","B20218","B20222"]
     ids = get_products(product_types)
     render "index", :locals => {:best_sellers => ids}
   end

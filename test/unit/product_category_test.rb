@@ -17,13 +17,13 @@ class ProductCategoryTest < ActiveSupport::TestCase
   test "get_children and leaves methods" do 
         
     #test a node without any children
-    assert_equal [], ProductCategory.get_leaves("B28597")
+    assert_equal ["B28597"], ProductCategory.get_leaves("B28597")
     #test a single node with one level of children
 
     assert_equal 2, ProductCategory.get_leaves("B30317a").uniq.count
     #test an array of nodes with more than one level children
 
-    assert_equal 5,  ProductCategory.get_leaves(["B30317a","B29339"]).uniq.count
+    assert_equal 6,  ProductCategory.get_leaves(["B30317a","B29339"]).uniq.count
   end
   
   test "get_ancestors method" do  

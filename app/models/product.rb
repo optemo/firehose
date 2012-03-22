@@ -1,4 +1,5 @@
 class Product < ActiveRecord::Base
+  require 'sunspot_autocomplete'
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
@@ -6,6 +7,69 @@ class Product < ActiveRecord::Base
   has_many :text_specs, :dependent=>:delete_all
   has_many :product_siblings
   has_many :product_bundles
+  attr_writer :product_name
+  
+  searchable(auto_index: false) do
+    text :title do
+      cat_specs.find_by_name("title").try(:value)
+    end
+     
+    text :description do
+      text_specs.find_by_name("longDescription").try(:value)
+    end
+    text :sku
+    boolean :instock
+    string :eq_id_str 
+    string :product_type do
+      cat_specs.find_by_name(:product_type).try(:value)
+    end
+    
+    string :first_ancestors
+    string :second_ancestors
+    
+   (Facet.find_all_by_used_for("filter")+Facet.find_all_by_used_for("sortby")).each do |s|
+    if (s.feature_type == "Continuous")
+      float s.name.to_sym, trie: true do
+        cont_specs.find_by_name(s.name).try(:value)
+      end
+    elsif (s.feature_type == "Categorical")
+      string s.name.to_sym do
+        cat_specs.find_by_name(s.name).try(:value)
+      end
+    elsif (s.feature_type == "Binary")
+      string s.name.to_sym do
+        bin_specs.find_by_name(s.name).try(:value)
+      end
+    end
+   end
+    autosuggest :product_name, :using => :instock?                  
+  end
+  
+  def first_ancestors
+    if pt = cat_specs.find_by_name(:product_type)
+      list = ProductCategory.get_ancestors(pt.value, 3)
+      list.join("")+"#{pt.value}" if list
+    end
+  end
+  
+  def second_ancestors
+    if pt = cat_specs.find_by_name(:product_type)
+      list = ProductCategory.get_ancestors(pt.value, 4)
+      list.join("")+"#{pt.value}" if list
+    end
+  end
+  
+  def eq_id_str
+    Equivalence.find_by_product_id(id).try(:eq_id).to_s
+  end
+  
+  def instock?
+    if (instock)
+      cat_specs.find_by_name("title").try(:value)
+    else
+      false
+    end
+  end
 
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
@@ -87,8 +151,7 @@ class Product < ActiveRecord::Base
         spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
         specs_to_delete << spec if spec && !spec.modified
       else
-        puts ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
-        #raise ValidationError, ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec)
+        puts ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec) # was: raise ValidationError
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
@@ -121,7 +184,8 @@ class Product < ActiveRecord::Base
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name] # Bulk insert/update for efficiency
     end
     specs_to_delete.each(&:destroy)
-    products_to_save.values.each(&:save) #Save products and associated specs
+    #Save products and associated specs
+    products_to_save.values.each(&:save)
     
     ProductBundle.get_relations
     #Get the color relationships loaded
@@ -129,6 +193,12 @@ class Product < ActiveRecord::Base
     Equivalence.fill
     Product.compute_custom_specs(Product.current_type)
     #This assumes Firehose is running with the same memcache as the Discovery Platform
+    
+    #Reindex sunspot
+    Sunspot.index(products_to_save.values)
+    Sunspot.index(products_to_update.values)
+    Sunspot.commit
+    
     begin
       Rails.cache.clear
     rescue Dalli::NetworkError

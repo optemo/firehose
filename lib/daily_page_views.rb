@@ -1,16 +1,31 @@
-def save_daily_pageviews
+def save_daily_pageviews (check_exist,start_date,end_date)
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
   imap.login('files@optemo.com', '***REMOVED***') 
   imap.select('INBOX') 
   
-  #Reset to true afterwards
+  # Get the messages wanted
+  if start_date || end_date # If a date is given...
+    only_last=false  
+    if start_date 
+      since = Date.strptime(start_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+      if end_date # If end date given read emails in range
+        before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y")
+        msgs = imap.search(["SINCE", since,"BEFORE", before])
+      else # If no end date specified, go to last email received (today)
+        msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
+      end
+    elsif end_date # If no start date given, but end date is, go from first email to end_date
+      before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y") 
+      msgs = imap.search(["SINCE", "29-Oct-2011","BEFORE", before])
+    end
+  else
+    only_last=true  #only process the last email
+    # 28-Oct-2011 is earliest possible date for online sales data (daily)
+    msgs = imap.search(["SINCE", "29-Oct-2011"])
+  end
   
-  only_last=false    #only process the last email
-  # All msgs in a folder 
-  # Oct 29, 2011 is the earliset possible date for page views
-  msgs = imap.search(["SINCE", "01-Mar-2012","BEFORE", "02-Mar-2012"])
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -54,7 +69,7 @@ def save_daily_pageviews
         end
         
         unless csvfile.blank? || weekly
-          
+          before_whole = Time.now()
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           views_map = {} # map of sku => views
           
@@ -64,18 +79,42 @@ def save_daily_pageviews
               views_map[sku] = views if sku
             end
           end
+          
+          # Only select the products that have some existing spec in the daily spec table for that day
+          # For addition to DailySpec 
           date = then_date.prev_day().strftime("%Y-%m-%d")
-          #only select the products that have some existing spec in the daily spec table for that day
-          products = DailySpec.where(:date => date).select("DISTINCT(sku)")
-          products.each do |prod_sku|
-            sku = prod_sku.sku
-            product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-            views_spec = views_map[sku]
-            views = (views_spec.nil?) ? "0" : views_spec.delete(',') # Otherwise to_i will only return characters before first comma
-            # write views to daily_sales for the date and the sku
-            ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'pageviews',views,date,product_type)
-            ds.save if ds.new_record?
+          if !check_exist && !DailySpec.where(:date => date, :name=>'pageviews').empty?
+             p "DailySpec has existing views for #{date}. Consider changing to a more cautious approach"
+             p "Note: data for this day has not been saved."
+          else
+            p "Getting products from daily_specs..."
+            products = DailySpec.where(:date => date).select("DISTINCT(sku)")
+            p "Saving to daily specs..." 
+            if check_exist # If want to make sure there are no duplicates (To be used if records already exist for date)
+              products.each do |prod|
+                sku = prod.sku            
+                product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+                views_spec = views_map[sku]
+                views = (views_spec.nil?) ? "0" : views_spec.delete(',') # Otherwise to_i will only return characters before first comma
+                # write views to daily_sales for the date and the sku
+                ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'pageviews',views,date,product_type)
+                ds.save if ds.new_record?
+              end
+            else # Bulk insert, duplicates not checked
+              rows = []
+              products.each do |prod|
+                sku = prod.sku         
+                product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+                views_spec = views_map[sku]
+                views = (views_spec.nil?) ? "0" : views_spec.delete(',')
+                rows.push(["cont",sku,"pageviews",views,date,product_type])
+              end
+              columns = %W( spec_type sku name value_flt date product_type )
+              DailySpec.import(columns,rows)
+            end
           end
+          after_whole = Time.now()
+          p "Time for sales of #{date}: #{after_whole-before_whole}"
         end
   # ******************************************
       end 
