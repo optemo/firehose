@@ -1,13 +1,13 @@
 task :get_all_daily_specs => :environment do
   require 'ruby-debug'
-  write_instock_skus_into_file ("drive_bestbuy")
-  analyze_daily_raw_specs("drive_bestbuy")
+ # write_instock_skus_into_file ("drive_bestbuy")
+  analyze_all_daily_raw_specs("drive_bestbuy")
 end
 
 task :import_all_daily_attributes => :environment do
   # get historical data on raw product attributes data and write to daily specs
   raw = true
-  import_data(raw)
+  import_all_data(raw)
 end
 
 task :import_coeffs => :environment do
@@ -17,7 +17,7 @@ task :get_features => :environment do
   get_all_features
 end
 
-def import_data(raw)
+def import_all_data(raw)
   directory = "/mysql_backup/slicehost"
   #directory = "/Users/Monir/optemo/mysql_backup"
   
@@ -40,12 +40,8 @@ def import_data(raw)
       #username and password cannot be company's (optemo, tiny******)
       ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
         :username => "monir", :password => "m_222978")
-      case raw
-      when true
-        specs = get_instock_attributes(date)
-      when false
-        specs = get_instock_factors(date)
-      end
+       specs = get_all_instock_attributes(date)
+   
       ActiveRecord::Base.establish_connection(:development)
       update_daily_specs(date, specs, raw)
     end
@@ -56,7 +52,7 @@ end
 # collects values of all specs for instock product_type
 # assumes an active connection to the temp database 
 # output: an array of hashes of the selected specs, one entry per product
-def get_instock_attributes(date)
+def get_all_instock_attributes(date)
   specs = []
   product_type="drive_bestbuy"
   cont_specs = get_cont_specs(product_type).reject{|e| e=~/[a-z]+_[factor|fr]/}
@@ -64,6 +60,7 @@ def get_instock_attributes(date)
     puts "#{r}"
   end
   cat_specs =  get_cat_specs(product_type).reject{|e| e=~/[a-z]+_[factor|fr]/}
+  #cat_specs = cat_specs.reject{|e| e== "imgsurl" | e== "imglurl" | e== "imgmurl" |e== "img150url"}
   cat_specs.each do |r|
     puts "#{r}"
   end
@@ -72,26 +69,29 @@ def get_instock_attributes(date)
     puts "#{r}"
   end
   
-  instock = Product.find_all_by_instock_and_product_type(1, product_type)
+  #instock = Product.find_all_by_instock_and_product_type(1, product_type)
+  some_prodcuts = CatSpec.where("name='category' and value= '29583'").map(&:product_id)
+  instock = Product.where("id in (?) and instock = ?",some_products,1)
+  
   instock.each do |p|
     sku = p.sku
     pid = p.id
     ContSpec.find_all_by_product_id(pid).each do |row|
       if (cont_specs.include?(row.name))
-        specs << {sku: sku, name: row.name, spec_type: "cont", value_flt: row.value, product_type: product_type, date: date}   
+        specs << {sku: sku, name: row.name, spec_type: "cont", value_flt: row.value, product_type: row.product_type, date: date}   
       end
     end
     
     CatSpec.find_all_by_product_id(pid).each do |row|
       if (cat_specs.include?(row.name))
-        specs << {sku: sku, name: row.name, spec_type: "cat", value_txt: row.value, product_type: product_type, date: date}
+        specs << {sku: sku, name: row.name, spec_type: "cat", value_txt: row.value, product_type: row.product_type, date: date}
       end
     end
     
     BinSpec.find_all_by_product_id(pid).each do |row|
       if (bin_specs.include?(row.name))
           row.value = 0 if row.value == nil  
-          specs << {sku: sku, name: row.name, spec_type: "bin", value_bin: row.value, product_type: product_type, date: date}
+          specs << {sku: sku, name: row.name, spec_type: "bin", value_bin: row.value, product_type: row.product_type, date: date}
       end
     end
 
@@ -121,49 +121,55 @@ def update_daily_specs(date, specs, raw)
   AllDailySpec.import alldailyspecs
 end
 
-def analyze_daily_raw_specs(product_type="camera_bestbuy")
+def analyze_all_daily_raw_specs(product_type="camera_bestbuy")
 
-  output_name =  "./log/Daily_Data/all_raw_data.txt"
+  output_name =  "/Users/Monir/optemo/data_analysis/all_raw_data_test.txt"
   out_file = File.open(output_name,'w')
-  
+  daily_product ={}
+  sku = ""
   features = get_all_features()
   features.delete("title")
   features.delete("model")
-  puts "features #{features}"
-  
-  factors = get_cumulative_data(product_type,features)
+  features.delete("mps")
+  features.delete("imgsurl")
+  features.delete("imgmurl")
+  features.delete("imglurl")
+  features.delete("img150url")
   out_file.write("date sku "+ features.keys.join(" ") + "\n")
-  factors.keys.each do |date|
-    # for each date appearing in the factors and each sku
-    # query the database to get historical attributes stored in daily specs
-    factors[date].each do |daily_product|
-      sku = daily_product["sku"]
-      #puts "date #{date} sku #{sku}"
-      feature_records = AllDailySpec.find_all_by_date_and_sku(date, sku)
-      next if feature_records.empty?
+  all_records = AllDailySpec.where(["date >= ? and date <= ?", '2011-08-01', '2011-112-31']).order("date").group_by(&:date)
   
-      feature_records.each do |record|
-        value = 
-        case record.spec_type
-          when "cat"
-            record.value_txt.gsub(/\s+/, '_')
-          when "bin"
-            record.value_bin == true ? 1 : 0
-          when "cont"
-            record.value_flt
+  puts "all_records_size #{all_records.size}"
+  all_records.each do |dates , keys|
+    #puts "date #{dates}"
+     date = dates
+      grouped_sku = keys.group_by(&:sku)
+      grouped_sku.each do |skus, k|
+        #puts "sku_test #{skus}"
+        sku = skus
+        daily_product ={}
+        #puts "sku #{sku} k.size #{k.size}"
+        k.each do |record_sub|
+          value = 
+          case record_sub.spec_type
+            when "cat"
+              record_sub.value_txt.gsub(/\s+/, '_')
+            when "bin"
+              record_sub.value_bin == true ? 1 : 0
+            when "cont"
+              record_sub.value_flt
+          end
+          daily_product[record_sub.name] = value
         end
-        daily_product[record.name] = value
+        # output a specification of the product to file
+        output_line= [date, sku]
+         output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
+         out_file.write(output_line + "\n")
       end
-      # output a specification of the product to file
-      output_line= [date, sku]
-      output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
-      #puts "output_line #{output_line}"
-      out_file.write(output_line + "\n")
-    end
   end
+  
 end
 
-def get_cumulative_data(product_type, features)
+def get_all_cumulative_data(product_type, features)
   
   factors = {}
   data_path =  "./log/Daily_Data/"
@@ -183,9 +189,9 @@ end
 def get_all_features
   features={}
   # when we want to get the features of a specific subcategory of a product_type
-   products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='20243'").map(&:sku)
+   products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='29583'").map(&:sku)
    skus = products.join(", ")
-   puts "skus #{skus}"
+   #puts "skus #{skus}"
    cont_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'cont'").map(&:name)
     cont_sp.each do |r|
      features[r] = 0
@@ -198,7 +204,7 @@ def get_all_features
    bin_sp.each do |r|
      features[r]=0
    end
-  puts "#{features}"
+ # puts "#{features}"
   features
 end
 
@@ -218,7 +224,7 @@ def write_instock_skus_into_file(product_type= "camera_bestbuy")
 end
 
 def insert_regression_coefficient
-  data_path =  "/Users/Monir/optemo/data_analysis/Outputs&Inputs/"
+  data_path =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/Outputs&Inputs/"
   fname = "camera_bestbuy_lr_coeffs_Test5_LR.txt"
   product_type= "B20218"
   f = File.open(data_path + fname, 'r')
@@ -226,8 +232,10 @@ def insert_regression_coefficient
   coeffs =[]
   lines.each do |line|
       a = line.split
-      puts "#{a[0]} #{a[1]} #{a[2]}"
-      coeffs << Facet.new(name: a[0].to_str, feature_type: a[2], used_for: "utility", value: a[1].to_f, active: 1, product_type: product_type)     
+      puts "#{a[0]} #{a[1]} #{a[2]} #{a[3]} #{a[4]}"
+      coeffs << Facet.new(name: a[0].to_str, feature_type: a[4], used_for: "utility", value: a[3].to_f, active: 1, product_type: product_type)   
+      #puts "#{a[0]} #{a[1]} #{a[2]}"
+      #coeffs << Facet.new(name: a[0].to_str, feature_type: a[2], used_for: "utility", value: a[1].to_f, active: 1, product_type: product_type)     
   end
   Facet.import coeffs
 end
