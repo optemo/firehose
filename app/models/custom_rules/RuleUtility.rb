@@ -31,9 +31,11 @@ class RuleUtility < Customization
           elsif (f.name =~ /^brand_/ || f.name =~ /^color_/)
             sp_feature = f.name.split("_")
             #puts "#{sp_feature}"
+            name = sp_feature[1]
+            name = sp_feature[1]+"_"+sp_feature[2] if (sp_feature.size == 3)
             records[sp_feature[0]] ||= model.where(["product_id IN (?) and name=? ", all_products,sp_feature[0]]).group_by(&:product_id)
             if records[sp_feature[0]][product.id]
-              feature_value = 1 if records[sp_feature[0]][product.id].first.value == sp_feature[1]
+              feature_value = 1 if records[sp_feature[0]][product.id].first.value == name
             elsif (f.name == "color_na")
               feature_value = 1
             end

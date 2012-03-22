@@ -121,3 +121,12 @@ Intercept:
   used_for: utility
   value: 4.26
   active: 1
+brand_LIQUID_IMAGE:
+  id: 16
+  product_type: B20218
+  name: brand_LIQUID_IMAGE
+  feature_type: Categorical
+  used_for: utility
+  value: -3.26
+  active: 1  
+  
