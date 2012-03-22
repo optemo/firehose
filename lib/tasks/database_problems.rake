@@ -1,6 +1,21 @@
 # Put code for getting info about (or figuring out) database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
+# 21/03/2012: Duplicates appear in siblings (same product_id and value for color)
+# delete all the product siblings where the products are from different retailers
+task :get_rid_of_siblings_duplicates => :environment do
+  results = ProductSibling.find_by_sql 'SELECT product_id, value, count(*) FROM `product_siblings` GROUP BY product_id, value HAVING count(*) > 1'
+  #records = ActiveRecord::Base.connection.execute('SELECT product_id, value, count(*) FROM `product_siblings` GROUP BY product_id, value HAVING count(*) > 1')
+  results.each do |result|
+    ProductSibling.find_all_by_product_id_and_value(result.product_id, result.value).each do |ps|
+      if Product.find(ps.product_id).retailer != Product.find(ps.sibling_id).retailer
+        ps.destroy
+      end
+    end
+  end
+end
+
+
 # 16/03/2012: Some categories are scraped/have products when they shouldn't
 # This removes the products/specs that were scraped in the categories
 task :get_rid_of_category => :environment do

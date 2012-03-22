@@ -10,7 +10,7 @@ class ProductSibling < ActiveRecord::Base
         skus = []
         data.each{|sk| skus<<sk["sku"] if sk["type"]=="Variant"} # AdditionalMedia -- has the other image urls. Save these other small image urls instead of colors.
         #Check if the product is in our database
-        sibs = skus.map{|sku|Product.find_by_sku(sku).try(:id)}.compact
+        sibs = skus.map{|sku|Product.find_by_sku_and_retailer(sku, Session.retailer).try(:id)}.compact
         sibs.each do |sib_id|
           ps = ProductSibling.find_or_initialize_by_product_id(p_id)
           if ps.sibling_id != sib_id
