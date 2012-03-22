@@ -25,9 +25,9 @@ end
 
 def import_data(raw,start_date,end_date)
   #for local runs (change to own directory)
-  directory = "/optemo/snapshots/slicehost"
+  #directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
-  #directory = "/mysql_backup/slicehost/linode"
+  directory = "/mysql_backup/slicehost"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -44,10 +44,10 @@ def import_data(raw,start_date,end_date)
         puts 'making records for date ' + date.to_s
         # import data from the snapshot to the temp database
         puts "mysql -u optemo -p ***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
-        %x[mysql -u marc -pkeiko2010 -h jaguar temp < #{directory}/#{snapshot}]
+        %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
         # Must be local user's credentials if run locally
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-          :username => "marc", :password => "keiko2010")
+          :username => "optemo", :password => "***REMOVED***")
         case raw
         when true
           specs = get_instock_attributes()
