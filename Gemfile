@@ -63,7 +63,7 @@ group :test do
   gem 'guard-spork'
   gem 'rb-fsevent'
   gem 'ruby-prof'
-  #gem 'growl_notify'
+  gem 'growl_notify'
   gem 'factory_girl_rails'
   #gem 'webrat', '0.7.3'
 end

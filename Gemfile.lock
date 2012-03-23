@@ -100,6 +100,8 @@ GEM
       railties (>= 3.0.0)
     fattr (2.2.1)
     ffi (1.0.11)
+    growl_notify (0.0.3)
+      rb-appscript
     guard (1.0.1)
       ffi (>= 0.5.0)
       thor (~> 0.14.6)
@@ -163,6 +165,7 @@ GEM
       rdoc (~> 3.4)
       thor (~> 0.14.6)
     rake (0.9.2.2)
+    rb-appscript (0.6.1)
     rb-fsevent (0.9.0)
     rdoc (3.12)
       json (~> 1.4)
@@ -210,6 +213,7 @@ DEPENDENCIES
   coffee-rails (~> 3.1.0)
   dalli (= 1.0.2)
   factory_girl_rails
+  growl_notify
   guard-spork
   guard-test
   i18n-active_record!
