@@ -151,7 +151,7 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_nil saved_spec, 'BinSpec for new should not be present for product that is not new'
   end
   
-  test "Rule Bestseller" do    
+  test "Rule Bestseller" do
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 902)
     p3 = create(:product, sku: 903)
@@ -221,6 +221,87 @@ class CustomizationTest < ActiveSupport::TestCase
     inexistant_pid = p6.id*100+1
     assert_raise(ActiveRecord::RecordNotFound) { RuleBestSeller.group_computation([inexistant_pid])}
   end
+  
+  def top_20_rule_tests(input_spec_name, rule_name)
+    p1 = create(:product, sku: 901)
+    p2 = create(:product, sku: 902)
+    p3 = create(:product, sku: 903)
+    p4 = create(:product, sku: 904)
+    p5 = create(:product, sku: 905)
+    p6 = create(:product, sku: 906)
+    
+    DailySpec.create(:sku => p1.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 4)
+    DailySpec.create(:sku => p1.sku, :name => input_spec_name, :date => (Date.today-1).to_s, :value_flt => 3)
+    DailySpec.create(:sku => p2.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 3)
+    DailySpec.create(:sku => p3.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 0)
+    DailySpec.create(:sku => p4.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 0)
+    DailySpec.create(:sku => p5.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 3)
+    
+    # result = rule_name.group_computation([p6.id])
+    # assert_empty result, "product with no input values in DailySpecs should not be a bestseller"
+    # 
+    # result = rule_name.group_computation([p3.id, p4.id])
+    # assert_empty result, "no spec created for a set with all 0 "
+    
+    result = rule_name.group_computation([p2.id])
+    result.each {|r| r.save}
+    assert_not_empty result, "spec created for a single product with non-0 input specs"
+    saved_spec = BinSpec.find_by_product_id_and_name(p2.id, rule_name.feature_name)
+    assert_not_nil saved_spec, "spec created for a single product with non-0 input specs"
+    assert saved_spec.value, "spec true created for a single product with non-0 input specs"
+    
+    # different order numbers
+    oldspec = BinSpec.find_by_product_id_and_name(p1.id, rule_name.feature_name)
+    oldspec.destroy unless oldspec.nil?
+    oldspec = BinSpec.find_by_product_id_and_name(p2.id, rule_name.feature_name)
+    oldspec.destroy unless oldspec.nil?
+    results = rule_name.group_computation([p1.id, p2.id, p3.id, p6.id])
+    results.each {|r| r.save}
+    assert_not_empty results, "spec created for some product with non-0 input specs"
+    assert_not_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p1.id && spec.value == true}
+    assert_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p2.id}
+    assert_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p3.id}
+    assert_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p4.id}
+    assert_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p6.id}
+    assert_not_nil BinSpec.find_by_product_id_and_name(p1.id, rule_name.feature_name)
+    assert_nil BinSpec.find_by_product_id_and_name(p2.id, rule_name.feature_name)
+    
+    # all equal number of input specs
+    results = rule_name.group_computation([p2.id, p5.id])
+    results.each {|r| r.save}
+    assert_not_empty results, 'all products with max non-0 number of input specs should be top viewed'
+    assert_not_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p2.id && spec.value == true}
+    assert_not_empty results.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p5.id && spec.value == true}
+    
+    # make sure non-promo week input specs are excluded
+    DailySpec.create(:sku => p6.id, :name => input_spec_name, :date => (Date.today-10).to_s, :value_flt => 3)
+    result = rule_name.group_computation([p6.id])
+    results.each {|r| r.save}
+    assert_empty result, "input values not in the promo week are not considered"
+    assert_nil BinSpec.find_by_product_id_and_name(p6.id, rule_name.feature_name)
+    
+    # last friday should be included in promo week
+    lastFriday = Date.today - (Date.today.wday - 5) % 7
+    DailySpec.create(:sku => p6.sku, :name => input_spec_name, :date => lastFriday.to_s, :value_flt => 3)
+    result = rule_name.group_computation([p6.id])
+    result.each {|r| r.save}
+    assert_not_empty result, "last friday should be included in promo week"
+    assert_not_empty result.select{|spec| spec.name == rule_name.feature_name && spec.product_id == p6.id && spec.value == true}
+    
+    # computing rule should fail on invalid pid
+    inexistant_pid = p6.id*100+1
+    assert_raise(ActiveRecord::RecordNotFound) { rule_name.group_computation([inexistant_pid])}
+  end
+  
+  test "Rule TopViewed" do
+    top_20_rule_tests('pageviews', RuleTopViewed)
+  end
+  
+  test "Rule BestS again" do
+    top_20_rule_tests('orders', RuleBestSeller)
+  end
+  
+  
   test "Rule Utility" do
     create(:product_category, product_type: 'BDepartments', l_id: 10, r_id: 5000)
     create(:product_category, product_type: 'B20218', l_id: 600, r_id: 1200)

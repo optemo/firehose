@@ -15,6 +15,17 @@ task :get_rid_of_siblings_duplicates => :environment do
   end
 end
 
+task :find_siblings_with_null_colour => :environment do
+  results = ProductSibling.where(:value => nil)
+  results.each do |result|
+    pid = result.sibling_id
+    colour_spec = CatSpec.find_by_product_id_and_name(pid, 'color')
+    title_spec = CatSpec.find_by_product_id_and_name(pid, 'title')
+    sku = Product.find_by_product_id(pid).sku
+    puts sku.to_s + 'is a sibling listing null colour; color spec is: ' + colour_spec + ' title spec is: ' + title_spec
+  end
+end
+
 
 # 16/03/2012: Some categories are scraped/have products when they shouldn't
 # This removes the products/specs that were scraped in the categories
