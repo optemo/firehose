@@ -20,6 +20,14 @@ public/system
 lib/.ruby_inline
 
 
+cache/*
+.sass-cache/
+public/assets/
+
+solr/data
+solr/pids
+
+
 mkmf.log
 public/images/cameras
 

@@ -44,8 +44,8 @@ gem 'ruby_core_source'
 gem 'progress_bar'
 
 group :development do
-  gem "linecache19", "0.5.13", :path => ENV['rvm_path'] + "/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
-  gem "ruby-debug-base19", "0.11.26", :path => ENV['rvm_path'] + "/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
+  gem "linecache19", "0.5.13", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
+  gem "ruby-debug-base19", "0.11.26", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
   gem "ruby-debug19", :require => 'ruby-debug'
 end
 
@@ -54,8 +54,8 @@ group :production do
 end
 
 group :test do
-  gem "linecache19", "0.5.13", :path => ENV['rvm_path'] + "/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
-  gem "ruby-debug-base19", "0.11.26", :path => ENV['rvm_path'] + "/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
+  gem "linecache19", "0.5.13", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
+  gem "ruby-debug-base19", "0.11.26", :path => "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
   gem "ruby-debug19", :require => 'ruby-debug'
   gem 'spork', '> 0.9.0.rc'
   gem 'spork-testunit'
@@ -65,13 +65,12 @@ group :test do
   gem 'ruby-prof'
   gem 'growl_notify'
   gem 'factory_girl_rails'
-  #gem 'webrat', '0.7.3'
 end
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails', "  ~> 3.1.0"
+  gem 'sass-rails', "3.1.4"
   gem 'coffee-rails', "~> 3.1.0"
   gem 'uglifier'
 end

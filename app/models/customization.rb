@@ -5,6 +5,7 @@ class Customization
   require 'custom_rules/RuleNew'
   require 'custom_rules/RuleOnSale'
   require 'custom_rules/RuleUtility'
+  require 'custom_rules/RuleTopViewed'
   
   class << self 
     attr_accessor :feature_name
@@ -19,7 +20,7 @@ class Customization
   end
   
   def Customization.all
-    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller]
+    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed]
     #Customization.subclasses
   end
   
@@ -43,8 +44,8 @@ class Customization
     results = {}
     # execute each of the rules
     rules.each do |rule|
-      if rule == RuleBestSeller
-        rule_results = RuleBestSeller.group_computation(pids)
+      if (rule == RuleBestSeller || rule == RuleTopViewed || rule == RuleUtility)
+          rule_results = RuleBestSeller.group_computation(pids)
       elsif rule == RuleUtility
         rule_results = RuleUtility.compute_utility(pids)
       else

@@ -55,6 +55,7 @@ FactoryGirl.define do
   end
   factory :product do
     instock true
+    retailer 'B'
   end
   factory :typed_product, :parent => :product do
     after_create do |product, evaluator|
