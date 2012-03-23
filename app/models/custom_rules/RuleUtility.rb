@@ -63,11 +63,11 @@ class RuleUtility < Customization
           utility << (feature_value* (f.value)) 
         end
         #Add the static calculated utility
-        puts "#{utility}"
+        # puts "#{utility}"
         utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
         product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
         product_utility.value = (utility.sum).to_f
-        puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
+        # puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
         cont_activerecords << product_utility
       end
   

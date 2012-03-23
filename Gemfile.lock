@@ -177,10 +177,11 @@ GEM
       archive-tar-minitar (>= 0.5.2)
     rubyzip (0.9.6.1)
     sass (3.1.15)
-    sass-rails (3.1.6)
+    sass-rails (3.1.4)
       actionpack (~> 3.1.0)
       railties (~> 3.1.0)
-      sass (>= 3.1.10)
+      sass (>= 3.1.4)
+      sprockets (~> 2.0.0)
       tilt (~> 1.3.2)
     spork (1.0.0rc2)
     spork-testunit (0.0.8)
@@ -226,7 +227,7 @@ DEPENDENCIES
   ruby-prof
   ruby_core_source
   rubyzip
-  sass-rails (~> 3.1.0)
+  sass-rails (= 3.1.4)
   spork (> 0.9.0.rc)
   spork-testunit
   sunspot_rails!
