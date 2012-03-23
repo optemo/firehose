@@ -15,6 +15,7 @@ task :get_rid_of_siblings_duplicates => :environment do
   end
 end
 
+# 22/03/2012: Some siblings appear with no colour scraped; we decided that is ok. Reporting such products here.
 task :find_siblings_with_null_colour => :environment do
   results = ProductSibling.where(:value => nil)
   results.each do |result|
