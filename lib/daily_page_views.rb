@@ -6,18 +6,19 @@ def save_daily_pageviews (check_exist,start_date,end_date)
   imap.select('INBOX') 
   
   # Get the messages wanted
+  debugger
   if start_date || end_date # If a date is given...
     only_last=false  
     if start_date 
-      since = Date.strptime(start_date,"%Y%m%d").next_day.strftime("%d-%b-%Y")
+      since = start_date.next_day.strftime("%d-%b-%Y")
       if end_date # If end date given read emails in range
-        before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y")
+        before = (end_date+2).strftime("%d-%b-%Y")
         msgs = imap.search(["SINCE", since,"BEFORE", before])
       else # If no end date specified, go to last email received (today)
         msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
       end
     elsif end_date # If no start date given, but end date is, go from first email to end_date
-      before = (Date.strptime(end_date,"%Y%m%d")+2).strftime("%d-%b-%Y") 
+      before = (end_date+2).strftime("%d-%b-%Y") 
       msgs = imap.search(["SINCE", "29-Oct-2011","BEFORE", before])
     end
   else
@@ -80,16 +81,18 @@ def save_daily_pageviews (check_exist,start_date,end_date)
             end
           end
           
+          /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
+          
           # Only select the products that have some existing spec in the daily spec table for that day
           # For addition to DailySpec 
           date = then_date.prev_day().strftime("%Y-%m-%d")
-          if !check_exist && !DailySpec.where(:date => date, :name=>'pageviews').empty?
+          if !check_exist && !DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?",date,'pageviews',retailer).empty?
              p "DailySpec has existing views for #{date}. Consider changing to a more cautious approach"
              p "Note: data for this day has not been saved."
           else
-            p "Getting products from daily_specs..."
-            products = DailySpec.where(:date => date).select("DISTINCT(sku)")
-            p "Saving to daily specs..." 
+    #        p "Getting products from daily_specs..."
+            products = DailySpec.where("date = ? AND product_type REGEXP ?",date,retailer).select("DISTINCT(sku)")
+    #        p "Saving to daily specs..." 
             if check_exist # If want to make sure there are no duplicates (To be used if records already exist for date)
               products.each do |prod|
                 sku = prod.sku            
