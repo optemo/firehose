@@ -1,7 +1,7 @@
 class RuleBestSeller < Customization
   @feature_name = 'bestseller'
   @product_type = ['BDepartments','FDepartments']
-  @needed_features = [{DailySpec => 'orders'}]
+  @needed_features = [{DailySpec => 'online_orders'}]
   @rule_type = 'Binary'
 
   def RuleBestSeller.group_computation(pids)
