@@ -44,7 +44,7 @@ class Customization
     results = {}
     # execute each of the rules
     rules.each do |rule|
-      if (rule == RuleBestSeller || rule == RuleTopViewed || rule == RuleUtility)
+      if (rule == RuleBestSeller || rule == RuleTopViewed)
           rule_results = RuleBestSeller.group_computation(pids)
       elsif rule == RuleUtility
         rule_results = RuleUtility.compute_utility(pids)

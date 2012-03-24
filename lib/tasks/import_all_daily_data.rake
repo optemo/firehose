@@ -123,7 +123,7 @@ end
 
 def analyze_all_daily_raw_specs(product_type="camera_bestbuy")
 
-  output_name =  "/Users/Monir/optemo/data_analysis/all_raw_data_test.txt"
+  output_name =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/raw_data_29583_1.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
@@ -136,35 +136,34 @@ def analyze_all_daily_raw_specs(product_type="camera_bestbuy")
   features.delete("imglurl")
   features.delete("img150url")
   out_file.write("date sku "+ features.keys.join(" ") + "\n")
-  all_records = AllDailySpec.where(["date >= ? and date <= ?", '2011-08-01', '2011-112-31']).order("date").group_by(&:date)
+  days= AllDailySpec.where("date >= ? and date <= ?", '2011-08-01', '2011-12-31').select("Distinct(date)").order("date")
   
-  puts "all_records_size #{all_records.size}"
-  all_records.each do |dates , keys|
-    #puts "date #{dates}"
-     date = dates
-      grouped_sku = keys.group_by(&:sku)
-      grouped_sku.each do |skus, k|
-        #puts "sku_test #{skus}"
-        sku = skus
-        daily_product ={}
-        #puts "sku #{sku} k.size #{k.size}"
-        k.each do |record_sub|
-          value = 
-          case record_sub.spec_type
-            when "cat"
-              record_sub.value_txt.gsub(/\s+/, '_')
-            when "bin"
-              record_sub.value_bin == true ? 1 : 0
-            when "cont"
-              record_sub.value_flt
-          end
-          daily_product[record_sub.name] = value
-        end
-        # output a specification of the product to file
-        output_line= [date, sku]
-         output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
-         out_file.write(output_line + "\n")
-      end
+  days.each do |day|
+   puts "day #{day.date}"  
+   all_records = AllDailySpec.where("date = ?",day.date)
+   puts "all_records_size #{all_records.size}"
+     date = day.date
+     grouped_sku = all_records.group_by(&:sku)
+     grouped_sku.each do |skus, k|
+       sku = skus
+       daily_product ={}
+       k.each do |record_sub|
+         value = 
+         case record_sub.spec_type
+           when "cat"
+             record_sub.value_txt.gsub(/\s+/, '_')
+           when "bin"
+             record_sub.value_bin == true ? 1 : 0
+           when "cont"
+             record_sub.value_flt
+         end
+         daily_product[record_sub.name] = value
+       end
+       # output a specification of the product to file
+       output_line= [date, sku]
+        output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
+        out_file.write(output_line + "\n")
+     end
   end
   
 end

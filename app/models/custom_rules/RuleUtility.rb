@@ -32,7 +32,6 @@ class RuleUtility < Customization
             sp_feature = f.name.split("_")
             name = sp_feature[1]
             name = sp_feature[1]+" "+sp_feature[2] if (sp_feature.size == 3)
-            #puts "#{name}"
             records[sp_feature[0]] ||= model.where(["product_id IN (?) and name=? ", all_products,sp_feature[0]]).group_by(&:product_id)
             if records[sp_feature[0]][product.id]
               feature_value = 1 if records[sp_feature[0]][product.id].first.value == name
@@ -50,6 +49,7 @@ class RuleUtility < Customization
               
               if f.name == "displayDate"
                 feature_value = RuleUtility.calculateFactor_displayDate(feature_value)
+                # puts "feature_value #{feature_value}"
               
               elsif f.name== "saleEndDate"
                 feature_value = RuleUtility.calculateFactor_saleEndDate(feature_value)
@@ -61,9 +61,10 @@ class RuleUtility < Customization
             end
           end
           utility << (feature_value* (f.value)) 
-           # puts "#{utility}"
+            
         end
         #Add the static calculated utility 
+        #puts "#{utility}"
         utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
         product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
         product_utility.value = (utility.sum).to_f
@@ -74,7 +75,7 @@ class RuleUtility < Customization
      cont_activerecords  
   end
   def self.calculateFactor_sale(fVal1, fVal2) 
-     fVal1 > fVal2 ? (fVal1-fVal2)/fVal1 : 0
+     fVal1 > fVal2 ? ((fVal1-fVal2)/fVal1) : 0
   end
   
   def self.calculateFactor_displayDate(fVal)
