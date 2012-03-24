@@ -159,12 +159,12 @@ class CustomizationTest < ActiveSupport::TestCase
     p5 = create(:product, sku: 905)
     p6 = create(:product, sku: 906)
     
-    DailySpec.create(:sku => p1.sku, :name => 'orders', :date => Date.today.to_s, :value_flt => 4)
-    DailySpec.create(:sku => p1.sku, :name => 'orders', :date => (Date.today-1).to_s, :value_flt => 3)
-    DailySpec.create(:sku => p2.sku, :name => 'orders', :date => Date.today.to_s, :value_flt => 3)
-    DailySpec.create(:sku => p3.sku, :name => 'orders', :date => Date.today.to_s, :value_flt => 0)
-    DailySpec.create(:sku => p4.sku, :name => 'orders', :date => Date.today.to_s, :value_flt => 0)
-    DailySpec.create(:sku => p5.sku, :name => 'orders', :date => Date.today.to_s, :value_flt => 3)
+    DailySpec.create(:sku => p1.sku, :name => 'online_orders', :date => Date.today.to_s, :value_flt => 4)
+    DailySpec.create(:sku => p1.sku, :name => 'online_orders', :date => (Date.today-1).to_s, :value_flt => 3)
+    DailySpec.create(:sku => p2.sku, :name => 'online_orders', :date => Date.today.to_s, :value_flt => 3)
+    DailySpec.create(:sku => p3.sku, :name => 'online_orders', :date => Date.today.to_s, :value_flt => 0)
+    DailySpec.create(:sku => p4.sku, :name => 'online_orders', :date => Date.today.to_s, :value_flt => 0)
+    DailySpec.create(:sku => p5.sku, :name => 'online_orders', :date => Date.today.to_s, :value_flt => 3)
     
     result = RuleBestSeller.group_computation([p6.id])
     assert_empty result, "product with no orders in DailySpecs should not be a bestseller"
@@ -203,7 +203,7 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_not_empty results.select{|spec| spec.name == RuleBestSeller.feature_name && spec.product_id == p5.id && spec.value == true}
     
     # make sure non-promo week orders are excluded
-    DailySpec.create(:sku => p6.id, :name => 'orders', :date => (Date.today-10).to_s, :value_flt => 3)
+    DailySpec.create(:sku => p6.id, :name => 'online_orders', :date => (Date.today-10).to_s, :value_flt => 3)
     result = RuleBestSeller.group_computation([p6.id])
     results.each {|r| r.save}
     assert_empty result, "orders not in the promo week are not considered"
@@ -211,7 +211,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # last friday should be included in promo week
     lastFriday = Date.today - (Date.today.wday - 5) % 7
-    DailySpec.create(:sku => p6.sku, :name => 'orders', :date => lastFriday.to_s, :value_flt => 3)
+    DailySpec.create(:sku => p6.sku, :name => 'online_orders', :date => lastFriday.to_s, :value_flt => 3)
     result = RuleBestSeller.group_computation([p6.id])
     result.each {|r| r.save}
     assert_not_empty result, "last friday should be included in promo week"
@@ -242,7 +242,7 @@ class CustomizationTest < ActiveSupport::TestCase
     # 
     # result = rule_name.group_computation([p3.id, p4.id])
     # assert_empty result, "no spec created for a set with all 0 "
-    
+    debugger
     result = rule_name.group_computation([p2.id])
     result.each {|r| r.save}
     assert_not_empty result, "spec created for a single product with non-0 input specs"
@@ -298,7 +298,7 @@ class CustomizationTest < ActiveSupport::TestCase
   end
   
   test "Rule BestS again" do
-    top_20_rule_tests('orders', RuleBestSeller)
+    top_20_rule_tests('online_orders', RuleBestSeller)
   end
   
   

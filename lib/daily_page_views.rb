@@ -6,7 +6,6 @@ def save_daily_pageviews (check_exist,start_date,end_date)
   imap.select('INBOX') 
   
   # Get the messages wanted
-  debugger
   if start_date || end_date # If a date is given...
     only_last=false  
     if start_date 

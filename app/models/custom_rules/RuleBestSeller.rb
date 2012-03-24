@@ -10,7 +10,7 @@ class RuleBestSeller < Customization
     
     sorted_specs = {}
     res_specs = []
-    set = DailySpec.where(:name => 'orders', :date => (lastFriday..today)) # this set is inclusive!
+    set = DailySpec.where(:name => 'online_orders', :date => (lastFriday..today)) # this set is inclusive!
     pids.each do |pid|
       prod = Product.find(pid) # will raise 
       raise 'attempting to re-add pid' unless sorted_specs[pid].nil?

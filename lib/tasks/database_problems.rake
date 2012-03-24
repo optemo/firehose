@@ -15,6 +15,7 @@ task :get_rid_of_siblings_duplicates => :environment do
   end
 end
 
+# 22/03/2012: Some siblings appear with no colour scraped; we decided that is ok. Reporting such products here.
 task :find_siblings_with_null_colour => :environment do
   results = ProductSibling.where(:value => nil)
   results.each do |result|
@@ -30,7 +31,8 @@ end
 # 16/03/2012: Some categories are scraped/have products when they shouldn't
 # This removes the products/specs that were scraped in the categories
 task :get_rid_of_category => :environment do
-  CATEGORIES_TO_DELETE = ['F29089','F32080']
+  Session.new 'B20218'
+  CATEGORIES_TO_DELETE = Session.product_type_leaves
   pids = CatSpec.where(:value => CATEGORIES_TO_DELETE).map(&:product_id)
   debugger
   pids.each do |pid|
