@@ -15,6 +15,14 @@ task :get_rid_of_siblings_duplicates => :environment do
   end
 end
 
+task :get_rid_of_duplicates => :environment do
+  results = Product.find_by_sql 'SELECT *, count(*) FROM `products` GROUP BY sku, retailer HAVING count(*) > 1'
+  #records = ActiveRecord::Base.connection.execute('SELECT product_id, value, count(*) FROM `product_siblings` GROUP BY product_id, value HAVING count(*) > 1')
+  puts 'about to delete' + result.count + ' duplicates'
+  debugger
+  results.each {|r| r.destroy}
+end
+
 # 22/03/2012: Some siblings appear with no colour scraped; we decided that is ok. Reporting such products here.
 task :find_siblings_with_null_colour => :environment do
   results = ProductSibling.where(:value => nil)
@@ -30,18 +38,18 @@ end
 
 # 16/03/2012: Some categories are scraped/have products when they shouldn't
 # This removes the products/specs that were scraped in the categories
-task :get_rid_of_category => :environment do
-  Session.new 'B20218'
+task :get_rid_of_category, [:category_name] => :environment do
+  Session.new args.category_name
   CATEGORIES_TO_DELETE = Session.product_type_leaves
   pids = CatSpec.where(:value => CATEGORIES_TO_DELETE).map(&:product_id)
   debugger
+  puts 'done'
   pids.each do |pid|
-  	the_cats = CatSpec.find_all_by_product_id_and_name(pid, 'product_type').map(&:value).uniq
+    the_cats = CatSpec.find_all_by_product_id_and_name(pid, 'product_type').map(&:value).uniq
     if the_cats.eql?(CATEGORIES_TO_DELETE) # Remove all dependents  if only categories in are those to be deleted
-  		Product.find(pid).destroy
-	  end
+      Product.find(pid).destroy
+      end
   end
-  CatSpec.where(:value => CATEGORIES_TO_DELETE).map(&:destroy) # Cleanup remaining unwanted specs
 end
 
 # 14/03/2012: Certain products are present in multiple categories in the BB/FS hierarchies

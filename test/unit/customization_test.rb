@@ -237,12 +237,11 @@ class CustomizationTest < ActiveSupport::TestCase
     DailySpec.create(:sku => p4.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 0)
     DailySpec.create(:sku => p5.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 3)
     
-    # result = rule_name.group_computation([p6.id])
-    # assert_empty result, "product with no input values in DailySpecs should not be a bestseller"
-    # 
-    # result = rule_name.group_computation([p3.id, p4.id])
-    # assert_empty result, "no spec created for a set with all 0 "
-    debugger
+    result = rule_name.group_computation([p6.id])
+    assert_empty result, "product with no input values in DailySpecs should not be a bestseller"
+    
+    result = rule_name.group_computation([p3.id, p4.id])
+    assert_empty result, "no spec created for a set with all 0 "
     result = rule_name.group_computation([p2.id])
     result.each {|r| r.save}
     assert_not_empty result, "spec created for a single product with non-0 input specs"

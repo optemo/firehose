@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120316193144) do
+ActiveRecord::Schema.define(:version => 20120326194244) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -97,18 +97,7 @@ ActiveRecord::Schema.define(:version => 20120316193144) do
     t.datetime "updated_at"
   end
 
-  create_table "daily_specs_new", :force => true do |t|
-    t.string   "sku"
-    t.string   "name"
-    t.string   "spec_type"
-    t.string   "value_txt"
-    t.float    "value_flt"
-    t.boolean  "value_bin"
-    t.string   "product_type"
-    t.date     "date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
+  add_index "daily_specs", ["sku", "name", "product_type", "date"], :name => "sku", :unique => true
 
   create_table "dynamic_facets", :force => true do |t|
     t.integer "facet_id", :null => false

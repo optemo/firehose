@@ -1,4 +1,6 @@
-def save_daily_pageviews (check_exist,start_date,end_date)
+NUMBER_OF_RETAILERS = 2
+
+def save_daily_pageviews (start_date,end_date)
   require 'net/imap'
   require 'zip/zip'
   imap = Net::IMAP.new('imap.1and1.com') 
@@ -25,7 +27,8 @@ def save_daily_pageviews (check_exist,start_date,end_date)
     # 28-Oct-2011 is earliest possible date for online sales data (daily)
     msgs = imap.search(["SINCE", "29-Oct-2011"])
   end
-  
+#  retailers_received = []
+
   # Read each message 
   msgs.reverse.each do |msgID| 
     msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
@@ -80,47 +83,34 @@ def save_daily_pageviews (check_exist,start_date,end_date)
             end
           end
           
+          # This should work both for the old and new product_types (camera_bestbuy vs. B20218)
           /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
-          
-          # Only select the products that have some existing spec in the daily spec table for that day
-          # For addition to DailySpec 
-          date = then_date.prev_day().strftime("%Y-%m-%d")
-          if !check_exist && !DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?",date,'pageviews',retailer).empty?
-             p "DailySpec has existing views for #{date}. Consider changing to a more cautious approach"
-             p "Note: data for this day has not been saved."
-          else
-    #        p "Getting products from daily_specs..."
+#          if !retailers_received.include?(retailer) || !only_last
+#            retailers_received.push(retailer)
+            # Only select the products that have some existing spec in the daily spec table for that day
+            # For addition to DailySpec 
+            date = then_date.prev_day().strftime("%Y-%m-%d")
             products = DailySpec.where("date = ? AND product_type REGEXP ?",date,retailer).select("DISTINCT(sku)")
-    #        p "Saving to daily specs..." 
-            if check_exist # If want to make sure there are no duplicates (To be used if records already exist for date)
-              products.each do |prod|
-                sku = prod.sku            
-                product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-                views_spec = views_map[sku]
-                views = (views_spec.nil?) ? "0" : views_spec.delete(',') # Otherwise to_i will only return characters before first comma
-                # write views to daily_sales for the date and the sku
-                ds = DailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'pageviews',views,date,product_type)
-                ds.save if ds.new_record?
-              end
-            else # Bulk insert, duplicates not checked
-              rows = []
-              products.each do |prod|
-                sku = prod.sku         
-                product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-                views_spec = views_map[sku]
-                views = (views_spec.nil?) ? "0" : views_spec.delete(',')
-                rows.push(["cont",sku,"pageviews",views,date,product_type])
-              end
-              columns = %W( spec_type sku name value_flt date product_type )
-              DailySpec.import(columns,rows)
+             # Bulk insert, duplicates not checked
+            rows = []
+            products.each do |prod|
+              sku = prod.sku         
+              product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+              views_spec = views_map[sku]
+              views = (views_spec.nil?) ? "0" : views_spec.delete(',')
+              rows.push(["cont",sku,"pageviews",views,date,product_type])
             end
-          end
-          after_whole = Time.now()
-          p "Time for sales of #{date}: #{after_whole-before_whole}"
+            columns = %W( spec_type sku name value_flt date product_type )
+            DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt])
+            after_whole = Time.now()
+            p "Time for sales of #{date}: #{after_whole-before_whole}"
+#          end
         end
   # ******************************************
       end 
-      if only_last
+# uncomment below --------|
+#                        v
+      if only_last #&& retailers_received.uniq.length == NUMBER_OF_RETAILERS
         break; #Only process the first email, unless that email is a weekly email
       end
     end 

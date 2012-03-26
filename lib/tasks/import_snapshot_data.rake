@@ -1,5 +1,5 @@
 # Imports select snapshot data to daily_specs
-# Does all snapshots in directory given
+# Does all snapshots in directory given and within dates specified
 
 task :import_daily_attributes, [:start_date,:end_date] => :environment do |t,args|
   # get historical data on raw product attributes data and write to daily specs
