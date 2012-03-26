@@ -17,7 +17,7 @@ def write_sale_in_time_frame (number_of_days)
   products = Product.find_all_by_instock(1)
   products.each do |product|
 
-    specs = DailySpec.where(:sku => product.sku, :name => "orders", :date=> date_range)
+    specs = DailySpec.where(:sku => product.sku, :name => "online_orders", :date=> date_range)
     unless specs.empty?
       sales = 0
       days_instock = 0
