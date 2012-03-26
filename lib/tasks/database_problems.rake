@@ -38,7 +38,7 @@ end
 
 # 16/03/2012: Some categories are scraped/have products when they shouldn't
 # This removes the products/specs that were scraped in the categories
-task :get_rid_of_category [:category_name] => :environment do
+task :get_rid_of_category, [:category_name] => :environment do
   Session.new args.category_name
   CATEGORIES_TO_DELETE = Session.product_type_leaves
   pids = CatSpec.where(:value => CATEGORIES_TO_DELETE).map(&:product_id)
