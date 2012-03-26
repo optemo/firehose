@@ -29,8 +29,8 @@ class FacetsController < ApplicationController
     @sr_filters = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters
     
-    cont_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous/}  
-    cont_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous/}
+    cont_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical/}  
+    cont_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical/}
     results = (cont_rules.nil? or cont_rules.empty?) ? [] : cont_rules.map(&:local_featurename).uniq
     results += (cont_custom_rules.nil? or cont_custom_rules.empty?) ? [] : cont_custom_rules.map(&:feature_name).uniq
     @sr_sortby = results.nil? ? [] : results.sort
