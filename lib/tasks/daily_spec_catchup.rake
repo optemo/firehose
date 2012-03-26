@@ -23,21 +23,11 @@ task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
     p "Time for snapshot data import for #{date}: #{after_import-before_import}"
 
     # Load online_orders based on previous day's instock
-    if DailySpec.where(:date => date, :name =>'online_orders').empty?
-      save_daily_sales("daily_specs",false,date,date) # Use mass inserts
-    else
-      p "#{date} already has some online_orders saved. Not using mass inserts (slower)..."
-      save_daily_sales("daily_specs",true,date,date)
-    end
-    
+    save_daily_sales("daily_specs",date,date) # Use mass inserts
+
     # Load pageviews based on previous day's products (all)
-    if DailySpec.where(:date => date, :name =>'pageviews').empty?
-      save_daily_pageviews(false,date,date) # Use mass inserts
-    else
-      p "#{date} already has some pageviews saved. Not using mass inserts (slower)..."
-      save_daily_pageviews(true,date,date)
-    end
-    
+    save_daily_pageviews(date,date) # Use mass inserts
+
     # Delete oldest record if daily_specs goes back more than 'DAYS_BACK' days
     debugger
     dates_saved = DailySpec.select("DISTINCT(date)").order("date ASC").map(&:date)

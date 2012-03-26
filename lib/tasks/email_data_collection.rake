@@ -1,19 +1,17 @@
 
-task :daily_sales_collection, [:table,:check_exist,:start_date,:end_date] => :environment do |t,args|
+task :daily_sales_collection, [:table,:start_date,:end_date] => :environment do |t,args|
   require 'daily_sales'
   args.with_defaults(:start_date=>false,:end_date=>false)
-  check_exist = args.check_exist == "true" ? true : false
   dates = parse_dates(args.start_date, args.end_date)
-  save_daily_sales(args.table, check_exist, dates.first, dates.last)
+  save_daily_sales(args.table, dates.first, dates.last)
   #generate_daily_graphs()
 end  
  
-task :daily_pageviews_collection, [:check_exist,:start_date,:end_date] => :environment do |t,args|
+task :daily_pageviews_collection, [:start_date,:end_date] => :environment do |t,args|
   require 'daily_page_views'
   args.with_defaults(:start_date=>false,:end_date=>false)
-  check_exist = args.check_exist == "true" ? true : false
   dates = parse_dates(args.start_date, args.end_date)
-  save_daily_pageviews(check_exist, dates.first, dates.last)
+  save_daily_pageviews(dates.first, dates.last)
 end  
 
 # Checks the date inputs and sets the appropriate dates
