@@ -41,7 +41,7 @@ def save_daily_sales (table,start_date,end_date)
         next unless body.parts[i-1].media_type == "APPLICATION"
         then_date = Date.parse(msg.attr["ENVELOPE"].date)
         #then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
+        cName = "#{Rails.root}/tmp/online_orders zip/#{then_date}.zip" 
         
   # fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
@@ -54,7 +54,7 @@ def save_daily_sales (table,start_date,end_date)
         csvfile = ""
         Zip::ZipFile.open(cName) do |zip_file|
            zip_file.each do |f|
-             f_path=File.join("#{Rails.root}/tmp/", f.name)
+             f_path=File.join("#{Rails.root}/tmp/online_orders/", f.name)
              csvfile = f_path
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
@@ -68,13 +68,12 @@ def save_daily_sales (table,start_date,end_date)
         if csvfile =~ /.+-.+-.+/
           weekly=true
         end
-
-        orders_map = {} # map of sku => orders
         
         unless csvfile.blank? || weekly
           before_whole = Time.now()
           #### THIS DOES THE PROCESSING OF THE CSV FILE
           orders_map = {} # map of sku => orders
+     
       #    p "Reading file #{csvfile}"
           File.open(csvfile, 'r') do |f|
             f.each do |line|
@@ -88,35 +87,44 @@ def save_daily_sales (table,start_date,end_date)
 
 #          if !retailers_received.include?(retailer) || !only_last
 #            retailers_received.push(retailer)
+
             case table
-            when /[Dd]aily((Spec)|(_specs))/  # Bulk insert
+            when /^[Dd]aily((Spec)|(_specs))/  # Bulk insert
               # Only select the products that have some existing spec in the daily spec table for that day
               # For addition to DailySpec 
               date = then_date.prev_day().strftime("%Y-%m-%d")
-              products = DailySpec.where("date = ? AND product_type REGEXP ?",date,retailer).select("DISTINCT(sku)")
               rows = []
-              products.each do |prod|
-                sku = prod.sku         
-                product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
-                orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
-                orders = (orders_spec.nil?) ? "0" : orders_spec
-                rows.push(["cont",sku,"online_orders",orders,date,product_type])
-              end
+       #       if daily
+       #         products = Product.where(:instock => 1, :retailer => retailer)
+       #         products.each do |prod|
+       #           sku = prod.sku
+       #           product_type = CatSpec.where(:product_id => prod.id, :name => 'product_type').first.value
+       #           orders = (orders_spec.nil?) ? "0" : orders_map[sku].try(:delete,',')
+       #           rows.push(["cont",sku,"online_orders",orders,date,product_type])
+       #         end
+       #       else
+                products = DailySpec.where("date = ? AND product_type REGEXP ?",date,retailer).select("DISTINCT(sku)")
+                products.each do |prod|
+                  sku = prod.sku         
+                  product_type = DailySpec.find_by_sku_and_value_txt(sku, nil).product_type
+                  orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
+                  orders = (orders_spec.nil?) ? "0" : orders_spec
+                  rows.push(["cont",sku,"online_orders",orders,date,product_type])
+                end
+        #      end
               columns = %W( spec_type sku name value_flt date product_type )
               DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt]) 
-            when /[Aa]ll((DailySpec)|(_daily_specs))/
+            when /^[Aa]ll((DailySpec)|(_daily_specs))/
               # For addition to AllDailySpec
               date = then_date.prev_day().strftime("%Y-%m-%d")
               products = AllDailySpec.where(:date => date).select("DISTINCT(sku)")
               products.each do |prod|
                 sku = prod.sku
                 product_type = AllDailySpec.find_by_sku_and_date(sku, date).product_type
-                orders_spec = orders_map[sku].try(:delete,',') # Not so much an issue here
+                orders_spec = orders_map[sku].try(:delete,',') 
                 orders = (orders_spec.nil?) ? "0" : orders_spec
                 # write orders to daily_sales for the date and the sku
-                debugger # have not yet been able to test this
-                ds = AllDailySpec.find_or_initialize_by_spec_type_and_sku_and_name_and_value_flt_and_date_and_product_type("cont",sku,'online_orders',orders,date,product_type)
-                ds.save if ds.new_record?
+                AllDailySpec.create(:spec_type => "cont", :sku => sku, :name => "online_orders", :value_flt => orders, :date => date, :product_type => product_type)
               end
             end
             after_whole = Time.now()
