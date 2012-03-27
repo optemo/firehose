@@ -1,5 +1,5 @@
 class RuleAverageSales < Customization
-  @feature_name = 'average_sales'
+  @feature_name = 'averageSales'
   @product_type = ['BDepartments', 'FDepartments']
   @needed_features = [{DailySpec => 'online_orders'}]
   @rule_type = 'Continuous'

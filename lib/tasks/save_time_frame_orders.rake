@@ -36,11 +36,11 @@ def write_sale_in_time_frame (number_of_days)
       end
       
       #Make a new orders row, unless the product already has one (update it then)
-      cont_spec = ContSpec.find_by_product_id_and_name(product.id, "average_sales")
+      cont_spec = ContSpec.find_by_product_id_and_name(product.id, "averageSales")
       unless cont_spec.nil?
         ContSpec.update(cont_spec.id, :value => avg_sales)
       else
-        cont = ContSpec.create(:product_id => product.id, :name => "average_sales", :value => avg_sales, :product_type => product.product_type) 
+        cont = ContSpec.create(:product_id => product.id, :name => "averageSales", :value => avg_sales, :product_type => product.product_type) 
       end
     end
   end 
