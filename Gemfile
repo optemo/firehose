@@ -27,7 +27,9 @@ gem 'mysql2', '> 0.3'
 # end
 
 gem 'i18n-active_record',
-    :git => 'git://github.com/svenfuchs/i18n-active_record.git',
+    #:git => 'git://github.com/svenfuchs/i18n-active_record.git',
+    #Set_table_name is deprecated, so we'll use this patched version
+    :git => 'git://github.com/Studentify/i18n-active_record.git',
     :require => 'i18n/active_record'
 
 # In firehose, use this in development mode too
