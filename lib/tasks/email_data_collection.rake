@@ -1,7 +1,7 @@
 #                                whether or not running daily updates of database
 #                                                 |
 task :email_data_collection, [:spec, :table, :daily_updates, :start_date, :end_date] => :environment do |t,args|
-  require 'temp_email_collection'
+  require 'email_data_collection'
   args.with_defaults(:start_date=>false,:end_date=>false)
   daily_updates = (args.daily_updates == "false") ? false : true
   dates = parse_dates(args.start_date, args.end_date)
