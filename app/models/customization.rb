@@ -6,6 +6,7 @@ class Customization
   require 'custom_rules/RuleOnSale'
   require 'custom_rules/RuleUtility'
   require 'custom_rules/RuleTopViewed'
+  require 'custom_rules/RuleAverageSales'
   
   class << self 
     attr_accessor :feature_name
@@ -14,13 +15,12 @@ class Customization
     attr_accessor :product_type
   end
   
-  
   def Customization.subclasses
     ObjectSpace.each_object(Class).select { |klass| klass < self }
   end
   
   def Customization.all
-    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed]
+    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed, RuleAverageSales]
     #Customization.subclasses
   end
   
@@ -44,7 +44,7 @@ class Customization
     results = {}
     # execute each of the rules
     rules.each do |rule|
-      if (rule == RuleBestSeller || rule == RuleTopViewed)
+      if (rule == RuleBestSeller || rule == RuleTopViewed || rule == RuleAverageSales)
         rule_results = rule.group_computation(pids)
       elsif rule == RuleUtility
         rule_results = RuleUtility.compute_utility(pids)

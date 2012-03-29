@@ -1,18 +1,13 @@
-
-task :daily_sales_collection, [:table,:start_date,:end_date] => :environment do |t,args|
-  require 'daily_sales'
+#                                whether or not running daily updates of database
+#                                                 |
+task :email_data_collection, [:spec, :table, :daily_updates, :start_date, :end_date] => :environment do |t,args|
+  require 'temp_email_collection'
   args.with_defaults(:start_date=>false,:end_date=>false)
+  daily_updates = (args.daily_updates == "false") ? false : true
   dates = parse_dates(args.start_date, args.end_date)
-  save_daily_sales(args.table, dates.first, dates.last)
-  #generate_daily_graphs()
-end  
- 
-task :daily_pageviews_collection, [:start_date,:end_date] => :environment do |t,args|
-  require 'daily_page_views'
-  args.with_defaults(:start_date=>false,:end_date=>false)
-  dates = parse_dates(args.start_date, args.end_date)
-  save_daily_pageviews(dates.first, dates.last)
-end  
+  task_data = set_needed_fields(args.spec, args.table)
+  save_email_data(task_data, daily_updates, dates.first, dates.last)
+end
 
 # Checks the date inputs and sets the appropriate dates
 def parse_dates (first_day, last_day)

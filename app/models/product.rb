@@ -198,7 +198,6 @@ class Product < ActiveRecord::Base
     Sunspot.index(products_to_save.values)
     Sunspot.index(products_to_update.values)
     Sunspot.commit
-    
     begin
       Rails.cache.clear
     rescue Dalli::NetworkError

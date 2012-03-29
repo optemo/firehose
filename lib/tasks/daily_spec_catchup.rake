@@ -1,11 +1,9 @@
-# TODO FOR LIVE VERSION:
-#  -move sales/previews saving up so first thing done
-
 DAYS_BACK = 60
 
+# Imports instock products from snapshots, then gets online_orders/pageviews for those products
+# Saves data to daily_specs
 task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
-  require 'daily_sales'
-  require 'daily_page_views'
+  require 'temp_email_collection'
  
   start_date = Date.strptime(args.start_date, "%Y%m%d")
   end_date = Date.strptime(args.end_date, "%Y%m%d")
@@ -23,13 +21,12 @@ task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
     p "Time for snapshot data import for #{date}: #{after_import-before_import}"
 
     # Load online_orders based on previous day's instock
-    save_daily_sales("daily_specs",date,date) # Use mass inserts
+    save_email_data({:first_possible_date => "09-Sep-2011", :spec => "online_orders", :table => "daily_specs"}, false, date, date)
 
     # Load pageviews based on previous day's products (all)
-    save_daily_pageviews(date,date) # Use mass inserts
+    save_email_data({:first_possible_date => "29-Oct-2011", :spec => "pageviews"}, false, date, date)
 
     # Delete oldest record if daily_specs goes back more than 'DAYS_BACK' days
-    debugger
     dates_saved = DailySpec.select("DISTINCT(date)").order("date ASC").map(&:date)
     unless dates_saved.length <= DAYS_BACK 
       DailySpec.delete_all(:date => dates_saved.first)
@@ -38,6 +35,9 @@ task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
     after_whole = Time.now
     p "Total time for #{date}: #{after_whole-before_whole} s"
   end
+  
+  # Final cleanup of table
+  DailySpec.delete_all(:name => 'instock')
 end
 
 def import_instock_data(start_date,end_date)
@@ -60,8 +60,8 @@ def import_instock_data(start_date,end_date)
       if (start_date..end_date) === date 
         puts 'making records for date ' + date.to_s
         # import data from the snapshot to the temp database
-        puts "mysql -u optemo -p ***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
-        %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
+        puts "mysql -u oana -p[...] -h jaguar temp < #{directory}/#{snapshot}"
+        %x[mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}]
         # Must be local user's credentials if run locally
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
           :username => "optemo", :password => "***REMOVED***")

@@ -1,5 +1,4 @@
 task :save_time_frame_orders, [:num_days_back] => :environment do |t, args|
-  require 'write_sales'
   #change default number of days to 30 after testing done
   args.with_defaults(:num_days_back => "30")
   write_sale_in_time_frame(args.num_days_back.to_i)
@@ -17,7 +16,7 @@ def write_sale_in_time_frame (number_of_days)
   products = Product.find_all_by_instock(1)
   products.each do |product|
 
-    specs = DailySpec.where(:sku => product.sku, :name => "orders", :date=> date_range)
+    specs = DailySpec.where(:sku => product.sku, :name => "online_orders", :date=> date_range)
     unless specs.empty?
       sales = 0
       days_instock = 0
@@ -37,11 +36,11 @@ def write_sale_in_time_frame (number_of_days)
       end
       
       #Make a new orders row, unless the product already has one (update it then)
-      cont_spec = ContSpec.find_by_product_id_and_name(product.id, "orders")
+      cont_spec = ContSpec.find_by_product_id_and_name(product.id, "averageSales")
       unless cont_spec.nil?
         ContSpec.update(cont_spec.id, :value => avg_sales)
       else
-        cont = ContSpec.create(:product_id => product.id, :name => "orders", :value => avg_sales, :product_type => product.product_type) 
+        cont = ContSpec.create(:product_id => product.id, :name => "averageSales", :value => avg_sales, :product_type => product.product_type) 
       end
     end
   end 

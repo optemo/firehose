@@ -1,5 +1,61 @@
-# Put code for getting info about (or figuring out) database issues here
+# Put code for getting info about/figuring out/fixing database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
+
+# 28/03/2012 Some products are missing 'product_type' in cat_specs
+task :find_missing_prod_type => :environment do
+  missing_products = []
+  all_ids = CatSpec.select("DISTINCT(product_id)").map(&:product_id)
+  all_ids.each do |id|
+    if CatSpec.where(:product_id => id, :name => 'product_type').empty?
+      missing_products.push([id,Product.where(:id => id)])
+    end
+  end
+  debugger
+  p missing_products
+end
+
+# 28/03/2012: Remove products scraped as a result of the accessories project (now has own database)
+# Should work for other unwanted categories too ... 
+task :remove_accessory_products => :environment do 
+  
+  # MAKE SURE TO UPDATE THIS LIST IF YOU USE THIS TASK
+  categories_wanted = ['F1127','F23773','F1002','F30659','B20218','B29157','B20352','B20232']
+  p "Product Categories To Keep"
+  categories_wanted.each do |category|
+    Translation.where(:key => "#{category}.name").first.value =~ /--- ([^\n]+)/ 
+    name = $1
+    if category =~ /^F/
+      p "Futureshop: #{name}"
+    elsif category =~ /^B/
+      p "Bestbuy: #{name}"
+    else
+      p "#{$1} : Unknown Retailer"
+    end
+  end
+  p "Are these the right categories? (y/n)"
+  answer = STDIN.gets.chomp
+  if (answer == "y") || (answer == "yes")
+    # Get all unwanted products
+    leaves_wanted = []
+    categories_wanted.each do |category|
+      Session.new(category)
+      Session.product_type_leaves.each do |leaf|
+        leaves_wanted.push(leaf)
+      end
+    end
+    all_types = CatSpec.select("DISTINCT(value)").where(:name => 'product_type').map(&:value)
+    unwanted_types = all_types.keep_if{|value| !leaves_wanted.include?(value)}
+    unwanted_products = Product.select("DISTINCT(products.id)").joins("INNER JOIN cat_specs ON products.id = cat_specs.product_id").where(cat_specs: {:name => 'product_type', :value => unwanted_types}).map(&:id)
+    p "#{unwanted_products.length} products will be removed. Do you wish to continue? (y/n)"
+    answer = STDIN.gets.chomp
+    if (answer == "y") || (answer == "yes")
+      Product.destroy_all(:id => unwanted_products)
+    end
+    
+  else
+    raise "Change the product types to be kept in the remove_accessory_products task"
+  end
+end
 
 # 21/03/2012: Duplicates appear in siblings (same product_id and value for color)
 # delete all the product siblings where the products are from different retailers
@@ -201,6 +257,6 @@ def find_missing_specs (spec_name, spec_type, leaf_nodes)
       results.store(leaf,["#{ids.length}/#{all_ids.length}",to_store,ids])
     end
   end
-  #debugger
-  #sleep(1)
+  debugger
+  sleep(1)
 end

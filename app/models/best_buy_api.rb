@@ -105,7 +105,10 @@ class BestBuyApi
         # check if the category is an invalid one (no parents, but many products listed)
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
-        raise BestBuyApi::RequestError, ('Invalid category ' + id.to_s) if feed_category['productCount'] == root_category['productCount']
+        
+        if (feed_category['productCount'] == root_category['productCount'] and my_id != 'Departments')
+          raise BestBuyApi::RequestError, ('Invalid category ' + id.to_s)
+        end
         page = 1
         totalpages = nil
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
