@@ -4,7 +4,7 @@ NUMBER_OF_RETAILERS = 1
 # Set extra data options given the spec and table names
 def set_needed_fields (spec_name, table_name)
   if spec_name =~ /[Pp]ageviews?/
-    task_data = {:first_possible_date => "29-Oct-2011", :spec => "pageviews"}
+    task_data = {:first_possible_date => "29-Oct-2011", :spec => "pageviews", :table => table_name}
   elsif spec_name =~ /([Oo]nline)?[\s_]?[Oo]rders/
     task_data = {:first_possible_date => "09-Sep-2011", :spec => "online_orders", :table => table_name}
   else
@@ -103,7 +103,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             retailers_received.push(retailer)
             data_date = then_date.prev_day().strftime("%Y-%m-%d")
             if spec == "pageviews"
-              save_pageviews(csvfile,data_date,daily_updates,retailer)
+              save_pageviews(csvfile,data_date,daily_updates,task_data[:table],retailer)
             else
               save_online_orders(csvfile,data_date,daily_updates,task_data[:table],retailer)
             end
