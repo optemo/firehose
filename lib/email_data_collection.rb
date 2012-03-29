@@ -64,8 +64,8 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
         then_date = Date.parse(msg.attr["ENVELOPE"].date)
+        Dir.mkdir("#{Rails.root}/tmp/#{task_data[:spec]} zip") unless File.exists?("#{Rails.root}/tmp/#{task_data[:spec]} zip")
         cName = "#{Rails.root}/tmp/#{task_data[:spec]} zip/#{then_date}.zip" 
-        
   # Fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
         
