@@ -47,9 +47,8 @@ def save_online_orders(filename,date,daily_updates,table,retailer)
 end
 
 # Saves pageviews to daily_specs
-def save_pageviews(filename,date,daily_updates,retailer)
+def save_pageviews(filename,date,daily_updates,table,retailer)
   views_map = {} # map of sku => views
-
   File.open(filename, 'r') do |f|
     f.each do |line|
       /\d+\.,,(?<sku>[^,N]{8}),,"?(?<views>\d+(,\d+)*)"?.+/ =~ line
@@ -57,26 +56,40 @@ def save_pageviews(filename,date,daily_updates,retailer)
     end
   end
 
-  rows = []
-  if daily_updates # Get products from non updated products table (only instock from retailer given)
-    products = Product.where(:instock => 1, :retailer => retailer)
-    products.each do |prod|
-      sku = prod.sku         
-      product_type = CatSpec.where(:name => "product_type", :product_id => prod.id).first.try(:value)
-      views_spec = views_map[sku]
-      views = (views_spec.nil?) ? "0" : views_spec.delete(',')
-      rows.push(["cont",sku,"pageviews",views,date,product_type])
+  case table
+  when /^[Dd]aily((Spec)|(_specs))/  # Save sales to daily_specs
+    rows = []
+    if daily_updates # Get products from non updated products table (only instock from retailer given)
+      products = Product.where(:instock => 1, :retailer => retailer)
+      products.each do |prod|
+        sku = prod.sku         
+        product_type = CatSpec.where(:name => "product_type", :product_id => prod.id).first.try(:value)
+        views_spec = views_map[sku]
+        views = (views_spec.nil?) ? "0" : views_spec.delete(',')
+        rows.push(["cont",sku,"pageviews",views,date,product_type])
+      end
+    else # Get products from daily_spec 
+      products = DailySpec.where(:name => "instock")
+      products.each do |prod|
+        sku = prod.sku         
+        product_type = prod.product_type
+        views_spec = views_map[sku]
+        views = (views_spec.nil?) ? "0" : views_spec.delete(',')
+        rows.push(["cont",sku,"pageviews",views,date,product_type])
+      end
     end
-  else # Get products from daily_spec 
-    products = DailySpec.where(:name => "instock")
+    columns = %W( spec_type sku name value_flt date product_type )
+    DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt])
+    
+  when /^[Aa]ll((DailySpec)|(_daily_specs))/ # Get products from and save pageviews to all_daily_specs
+    products = AllDailySpec.where(:date => date).select("DISTINCT(sku),product_type")
     products.each do |prod|
-      sku = prod.sku         
+      sku = prod.sku
       product_type = prod.product_type
       views_spec = views_map[sku]
-      views = (views_spec.nil?) ? "0" : views_spec.delete(',')
-      rows.push(["cont",sku,"pageviews",views,date,product_type])
+      views = (views_spec.nil?) ? "0" : views_spec
+      # write orders to online_orders for the date and the sku
+      AllDailySpec.create(:spec_type => "cont", :sku => sku, :name => "pageviews", :value_flt => views, :date => date, :product_type => product_type)
     end
   end
-  columns = %W( spec_type sku name value_flt date product_type )
-  DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt])
 end
