@@ -2,10 +2,13 @@ NUM_PRODUCTS = 20
 
 #                               Product Type ID (can be parent or leaf)
 #                                                   |
-#example call: bundle exec rake find_bestselling["B29361"","20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
+#example call: bundle exec rake update_store_sales["B29361",false,"20110801","20110831","/Users/marc/Documents/Best_Buy_Data/second_set"]
 
 # If give :do_all_products = true , will save sales for all products under store_sales. Otherwise only saves top NUM_PRODUCTS sales under bestseller_store_sales
 task :update_store_sales, [:product_type, :do_all_products, :start_date, :end_date, :directory] => :environment do |t, args|
+  unless Rails.env == "accessories"
+    raise "Please use the 'accessories' environment and table"
+  end
   args.with_defaults(:do_all_products=>"false", :start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
