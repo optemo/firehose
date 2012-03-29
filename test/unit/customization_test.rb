@@ -157,7 +157,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # test when no daily specs
     result = RuleAverageSales.group_computation([p1.id,p2.id])
-    debugger
+    #debugger
     assert_empty result, 'no average sales'
     
     # test only one product
@@ -285,7 +285,7 @@ class CustomizationTest < ActiveSupport::TestCase
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 902)
     p3= create(:product, sku:903, instock: 0)
-    create(:cat_spec, product_id: p1.id, name: "brand", value: "LIQUID_IMAGE")
+    create(:cat_spec, product_id: p1.id, name: "brand", value: "LIQUID IMAGE")
     create(:bin_spec, product_id: p1.id, name: "hdmi", value: 1)
     create(:cont_spec, product_id: p1.id, name: "customerRating", value: 4)
     create(:cont_spec, product_id: p1.id, name: "price", value: 99.99)
@@ -293,7 +293,7 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:cat_spec, product_id: p1.id, name: "displayDate", value: "2011-05-12")
     create(:cat_spec, product_id: p1.id, name: "saleEndDate", value: "2012-05-20")
     
-    create(:cat_spec, product_id: p2.id, name: "brand", value: "SONY")
+    create(:cat_spec, product_id: p2.id, name: "brand", value: "AGPHA")
     create(:cat_spec, product_id: p2.id, name: "color", value: "RED")
     create(:bin_spec, product_id: p2.id, name: "frontlcd", value: 1)
     create(:cont_spec, product_id: p2.id, name: "customerRating", value: 2)
