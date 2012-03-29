@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120326194244) do
+ActiveRecord::Schema.define(:version => 20120329185239) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -122,6 +122,7 @@ ActiveRecord::Schema.define(:version => 20120326194244) do
     t.string  "style",        :default => ""
     t.boolean "active",       :default => true
     t.string  "product_type"
+    t.string  "ui"
   end
 
   create_table "keyword_searches", :force => true do |t|
