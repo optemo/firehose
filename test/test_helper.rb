@@ -11,7 +11,7 @@ Spork.prefork do
   require 'rails/test_help'
   # Factory Girl Shortcut, FactoryGirl.create() doesn't have to be repeated all the time
   class Test::Unit::TestCase
-    include Factory::Syntax::Methods
+    include FactoryGirl::Syntax::Methods
   end
 end
 
