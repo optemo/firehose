@@ -10,7 +10,7 @@ class RuleUtility < Customization
       records = {}
       feature_value= 0;
       features=[]
-      br_flag= FALSE
+      br_flag = FALSE
       
       all_products = Product.where(["id IN (?) and instock = ?", pids, 1])
       prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
@@ -20,7 +20,8 @@ class RuleUtility < Customization
       ptype_path.each do |path|
        features = Facet.find_all_by_used_for_and_product_type("utility",path)
         break unless features.empty?
-      end     
+      end
+      has_brand =features.inject(res){|res,ele| res = TRUE if ele.name=~/^brand_/}     
       all_products.each do |product|
         utility = []
         br_flag=FALSE
@@ -67,7 +68,7 @@ class RuleUtility < Customization
           end
           utility << (feature_value* (f.value))     
         end
-         utility << (-2) unless br_flag # The case that the product's brand is a new one and there is no coefficient for it in the facet table.
+         utility << (-2) if (!br_flag && has_brand) # The case that the product's brand is a new one and there is no coefficient for it in the facet table.
         #Add the static calculated utility 
         #puts "#{utility}"
         utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
