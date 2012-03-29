@@ -41,7 +41,7 @@ def save_daily_sales (table,start_date,end_date)
         next unless body.parts[i-1].media_type == "APPLICATION"
         then_date = Date.parse(msg.attr["ENVELOPE"].date)
         #then_date = Date.parse(msg.attr["ENVELOPE"].date).strftime("%Y-%m-%d")
-        cName = "#{Rails.root}/tmp/online_orders zip/#{then_date}.zip" 
+        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
         
   # fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
@@ -54,7 +54,7 @@ def save_daily_sales (table,start_date,end_date)
         csvfile = ""
         Zip::ZipFile.open(cName) do |zip_file|
            zip_file.each do |f|
-             f_path=File.join("#{Rails.root}/tmp/online_orders/", f.name)
+             f_path=File.join("#{Rails.root}/tmp/", f.name)
              csvfile = f_path
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
