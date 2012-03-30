@@ -3,7 +3,7 @@ DAYS_BACK = 60
 # Imports instock products from snapshots, then gets online_orders/pageviews for those products
 # Saves data to daily_specs
 task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
-  require 'temp_email_collection'
+  require 'email_data_collection'
  
   start_date = Date.strptime(args.start_date, "%Y%m%d")
   end_date = Date.strptime(args.end_date, "%Y%m%d")
@@ -24,7 +24,7 @@ task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
     save_email_data({:first_possible_date => "09-Sep-2011", :spec => "online_orders", :table => "daily_specs"}, false, date, date)
 
     # Load pageviews based on previous day's products (all)
-    save_email_data({:first_possible_date => "29-Oct-2011", :spec => "pageviews"}, false, date, date)
+    save_email_data({:first_possible_date => "29-Oct-2011", :spec => "pageviews", :table => "daily_specs"}, false, date, date)
 
     # Delete oldest record if daily_specs goes back more than 'DAYS_BACK' days
     dates_saved = DailySpec.select("DISTINCT(date)").order("date ASC").map(&:date)

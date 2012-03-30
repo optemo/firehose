@@ -12,3 +12,11 @@ def check
     end
   end
 end
+
+task :check_brand_capitalize => :environment do 
+  require 'custom_rules/RuleCapitalizeBrand'
+  puts "Capitalized brands (all)"
+  pids = CatSpec.select(:product_id).where(:name => 'brand', :modified => nil).group("value").map(&:product_id)
+  RuleCapitalizeBrand.capitalize(pids)
+
+end

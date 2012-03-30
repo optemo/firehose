@@ -1,12 +1,13 @@
 
 class Customization
+  require 'custom_rules/RuleAverageSales'
   require 'custom_rules/RuleBestSeller'
+  require 'custom_rules/RuleCapitalizeBrand'
   require 'custom_rules/RuleComingSoon'
   require 'custom_rules/RuleNew'
   require 'custom_rules/RuleOnSale'
-  require 'custom_rules/RuleUtility'
   require 'custom_rules/RuleTopViewed'
-  require 'custom_rules/RuleAverageSales'
+  require 'custom_rules/RuleUtility'
   
   class << self 
     attr_accessor :feature_name
@@ -20,7 +21,7 @@ class Customization
   end
   
   def Customization.all
-    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed, RuleAverageSales]
+    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed, RuleAverageSales, RuleCapitalizeBrand]
     #Customization.subclasses
   end
   

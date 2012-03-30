@@ -38,8 +38,8 @@ class ProductBundle < ActiveRecord::Base
       end
     end
     copiedspecs.each do |s_class, v|
-      s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value, :modified, :updated_at] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
+      s_class.import v, :on_duplicate_key_update=>[:value, :modified, :updated_at] # Bulk insert/update with ActiveRecord_import, :on_duplicate_key_update only works on Mysql database
     end
-    ProductBundle.import product_bundles, :on_duplicate_key_update=>[:bundle_id, :product_id, :created_at, :updated_at]
+    ProductBundle.import product_bundles, :on_duplicate_key_update=>[:updated_at]
   end
 end
