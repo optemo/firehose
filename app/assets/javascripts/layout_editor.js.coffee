@@ -17,6 +17,15 @@ $(document).ready ->
     revert: "invalid"
   make_editable()
 
+make_sortable = ->
+  debugger
+  $(".sortable_cats").sortable
+    revert: true
+  $(".draggable_cats").draggable
+    connectToSortable: ".sortable_cats"
+    helper: "original"
+    revert: "invalid"
+
 $('#save_ordering').live "click", ->
   # collect the ordering of elements to pass to the controller
   ordered_values = new Array()
@@ -174,6 +183,24 @@ $('#add_spacer').live "click", ->
       used_for: 'filter'
     success: (data) ->
       $('#filters_body').append(data)
+    error: (jqXHR, textStatus, errorThrown) ->
+      alert(jqXHR.statusText)
+  return false
+  
+$('.edit_categories').live "click", ->
+  facet = $(this).closest($("div").filter(->
+    @className.match /box/
+  ))
+  $(this).removeClass('edit_categories').addClass('save_categories')
+  $(this).html('Save')
+  db_name = facet.attr('data-name')
+  $.ajax
+    url: window.location.pathname + '/' + db_name + "/edit"
+    data:
+      id: db_name
+    success: (data) ->
+      $('#'+db_name + '_list').append(data)
+      make_sortable()
     error: (jqXHR, textStatus, errorThrown) ->
       alert(jqXHR.statusText)
   return false

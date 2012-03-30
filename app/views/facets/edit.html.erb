@@ -1,16 +1,1 @@
-<div class='column' data-facet='<%= @facet_name %>' data-product-type='<%= @product_type %>'>
-  <h2>Ordering for <%= @facet_name %></h2>
-  <div>
-    <input type="button" id="save_ordering" value="Save">
-    <input type="button" id="unset_ordering" value="Unset">
-  </div>
-  <div id='facet_order' class="sortable">
-    <% @categories.each do |category_name| -%>
-    <div class="draggable">
-      <div class='cat_option' data-name='<%= category_name %>'>
-        <div><%= category_name %></div>
-      </div>
-    </div>
-    <% end -%>
-  </div>
-</div>
+<%= render 'categories' %>

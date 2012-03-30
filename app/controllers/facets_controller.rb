@@ -72,6 +72,8 @@ class FacetsController < ApplicationController
       product_ids = CatSpec.find_all_by_name_and_value("product_type", Session.product_type_leaves).map(&:product_id)
       @categories = CatSpec.where(:product_id => product_ids, :name => @facet_name).map(&:value).uniq.sort
     end
+    render 'edit', :layout => 'empty'
+    #render :layout => 'empty'
   end
   
   def new

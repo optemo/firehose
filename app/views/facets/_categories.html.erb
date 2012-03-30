@@ -1,0 +1,20 @@
+<div class='categories' data-facet='<%= @facet_name %>' data-product-type='<%= @product_type %>'>
+  <div>
+    <input type="button" id="save_ordering" value="Save">
+    <input type="button" id="unset_ordering" value="Unset">
+  </div>
+  <% if @facet_name == 'product_type' %>
+    <a class='add_category' href="#">Add Category</a>
+    <div id='facet_order' class="sortable_cats">
+    <% @categories.each do |category_name| -%>
+      <div class="draggable_cats">
+        <div class='cat_option' data-name='<%= category_name %>'>
+          <div>
+            <%= category_name %> <a class='remove_category' href="#">x</a>
+          </div>  
+        </div>
+      </div>
+    <% end -%>
+    </div>
+  <% end %>
+</div>
