@@ -1,13 +1,13 @@
 task :get_all_daily_specs => :environment do
   require 'ruby-debug'
  # write_instock_skus_into_file ("drive_bestbuy")
-  analyze_all_daily_raw_specs("drive_bestbuy")
+  analyze_all_daily_raw_specs("drive_bestbuy","20028")
 end
 
-task :import_all_daily_attributes => :environment do
+task :import_all_daily_attributes, [:start_date, :end_date] => :environment do |t, args|
   # get historical data on raw product attributes data and write to daily specs
-  raw = true
-  import_all_data(raw)
+
+  import_all_data(Date.strptime(args.start_date, '%Y%m%d'), Date.strptime(args.end_date, '%Y%m%d'))
 end
 
 task :import_coeffs => :environment do
@@ -21,7 +21,7 @@ task :delete_some_data  => :environment do
 delete_some_categories_data
 end
 
-def import_all_data(raw)
+def import_all_data(start_date, end_date)
   directory = "/mysql_backup/slicehost"
   #directory = "/Users/Monir/optemo/mysql_backup"
   
@@ -36,18 +36,20 @@ def import_all_data(raw)
   Dir.foreach(directory) do |snapshot|
     if snapshot =~ /\.sql/
       date = Date.parse(snapshot.chomp(File.extname(snapshot)))
-      puts 'making records for date ' + date.to_s
-      # import data from the snapshot to the temp database
-      puts "mysql -u monir -p m_222978 -h jaguar temp < #{directory}/#{snapshot}"
-      %x[mysql -u monir -pm_222978 -h jaguar temp < #{directory}/#{snapshot}]
+      if (date >= start_date and date <= end_date)
+        puts 'making records for date ' + date.to_s
+        # import data from the snapshot to the temp database
+        puts "mysql -u monir -p m_222978 -h jaguar temp < #{directory}/#{snapshot}"
+        %x[mysql -u monir -pm_222978 -h jaguar temp < #{directory}/#{snapshot}]
 
-      #username and password cannot be company's (optemo, tiny******)
-      ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-        :username => "monir", :password => "m_222978")
-       specs = get_all_instock_attributes(date)
+        #username and password cannot be company's (optemo, tiny******)
+        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
+          :username => "monir", :password => "m_222978")
+         specs = get_all_instock_attributes(date)
    
-      ActiveRecord::Base.establish_connection(:development)
-      update_all_daily_specs(date, specs, raw)
+        ActiveRecord::Base.establish_connection(:development)
+        update_all_daily_specs(date, specs)
+      end
     end
   end
 end
@@ -117,7 +119,7 @@ def get_bin_specs(product_type="camera_bestbuy")
 end
 
 
-def update_all_daily_specs(date, specs, raw)
+def update_all_daily_specs(date, specs)
   AllDailySpec.delete_all();
   alldailyspecs= []
   specs.each do |attributes|
@@ -128,13 +130,13 @@ end
 
 def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="20243")
 
-  start_date = '2011-10-01'
-  end_date = '2012-01-31'
+  start_date = '2011-11-01'
+  end_date = '2011-12-31'
   output_name =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/raw_data_#{category}_#{start_date}_#{end_date}.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
-  features = get_all_features
+  features = get_all_features(category)
   features.delete("title")
   features.delete("model")
   features.delete("mpn")

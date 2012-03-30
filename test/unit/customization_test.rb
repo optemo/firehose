@@ -277,14 +277,16 @@ class CustomizationTest < ActiveSupport::TestCase
   
   test "Rule Utility" do
     create(:product_category, product_type: 'BDepartments', l_id: 10, r_id: 5000)
+    create(:product_category, product_type: 'B20270', l_id: 400, r_id: 1800)
     create(:product_category, product_type: 'B20218', l_id: 600, r_id: 1200)
     create(:product_category, product_type: 'B20282', l_id: 650, r_id: 710)
     create(:product_category, product_type: 'B20232', l_id: 700, r_id: 701)
     
-    Session.new('B20232')
+    Session.new('B20270')
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 902)
     p3= create(:product, sku:903, instock: 0)
+    p4= create(:product, sku:904)
     create(:cat_spec, product_id: p1.id, name: "brand", value: "LIQUID IMAGE")
     create(:bin_spec, product_id: p1.id, name: "hdmi", value: 1)
     create(:cont_spec, product_id: p1.id, name: "customerRating", value: 4)
@@ -304,15 +306,24 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:cont_spec, product_id: p3.id, name: "price", value: 300.99)
     create(:cont_spec, product_id: p3.id, name: "saleprice", value: 280.99)
     create(:cat_spec, product_id: p3.id, name: "saleEndDate", value: "2012-03-20")
-
+    
+    create(:cont_spec, product_id: p4.id, name: "price", value: 199.99)
+    create(:cont_spec, product_id: p4.id, name: "saleprice", value: 179.99)
+    create(:cat_spec, product_id: p4.id, name: "displayDate", value: "2011-11-20")
+    create(:bin_spec, product_id: p4.id, name: "isAdvertised", value: 1)
+    create(:cont_spec, product_id: p4.id, name: "averageSales", value: 7.4)
+    #create(:daily_sales, product_id: p4.id, name: "pageviews", value: 7400)
+    
     create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")
     create(:facet, name: "frontlcd", feature_type: "Binary", used_for: "utility", value: 0.4, product_type: "B20218")
     
-    result = RuleUtility.compute_utility([p1.id,p2.id, p3.id])
+    
+    result = RuleUtility.compute_utility([p1.id,p2.id, p3.id, p4.id])
     #result.save unless result.nil?
     #computing utility for instock products
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p1.id}.map(&:value)
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p2.id}.map(&:value)
+    assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p4.id}.map(&:value)
     #utility is not calculated for non instock products
     assert_empty result.select{|spec| spec.name="utility" && spec.product_id == p3.id}
   end
