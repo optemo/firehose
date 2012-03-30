@@ -68,7 +68,7 @@ class Customization
           end
           # actual computation logic
           spec = rule.compute_feature(values, pid)
-          rule_results += [spec] unless spec.nil?
+          rule_results += [spec].flatten unless spec.nil?
         end
       end
       unless rule_results.empty?

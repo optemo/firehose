@@ -2,6 +2,8 @@
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
 # 28/03/2012 Some products are missing 'product_type' in cat_specs
+# RESOLVED: we think that these products were deleted but not their specs (running the update task updated a new product record which has a type)
+# We still don't know why they are missing the product_type, but will delete them and see if they reappear
 task :find_missing_prod_type => :environment do
   missing_products = []
   all_ids = CatSpec.select("DISTINCT(product_id)").map(&:product_id)
@@ -14,8 +16,30 @@ task :find_missing_prod_type => :environment do
   pp missing_products
 end
 
+# 30/03/2012 Some products were deleted but their specs remained. Taking care of that
+task :delete_leftover_specs => :environment do
+  missing_spec = "product_type"
+  pids_to_remove = [37796,72816,72820,72828,72830,72832,72834,72836,72846,72848,72868,72870,72880,72884,72886,72926,72928,72946,72950,72952,72954,72956,72960,72962,72966,72968,72996,73010,73012,73086,73088]
+  pids_to_remove.each do |pid|
+    debugger
+    if CatSpec.find_by_product_id_and_name(pid,missing_spec).nil?
+      CatSpec.destroy_all(:product_id => pid)
+      ContSpec.destroy_all(:product_id => pid)
+      BinSpec.destroy_all(:product_id => pid)
+      TextSpec.destroy_all(:product_id => pid)
+    else
+      p "Product id: #{pid} has a #{missing_spec}"
+    end
+  end
+#  CatSpec.destroy_all(:product_id => pids_to_remove)
+#  ContSpec.destroy_all(:product_id => pids_to_remove)
+#  BinSpec.destroy_all(:product_id => pids_to_remove)
+#  TextSpec.destroy_all(:product_id => pids_to_remove)
+end
+
 # 28/03/2012: Remove products scraped as a result of the accessories project (now has own database)
 # Should work for other unwanted categories too ... 
+# Removes products in all categories except those below
 task :remove_accessory_products => :environment do 
   
   # MAKE SURE TO UPDATE THIS LIST IF YOU USE THIS TASK

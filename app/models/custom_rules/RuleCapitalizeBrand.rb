@@ -1,23 +1,50 @@
 class RuleCapitalizeBrand < Customization
   @product_type = ['FDepartments','BDepartments']
   @rule_type = 'Categorical'
-  @feature_name = 'brand'
-  @needed_features = [{CatSpec => 'brand'}]
+  @needed_features = [{CatSpec => 'brand'},{CatSpec => 'brand_fr'}]
   @exceptions = ["AGFAPHOTO","IOSAFE","IPRODRIVE","LACIE","LITEON","SKIPDR","STARTECH","ULTRASPEED"]
   # These should be exempt from the short word rule (ie: they should not be all caps)
   @small_exceptions = ["PRO","HIP"]
       
   def RuleCapitalizeBrand.compute_feature (values, pid)
-    capitalized_brand = "" 
+    specs = []
+    spec_class = Customization.rule_type_to_class(@rule_type)
+    brand = spec_class.find_by_product_id_and_name(pid, 'brand')
+    brand_fr = spec_class.find_by_product_id_and_name(pid, 'brand_fr')
     
-    values.first.split.each do |word|
-      capitalized_brand << capitalize_word(word) << " "
+    # English brand
+    unless brand.nil?
+      if values.first == nil
+        capitalized_brand = nil
+      else
+        capitalized_brand = "" 
+        values.first.try(:split).each do |word|
+          capitalized_brand << capitalize_word(word) << " "
+        end
+      end
+      brand.value = capitalized_brand
+      specs.push(brand)
+    end
+  
+    #French brand
+    unless brand_fr.nil?
+      if values.second == nil
+        capitalized_brand = nil
+      else
+        capitalized_brand = "" 
+        values.second.try(:split).each do |word|
+          capitalized_brand << capitalize_word(word) << " "
+        end
+      end
+      brand_fr.value = capitalized_brand
+      specs.push(brand_fr)
     end
     
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    spec = spec_class.find_by_product_id_and_name(pid, @feature_name)
-    spec.value = capitalized_brand
-    spec
+    if specs.empty?
+      nil
+    else
+      specs
+    end
   end
   
   def RuleCapitalizeBrand.capitalize_word (word)
