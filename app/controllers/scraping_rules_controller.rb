@@ -1,5 +1,5 @@
 class ScrapingRulesController < ApplicationController
-  layout "application", only: :index
+  layout false, except: :index
   
   def index
     @rules = ScrapingRule.order('priority').find_all_by_product_type(Session.product_type).group_by(&:local_featurename)
