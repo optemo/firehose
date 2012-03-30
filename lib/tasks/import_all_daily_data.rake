@@ -118,6 +118,7 @@ end
 
 
 def update_all_daily_specs(date, specs, raw)
+  AllDailySpec.delete_all();
   alldailyspecs= []
   specs.each do |attributes|
      alldailyspecs << AllDailySpec.new(attributes)
