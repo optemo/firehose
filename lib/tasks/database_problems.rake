@@ -10,8 +10,8 @@ task :find_missing_prod_type => :environment do
       missing_products.push([id,Product.where(:id => id)])
     end
   end
-  debugger
-  p missing_products
+  p missing_products.length
+  pp missing_products
 end
 
 # 28/03/2012: Remove products scraped as a result of the accessories project (now has own database)

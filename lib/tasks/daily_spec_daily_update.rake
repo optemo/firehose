@@ -4,10 +4,10 @@
 
 DAYS_BACK = 60
 
-task :update_daily_specs,[:date] => :environment do |t,args|
+task :update_daily_specs => :environment do |t,args|
   # Check whether table is going to skip a day. Because this task will be run before the update task, 
   # if it hasn't been run in a while the products table is out of date)
-  date = Date.strptime(args.date, "%Y%m%d")
+  date = Date.today.prev_day
   last_date_in_table = DailySpec.select("DISTINCT(date)").order("date DESC").limit(1).first.date
   unless last_date_in_table == date.prev_day
     raise "DailySpec is missing one or more days of data. Please use the catchup rake task."
