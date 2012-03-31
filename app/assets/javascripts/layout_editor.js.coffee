@@ -18,13 +18,28 @@ $(document).ready ->
   make_editable()
 
 make_sortable = ->
-  debugger
   $(".sortable_cats").sortable
     revert: true
   $(".draggable_cats").draggable
     connectToSortable: ".sortable_cats"
     helper: "original"
     revert: "invalid"
+
+load_product_type_tree = ->
+  $("#product_type_tree").jstree
+    plugins: [ "themes", "html_data", "ui" ]
+    themes:
+      theme: "classic"
+    core:
+      animation: 0
+  $("#product_type_tree").bind "open_node.jstree", (event, data) ->
+    id = data.rslt.obj.attr("id")
+    $.ajax
+      url: "category_ids/new"
+      data:
+        id: id
+      success: (data) ->
+        $('#' + id).replaceWith(data)
 
 $('#save_ordering').live "click", ->
   # collect the ordering of elements to pass to the controller
@@ -71,7 +86,7 @@ $('#reset_layout').live "click", ->
       window.location.reload()
     error: (jqXHR, textStatus, errorThrown) ->
       alert(jqXHR.statusText + " in resetting layout")
-
+  
 $('#submit_layout').live "click", ->
   ordered_filters = collect_attributes('.filter_box')
   ordered_sorting = collect_attributes('.sortby_box')
@@ -192,19 +207,36 @@ $('.edit_categories').live "click", ->
     @className.match /box/
   ))
   $(this).removeClass('edit_categories').addClass('save_categories')
-  $(this).html('Save')
+  $(this).html('Done editing')
   db_name = facet.attr('data-name')
-  $.ajax
-    url: window.location.pathname + '/' + db_name + "/edit"
-    data:
-      id: db_name
-    success: (data) ->
-      $('#'+db_name + '_list').append(data)
-      make_sortable()
-    error: (jqXHR, textStatus, errorThrown) ->
-      alert(jqXHR.statusText)
+  list_node = $(this).closest(".filter_box").children().filter((index) ->
+    this.id.match /_list/
+  )
+  if list_node.css('display') == 'none'
+    list_node.css({'display':'block'})
+  else 
+    $.ajax
+      url: window.location.pathname + '/' + db_name + "/edit"
+      data:
+        id: db_name
+      success: (data) ->
+        $('#'+db_name + '_list').append(data)
+        make_sortable()
+        if db_name == 'product_type'
+          load_product_type_tree()
+      error: (jqXHR, textStatus, errorThrown) ->
+        alert(jqXHR.statusText)
   return false
-  
+
+$('.save_categories').live "click", ->
+  list_node = $(this).closest(".filter_box").children().filter((index) ->
+    this.id.match /_list/
+  )
+  list_node.css({'display':'none'})
+  $(this).removeClass('save_categories').addClass('edit_categories')
+  $(this).html('Edit subcategories')
+  return false
+
 collect_attributes = (element_class) ->
   ordered_facets = new Array()
   $(element_class).each (index) ->
@@ -216,17 +248,21 @@ collect_attributes = (element_class) ->
     if display is null
       display = "" # not null so that it can be used in the ajax params
     styled = false
+    ordered_cats = new Array()
     if (element_class) is '.filter_box'
-      kids = $(this).children()
-      if kids
-        styled = kids.children('input').is(':checked')
+      styled = $(this).find('input').is(':checked')
+      $(this).find('.cat_option').each (index) ->
+        ordered_cats[index] = $(this).attr('data-name')
     else if (element_class) is '.sortby_box'
       styled = $($(this).children()[2].children).val()
     if (element_class) is '.filter_box' or (element_class) is '.show_box'
       unit = $(this).children().children('span').last().html()
       if unit is null or unit.match(/Click to edit/)
         unit = ""
-    ordered_facets[index] = [dbid,type,dbname,display,unit,styled]
+    result = [dbid,type,dbname,display,unit,styled]
+    if (element_class) is '.filter_box'
+      result = result.concat(ordered_cats)
+    ordered_facets[index] = result
   return ordered_facets
 
 collect_names = (element_class) ->

@@ -49,7 +49,8 @@ class Facet < ActiveRecord::Base
        end
        
        fn[:feature_type] = vals[1]
-       fn[:name] = vals[2]
+       facet_name = vals[2]
+       fn[:name] = facet_name
        fn[:style] = case vals[5]
        when "true"
          'boldlabel'
@@ -69,6 +70,15 @@ class Facet < ActiveRecord::Base
        if fn[:feature_type] == 'Heading' or fn[:feature_type] == 'Spacer'
           fn[:name] = fn[:feature_type] + fn.id.to_s
           fn.save()
+       end
+       
+       # save the ordering of the categories, if there is a list of categories in the params
+       if vals.length > 6
+          categories = vals[6..-1]
+          results = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name).each {|instance| instance.destroy}
+          categories.each_with_index do |name, index|
+            fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
+          end
        end
        
        # store the display name as a translation string

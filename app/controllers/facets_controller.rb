@@ -49,19 +49,6 @@ class FacetsController < ApplicationController
     render :nothing => true
   end
   
-  def update
-    product_type = params[:product_type_id]
-    facet_name = params[:id]
-    getOrdering(facet_name, product_type).each {|instance| instance.destroy}
-    if params[:unset_flag] == "0"
-      # save the new ordering
-      params[:ordered_names].each_with_index do |name, index|  
-        fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
-      end
-    end
-    render :nothing => true
-  end
-  
   def edit
     @product_type = params[:product_type_id]
     @facet_name = params[:id]
@@ -73,7 +60,6 @@ class FacetsController < ApplicationController
       @categories = CatSpec.where(:product_id => product_ids, :name => @facet_name).map(&:value).uniq.sort
     end
     render 'edit', :layout => 'empty'
-    #render :layout => 'empty'
   end
   
   def new

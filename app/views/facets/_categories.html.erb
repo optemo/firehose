@@ -1,20 +1,23 @@
 <div class='categories' data-facet='<%= @facet_name %>' data-product-type='<%= @product_type %>'>
-  <div>
-    <input type="button" id="save_ordering" value="Save">
-    <input type="button" id="unset_ordering" value="Unset">
-  </div>
-  <% if @facet_name == 'product_type' %>
-    <a class='add_category' href="#">Add Category</a>
     <div id='facet_order' class="sortable_cats">
     <% @categories.each do |category_name| -%>
-      <div class="draggable_cats">
-        <div class='cat_option' data-name='<%= category_name %>'>
-          <div>
-            <%= category_name %> <a class='remove_category' href="#">x</a>
-          </div>  
-        </div>
-      </div>
+      <%= render 'category_order', :locals => {:category_name => category_name}%>
     <% end -%>
     </div>
+  <% if @facet_name == 'product_type' %>  
+    <div id='product_type_tree' class='tree'>
+      <% top_category = "Departments" %>
+      <ul>
+        <% nodes = BestBuyApi.get_subcategories(top_category) -%>
+        <% root = nodes.keys.first -%>
+        <% children = nodes.values.first -%>
+        <% category_id = root.keys.first -%>
+        <% category_name = root.values.first -%>
+      	<li id="<%= category_id %>" class="jstree-closed">
+      		<a class="tree_" href="#" ><%= category_id %> <%= category_name %></a>
+      	</li>
+      </ul>
+    </div>
   <% end %>
+  
 </div>
