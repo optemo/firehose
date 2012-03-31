@@ -23,7 +23,7 @@ class FacetsController < ApplicationController
     type_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (type_rules.nil? or type_rules.empty?) ? [] : type_rules.map(&:local_featurename).uniq
     # add custom rules
-    custom_rules = Customization.find_all_by_product_type(parent_types)
+    custom_rules = Customization.find_all_by_product_type(parent_types).select{|sr| sr.feature_name != nil}
     type_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results += (type_custom_rules.nil? or type_custom_rules.empty?) ? [] : type_custom_rules.map(&:feature_name).uniq
     @sr_filters = results.nil? ? [] : results.sort

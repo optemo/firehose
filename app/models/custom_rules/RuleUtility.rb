@@ -10,6 +10,8 @@ class RuleUtility < Customization
       records = {}
       feature_value= 0;
       features=[]
+      br_flag = FALSE
+      has_brand = FALSE
       
       all_products = Product.where(["id IN (?) and instock = ?", pids, 1])
       prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
@@ -19,9 +21,14 @@ class RuleUtility < Customization
       ptype_path.each do |path|
        features = Facet.find_all_by_used_for_and_product_type("utility",path)
         break unless features.empty?
-      end     
+      end
+      features.each do |f|
+        has_brand = TRUE if f.name=~/^brand_/
+        break if has_brand
+      end    
       all_products.each do |product|
         utility = []
+        br_flag=FALSE
         Maybe(features).each  do |f|
           #puts "#{f.name}"
           feature_value = 0 
@@ -33,8 +40,11 @@ class RuleUtility < Customization
             name = sp_feature[1]
             name = sp_feature[1]+" "+sp_feature[2] if (sp_feature.size == 3)
             records[sp_feature[0]] ||= model.where(["product_id IN (?) and name=? ", all_products,sp_feature[0]]).group_by(&:product_id)
-            if records[sp_feature[0]][product.id]
-              feature_value = 1 if records[sp_feature[0]][product.id].first.value == name
+            if records[sp_feature[0]][product.id]       
+              if records[sp_feature[0]][product.id].first.value == name
+                feature_value = 1 
+                br_flag = TRUE if f.name=~/^brand_/
+              end     
             elsif (f.name == "color_na")
               feature_value = 1
             end
@@ -60,15 +70,15 @@ class RuleUtility < Customization
               end 
             end
           end
-          utility << (feature_value* (f.value)) 
-            
+          utility << (feature_value* (f.value))     
         end
+         utility << (-2) if (!br_flag && has_brand) # The case that the product's brand is a new one and there is no coefficient for it in the facet table.
         #Add the static calculated utility 
-        #puts "#{utility}"
+        puts "#{utility}"
         utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
         product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
         product_utility.value = (utility.sum).to_f
-        # puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
+         puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
         cont_activerecords << product_utility
       end
   

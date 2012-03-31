@@ -17,6 +17,10 @@ task :get_features => :environment do
   get_all_features
 end
 
+task :delete_some_data  => :environment do
+delete_some_categories_data
+end
+
 def import_all_data(raw)
   directory = "/mysql_backup/slicehost"
   #directory = "/Users/Monir/optemo/mysql_backup"
@@ -43,7 +47,7 @@ def import_all_data(raw)
        specs = get_all_instock_attributes(date)
    
       ActiveRecord::Base.establish_connection(:development)
-      update_daily_specs(date, specs, raw)
+      update_all_daily_specs(date, specs, raw)
     end
   end
 end
@@ -113,7 +117,7 @@ def get_bin_specs(product_type="camera_bestbuy")
 end
 
 
-def update_daily_specs(date, specs, raw)
+def update_all_daily_specs(date, specs, raw)
   alldailyspecs= []
   specs.each do |attributes|
      alldailyspecs << AllDailySpec.new(attributes)
@@ -121,22 +125,25 @@ def update_daily_specs(date, specs, raw)
   AllDailySpec.import alldailyspecs
 end
 
-def analyze_all_daily_raw_specs(product_type="camera_bestbuy")
+def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="20243")
 
-  output_name =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/raw_data_29583_1.txt"
+  start_date = '2011-10-01'
+  end_date = '2012-01-31'
+  output_name =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/raw_data_#{category}_#{start_date}_#{end_date}.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
-  features = get_all_features()
+  features = get_all_features
   features.delete("title")
   features.delete("model")
-  features.delete("mps")
+  features.delete("mpn")
+  features.delete("utility")
   features.delete("imgsurl")
   features.delete("imgmurl")
   features.delete("imglurl")
   features.delete("img150url")
   out_file.write("date sku "+ features.keys.join(" ") + "\n")
-  days= AllDailySpec.where("date >= ? and date <= ?", '2011-08-01', '2011-12-31').select("Distinct(date)").order("date")
+  days= AllDailySpec.where("date >= ? and date <= ?", start_date, end_date).select("Distinct(date)").order("date")
   
   days.each do |day|
    puts "day #{day.date}"  
@@ -168,27 +175,11 @@ def analyze_all_daily_raw_specs(product_type="camera_bestbuy")
   
 end
 
-def get_all_cumulative_data(product_type, features)
-  
-  factors = {}
-  data_path =  "./log/Daily_Data/"
-  fname = "cumullative_data_#{product_type}_1.txt"
-  f = File.open(data_path + fname, 'r')
-  lines = f.readlines
-  lines.each do |line|
-      a = line.split
-      date = Date.parse(a[0])
-      #puts "date_analyize #{date}"
-      factors[date] = [] if factors[date].nil?
-      factors[date] << {"sku" => a[1]}.merge(features)
-  end
-  return factors
-end
 
-def get_all_features
+def get_all_features(category="20243")
   features={}
   # when we want to get the features of a specific subcategory of a product_type
-   products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='29583'").map(&:sku)
+   products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='#{category}'").map(&:sku)
    skus = products.join(", ")
    #puts "skus #{skus}"
    cont_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'cont'").map(&:name)
@@ -207,21 +198,6 @@ def get_all_features
   features
 end
 
-def write_instock_skus_into_file(product_type= "camera_bestbuy")
-  output_name =  "../log/Daily_Data/cumullative_data_#{product_type}_1.txt"
-  out_file = File.open(output_name,'w')
-  records = AllDailySpec.find_by_sql("select * from all_daily_specs where date >= '2011-08-01' and date <= '2011-12-31' and name='store_orders' order by date")
-  puts "size #{records.size}"
-  records.each do |re|
-    line=[]
-    line << re.date 
-    line << re.sku
-    line << re.value_flt
-    puts "line #{line.join(" ")}"
-    out_file.write(line.join(" ")+"\n")
-  end
-end
-
 def insert_regression_coefficient
   data_path =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/Outputs&Inputs/"
   fname = "camera_bestbuy_lr_coeffs_Test5_LR.txt"
@@ -238,3 +214,40 @@ def insert_regression_coefficient
   end
   Facet.import coeffs
 end
+
+def delete_some_categories_data
+  
+  skus = AllDailySpec.where("name = 'category' and value_txt in ('20237','20239')").select("DISTINCT(sku)").map(&:sku)
+  AllDailySpec.delete_all(["sku in (?)", skus])    
+end
+#def get_all_cumulative_data(product_type, features)
+#  
+#  factors = {}
+#  data_path =  "./log/Daily_Data/"
+#  fname = "cumullative_data_#{product_type}_1.txt"
+#  f = File.open(data_path + fname, 'r')
+#  lines = f.readlines
+#  lines.each do |line|
+#      a = line.split
+#      date = Date.parse(a[0])
+#      #puts "date_analyize #{date}"
+#      factors[date] = [] if factors[date].nil?
+#      factors[date] << {"sku" => a[1]}.merge(features)
+#  end
+#  return factors
+#end
+
+#def write_instock_skus_into_file(product_type= "camera_bestbuy")
+#  output_name =  "../log/Daily_Data/cumullative_data_#{product_type}_1.txt"
+#  out_file = File.open(output_name,'w')
+#  records = AllDailySpec.find_by_sql("select * from all_daily_specs where date >= '2011-08-01' and date <= '2011-12-31' and name='store_orders' order by date")
+#  puts "size #{records.size}"
+#  records.each do |re|
+#    line=[]
+#    line << re.date 
+#    line << re.sku
+#    line << re.value_flt
+#    puts "line #{line.join(" ")}"
+#    out_file.write(line.join(" ")+"\n")
+#  end
+#end

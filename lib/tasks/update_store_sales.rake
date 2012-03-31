@@ -9,6 +9,7 @@ task :update_store_sales, [:product_type, :do_all_products, :start_date, :end_da
   unless Rails.env == "accessories"
     raise "Please use the 'accessories' environment and table"
   end
+  # Change these default dates to get the longest stretch allowed by the sales files
   args.with_defaults(:do_all_products=>"false", :start_date=>"20110801", :end_date=>"20111231", :directory=>"/Users/marc/Documents/Best_Buy_Data/second_set")
   start_date = Date.strptime(args.start_date, '%Y%m%d')
   end_date = Date.strptime(args.end_date, '%Y%m%d')
