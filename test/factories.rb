@@ -101,4 +101,7 @@ FactoryGirl.define do
     r_id 0
     level 0
   end
+  factory :daily_spec do 
+    created_at '2012-04-02'
+  end
 end

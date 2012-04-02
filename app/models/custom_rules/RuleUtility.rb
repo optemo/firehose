@@ -21,12 +21,25 @@ class RuleUtility < Customization
       
       ptype_path = Session.product_type_path 
       #puts "path #{ptype_path}"
-      ptype_path.each do |path|  
-        default =TRUE if (path == ptype_path[0])  
+      ptype_path.reverse.each do |path|  
+        default =TRUE if (path == "BDepartments")  
         features = Facet.find_all_by_used_for_and_product_type("utility",path)
         break unless features.empty?
       end
-   
+      if default
+        features.each do |f|
+          max= 0
+          unless (f.name == 'onsale_factor' || f.name == 'displayDate' || f.name =="isAdvertised")  
+           model = Customization.rule_type_to_class(f.feature_type)
+           max = model.maximum(:value, :conditions => ['name = ?', f.name])
+           f.value = max.to_f if max
+          else
+            f.value = 1 #max value for onsale_factor and displayDate
+          end
+        end
+        features = calculate_default_coefs(features)
+      end
+      
       features.each do |f|
        has_brand = TRUE if f.name=~/^brand_/
        break if has_brand
@@ -36,7 +49,6 @@ class RuleUtility < Customization
        utility = []
        br_flag=FALSE
        Maybe(features).each  do |f|
-         puts "#{f.name}"
          feature_value = 0 
          model = Customization.rule_type_to_class(f.feature_type)
          if (f.name == "Intercept")
@@ -58,9 +70,6 @@ class RuleUtility < Customization
            org_price = prices[product.id].first.value
            saleprice = records["saleprice"][product.id].first.value
            feature_value = RuleUtility.calculateFactor_sale(org_price, saleprice)
-         #elsif (f.name == 'pageviews')
-          # records[f.name] ||= DailySpec.where(["sku IN (?) and name = ? and date = ?", all_products, f.name, (Date.today-1)]).group_by(&:sku)
-          # feature_value = records[f.name][product.sku].first.value if records[f.name][product.sku]
          else
            records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
            if records[f.name][product.id]
@@ -69,7 +78,7 @@ class RuleUtility < Customization
              if f.name == "displayDate"
                feature_value = RuleUtility.calculateFactor_displayDate(feature_value)
                feature_value = (1/feature_value)  if default
-                puts "feature_value #{feature_value}"
+                #puts "feature_value #{feature_value}"
              elsif f.name== "saleEndDate"
                feature_value = RuleUtility.calculateFactor_saleEndDate(feature_value)
              elsif f.feature_type == "Binary"
@@ -84,11 +93,12 @@ class RuleUtility < Customization
        end
         utility << (-2) if (!br_flag && has_brand) # The case that the product's brand is a new one and there is no coefficient for it in the facet table.
        #Add the static calculated utility 
-       puts "#{utility}"
+       #puts "#{utility}"
        utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "utility"]).group_by(&:product_id)
        product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: "utility")
        product_utility.value = (utility.sum).to_f
-        puts "product_id #{product.id} sku #{product.sku}  utility_sum #{utility.sum}"
+       product_utility.value = (product_utility.value/1e5) if default
+       puts "product_id #{product.id} sku #{product.sku}  utility_sum #{product_utility.value}"
        cont_activerecords << product_utility
       end
   
@@ -113,6 +123,28 @@ class RuleUtility < Customization
     end
     ret
   end
+  
+  def self.calculate_default_coefs (features)
+    max_f = Hash.new  
+    hash_f = Hash.new
+    features.each do |ele| 
+      max_f[ele.name] = ele.value
+      hash_f[ele.name] = ele.value
+    end 
+      hash_f['saleprice'] = (10/(max_f['saleprice']||1)) 
+      hash_f['averagePageviews'] = ((max_f['saleprice']||1)+2) * (hash_f['saleprice'])
+      hash_f['averageSales'] = ((max_f['averagePageviews']||1)+2) * hash_f['averagePageviews']
+      hash_f['displayDate'] =  ((max_f['averageSales']||1)+2) * hash_f['averageSales'] 
+      hash_f['onsale_factor'] = ((max_f['displayDate']||1)+2)*hash_f['displayDate'] # max of displayDate is 1
+      hash_f['isAdvertised'] = ((max_f['onsale_factor']||1)+2)*hash_f['onsale_factor'] # max of onsale_factor is 1    
+   
+      features.each do |f|
+        f.value = hash_f[f.name]
+        #puts "#{f.name} #{f.feature_type} #{f.value}"
+      end
+    features
+  end
+    
 
 end
 

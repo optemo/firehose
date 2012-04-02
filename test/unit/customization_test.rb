@@ -287,6 +287,7 @@ class CustomizationTest < ActiveSupport::TestCase
     p2 = create(:product, sku: 902)
     p3= create(:product, sku:903, instock: 0)
     p4= create(:product, sku:904)
+    p5 = create(:product, sku:905)
     create(:cat_spec, product_id: p1.id, name: "brand", value: "LIQUID IMAGE")
     create(:bin_spec, product_id: p1.id, name: "hdmi", value: 1)
     create(:cont_spec, product_id: p1.id, name: "customerRating", value: 4)
@@ -310,20 +311,25 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:cont_spec, product_id: p4.id, name: "price", value: 199.99)
     create(:cont_spec, product_id: p4.id, name: "saleprice", value: 179.99)
     create(:cat_spec, product_id: p4.id, name: "displayDate", value: "2011-11-20")
-    create(:bin_spec, product_id: p4.id, name: "isAdvertised", value: 1)
+    #create(:bin_spec, product_id: p4.id, name: "isAdvertised", value: 1)
     create(:cont_spec, product_id: p4.id, name: "averageSales", value: 7.4)
-    #create(:daily_sales, product_id: p4.id, name: "pageviews", value: 7400)
+    create(:cont_spec, product_id: p4.id, name: "averagePageviews", value: 12)
+    
+    create(:cont_spec, product_id: p5.id, name: "price", value: 199.99)
+    create(:cont_spec, product_id: p5.id, name: "saleprice", value: 179.99)
+    create(:bin_spec, product_id: p5.id, name: "isAdvertised", value: 1)
     
     create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")
     create(:facet, name: "frontlcd", feature_type: "Binary", used_for: "utility", value: 0.4, product_type: "B20218")
     
     
-    result = RuleUtility.compute_utility([p1.id,p2.id, p3.id, p4.id])
+    result = RuleUtility.compute_utility([p1.id,p2.id, p3.id, p4.id,p5.id])
     #result.save unless result.nil?
     #computing utility for instock products
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p1.id}.map(&:value)
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p2.id}.map(&:value)
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == p4.id}.map(&:value)
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == p5.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == p4.id}.map(&:value)[0]
     #utility is not calculated for non instock products
     assert_empty result.select{|spec| spec.name="utility" && spec.product_id == p3.id}
   end
