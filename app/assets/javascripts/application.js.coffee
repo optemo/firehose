@@ -231,7 +231,6 @@ $(document).ready ->
       cat_id = $.trim($('.current_product_type').html())[0] + t.closest('li').attr("id")
       tree = t.closest('.tree').attr('id')
       if tree == 'product_type_tree'
-        #$.get "_category_order.html", (data) ->
         # $("#facet_order").append data
         data="<div class='draggable_cats'><div class='cat_option' data-name='#{cat_id}'><div>#{cat_id} <a class='remove_category' href='#'>x</a></div></div></div>"
         $("#facet_order").append data

@@ -1,7 +1,16 @@
 <div class='categories' data-facet='<%= @facet_name %>' data-product-type='<%= @product_type %>'>
     <div id='facet_order' class="sortable_cats">
     <% @categories.each do |category_name| -%>
-      <%= render 'category_order', :locals => {:category_name => category_name}%>
+      <div class="draggable_cats">
+        <div class='cat_option' data-name='<%= category_name %>'>
+          <div>
+            <%= category_name %> 
+            <%- if @facet_name == 'product_type' %>
+              <a class='remove_category' href="#">x</a>
+            <%- end %>
+          </div>  
+        </div>
+      </div>
     <% end -%>
     </div>
   <% if @facet_name == 'product_type' %>  

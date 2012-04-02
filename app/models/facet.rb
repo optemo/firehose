@@ -30,7 +30,11 @@ class Facet < ActiveRecord::Base
    def self.update_layout(product_type, used_for, facet_set)
      existing_facets = Facet.find_all_by_used_for_and_product_type(used_for, product_type)
      if facet_set == "null"
-       existing_facets.each{|d| d.destroy}
+       existing_facets.each do |f|
+         # delete the facet and any ordering for it
+         Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, f.name).each { |o| o.destroy }
+         f.destroy
+       end
        return
      end
      
