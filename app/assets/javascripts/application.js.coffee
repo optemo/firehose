@@ -142,15 +142,15 @@ $(document).ready ->
     
   $('.raise_rule_priority').click ->
     t = $(this)
-    form = t.parents("form")
+    category = document.getElementsByClassName('current_product_type')[0].innerHTML.match(/\s*(\w+)\s*/)[1]
     $.ajax
-  		url: "/scraping_rules/raisepriority?id=" + t.parent().attr("data-id")
-  		data: form.serialize()
-  		type: "POST"
-  		success: ->
-  		  alert_substitute("Rule priority raised.")
-  		error: ->
-  			alert_substitute("Error in processing the rule raise request.")
+      url: "/#{category}/scraping_rules/raisepriority?id=" + t.parent().attr("data-id")
+      data: ""
+      type: "POST"
+      success: ->
+        alert_substitute("Rule priority raised.")
+      error: ->
+        alert_substitute("Error in processing the rule raise request.")
     return false
     
   $('.edit_scraping_rule').each ->
