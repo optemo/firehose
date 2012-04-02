@@ -224,13 +224,23 @@ $(document).ready ->
   	  t.parent().remove()
   	  alert_substitute("Item has been removed.")
   	  return false
+  	else if t.hasClass('remove_category')
+  	  t.closest('.cat_option').remove()
+  	  return false
     else if t.hasClass("catnav")
-      cat_id = t.parent().attr("id")
-      parts = $(location).attr("href").split("/")
-      parts[3] = $.trim($('.current_product_type').html())[0] + cat_id
-      address = parts.join("/")
-      window.location = address
-      return false
+      cat_id = $.trim($('.current_product_type').html())[0] + t.closest('li').attr("id")
+      tree = t.closest('.tree').attr('id')
+      if tree == 'product_type_tree'
+        #$.get "_category_order.html", (data) ->
+        # $("#facet_order").append data
+        data="<div class='draggable_cats'><div class='cat_option' data-name='#{cat_id}'><div>#{cat_id} <a class='remove_category' href='#'>x</a></div></div></div>"
+        $("#facet_order").append data
+      else
+        parts = $(location).attr("href").split("/")
+        parts[3] = cat_id
+        address = parts.join("/")
+        window.location = address
+        return false
   	else if t.attr('data-method') is "delete"
   	  if confirm("Are you sure you want to delete this item?") 
   		  $.ajax

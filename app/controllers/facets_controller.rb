@@ -23,7 +23,7 @@ class FacetsController < ApplicationController
     type_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (type_rules.nil? or type_rules.empty?) ? [] : type_rules.map(&:local_featurename).uniq
     # add custom rules
-    custom_rules = Customization.find_all_by_product_type(parent_types)
+    custom_rules = Customization.find_all_by_product_type(parent_types).select{|sr| sr.feature_name != nil}
     type_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results += (type_custom_rules.nil? or type_custom_rules.empty?) ? [] : type_custom_rules.map(&:feature_name).uniq
     @sr_filters = results.nil? ? [] : results.sort
@@ -49,19 +49,6 @@ class FacetsController < ApplicationController
     render :nothing => true
   end
   
-  def update
-    product_type = params[:product_type_id]
-    facet_name = params[:id]
-    getOrdering(facet_name, product_type).each {|instance| instance.destroy}
-    if params[:unset_flag] == "0"
-      # save the new ordering
-      params[:ordered_names].each_with_index do |name, index|  
-        fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
-      end
-    end
-    render :nothing => true
-  end
-  
   def edit
     @product_type = params[:product_type_id]
     @facet_name = params[:id]
@@ -72,6 +59,7 @@ class FacetsController < ApplicationController
       product_ids = CatSpec.find_all_by_name_and_value("product_type", Session.product_type_leaves).map(&:product_id)
       @categories = CatSpec.where(:product_id => product_ids, :name => @facet_name).map(&:value).uniq.sort
     end
+    render 'edit', :layout => 'empty'
   end
   
   def new

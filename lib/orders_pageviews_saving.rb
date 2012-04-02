@@ -46,7 +46,7 @@ def save_online_orders(filename,date,daily_updates,table,retailer)
   end
 end
 
-# Saves pageviews to daily_specs
+# Saves pageviews to table specified
 def save_pageviews(filename,date,daily_updates,table,retailer)
   views_map = {} # map of sku => views
   File.open(filename, 'r') do |f|
