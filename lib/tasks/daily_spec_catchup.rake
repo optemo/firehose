@@ -64,7 +64,7 @@ def import_instock_data(start_date,end_date)
         %x[mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}]
         # Must be local user's credentials if run locally
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-          :username => "optemo", :password => "***REMOVED***")
+          :username => "oana", :password => "cleanslate")
         specs = []
         instock = Product.find_all_by_instock(1)
         instock.each do |p|

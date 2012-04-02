@@ -38,7 +38,7 @@ class ScrapingRulesController < ApplicationController
     # The basic algorithm is this: Find the given rule. Swap priorities with the rule that's one lower.
     rule = ScrapingRule.find(params[:id])
     if rule.priority > 0 # If the rule priority number is 0, its priority can't be raised higher
-      other_rules = ScrapingRule.where("priority < ?", rule.priority).find_all_by_local_featurename_and_active(rule.local_featurename, 1)
+      other_rules = ScrapingRule.where("priority < ?", rule.priority).find_all_by_local_featurename_and_product_type(rule.local_featurename, rule.product_type)
       other_rule = other_rules.max{|a, b| a.priority <=> b.priority}
       if other_rule
         # Swap the priorities. It's not possible to do arithmetic operations for this because there might be some deleted rules
