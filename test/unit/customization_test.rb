@@ -282,7 +282,7 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:product_category, product_type: 'B20282', l_id: 650, r_id: 710)
     create(:product_category, product_type: 'B20232', l_id: 700, r_id: 701)
     
-    Session.new('B20270')
+    Session.new('B20232')
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 902)
     p3= create(:product, sku:903, instock: 0)
