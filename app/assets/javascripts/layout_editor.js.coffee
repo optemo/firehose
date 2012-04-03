@@ -207,7 +207,7 @@ $('.edit_categories').live "click", ->
     @className.match /box/
   ))
   $(this).removeClass('edit_categories').addClass('save_categories')
-  $(this).html('Done editing')
+  $(this).html('Hide ordering')
   db_name = facet.attr('data-name')
   list_node = $(this).closest(".filter_box").children().filter((index) ->
     this.id.match /_list/
@@ -234,7 +234,7 @@ $('.save_categories').live "click", ->
   )
   list_node.css({'display':'none'})
   $(this).removeClass('save_categories').addClass('edit_categories')
-  $(this).html('Edit subcategories')
+  $(this).html('Edit order of categories')
   return false
 
 collect_attributes = (element_class) ->

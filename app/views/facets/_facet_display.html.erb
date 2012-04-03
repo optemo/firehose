@@ -9,7 +9,9 @@
       <div>Unit: <span class='edit-translation'><%= t(@p_type+'.'+f.used_for+'.'+f.name+'.unit', :default => '') %></span></div>
       <div>Display: <%= f.get_display %></div>
       <% if f.feature_type == 'Categorical' %>
-        <div><a class="edit_categories" href="#">Edit subcategories</a></div>
+        <div>
+          <a class="edit_categories" href="#"> <%= @categories_with_order.include?(f.name) ? 'Update ' : 'Set ' %>order of categories</a>
+        </div>
         <div id='<%= f.name %>_list'></div>
       <% end %>
 	    <div class='check'>Style: <input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
