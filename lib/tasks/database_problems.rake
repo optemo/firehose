@@ -16,17 +16,26 @@ task :find_missing_prod_type => :environment do
   pp missing_products
 end
 
+# 2/04/2012 Some products were deleted but productsiblings specs remained for them. deleting those
+task :delete_siblings_for_invalid_pids => :environment do
+  bad_siblings = ProductSibling.select{|r| !(Product.exists?(r.product_id) and Product.exists?(r.sibling_id))}
+  bad_siblings.map(&:destroy)
+end
+
 # 30/03/2012 Some products were deleted but their specs remained. Taking care of that
+# modified 2/04/2012 to also clear siblings and bundles for those ids
 task :delete_leftover_specs => :environment do
   missing_spec = "product_type"
   pids_to_remove = [37796,72816,72820,72828,72830,72832,72834,72836,72846,72848,72868,72870,72880,72884,72886,72926,72928,72946,72950,72952,72954,72956,72960,72962,72966,72968,72996,73010,73012,73086,73088]
   pids_to_remove.each do |pid|
-    debugger
     if CatSpec.find_by_product_id_and_name(pid,missing_spec).nil?
       CatSpec.destroy_all(:product_id => pid)
       ContSpec.destroy_all(:product_id => pid)
       BinSpec.destroy_all(:product_id => pid)
       TextSpec.destroy_all(:product_id => pid)
+      ProductSibling.destroy_all(:product_id => pid)
+      ProductSibling.destroy_all(:sibling_id => pid)
+      ProductBundle.destroy_all(:product_id => pid)
     else
       p "Product id: #{pid} has a #{missing_spec}"
     end
