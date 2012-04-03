@@ -129,4 +129,52 @@ brand_LIQUID_IMAGE:
   used_for: utility
   value: -3.26
   active: 1  
-  
+isAdvertised:
+  id: 17
+  product_type: BDepartments
+  name: isAdvertised
+  feature_type: Binary
+  used_for: utility
+  value: 2880060
+  active: 1
+onsale_factor:
+  id: 18
+  product_type: BDepartments
+  name: onsale_factor
+  feature_type: Continuous
+  used_for: utility
+  value: 960020
+  active: 1
+displayDate:
+  id: 19
+  product_type: BDepartments
+  name: displayDate
+  feature_type: Categorical
+  used_for: utility
+  value: 480010
+  active: 1  
+averageSales:
+  id: 20
+  product_type: BDepartments
+  name: averageSales
+  feature_type: Continuous
+  used_for: utility
+  value: 48001
+  active: 1
+averagePageviews:
+  id: 21
+  product_type: BDepartments
+  name: averagePageviews
+  feature_type: Continuous
+  used_for: utility
+  value: 10 
+  active: 1
+saleprice:
+  id: 22
+  product_type: BDepartments
+  name: saleprice
+  feature_type: Continuous
+  used_for: utility
+  value: 0.001
+  active: 1
+
