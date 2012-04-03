@@ -98,6 +98,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
           before_whole = Time.now()
     
           # This should work both for the old and new product_types (camera_bestbuy vs. B20218)
+          # neither drives nor camera has an 'f'
           /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
           if !retailers_received.include?(retailer) || !only_last
             retailers_received.push(retailer)
