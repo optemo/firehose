@@ -4,7 +4,7 @@ class ProductBundle < ActiveRecord::Base
   def self.get_relations
     copiedspecs = {} # For bulk insert
     product_bundles = []
-    TextSpec.where(name: "bundle").joins("INNER JOIN `cat_specs` ON `text_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type", value: Session.product_type_leaves}).each do |bundle|
+    TextSpec.joins("INNER JOIN `cat_specs` ON `text_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type",value: Session.product_type_leaves}, text_specs: {name: "bundle"}).each do |bundle|
       data = JSON.parse(bundle.value.gsub("=>",":"))
       if data && !data.empty?
         data.map{|d|d["sku"]}.each do |sku|
