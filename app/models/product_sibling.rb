@@ -3,7 +3,7 @@ class ProductSibling < ActiveRecord::Base
   def self.get_relations
     siblings_activerecords = []
     siblings_unchanged = []
-    TextSpec.where(name: "relations").joins("INNER JOIN cat_specs ON `text_specs`.product_id = cat_specs.product_id").where(cat_specs: {name: "product_type", value: Session.product_type_leaves}).each do |record|
+    TextSpec.joins("INNER JOIN `cat_specs` ON `text_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type",value: Session.product_type_leaves}, text_specs: {name: "relations"}).each do |record|
       data = JSON.parse(record.value.gsub("=>",":"))
       if data && !data.empty?
         p_id = record.product_id
