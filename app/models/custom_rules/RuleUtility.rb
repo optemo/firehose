@@ -105,11 +105,13 @@ class RuleUtility < Customization
          utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, key]).group_by(&:product_id)
          product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: key)
          product_utility.value = (utility.sum).to_f
+         product_utility.value = (product_utility.value/1e4) if key == default
+          # puts "product_id #{product.id} sku #{product.sku} utility_name #{product_utility.name} utility_sum #{product_utility.value}"
          cont_activerecords[key] << product_utility
        end
       end
     #normalizing the default utility values  
-     cont_activerecords[default] = normalize(cont_activerecords[default])
+     #cont_activerecords[default] = normalize(cont_activerecords[default])
     #print out put 
      
     # (cont_activerecords[default]+ cont_activerecords[non_default]).each do |product|
@@ -181,6 +183,7 @@ class RuleUtility < Customization
    
       features.each do |f|
         f.value = hash_f[f.name]
+       # puts "#{f.name} f.value #{f.value}"
       end
     features
   end
