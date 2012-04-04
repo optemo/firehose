@@ -95,7 +95,6 @@ featured:
   used_for: utility
   value: 0
   active: 1
-  
 displayDate:
   id: 13
   product_type: B20218
@@ -104,7 +103,6 @@ displayDate:
   used_for: utility
   value: -0.001
   active: 1  
-
 saleEndDate:
   id: 14
   product_type: B20218
