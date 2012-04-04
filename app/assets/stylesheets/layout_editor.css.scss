@@ -8,18 +8,16 @@
     margin-right: auto;
 }
 
-$margin: 1px;
-$padding: 5px;
+$margin: 4px;
 
 @mixin box {
   border: {
-    width: 1px;
+    width: 2px;
     color: gray;
     style: solid;
+    radius: 12px;
   }
-  padding: {
-    left: $padding;
-  }
+  padding: 4px 4px 4px 8px;
   margin: {
     bottom: $margin;
   }
