@@ -1,5 +1,5 @@
 class FacetsController < ApplicationController
-  layout "application", except: [:new]
+  layout false, only: [:new]
 
   def index
     parent_types = Session.product_type_path.reverse
