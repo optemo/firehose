@@ -12,6 +12,8 @@ $(document).ready ->
   $(".sortable").sortable
     revert: true
   make_editable()
+  $('.clear_order').each ->
+    $(this).css({'display':'none'})
 
 make_sortable = ->
   $(".sortable_cats").sortable
@@ -193,6 +195,12 @@ $('#add_spacer').live "click", ->
     error: (jqXHR, textStatus, errorThrown) ->
       alert(jqXHR.statusText)
   return false
+
+$('.clear_order').live "click", ->
+  list_node = $(this).closest(".filter_box").children().filter((index) ->
+    this.id.match /_list/
+  )
+  
   
 $('.edit_categories').live "click", ->
   facet = $(this).closest($("div").filter(->
@@ -200,6 +208,7 @@ $('.edit_categories').live "click", ->
   ))
   $(this).removeClass('edit_categories').addClass('save_categories')
   $(this).html('Hide ordering')
+  $(this).parent().children('.clear_order').css({'display':'inline'})
   db_name = facet.attr('data-name')
   list_node = $(this).closest(".filter_box").children().filter((index) ->
     this.id.match /_list/
@@ -225,6 +234,7 @@ $('.save_categories').live "click", ->
     this.id.match /_list/
   )
   list_node.css({'display':'none'})
+  $(this).parent().children('.clear_order').css({'display':'none'})
   $(this).removeClass('save_categories').addClass('edit_categories')
   $(this).html('Edit order of categories')
   return false
