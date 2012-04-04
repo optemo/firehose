@@ -1,19 +1,52 @@
 # Put code for getting info about/figuring out/fixing database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
-# 28/03/2012 Some products are missing 'product_type' in cat_specs
-# RESOLVED: we think that these products were deleted but not their specs (running the update task updated a new product record which has a type)
-# We still don't know why they are missing the product_type, but will delete them and see if they reappear
-task :find_missing_prod_type => :environment do
-  missing_products = []
-  all_ids = CatSpec.select("DISTINCT(product_id)").map(&:product_id)
-  all_ids.each do |id|
-    if CatSpec.where(:product_id => id, :name => 'product_type').empty?
-      missing_products.push([id,Product.where(:id => id)])
+task :find_any_missing_bundles => :environment do
+  pids = BinSpec.find_all_by_name('isBundle').map(&:product_id)
+  bundles = []
+  no_prod_type = []
+  pids.each do |pid|
+    product = Product.find(pid)
+    one_bundle = {:product => product, :siblings => []}
+    found_bundle = false
+    bundle_spec = TextSpec.find_all_by_name_and_product_id('bundle', pid)
+    if bundle_spec.count > 0
+      data = JSON.parse(bundle_spec.first.value.gsub("=>",":"))
+      if data && !data.empty?
+        
+        bundle_prod_type = CatSpec.find_by_name_and_product_id("product_type", bundle_spec.first.product_id)
+        no_prod_type << product if bundle_prod_type.nil?
+        next if bundle_prod_type.nil?
+        bundle_prod_type = bundle_prod_type.try(:value)
+        data.map{|d|d["sku"]}.each do |sku|
+          other_product = Product.find_by_sku_and_retailer(sku,product.retailer)
+          item_prod_type = CatSpec.find_by_name_and_product_id("product_type", other_product.try(:id)).try(:value)
+          unless item_prod_type.nil?
+          #if bundle_prod_type == item_prod_type and !item_prod_type.nil?
+            found_bundle = true
+            one_bundle[:siblings] << other_product
+            puts 'found bundle'
+            pp one_bundle
+          else
+            pp 'bundle product' 
+            pp product
+            pp bundle_prod_type
+            pp 'other product' 
+            pp other_product
+            pp item_prod_type
+            puts '----'
+          end
+        end
+        if found_bundle
+          bundles << one_bundle
+        end
+      end
     end
   end
-  p missing_products.length
-  pp missing_products
+  puts 'found bundles with no product type: '
+  pp no_prod_type
+  puts 'and the bundles found are:'
+  pp bundles
 end
 
 # 2/04/2012 Some products were deleted but productsiblings specs remained for them. deleting those
@@ -44,6 +77,21 @@ task :delete_leftover_specs => :environment do
 #  ContSpec.destroy_all(:product_id => pids_to_remove)
 #  BinSpec.destroy_all(:product_id => pids_to_remove)
 #  TextSpec.destroy_all(:product_id => pids_to_remove)
+end
+
+# 28/03/2012 Some products are missing 'product_type' in cat_specs
+# RESOLVED: we think that these products were deleted but not their specs (running the update task updated a new product record which has a type)
+# We still don't know why they are missing the product_type, but will delete them and see if they reappear
+task :find_missing_prod_type => :environment do
+  missing_products = []
+  all_ids = CatSpec.select("DISTINCT(product_id)").map(&:product_id)
+  all_ids.each do |id|
+    if CatSpec.where(:product_id => id, :name => 'product_type').empty?
+      missing_products.push([id,Product.where(:id => id)])
+    end
+  end
+  p missing_products.length
+  pp missing_products
 end
 
 # 28/03/2012: Remove products scraped as a result of the accessories project (now has own database)
