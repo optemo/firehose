@@ -11,19 +11,11 @@ make_editable = ->
 $(document).ready ->
   $(".sortable").sortable
     revert: true
-  $("#draggable").draggable
-    connectToSortable: "#sortable"
-    helper: "original"
-    revert: "invalid"
   make_editable()
 
 make_sortable = ->
   $(".sortable_cats").sortable
     revert: true
-  $(".draggable_cats").draggable
-    connectToSortable: ".sortable_cats"
-    helper: "original"
-    revert: "invalid"
 
 load_product_type_tree = ->
   $("#product_type_tree").jstree
