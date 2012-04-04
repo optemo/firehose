@@ -9,6 +9,10 @@ Spork.prefork do
   ENV["RAILS_ENV"] = "test"
   require File.expand_path('../../config/environment', __FILE__)
   require 'rails/test_help'
+  
+  #Load BestBuy API saved responses
+  $bb_api_response = YAML.load_file("#{Rails.root}/test/api_response.yml")
+  
   # Factory Girl Shortcut, FactoryGirl.create() doesn't have to be repeated all the time
   class Test::Unit::TestCase
     include FactoryGirl::Syntax::Methods
