@@ -164,6 +164,8 @@ class RuleUtility < Customization
     ret = (Date.parse(fVal) - Date.today)
     if ret>0
       ret = 1/ret
+    elsif ret == 0
+      ret = 1
     else
       ret = 0
     end
