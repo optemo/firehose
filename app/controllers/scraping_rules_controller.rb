@@ -122,7 +122,7 @@ class ScrapingRulesController < ApplicationController
       #Check single rules
       @candidates = ScrapingRule.scrape(products,false,ScrapingRule.find(params[:id])).sort{|a,b|(b.delinquent ? 2 : b.scraping_correction_id ? 1 : 0) <=> (a.delinquent ? 2 : a.scraping_correction_id ? 1 : 0)}
     end
-    render :partial => 'candidate', :collection => @candidates
+    render :partial => 'candidate', :collection => @candidates, content_type: "text/html"
   end
   
   def destroy
