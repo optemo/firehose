@@ -33,7 +33,7 @@ class Facet < ActiveRecord::Base
      page_facet_ids = facet_set.values.map{|f|f[0].to_i} unless facet_set == "null"
      to_delete = existing_facets.select{|f| !page_facet_ids.include?(f.id)}
      to_delete.each do |d|
-       Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, d.name).each { |o| o.destroy }
+       Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, d.name).each { |o| o.destroy } if used_for == 'filter'
        d.destroy
      end
      return if facet_set == "null"
@@ -45,7 +45,6 @@ class Facet < ActiveRecord::Base
        else
          fn = Facet.new()
        end
-       
        fn[:feature_type] = vals[1]
        facet_name = vals[2]
        fn[:name] = facet_name
@@ -70,22 +69,23 @@ class Facet < ActiveRecord::Base
           fn.save()
        end
        
-       cleared = vals[6]
-       current_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name)
-       categories = vals[7..-1]
-       ordering_to_delete = current_order.select{ |p| !categories.include?(p.name) }
-       # save the ordering of the categories, if there is a list of categories in the params
-       ordering_to_delete.each {|instance| instance.destroy}
-       categories.each_with_index do |name, index|
-         fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, facet_name, product_type, 'ordering')
-         fn.value = index
-         fn.active = true
-         fn.save
+       if used_for == 'filter'
+         cleared = vals[6]
+         current_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name)
+         categories = vals[7..-1]
+         ordering_to_delete = current_order.select{ |p| !categories.include?(p.name) }
+         # save the ordering of the categories, if there is a list of categories in the params
+         ordering_to_delete.each {|instance| instance.destroy}
+         categories.each_with_index do |name, index|
+           fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, facet_name, product_type, 'ordering')
+           fn.value = index
+           fn.active = true
+           fn.save
+         end
+         if cleared == "true"
+             current_order.each {|instance| instance.destroy}
+         end
        end
-       if cleared == "true"
-           current_order.each {|instance| instance.destroy}
-       end
-       
        # store the display name as a translation string
        suffix = (fn[:style] == "asc" or fn[:style] == "desc") ? ('_' + fn[:style]) : ''
        unless (fn[:feature_type] == 'Spacer')

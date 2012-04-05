@@ -85,7 +85,10 @@ class RuleUtility < Customization
            
                if f.name == "displayDate"
                  feature_value = RuleUtility.calculateFactor_displayDate(feature_value)
-                 feature_value = (1/feature_value)  if key == default and feature_value != 0
+                  if key == default 
+                    feature_value = (1/feature_value) if feature_value != 0
+                    feature_value = 1 if feature_value == 0
+                  end 
                elsif f.name== "saleEndDate"
                  feature_value = RuleUtility.calculateFactor_saleEndDate(feature_value)
                elsif f.feature_type == "Binary"
@@ -161,6 +164,8 @@ class RuleUtility < Customization
     ret = (Date.parse(fVal) - Date.today)
     if ret>0
       ret = 1/ret
+    elsif ret == 0
+      ret = 1
     else
       ret = 0
     end
