@@ -15,7 +15,11 @@ class BestBuyApi
       if includeall
         q[:include] = "all"
       end
-      cached_request('product',q)
+      if Rails.env.test? && (id == "100000" || id == "100001")
+        JSON.parse($bb_api_response[id])
+      else
+        cached_request('product',q)
+      end
       # From the BestBuy API documentation, use &Include=media and/or any of the following: 
       # relations,description,availability,all (in comma-separated format as a URL parameter)
     end

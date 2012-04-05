@@ -19,4 +19,9 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     sr1 = build(:scraping_rule, :local_featurename => "Name with spaces")
     assert !sr1.save, "local_featurename with spaces not allowed"
   end
+  
+  test "scraping" do
+    ScrapingRule.scrape(BBproduct.new id: "100000", category: "B20218")
+    assert true
+  end
 end
