@@ -29,20 +29,14 @@ class Facet < ActiveRecord::Base
    
    def self.update_layout(product_type, used_for, facet_set)
      existing_facets = Facet.find_all_by_used_for_and_product_type(used_for, product_type)
-     if facet_set == "null"
-       existing_facets.each do |f|
-         # delete the facet and any ordering for it
-         Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, f.name).each { |o| o.destroy }
-         f.destroy
-       end
-       return
-     end
-     
-     # determine which facets are in the facets table but not in the page and delete them
-     page_facet_ids = facet_set.values.map{|f|f[0].to_i}
+     page_facet_ids = []
+     page_facet_ids = facet_set.values.map{|f|f[0].to_i} unless facet_set == "null"
      to_delete = existing_facets.select{|f| !page_facet_ids.include?(f.id)}
-     to_delete.each {|d| d.destroy}
-     
+     to_delete.each do |d|
+       Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, d.name).each { |o| o.destroy }
+       d.destroy
+     end
+     return if facet_set == "null"
      # update the facets given the input from the page
      facet_set.each_pair do |index, vals|
        id = vals[0]
@@ -76,13 +70,20 @@ class Facet < ActiveRecord::Base
           fn.save()
        end
        
+       cleared = vals[6]
+       current_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name)
+       categories = vals[7..-1]
+       ordering_to_delete = current_order.select{ |p| !categories.include?(p.name) }
        # save the ordering of the categories, if there is a list of categories in the params
-       if vals.length > 6
-          categories = vals[6..-1]
-          results = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name).each {|instance| instance.destroy}
-          categories.each_with_index do |name, index|
-            fn = Facet.create(:name => name, :feature_type => facet_name, :used_for => 'ordering', :value => index, :active => true, :product_type => product_type)
-          end
+       ordering_to_delete.each {|instance| instance.destroy}
+       categories.each_with_index do |name, index|
+         fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, facet_name, product_type, 'ordering')
+         fn.value = index
+         fn.active = true
+         fn.save
+       end
+       if cleared == "true"
+           current_order.each {|instance| instance.destroy}
        end
        
        # store the display name as a translation string

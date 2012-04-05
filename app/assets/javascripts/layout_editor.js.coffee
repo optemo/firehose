@@ -33,6 +33,9 @@ load_product_type_tree = ->
       success: (data) ->
         $('#' + id).replaceWith(data)
 
+$('#clear_layout').live "click", ->
+  window.location.reload()
+
 $('#reset_layout').live "click", ->
   locale = $(location).attr('search').split('=')[1]
   $.ajax
@@ -170,6 +173,7 @@ $('.clear_order').live "click", ->
   )
   list_node.children('.categories').remove()
   $(this).parent().children('.clear_order').addClass('invisible')
+  $(this).addClass('cleared')
   hide_link = $(this).closest(".filter_box").find('.save_categories')
   hide_link.removeClass('save_categories').addClass('edit_categories')
   hide_link.html('Set order of categories')
@@ -181,7 +185,7 @@ $('.edit_categories').live "click", ->
   ))
   $(this).removeClass('edit_categories').addClass('save_categories')
   $(this).html('Hide ordering')
-  $(this).parent().children('.clear_order').removeClass('invisible')
+  $(this).parent().children('.clear_order').removeClass('invisible').removeClass('cleared')
   db_name = facet.attr('data-name')
   list_node = $(this).closest(".filter_box").children().filter((index) ->
     this.id.match /_list/
@@ -223,9 +227,11 @@ collect_attributes = (element_class) ->
     if display is null
       display = "" # not null so that it can be used in the ajax params
     styled = false
+    cleared = false
     ordered_cats = new Array()
     if (element_class) is '.filter_box'
       styled = $(this).find('input').is(':checked')
+      cleared = $(this).find('.clear_order').hasClass('cleared')
       $(this).find('.cat_option').each (index) ->
         ordered_cats[index] = $(this).attr('data-name')
     else if (element_class) is '.sortby_box'
@@ -234,7 +240,7 @@ collect_attributes = (element_class) ->
       unit = $(this).children().children('span').last().html()
       if unit is null or unit.match(/Click to edit/)
         unit = ""
-    result = [dbid,type,dbname,display,unit,styled]
+    result = [dbid,type,dbname,display,unit,styled,cleared]
     if (element_class) is '.filter_box'
       result = result.concat(ordered_cats)
     ordered_facets[index] = result

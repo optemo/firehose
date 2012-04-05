@@ -53,6 +53,7 @@ class FacetsController < ApplicationController
     @product_type = params[:product_type_id]
     @facet_name = params[:id]
     existing_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', @product_type, @facet_name)
+    
     unless existing_order.empty?
       @categories = existing_order.map(&:name)
     else

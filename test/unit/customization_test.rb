@@ -157,7 +157,6 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # test when no daily specs
     result = RuleAverageSales.group_computation([p1.id,p2.id])
-    #debugger
     assert_empty result, 'no average sales'
     
     # test only one product

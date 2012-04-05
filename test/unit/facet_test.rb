@@ -7,15 +7,15 @@ class FacetTest < ActiveSupport::TestCase
      f2 = create(:facet)
      f3 = create(:facet)
      
-     filter_data = {"0"=>["100", "Binary", "toprated", "Top Rated", "stars", "boldlabel"],
-                  "1"=>["101", "Heading", "status", "Status", "", ""],
-                  "2"=>["102", "Spacer", "space1", "", "", "false"]}
-     Facet.update_layout("B20218", 'filter', filter_data) 
-     sorting_data = {"0"=>["103", "Continuous", "displayDate", "Display Date", "", "asc"],
-                    "1"=>["104", "Continuous", "saleprice", "Sale Price", "$", "desc"] }
+     filter_data = {"0"=>["100", "Binary", "toprated", "Top Rated", "stars", "boldlabel","false","B20222"],
+                  "1"=>["101", "Heading", "status", "Status", "", "","false"],
+                  "2"=>["102", "Spacer", "space1", "", "", "false","false"]}
+     Facet.update_layout("B20218", 'filter', filter_data)
+     sorting_data = {"0"=>["103", "Continuous", "displayDate", "Display Date", "", "asc","false"],
+                    "1"=>["104", "Continuous", "saleprice", "Sale Price", "$", "desc","false"] }
      Facet.update_layout("B20218", 'sortby', sorting_data)
-     compare_data = {"0"=>["105", "Continuous", "regularPrice", "Compare prices", "$$", "false"],
-                    "1"=>["106", "Binary", "usb3", "usb3", "", "false"]}
+     compare_data = {"0"=>["105", "Continuous", "regularPrice", "Compare prices", "$$", "false","false"],
+                    "1"=>["106", "Binary", "usb3", "usb3", "", "false","false"]}
      Facet.update_layout("B20218", 'show', compare_data)
 
      assert_nil Facet.find_by_name(f1.name), 'previous facets should be removed when the layout is updated'
@@ -29,6 +29,11 @@ class FacetTest < ActiveSupport::TestCase
      assert Facet.find_by_feature_type_and_used_for('Spacer', 'filter').value > Facet.find_by_name_and_used_for('toprated', 'filter').value, 'order should be as defined'
      assert Facet.find_by_name_and_used_for('saleprice', 'sortby').value > Facet.find_by_name_and_used_for('displayDate', 'sortby').value, 'order should be as defined'
      assert Facet.find_by_name_and_used_for('usb3', 'show').value > Facet.find_by_name_and_used_for('regularPrice', 'show').value, 'order should be as defined'
+     
+     assert_not_nil Facet.find_by_used_for_and_name('ordering', "B20222"), "ordering facet should be created"
+     filter_data[0] = ["100", "Binary", "toprated", "Top Rated", "stars", "boldlabel","true"]
+     Facet.update_layout("B20218", 'filter', filter_data)
+     assert_nil Facet.find_by_used_for_and_name('ordering', "B20222"), "ordering should be cleared"
      
      assert_equal "stars", I18n.t('B20218.filter.toprated.unit'), 'filter unit should be stored as translation'
      assert_equal "Display Date", I18n.t('B20218.sortby.displayDate_asc.name'), 'sorby translation should be stored with its direction as translation'
@@ -47,10 +52,5 @@ class FacetTest < ActiveSupport::TestCase
     assert_not_nil f2.get_display, "binary facet should have an associated display type"
     assert_not_nil f3.get_display, "continuous facet should have an associated display type"
   end
-  
-  # test "check active" do
-  #   # create some facets, etc.
-  #   assert true
-  # end
   
 end
