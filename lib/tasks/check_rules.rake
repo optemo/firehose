@@ -23,3 +23,40 @@ task :check_brand_capitalize => :environment do
   RuleCapitalizeBrand.compute_feature(["APPLE","POMME"],2)
 
 end
+
+task :check_appropriate_scraped => :environment do
+  cats_to_check = ["B20218","B29157","B20352","B20232","F1127","F23773","F1002","F30659"]
+  spec_types = {"Binary"=>BinSpec, "Categorical"=>CatSpec, "Continuous"=>ContSpec, "Text"=>TextSpec}
+    
+  file = File.new("/Users/marc/Documents/scraping_rule_counts.txt")
+  File.open(file, "w") do |f|
+    
+    cats_to_check.each do |cat|
+      
+      Session.new(cat)
+      leaves = Session.product_type_leaves
+      pids = CatSpec.where(:name=>'product_type', :value=>leaves).map(&:product_id)
+      
+      f.puts "\n\n#{cat}:"
+      spec_types.each_pair do |type_str,type|
+        
+        f.puts "\n\t#{type_str} Features"
+        specs = ScrapingRule.select("DISTINCT(local_featurename)").where("product_type = ? AND rule_type = ?",cat,type_str).map(&:local_featurename)
+        
+        if type_str == "Text"
+          specs.each do |spec|
+            type.select("value, count(value) AS count").where(:name=>spec, :product_id=>pids).group("value HAVING count(value)>5").each do |scraped|
+              f.puts "\n\t\t#{spec.ljust(30,'.')}#{scraped.value.to_s.ljust(60,'.')}#{scraped.count.to_s}"
+            end
+          end
+        else  
+          specs.each do |spec|
+            type.select("value, count(value) AS count").where(:name=>spec, :product_id=>pids).group("value HAVING count(value)>1").each do |scraped|
+              f.puts "\t\t#{spec.ljust(30,'.')}#{scraped.value.to_s.ljust(60,'.')}#{scraped.count.to_s}"
+            end
+          end
+        end
+      end
+    end
+  end
+end

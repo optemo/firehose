@@ -15,9 +15,8 @@ class ScrapingRule < ActiveRecord::Base
     candidates = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
-    
-    corrections = ScrapingCorrection.all
 
+    corrections = ScrapingCorrection.all
     ids.each do |bbproduct|
       raw_return = nil
       ["English","French"].each do |language|
@@ -60,26 +59,27 @@ class ScrapingRule < ActiveRecord::Base
             else
               #We can handle multiple passes of regular expressions with ^^
               current_text = raw.to_s
-              firstregex = true
+              parsed = nil
               r[:regex].each do |current_regex|
                 begin
                   if current_regex[:sub]
                     #Replacement part of the regex (do a match first, since it's a two-part operation)
-                    parsed = current_text[current_regex[:reg]]
-                    parsed = parsed.sub(current_regex[:reg],current_regex[:sub]) if parsed
+                    parsed_temp = current_text[current_regex[:reg]]
+                    parsed_temp = parsed_temp.sub(current_regex[:reg],current_regex[:sub]) if parsed_temp
                   else
                     #Just match, not replacement
-                    parsed = current_text[current_regex[:reg]]
+                    parsed_temp = current_text[current_regex[:reg]]
                   end
                 rescue RegexpError
-                  parsed = "**Regex Error"
+                  parsed_temp = "**Regex Error"
                 end
-                #If it fails the first Regex, it should return nothing
-                current_text = parsed if !parsed.nil? || firstregex
-                break if firstregex && current_text.nil?
-                firstregex = false
+                # If match was successful, continue on from loop
+                unless parsed_temp.nil?
+                  parsed = parsed_temp
+                  break
+                end
               end
-              parsed = current_text
+              
               #Validation Tests
               parsed = "**LOW" if r[:rule].min && parsed && parsed.to_f < r[:rule].min
               parsed = "**HIGH" if r[:rule].max && parsed && parsed.to_f > r[:rule].max
@@ -89,7 +89,6 @@ class ScrapingRule < ActiveRecord::Base
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
             #Save the new candidate
-            
             candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
           end
         end

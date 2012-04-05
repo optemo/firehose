@@ -10,7 +10,7 @@
   <%= f.label :regex, "Regular Expression" %> 
     <div style="float: left;">
       <%= select "scraping_rule", "regex", ScrapingRule::REGEXES, {:include_blank=>false}, {:class=>"require regex scraping_rule_regex"} %>
-      <input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" class="require regexp scraping_rule_regex_option" style="display:inline;"  value='<%= @scraping_rule.regex %>' />
+      <input type="text" id="scraping_rule_regex_option" name="scraping_rule_option[regex]" class="require regexp scraping_rule_regex_option" style="display:none;"  value='<%= @scraping_rule.regex %>' />
       <br style="clear: both;" />
       <span style="float: left;">Custom Regex</span>
       <input type="checkbox" class="custom_regex" />
