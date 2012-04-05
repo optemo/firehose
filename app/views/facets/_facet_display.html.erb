@@ -11,7 +11,7 @@
       <% if f.feature_type == 'Categorical' %>
         <div>
           <a class="edit_categories" href="#"> <%= @categories_with_order.include?(f.name) ? 'Update ' : 'Set ' %>order of categories</a>
-          <a class="clear_order" href="#"> Clear order</a>
+          <a class="clear_order invisible" href="#"> Clear order</a>
         </div>
         <div id='<%= f.name %>_list'></div>
       <% end %>

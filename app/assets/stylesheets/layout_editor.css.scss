@@ -8,6 +8,10 @@
     margin-right: auto;
 }
 
+.invisible {
+    display: none
+}
+
 $margin: 4px;
 
 @mixin box {
