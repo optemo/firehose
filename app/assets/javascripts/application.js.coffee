@@ -51,6 +51,9 @@ $(document).ready ->
     rule_adder_div.css("top", $(window).scrollTop() + 100)
     applySilkScreen()
     myparams = []
+    full = "false"
+    if window.location.search.match(/full=true/)
+      full = "true"
     params =
       "rule[remote_featurename]" : $(this).attr('data-rf')
       "rule[local_featurename]" : $(this).attr('data-lf')
@@ -58,7 +61,7 @@ $(document).ready ->
     for i of params
       if params[i] isnt undefined 
         myparams.push(escape(i)+"="+escape(params[i]))
-    myurl = ($(this).attr('data-url') or window.location + "/new") + "?" + myparams.join('&')
+    myurl = ($(this).attr('data-url') or window.location.pathname + "/new") + "?" + myparams.join('&')
     rule_adder_div.load myurl, (->
       # The actual validation rules are according to the defaults from the jquery validation plugin, in conjunction with
       # html attribute triggers written out in views/scraping_rules/new.html.erb.
