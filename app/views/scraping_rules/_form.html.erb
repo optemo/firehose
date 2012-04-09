@@ -21,6 +21,6 @@
   <%= f.label :french, "French" %>
   <%= f.check_box(:french) %>
   <%= f.submit "Update Rule", :"data-id" => @scraping_rule.id, :class => "scraping_rule_submit", :style => "clear: left; margin-left: 200px" %>
-  <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expression which are applied in order with the '^^' separator. The result will be the last match in a chain of regular expressions, but if the first one fails, there will be no result.</p>
+  <p style="float: left; margin-bottom: 0">NB: Regular expressions can be either match or replace. To replace, use () with \1 \2 etc., with a "/" character in between the match and replace expressions. You can supply multiple regular expressions which are applied in order with the '^^' separator. The result will be the first match in the chain of regular expressions. If all fail, nothing is returned</p>
   <p style="float: left; margin-bottom: 0">For the valid inputs field use the '*' as a separator.</p>
 </fieldset>
