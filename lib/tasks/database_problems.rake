@@ -192,7 +192,10 @@ end
 # 14/03/2012: Certain products are present in multiple categories in the BB/FS hierarchies
 # Trying to solve issue of same item in multiple categories/product_types
 task :multi_cat_items,[:cat_to_find] => :environment do |t,args|
-  analyze_cat_items(args.cat_to_find)
+  Session.new(args.cat_to_find)
+  Session.product_type_leaves.each do |leaf|
+    analyze_cat_items(leaf)
+  end
 end
 
 #******* RESOLVED *******#
@@ -249,13 +252,12 @@ def analyze_cat_items(cat_to_find)
   Session.new(cat_to_find)
   p "Getting products in #{cat_to_find}"
   prod_skus =  BestBuyApi.category_ids(Session.product_type) # eg output: [#<BBproduct:0x31951ec @id="M1860039", @category="29089"> ... ]
-  
   # Find other categories in which products found
   p "Getting other categories of products in #{cat_to_find}"
   prod_cats = {}
   prod_skus.each do |prod|
     cats = CatSpec.select(:value).joins("INNER JOIN products ON products.id = cat_specs.product_id").where(products: {sku: prod.id, retailer: Session.retailer}, cat_specs: {name: 'product_type'})
-    cat_ids = ["#{cat_to_find}"]
+    cat_ids = []
     cats.each do |cat|
       cat_ids.push(cat.value)
     end

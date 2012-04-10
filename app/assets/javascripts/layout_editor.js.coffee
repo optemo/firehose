@@ -33,11 +33,17 @@ load_product_type_tree = ->
       success: (data) ->
         $('#' + id).replaceWith(data)
 
+alert_substitute = (msg) ->
+  div_to_add = $("<div class='global_popup'>" + msg + "</div>")
+  $("body").append(div_to_add)
+  div_to_add.delay(2000).fadeOut(1000)
+
 $('#clear_layout').live "click", ->
   window.location.reload()
 
 $('#reset_layout').live "click", ->
   locale = $(location).attr('search').split('=')[1]
+  alert_substitute("Resetting layout ... ")
   $.ajax
     type: 'POST'
     url: window.location.pathname
@@ -61,6 +67,7 @@ $('#submit_layout').live "click", ->
     alert('Error: please save the values of all display fields before saving layout')
     return false
   else
+    alert_substitute("Saving layout ... ")
     $.ajax
       type: 'POST'
       url: window.location.pathname
