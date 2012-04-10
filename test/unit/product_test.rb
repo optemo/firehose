@@ -20,6 +20,8 @@ class ProductTest < ActiveSupport::TestCase
   test "Product and Spec import from BBY API" do
     sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription", rule_type: "Text")
     Product.feed_update
+    #Put the first product back in stock since it is defined in the fixtures
+    Product.first.update_attribute(:instock, true)
     # 20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 20 products created in the database"
     assert_equal true, Product.all.inject(true){|res,el|res && (el.instock || /^B/ =~ el.sku)}, "All products should be instock (unless they're bundles)"
@@ -29,6 +31,8 @@ class ProductTest < ActiveSupport::TestCase
   test "Product and Spec import for bundles from BBY API" do
     sr = create(:scraping_rule, local_featurename: "price", remote_featurename: "regularPrice", rule_type: "Continuous")
     Product.feed_update
+    #Put the first product back in stock since it is defined in the fixtures
+    Product.first.update_attribute(:instock, true)
     # 20 created(Current BB page size), and 1 in the fixtures
     assert_equal 21, Product.count, "There should be 20 products created in the database"
     assert_equal true, Product.all.inject(true){|res,el|res && el.instock}, "All products should be instock"
