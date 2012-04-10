@@ -1,7 +1,6 @@
 #= require_self
 #= require layout_editor
 #= require jquery.jeditable.min
-#= require jquery_ujs
 #= require jquery.validate.min
 #= require jstree
 
@@ -164,11 +163,11 @@ $(document).ready ->
         error.appendTo(element.parent())
 
   $('.expandable_sku').live "click", ->
-  	$(this).load (window.location + "/" + $(this).attr('data-id')), ->
-  		$(this).find('.togglable').each ->
-  		  addtoggle($(this))
-  		$(this).removeClass('bold').removeClass('expandable_sku')
-  		return false
+    $(this).load (window.location + "/" + $(this).attr('data-id')), ->
+      $(this).find('.togglable').each ->
+        addtoggle($(this))
+      $(this).removeClass('bold').removeClass('expandable_sku')
+      return false
     
   # Scrape the first SKU from the category list
   $('.skus_to_fetch').first().click()
@@ -221,15 +220,15 @@ $(document).ready ->
     div_to_add.delay(2000).fadeOut(1000)
 
   $("a").live 'click', ->
-  	t = $(this)
-  	form = t.parents("form")
-  	if t.hasClass('category_id-delete') or t.hasClass('delete_scraping_rule') 
-  	  t.parent().remove()
-  	  alert_substitute("Item has been removed.")
-  	  return false
-  	else if t.hasClass('remove_category')
-  	  t.closest('.cat_option').remove()
-  	  return false
+    t = $(this)
+    form = t.parents("form")
+    if t.hasClass('category_id-delete') or t.hasClass('delete_scraping_rule') 
+      t.parent().remove()
+      alert_substitute("Item has been removed.")
+      return false
+    else if t.hasClass('remove_category')
+      t.closest('.cat_option').remove()
+      return false
     else if t.hasClass("catnav")
       cat_id = $.trim($('.current_product_type').html())[0] + t.closest('li').attr("id")
       tree = t.closest('.tree').attr('id')
@@ -243,41 +242,42 @@ $(document).ready ->
         address = parts.join("/")
         window.location = address
         return false
-  	else if t.attr('data-method') is "delete"
-  	  if confirm("Are you sure you want to delete this item?") 
-  		  $.ajax
-  				url: t.attr("href")
-  				data: form.serialize()
-  				type: "DELETE"
-  				success: (data) ->
-				    if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete')
-					    t.parent().remove()
-  				error: ->
-  					alert_substitute("Error in processing the request for delete.")
+    else if t.attr('data-method') is "delete"
+      if confirm("Are you sure you want to delete this item?") 
+        $.ajax
+          url: t.attr("href")
+          data: form.serialize()
+          type: "DELETE"
+          success: (data) ->
+            if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete')
+              t.parent().remove()
+            alert_substitute("Correction has been removed.")
+          error: ->
+            alert_substitute("Error in processing the request for delete.")
       return false
-  	else
-  		return true
+    else
+      return true
 
   $('.correction').live "click", ->
-  	myparams = []
-  	t = $(this)
-  	if t.html() is "Update Correction"
-  		myurl = ($("h3").attr("data-correctionsurl") + "/" + t.siblings(".parsed").attr("data-sc") + "/edit")
-  	else 
-  		elem = t.parents(".contentholder").siblings(".edit_rule_dropdown") #Single rule definition
-  		if not elem.length > 0 
-  			#Combined for all rules, chooses the first one as id
-  			elem = t.parents(".contentholder").parent().find(".edit_rule_dropdown")
-  		params =
-  		  "sc[product_id]" : t.siblings(".expandable_sku").attr('data-id')
-  			"sc[raw]" : t.siblings(".raw").attr("data-rawhash") or t.siblings(".raw").html()
-  			"sc[scraping_rule_id]" : elem.attr("data-id")
-  		for arg,i in params
-  			if arg isnt undefined
-  			  myparams.push(escape(i)+"="+escape(arg))
+    myparams = []
+    t = $(this)
+    if t.html() is "Update Correction"
+      myurl = ($("h3").attr("data-correctionsurl") + "/" + t.siblings(".bold").eq(1).attr("data-sc") + "/edit")
+    else 
+      elem = t.parents(".contentholder").siblings(".edit_rule_dropdown") #Single rule definition
+      if not elem.length > 0 
+        #Combined for all rules, chooses the first one as id
+        elem = t.parents(".contentholder").parent().find(".edit_rule_dropdown")
+      params =
+        "sc[product_id]" : t.siblings(".expandable_sku").attr('data-id')
+        "sc[raw]" : t.siblings(".raw").attr("data-rawhash") or t.siblings(".raw").html()
+        "sc[scraping_rule_id]" : elem.attr("data-id")
+      for key,val of params
+        if val isnt undefined
+          myparams.push(escape(key)+"="+escape(val))
       myurl = $("h3").attr("data-correctionsurl") + "/new?" + myparams.join('&')
-    t.toggle().siblings(".parsed").load(myurl)
-  	return false
+    t.siblings(".bold").eq(1).load(myurl)
+    return false
 
   # Editable, use jeditable to edit inline. Document is jquery jeditable
   editableVar =
