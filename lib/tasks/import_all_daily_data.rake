@@ -1,6 +1,5 @@
 task :get_all_daily_specs => :environment do
   require 'ruby-debug'
- # write_instock_skus_into_file ("drive_bestbuy")
   analyze_all_daily_raw_specs("drive_bestbuy","20028")
 end
 
@@ -23,7 +22,6 @@ end
 
 def import_all_data(start_date, end_date)
   directory = "/mysql_backup/slicehost"
-  #directory = "/Users/Monir/optemo/mysql_backup"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -202,16 +200,16 @@ def get_all_features(category="20243")
 end
 
 def insert_regression_coefficient
-  data_path =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/Outputs&Inputs/"
-  fname = "camera_bestbuy_lr_coeffs_Test5_LR.txt"
-  product_type= "B20218"
+  data_path =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/Inputs&Outputs/"
+  fname = "Coefficient_20028_Test4.txt"
+  product_type= "B20028"
   f = File.open(data_path + fname, 'r')
   lines = f.readlines
   coeffs =[]
   lines.each do |line|
       a = line.split
-      puts "#{a[0]} #{a[1]} #{a[2]} #{a[3]} #{a[4]}"
-      coeffs << Facet.new(name: a[0].to_str, feature_type: a[4], used_for: "utility", value: a[3].to_f, active: 1, product_type: product_type)   
+      puts "#{a[0]} #{a[1]} #{a[2]} #{a[3]}"
+      coeffs << Facet.new(name: a[0].to_str, feature_type: a[3], used_for: "utility", value:(a[1].to_f * (1-a[2].to_f)), active: 1, product_type: product_type)   
       #puts "#{a[0]} #{a[1]} #{a[2]}"
       #coeffs << Facet.new(name: a[0].to_str, feature_type: a[2], used_for: "utility", value: a[1].to_f, active: 1, product_type: product_type)     
   end
@@ -223,34 +221,3 @@ def delete_some_categories_data
   skus = AllDailySpec.where("name = 'category' and value_txt in ('20237','20239')").select("DISTINCT(sku)").map(&:sku)
   AllDailySpec.delete_all(["sku in (?)", skus])    
 end
-#def get_all_cumulative_data(product_type, features)
-#  
-#  factors = {}
-#  data_path =  "./log/Daily_Data/"
-#  fname = "cumullative_data_#{product_type}_1.txt"
-#  f = File.open(data_path + fname, 'r')
-#  lines = f.readlines
-#  lines.each do |line|
-#      a = line.split
-#      date = Date.parse(a[0])
-#      #puts "date_analyize #{date}"
-#      factors[date] = [] if factors[date].nil?
-#      factors[date] << {"sku" => a[1]}.merge(features)
-#  end
-#  return factors
-#end
-
-#def write_instock_skus_into_file(product_type= "camera_bestbuy")
-#  output_name =  "../log/Daily_Data/cumullative_data_#{product_type}_1.txt"
-#  out_file = File.open(output_name,'w')
-#  records = AllDailySpec.find_by_sql("select * from all_daily_specs where date >= '2011-08-01' and date <= '2011-12-31' and name='store_orders' order by date")
-#  puts "size #{records.size}"
-#  records.each do |re|
-#    line=[]
-#    line << re.date 
-#    line << re.sku
-#    line << re.value_flt
-#    puts "line #{line.join(" ")}"
-#    out_file.write(line.join(" ")+"\n")
-#  end
-#end
