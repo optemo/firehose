@@ -1,5 +1,6 @@
 # Save online orders to either daily_specs or all_daily_specs (all_daily_specs can't use mass inserts)
 def save_online_orders(filename,date,daily_updates,table,retailer)
+  
   orders_map = {} # map of sku => orders
   File.open(filename, 'r') do |f|
     f.each do |line|

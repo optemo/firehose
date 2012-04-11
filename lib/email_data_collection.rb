@@ -10,6 +10,7 @@ def set_needed_fields (spec_name, table_name)
   else
     p "Invalid spec_name. Please try again."
   end
+  p "Task data block run"
   return task_data
 end
 
@@ -64,6 +65,8 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
         then_date = Date.parse(msg.attr["ENVELOPE"].date)
+        p then_date
+        
         Dir.mkdir("#{Rails.root}/tmp/#{task_data[:spec]} zip") unless File.exists?("#{Rails.root}/tmp/#{task_data[:spec]} zip")
         cName = "#{Rails.root}/tmp/#{task_data[:spec]} zip/#{then_date}.zip" 
   # Fetch attachment. 
@@ -72,6 +75,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
   # Save message, BASE64 decoded 
         File.open(cName,'wb+') do |f|
           f.write(attachment.unpack('m')[0])
+          p "Decoding block run"
         end
         
   # Unzip file
@@ -84,6 +88,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
            end
+           p "Unzipping block run"
         end
 
   # Open csv file, process data, save sales or pageviews
@@ -105,20 +110,24 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             data_date = then_date.prev_day().strftime("%Y-%m-%d")
             if spec == "pageviews"
               save_pageviews(csvfile,data_date,daily_updates,task_data[:table],retailer)
-            else
+            elsif spec == "online_orders"
               save_online_orders(csvfile,data_date,daily_updates,task_data[:table],retailer)
             end
             
             after_whole = Time.now()
             p "Time for sales of #{data_date}: #{after_whole-before_whole}"
+            p "Saving block run"
           end
         end
+        p "Finding attachment block run"
       end 
 
       if only_last && retailers_received.uniq.length == NUMBER_OF_RETAILERS
         break; #Only process the first email, unless that email is a weekly email
       end
+      p "Email match block run"
     end 
+    p "Reading each email block run"
   end 
   imap.close
 end
