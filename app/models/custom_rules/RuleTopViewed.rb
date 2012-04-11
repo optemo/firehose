@@ -12,7 +12,7 @@ class RuleTopViewed < Customization
     res_specs = []
     set = DailySpec.where(:name => 'pageviews', :date => (lastFriday..today)) # this set is inclusive!
     pids.each do |pid|
-      prod = Product.find(pid) # will raise 
+      prod = Product.find(pid) # will raise exception if not found
       raise 'attempting to re-add pid' unless sorted_specs[pid].nil?
       sorted_specs[pid] = set.where(:sku => prod.sku).inject(0) {|sum, spec| sum += spec.value_flt}
     end
