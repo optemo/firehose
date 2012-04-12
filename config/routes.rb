@@ -65,6 +65,8 @@ Firehose::Application.routes.draw do
   resources :futureshop, only: [:index, :show], id: /\w+/i
   resources :bestbuy, only: [:index, :show], id: /\w+/i
   resources :accessories, only: [:index, :show], id: /\w+/i
+  resources :category_id_product_type_maps, only: [:new], :path=>"category_ids"
+  match "category_ids" => "category_id_product_type_maps#show"
 
   resources :product_types, path: "/", id: /[BF]\w+/i, only: [:show] do
     resources :facets, only: [:index, :new, :create, :edit, :update], id: /\w+/, path: "layout_editor"
