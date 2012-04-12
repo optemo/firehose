@@ -41,6 +41,7 @@ class BestBuyApi
       res = cached_request('category',q)      
       children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
       subcats = {{res["id"] => res["name"]} => children}
+      debugger
       subcats
     end
     
@@ -146,7 +147,7 @@ class BestBuyApi
 
     def cached_request(type, params = {})
       #Data is only valid for 1 hour
-      CachingMemcached.cache_lookup(type + params.to_s + Time.now.strftime("%Y-%m-%d-%H")) do
+      CachingMemcached.cache_lookup(type + params.to_s + Session.retailer + Time.now.strftime("%Y-%m-%d-%H")) do
         send_request(type, params)
       end
     end
