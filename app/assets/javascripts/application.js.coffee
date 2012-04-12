@@ -225,18 +225,13 @@ $(document).ready ->
   $("a").live 'click', ->
     t = $(this)
     form = t.parents("form")
-    if t.hasClass('category_id-delete') or t.hasClass('delete_scraping_rule') 
-      t.parent().remove()
-      alert_substitute("Item has been removed.")
-      return false
-    else if t.hasClass('remove_category')
+    if t.hasClass('remove_category')
       t.closest('.cat_option').remove()
       return false
     else if t.hasClass("catnav")
       cat_id = $.trim($('#current_product_type').html())[0] + t.closest('li').attr("id")
       tree = t.closest('.tree').attr('id')
       if tree == 'product_type_tree'
-        # $("#facet_order").append data
         data="<div class='draggable_cats'><div class='cat_option' data-name='#{cat_id}'><div>#{cat_id} <a class='remove_category' href='#'>x</a></div></div></div>"
         $("#facet_order").append data
       else
@@ -246,15 +241,15 @@ $(document).ready ->
         window.location = address
         return false
     else if t.attr('data-method') is "delete"
-      if confirm("Are you sure you want to delete this item?") 
+      if confirm("Are you sure you want to delete this item?")
         $.ajax
           url: t.attr("href")
           data: form.serialize()
           type: "DELETE"
           success: (data) ->
-            if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete')
+            if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete') or t.hasClass('delete_scraping_rule') 
               t.parent().remove()
-            alert_substitute("Correction has been removed.")
+            alert_substitute("Item has been removed.")
           error: ->
             alert_substitute("Error in processing the request for delete.")
       return false
