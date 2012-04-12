@@ -115,7 +115,7 @@ $(document).ready ->
           id: id
           product_type: product_type_id
         success: (data) ->
-          $('#' + id).replaceWith(data)
+          $('#tree_categories').find('#' + id).replaceWith(data)
 
   load_nodes = (nodes) ->
     setTimeout (->
