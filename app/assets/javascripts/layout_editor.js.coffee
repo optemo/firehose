@@ -31,7 +31,7 @@ load_product_type_tree = ->
       data:
         id: id
       success: (data) ->
-        $('#' + id).replaceWith(data)
+        $('#product_type_tree').find('#' + id).replaceWith(data)
 
 alert_substitute = (msg) ->
   div_to_add = $("<div class='global_popup'>" + msg + "</div>")
