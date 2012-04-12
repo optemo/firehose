@@ -67,8 +67,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
         p then_date
 
-        Dir.mkdir("#{Rails.root}/tmp/#{task_data[:spec]} zip") unless File.exists?("#{Rails.root}/tmp/#{task_data[:spec]} zip")
-        cName = "#{Rails.root}/tmp/#{task_data[:spec]} zip/#{then_date}.zip" 
+        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
   # Fetch attachment. 
         attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
         
@@ -83,7 +82,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         csvfile = ""
         Zip::ZipFile.open(cName) do |zip_file|
            zip_file.each do |f|
-             f_path=File.join("#{Rails.root}/tmp/#{task_data[:spec]}/", f.name)
+             f_path=File.join("#{Rails.root}/tmp/", f.name)
              csvfile = f_path
              FileUtils.mkdir_p(File.dirname(f_path))
              zip_file.extract(f, f_path) unless File.exist?(f_path)
