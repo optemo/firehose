@@ -64,9 +64,9 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         i+=1 
         next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
         next unless body.parts[i-1].media_type == "APPLICATION"
-        then_date = Date.parse(msg.attr["ENVELOPE"].date)
+        then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
         p then_date
-        
+
         Dir.mkdir("#{Rails.root}/tmp/#{task_data[:spec]} zip") unless File.exists?("#{Rails.root}/tmp/#{task_data[:spec]} zip")
         cName = "#{Rails.root}/tmp/#{task_data[:spec]} zip/#{then_date}.zip" 
   # Fetch attachment. 
@@ -115,10 +115,14 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             end
             
             after_whole = Time.now()
-            p "Time for sales of #{data_date}: #{after_whole-before_whole}"
+            p "Time for #{spec} of #{data_date}: #{after_whole-before_whole}"
             p "Saving block run"
           end
         end
+        
+        # Delete files used
+        File.delete(cName,csvfile)
+        
         p "Finding attachment block run"
       end 
 
