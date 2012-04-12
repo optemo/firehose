@@ -96,8 +96,8 @@ $(document).ready ->
     product_type = $('#current_product_type').attr('data-product_type')
     dropdown_div.load '/' + product_type + "/category_ids", ->      
       $("#product_type_menu").append dropdown_div
-      setTimeout load_tree(nodes), 1000
-      setTimeout load_nodes(nodes), 1500
+      load_tree(nodes)
+      load_nodes(nodes)
     return false
 
   load_tree = (nodes) ->
