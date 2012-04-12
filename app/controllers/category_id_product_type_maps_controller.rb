@@ -1,4 +1,5 @@
 class CategoryIdProductTypeMapsController < ApplicationController
+  layout false
   # Get /category_ids/new
   def new
     @nodes = BestBuyApi.get_subcategories(params[:id])

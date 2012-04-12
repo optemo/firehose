@@ -41,7 +41,6 @@ class BestBuyApi
       res = cached_request('category',q)      
       children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
       subcats = {{res["id"] => res["name"]} => children}
-      debugger
       subcats
     end
     

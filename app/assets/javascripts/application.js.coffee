@@ -93,7 +93,8 @@ $(document).ready ->
     nodes_path = $('#tree_categories').attr('data-path').split('"')
     for node, i in nodes_path
       nodes.push node.substr(1) if i % 2 == 1
-    dropdown_div.load "category_ids", ->
+    product_type = $('#current_product_type').attr('data-product_type')
+    dropdown_div.load '/' + product_type + "/category_ids", ->      
       $("#product_type_menu").append dropdown_div
       setTimeout load_tree(nodes), 1000
       setTimeout load_nodes(nodes), 1500
@@ -108,15 +109,17 @@ $(document).ready ->
         animation: 0
     $("#tree_categories").bind "open_node.jstree", (event, data) ->
       id = data.rslt.obj.attr("id")
-      product_type_id = $('#top_type').attr('data-id')
+      product_type_id = $('#current_product_type').attr('data-product_type')
       $.ajax
-        url: "category_ids/new"
+        url: '/' + product_type_id + "/category_ids/new"
         data:
           id: id
           product_type: product_type_id
         success: (data) ->
           $('#tree_categories').find('#' + id).replaceWith(data)
-
+        failure: ->
+          alert('failed to get categories tree')
+          
   load_nodes = (nodes) ->
     setTimeout (->
       $("#tree_categories").jstree "set_focus"
@@ -144,7 +147,7 @@ $(document).ready ->
     
   $('.raise_rule_priority').click ->
     t = $(this)
-    category = document.getElementsByClassName('current_product_type')[0].innerHTML.match(/\s*(\w+)\s*/)[1]
+    category = $('#current_product_type').attr('data-product_type')
     $.ajax
       url: "/#{category}/scraping_rules/raisepriority?id=" + t.parent().attr("data-id")
       data: ""
@@ -230,7 +233,7 @@ $(document).ready ->
       t.closest('.cat_option').remove()
       return false
     else if t.hasClass("catnav")
-      cat_id = $.trim($('.current_product_type').html())[0] + t.closest('li').attr("id")
+      cat_id = $.trim($('#current_product_type').html())[0] + t.closest('li').attr("id")
       tree = t.closest('.tree').attr('id')
       if tree == 'product_type_tree'
         # $("#facet_order").append data
