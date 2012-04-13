@@ -16,121 +16,127 @@ end
 
 # Opens the attachments for the days specified, processes and saves their data to the table specified
 def save_email_data (task_data,daily_updates,start_date,end_date)
-  require 'net/imap'
-  require 'zip/zip'
-  require 'orders_pageviews_saving'
-  spec = task_data[:spec]
-  retailers_received = []
+  begin
+    require 'net/imap'
+    require 'zip/zip'
+    require 'orders_pageviews_saving'
+    spec = task_data[:spec]
+    retailers_received = []
 
-  imap = Net::IMAP.new('imap.1and1.com') 
-  if spec == "pageviews"
-    imap.login('files@optemo.com', '***REMOVED***') 
-  else # ... if online_orders
-    imap.login('auto@optemo.com', '***REMOVED***')
-  end
-  imap.select('INBOX') 
-  
-  # Get the messages wanted
-  if (start_date || end_date) && !daily_updates # If a date is given or it is not running the production update...
-    only_last = false  
-    if start_date 
-      since = start_date.next_day.strftime("%d-%b-%Y")
-      if end_date # If end date given, read emails in range
-        before = (end_date+2).strftime("%d-%b-%Y")
-        msgs = imap.search(["SINCE", since,"BEFORE", before])
-      else # If no end date specified, go to last email received ('today')
-        msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
-      end
-    elsif end_date # If no start date given, but end date is, go from first email to end_date
-      before = (end_date+2).strftime("%d-%b-%Y") 
-      msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}","BEFORE", before])
+    imap = Net::IMAP.new('imap.1and1.com') 
+    if spec == "pageviews"
+      imap.login('files@optemo.com', '***REMOVED***') 
+    else # ... if online_orders
+      imap.login('auto@optemo.com', '***REMOVED***')
     end
-  else
-    only_last = true  #only process the last email
-    msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}"])
-  end
-
-  # Read each message 
-  msgs.reverse.each do |msgID| 
-    msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
+    imap.select('INBOX') 
+    p 'logged in'
     
-  # Only those with 'SOMETEXT' in subject are of our interest 
-    if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
-      body = msg.attr["BODY"] 
-      i = 1 
-      while body.parts[i] != nil 
-        
-  # Additional attachments attributes 
-        i+=1 
-        next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
-        next unless body.parts[i-1].media_type == "APPLICATION"
-        then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
-        p then_date
-
-        cName = "#{Rails.root}/tmp/#{then_date}.zip" 
-  # Fetch attachment. 
-        attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
-        
-  # Save message, BASE64 decoded 
-        File.open(cName,'wb+') do |f|
-          f.write(attachment.unpack('m')[0])
-          p "Decoding block run"
+    # Get the messages wanted
+    if (start_date || end_date) && !daily_updates # If a date is given or it is not running the production update...
+      only_last = false  
+      if start_date 
+        since = start_date.next_day.strftime("%d-%b-%Y")
+        if end_date # If end date given, read emails in range
+          before = (end_date+2).strftime("%d-%b-%Y")
+          msgs = imap.search(["SINCE", since,"BEFORE", before])
+        else # If no end date specified, go to last email received ('today')
+          msgs = imap.search(["SINCE", since,"BEFORE", Date.today.strftime("%d-%b-%Y")])
         end
-        
-  # Unzip file
-        #I coulnd't figure out how to unzip a string, otherwise we could do this whole thing in memory instead of temp files
-        csvfile = ""
-        Zip::ZipFile.open(cName) do |zip_file|
-           zip_file.each do |f|
-             f_path=File.join("#{Rails.root}/tmp/", f.name)
-             csvfile = f_path
-             FileUtils.mkdir_p(File.dirname(f_path))
-             zip_file.extract(f, f_path) unless File.exist?(f_path)
-           end
-           p "Unzipping block run"
-        end
-
-  # Open csv file, process data, save sales or pageviews
-        contspecs = []
-        #sometimes the top email will be a weekly email.  I don't want to process this
-        weekly=false
-        if csvfile =~ /.+-.+-.+/
-          weekly=true
-        end
-        
-        unless csvfile.blank? || weekly
-          before_whole = Time.now()
-    
-          # This should work both for the old and new product_types (camera_bestbuy vs. B20218)
-          # neither drives nor camera has an 'f'
-          /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
-          if !retailers_received.include?(retailer) || !only_last
-            retailers_received.push(retailer)
-            data_date = then_date.prev_day().strftime("%Y-%m-%d")
-            if spec == "pageviews"
-              save_pageviews(csvfile,data_date,daily_updates,task_data[:table],retailer)
-            elsif spec == "online_orders"
-              save_online_orders(csvfile,data_date,daily_updates,task_data[:table],retailer)
-            end
-            
-            after_whole = Time.now()
-            p "Time for #{spec} of #{data_date}: #{after_whole-before_whole}"
-            p "Saving block run"
-          end
-        end
-        
-        # Delete files used
-        File.delete(cName,csvfile)
-        
-        p "Finding attachment block run"
-      end 
-
-      if only_last && retailers_received.uniq.length == NUMBER_OF_RETAILERS
-        break; #Only process the first email, unless that email is a weekly email
+      elsif end_date # If no start date given, but end date is, go from first email to end_date
+        before = (end_date+2).strftime("%d-%b-%Y") 
+        msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}","BEFORE", before])
       end
-      p "Email match block run"
+    else
+      only_last = true  #only process the last email
+      msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}"])
+    end
+    
+    # Read each message 
+    msgs.reverse.each do |msgID| 
+      p 'processing a message'
+      msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
+    
+    # Only those with 'SOMETEXT' in subject are of our interest 
+      if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
+        body = msg.attr["BODY"] 
+        i = 1 
+        while body.parts[i] != nil 
+        
+    # Additional attachments attributes 
+          i+=1 
+          next if body.parts[i-1].param.nil? || body.parts[i-1].media_type.nil?
+          next unless body.parts[i-1].media_type == "APPLICATION"
+          then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
+          p then_date
+          cName = "#{Rails.root}/tmp/#{then_date}.zip" 
+    # Fetch attachment. 
+          attachment = imap.fetch(msgID, "BODY[#{i}]")[0].attr["BODY[#{i}]"] 
+        
+    # Save message, BASE64 decoded 
+          File.open(cName,'wb+') do |f|
+            f.write(attachment.unpack('m')[0])
+            p "Decoding block run"
+          end
+        
+    # Unzip file
+          #I coulnd't figure out how to unzip a string, otherwise we could do this whole thing in memory instead of temp files
+          csvfile = ""
+          Zip::ZipFile.open(cName) do |zip_file|
+             zip_file.each do |f|
+               f_path=File.join("#{Rails.root}/tmp/", f.name)
+               csvfile = f_path
+               FileUtils.mkdir_p(File.dirname(f_path))
+               zip_file.extract(f, f_path) unless File.exist?(f_path)
+             end
+             p "Unzipping block run"
+          end
+
+    # Open csv file, process data, save sales or pageviews
+          contspecs = []
+          #sometimes the top email will be a weekly email.  I don't want to process this
+          weekly=false
+          if csvfile =~ /.+-.+-.+/
+            weekly=true
+          end
+        
+          unless csvfile.blank? || weekly
+            before_whole = Time.now()
+    
+            # This should work both for the old and new product_types (camera_bestbuy vs. B20218)
+            # neither drives nor camera has an 'f'
+            /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
+            if !retailers_received.include?(retailer) || !only_last
+              retailers_received.push(retailer)
+              data_date = then_date.prev_day().strftime("%Y-%m-%d")
+              if spec == "pageviews"
+                save_pageviews(csvfile,data_date,daily_updates,task_data[:table],retailer)
+              elsif spec == "online_orders"
+                save_online_orders(csvfile,data_date,daily_updates,task_data[:table],retailer)
+              end
+            
+              after_whole = Time.now()
+              p "Time for #{spec} of #{data_date}: #{after_whole-before_whole}"
+              p "Saving block run"
+            end
+          end
+        
+          # Delete files used
+          File.delete(cName,csvfile)
+        
+          p "Finding attachment block run"
+        end 
+
+        if only_last && retailers_received.uniq.length == NUMBER_OF_RETAILERS
+          break; #Only process the first email, unless that email is a weekly email
+        end
+        p "Email match block run"
+      end 
+      p "Reading each email block run"
     end 
-    p "Reading each email block run"
-  end 
-  imap.close
+    imap.close
+  rescue Exception => e
+    puts e.message
+    raise e
+  end
 end
