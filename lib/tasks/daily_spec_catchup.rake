@@ -71,7 +71,7 @@ def import_instock_data(start_date,end_date)
           sku = p.sku
           specs.push([sku,'instock','bin',p.instock,p.product_type,date])
         end
-        ActiveRecord::Base.establish_connection(:development)        
+        ActiveRecord::Base.establish_connection(:production)
         columns = %W( sku name spec_type value_bin product_type date )
         DailySpec.import(columns,specs)
       end

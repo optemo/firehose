@@ -80,7 +80,7 @@ class CustomizationTest < ActiveSupport::TestCase
     result = RuleOnSale.compute_feature([saleEndDate.to_s], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
-    assert_nil saved_spec, 'BinSpec should not be present for false rule value'    
+    assert_nil saved_spec, 'BinSpec should not be present for false rule value'
     
     # no saleEndDate -> not on sale
     result = RuleOnSale.compute_feature([nil], pid = 911)

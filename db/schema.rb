@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120329185239) do
+ActiveRecord::Schema.define(:version => 20120411212246) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -60,16 +60,6 @@ ActiveRecord::Schema.define(:version => 20120329185239) do
 
   add_index "cat_specs", ["name"], :name => "index_cat_specs_on_name"
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
-
-  create_table "categorical_facet_values", :force => true do |t|
-    t.integer  "facet_id"
-    t.string   "name"
-    t.float    "value"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "categorical_facet_values", ["facet_id"], :name => "index_categorical_facet_values_on_facet_id"
 
   create_table "cont_specs", :force => true do |t|
     t.integer  "product_id"

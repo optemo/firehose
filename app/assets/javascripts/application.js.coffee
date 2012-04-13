@@ -93,10 +93,11 @@ $(document).ready ->
     nodes_path = $('#tree_categories').attr('data-path').split('"')
     for node, i in nodes_path
       nodes.push node.substr(1) if i % 2 == 1
-    dropdown_div.load "category_ids", ->
+    product_type = $('#current_product_type').attr('data-product_type')
+    dropdown_div.load '/' + product_type + "/category_ids", ->      
       $("#product_type_menu").append dropdown_div
-      setTimeout load_tree(nodes), 1000
-      setTimeout load_nodes(nodes), 1500
+      load_tree(nodes)
+      load_nodes(nodes)
     return false
 
   load_tree = (nodes) ->
@@ -108,15 +109,17 @@ $(document).ready ->
         animation: 0
     $("#tree_categories").bind "open_node.jstree", (event, data) ->
       id = data.rslt.obj.attr("id")
-      product_type_id = $('#top_type').attr('data-id')
+      product_type_id = $('#current_product_type').attr('data-product_type')
       $.ajax
-        url: "category_ids/new"
+        url: '/' + product_type_id + "/category_ids/new"
         data:
           id: id
           product_type: product_type_id
         success: (data) ->
-          $('#' + id).replaceWith(data)
-
+          $('#tree_categories').find('#' + id).replaceWith(data)
+        failure: ->
+          alert('failed to get categories tree')
+          
   load_nodes = (nodes) ->
     setTimeout (->
       $("#tree_categories").jstree "set_focus"
@@ -144,7 +147,7 @@ $(document).ready ->
     
   $('.raise_rule_priority').click ->
     t = $(this)
-    category = document.getElementsByClassName('current_product_type')[0].innerHTML.match(/\s*(\w+)\s*/)[1]
+    category = $('#current_product_type').attr('data-product_type')
     $.ajax
       url: "/#{category}/scraping_rules/raisepriority?id=" + t.parent().attr("data-id")
       data: ""
@@ -222,18 +225,13 @@ $(document).ready ->
   $("a").live 'click', ->
     t = $(this)
     form = t.parents("form")
-    if t.hasClass('category_id-delete') or t.hasClass('delete_scraping_rule') 
-      t.parent().remove()
-      alert_substitute("Item has been removed.")
-      return false
-    else if t.hasClass('remove_category')
+    if t.hasClass('remove_category')
       t.closest('.cat_option').remove()
       return false
     else if t.hasClass("catnav")
-      cat_id = $.trim($('.current_product_type').html())[0] + t.closest('li').attr("id")
+      cat_id = $.trim($('#current_product_type').html())[0] + t.closest('li').attr("id")
       tree = t.closest('.tree').attr('id')
       if tree == 'product_type_tree'
-        # $("#facet_order").append data
         data="<div class='draggable_cats'><div class='cat_option' data-name='#{cat_id}'><div>#{cat_id} <a class='remove_category' href='#'>x</a></div></div></div>"
         $("#facet_order").append data
       else
@@ -243,15 +241,15 @@ $(document).ready ->
         window.location = address
         return false
     else if t.attr('data-method') is "delete"
-      if confirm("Are you sure you want to delete this item?") 
+      if confirm("Are you sure you want to delete this item?")
         $.ajax
           url: t.attr("href")
           data: form.serialize()
           type: "DELETE"
           success: (data) ->
-            if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete')
+            if t.hasClass('feature-delete') or t.hasClass('spec-delete') or t.hasClass('url-delete') or t.hasClass('delete_scraping_rule') 
               t.parent().remove()
-            alert_substitute("Correction has been removed.")
+            alert_substitute("Item has been removed.")
           error: ->
             alert_substitute("Error in processing the request for delete.")
       return false

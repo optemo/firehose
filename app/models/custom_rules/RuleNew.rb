@@ -6,7 +6,6 @@ class RuleNew < Customization
   @rule_type = 'Binary'
 
   def RuleNew.compute_feature(values, pid)
-    # assumption: the values are in the same order as the needed_features, but this doesn't matter for this rule
     # if either of the values (dates) are within 30 days of today, make a spec with a true value
     derived_value = values.inject(false) { |result,val| result or val.nil? ? false : (Date.today >= Date.parse(val) and Date.today - Date.parse(val) <= 30) }
     spec_class = Customization.rule_type_to_class(@rule_type)
