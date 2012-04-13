@@ -106,7 +106,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
           /(?<retailer>[Bb])est[Bb]uy|(?<retailer>[Ff])uture[Ss]hop/ =~ File.basename(csvfile)
           if !retailers_received.include?(retailer) || !only_last
             retailers_received.push(retailer)
-            data_date = then_date.prev_day().strftime("%Y-%m-%d")
+            data_date = then_date.strftime("%Y-%m-%d")
             if spec == "pageviews"
               save_pageviews(csvfile,data_date,daily_updates,task_data[:table],retailer)
             elsif spec == "online_orders"
