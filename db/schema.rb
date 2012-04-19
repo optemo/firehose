@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120411212246) do
+ActiveRecord::Schema.define(:version => 20120417191944) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -185,6 +185,7 @@ ActiveRecord::Schema.define(:version => 20120411212246) do
     t.string  "rule_type"
     t.integer "priority",           :default => 0
     t.boolean "french",             :default => false
+    t.boolean "bilingual",          :default => false
   end
 
   create_table "searches", :force => true do |t|

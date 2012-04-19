@@ -5,6 +5,7 @@ class ScrapingRule < ActiveRecord::Base
   validates :regex, :presence => true
   validates :product_type, :presence => true
   validates :rule_type, :presence => true
+  validates :bilingual, :inclusion => { :in => [false] }, :unless => "rule_type == 'Categorical'"
   has_many :candidates
   has_many :scraping_corrections
 

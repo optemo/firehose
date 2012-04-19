@@ -14,6 +14,8 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     assert !sr1.save, "must have product_type"
     sr1 = build(:scraping_rule, :rule_type => nil)
     assert !sr1.save, "must have rule_type"
+    sr1 = build(:scraping_rule, :rule_type => 'Binary', :bilingual => true)
+    assert !sr1.save, "Bilingual can only be true for Categorical rules"
     sr1 = build(:scraping_rule, :local_featurename => "Name.withperiod")
     assert !sr1.save, "local_featurename with punctuation not allowed"
     sr1 = build(:scraping_rule, :local_featurename => "Name with spaces")

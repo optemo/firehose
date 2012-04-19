@@ -334,6 +334,16 @@ $(document).ready ->
       $.get window.location.pathname+"/"+$(this).parent().attr('data-id'), (data) ->
         contentbox.html(data)
 
+  $('[type="radio"]').live 'click', ->
+    check = $('#scraping_rule_bilingual')
+    label = $('label[for="scraping_rule_bilingual"]')
+    if $(this).attr('value') == 'Categorical'
+      check.attr('style', 'display:inline;')
+      label.attr('style', 'display:inline;')
+    else
+      check.attr('style', 'display:none;')
+      label.attr('style', 'display:none;')
+
   $(".custom_regex").live 'click', ->
     reg = $(this).parent().prev() # children('.scraping_rule_regex')
     reg_option = $(this).prev().prev().prev() # prev('.scraping_rule_regex_option')
