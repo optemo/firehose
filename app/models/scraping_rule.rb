@@ -11,15 +11,18 @@ class ScrapingRule < ActiveRecord::Base
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
   
-  def self.scrape(ids,ret_raw = false,rules = [], multi = nil) #Can accept both one or more ids, whether to return the raw json
+  def self.scrape(ids,ret_raw = false,rules = [], multi = nil, to_show = false) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
+    translations = []
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
 
     corrections = ScrapingCorrection.all
     ids.each do |bbproduct|
       raw_return = nil
+      en_trans = {}
+      fr_trans = {}
       ["English","French"].each do |language|
         begin
           raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
@@ -35,7 +38,7 @@ class ScrapingRule < ActiveRecord::Base
           sleep 30
           retry
         end
-
+        
         unless raw_info.nil?
           #Insert category id spec
           raw_info["category_id"] = bbproduct.category
@@ -89,8 +92,29 @@ class ScrapingRule < ActiveRecord::Base
               
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
-            #Save the new candidate
-            candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
+            
+            if r[:rule].bilingual && !to_show
+              local_featurename = r[:rule].local_featurename
+              if r[:rule].french
+                trans = fr_trans
+              else
+                trans = en_trans
+                candidates << Candidate.new(:parsed => parsed.try(:downcase), :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => local_featurename)
+              end
+
+              if trans.has_key?(local_featurename) && !delinquent
+                # Store the highest priority match only
+                if r[:rule].priority < trans[local_featurename][1]
+                  trans[local_featurename] = [parsed, r[:rule].priority]
+                end
+              elsif !delinquent
+                trans[local_featurename] = [parsed, r[:rule].priority]
+              end
+
+            else
+             # Save the new candidate
+             candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
+            end
           end
         end
         #Return the raw info only on the first pass
@@ -100,11 +124,33 @@ class ScrapingRule < ActiveRecord::Base
           ret_raw = raw_return
         end
       end
+      if en_trans.empty? && multi == true
+        p "No english translations found for product #{bbproduct.id}. Please ensure each scraping rule needing a translation has an english version."
+      else
+        en_trans.each_pair do |lf, data|
+          parsed = data.first
+          key = "cat_option.#{lf}.#{parsed.gsub('.',',').downcase}"
+          translations << ['en', key, parsed]
+          if fr_trans.empty? && multi == true
+            p "No french translations were found for product #{bbproduct.id}"
+          else
+            begin
+              if fr_trans[lf][0].nil? # If no french result parsed, use the english one
+                translations << ['en', key, parsed]
+              else
+                translations << ['fr', key, fr_trans[lf][0]]
+              end
+            rescue
+              p "A french translation may have not been defined for product #{bbproduct.id} #{lf}, or its value is missing"
+            end
+          end
+        end
+      end
     end
     if ret_raw
-      [candidates,ret_raw]
+      [translations, [candidates,ret_raw]]
     else
-      candidates
+      [translations, candidates]
     end
   end
   
