@@ -106,8 +106,11 @@ class Product < ActiveRecord::Base
     specs_to_delete = []
     
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
-    candidates_multi = ScrapingRule.scrape(product_skus,false,[],true)
-    candidates = ScrapingRule.scrape(product_skus,false,[],false)
+
+    holding = ScrapingRule.scrape(product_skus,false,[],true,false)
+    candidates_multi = holding.last
+    translations = holding.first.uniq
+    candidates = ScrapingRule.scrape(product_skus,false,[],false,false).last
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     
     # Reset the instock flags
@@ -136,7 +139,6 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    
     candidates.each do |candidate|
       spec_class = case candidate.model
         when "Categorical" then CatSpec
@@ -180,9 +182,16 @@ class Product < ActiveRecord::Base
     raise ValidationError, "No products are instock" if specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
+    
+    translations.each do |data|
+      path = data[1].split('.')   #   locale   ------------- key -------------    value
+      I18n.backend.store_translations(data[0], path[0] => {path[1] => {path[2] => data[2]}})
+    end
+    
     specs_to_save.each do |s_class, v|
       s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value] # Bulk insert/update for efficiency
     end
+    
     specs_to_delete.each(&:destroy)
     #Save products and associated specs
     products_to_save.values.each(&:save)

@@ -1,50 +1,49 @@
 class RuleCapitalizeBrand < Customization
   @product_type = ['FDepartments','BDepartments']
   @rule_type = 'Categorical'
-  @needed_features = [{CatSpec => 'brand'},{CatSpec => 'brand_fr'}]
+  @needed_features = [{CatSpec => 'brand'}]
   @exceptions = ["AGFAPHOTO","IOSAFE","IPRODRIVE","LACIE","LITEON","SKIPDR","STARTECH","ULTRASPEED"]
   # These should be exempt from the short word rule (ie: they should not be all caps)
   @small_exceptions = ["PRO","HIP"]
       
   def RuleCapitalizeBrand.compute_feature (values, pid)
-    specs = []
-    spec_class = Customization.rule_type_to_class(@rule_type)
-    brand = spec_class.find_by_product_id_and_name(pid, 'brand')
-    brand_fr = spec_class.find_by_product_id_and_name(pid, 'brand_fr')
     
+    specs = []
+    brand = Translation.where("locale = ? AND `key` REGEXP ?","en","brand.#{values.first}").first
+    brand_fr = Translation.where("locale = ? AND `key` REGEXP ?","fr","brand.#{values.first}").first
+    
+    /--- (?<brand_value>[^\n]*)/ =~ brand.try(:value)
+    /--- (?<brand_fr_value>[^\n]*)/ =~ brand_fr.try(:value)
+#    debugger if brand_value == "IPRODRIVE" || brand_value == "iprodrive"
     # English brand
     unless brand.nil?
-      if values.first == nil
+      if brand_value == nil
         capitalized_brand = nil
       else
         capitalized_brand = "" 
-        values.first.try(:split).each do |word|
+        brand_value.upcase.try(:split).each do |word|
           capitalized_brand << capitalize_word(word) << " "
         end
       end
-      brand.value = capitalized_brand
-      specs.push(brand)
+      brand.value = "--- #{capitalized_brand.strip}\n...\n"
+      brand.save
     end
   
     #French brand
     unless brand_fr.nil?
-      if values.second == nil
+      if brand_fr_value == nil
         capitalized_brand = nil
       else
         capitalized_brand = "" 
-        values.second.try(:split).each do |word|
+        brand_fr_value.upcase.try(:split).each do |word|
           capitalized_brand << capitalize_word(word) << " "
         end
       end
-      brand_fr.value = capitalized_brand
-      specs.push(brand_fr)
+      brand_fr.value = "--- #{capitalized_brand.strip}\n...\n"
+      brand_fr.save
     end
     
-    if specs.empty?
-      nil
-    else
-      specs
-    end
+    return nil
   end
   
   def RuleCapitalizeBrand.capitalize_word (word)
