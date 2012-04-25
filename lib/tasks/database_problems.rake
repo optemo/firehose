@@ -1,6 +1,73 @@
 # Put code for getting info about/figuring out/fixing database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
+
+
+
+# Some product features are scraped by different rules in En vs. Fr
+# this code was not helpful in finding such products, but may be useful for something else
+task :find_different_applied_rules,[:prod_cat,:local_feature] => :environment do |t,args|
+  priority = 0
+  results = {}
+  different_prods = []
+  Session.new(args.prod_cat)
+  Session.product_type_leaves.each do |leaf|
+    products = BestBuyApi.category_ids(leaf)
+    rules = ScrapingRule.where("local_featurename = ? AND product_type = ?",args.local_feature,args.prod_cat).order("priority ASC")
+    rules.each do |rule|
+      # Though the priority may not match, the order is all that is important
+      results[priority] = ScrapingRule.scrape(products,false,rule,false,true).last
+      priority += 1
+    end 
+    
+    # NEED TO MAKE IT SO THAT ONLY THE RULE THAT WILL BE SHOWN(ITS SCRAPED RESULT IS WHAT IS GIVEN TO THE PRODUCT) IS KEPT IN RESULTS[..]
+    
+    range = (0..rules.length-1)
+    range.step(2) do |n|
+      scraped1 = {}
+      results[n].map{|cand| scraped1[cand.sku] = cand.parsed unless cand.delinquent}
+      scraped2 = {}
+      results[n+1].map{|cand|scraped2[cand.sku] = cand.parsed unless cand.delinquent}
+      scraped1.each_pair do |sku,parsed1|
+        debugger if sku =='10195222'
+        # Check if only one of the parsed results is nil/unmatched
+        if parsed1.nil?
+          unless scraped2[sku].nil?
+            different_prods.push([sku,rules[n].id])
+            next
+          end
+        else
+          if scraped2[sku].nil?
+            different_prods.push([sku,rules[n].id])
+            next
+          end
+          if parsed1 != scraped2[sku] # This will only work for rules like those for opticalDrives in laptops
+            different_prods.push([sku,rules[n].id],parsed1,scraped2[sku])
+            next
+          end
+        end
+      end
+    end
+  end
+  pp different_prods.to_s
+end
+
+# Some products are showing up in the wrong category in the site project. This could be an issue with solr indexing,
+# but this is just to check that nothing is wrong with the database
+task :find_misplaced_products,[:prod_cat] => :environment do |t,args|
+  Session.new(args.prod_cat)
+  Session.product_type_leaves.each do |leaf|
+    p I18n.t("#{leaf}.name")
+    ids = CatSpec.select("product_id").where("name = ? AND value = ?",'product_type',leaf)
+    # Replace with spec you think would be best for checking
+    rows = TextSpec.select("product_id,value").where(:product_id => ids, :name => "title")
+    p "There are #{rows.length} rows"
+    rows.each do |row|
+      pp [row.product_id,row.value].to_s
+    end
+  end
+end
+
 task :find_any_missing_bundles => :environment do
   pids = BinSpec.find_all_by_name('isBundle').map(&:product_id)
   bundles = []
