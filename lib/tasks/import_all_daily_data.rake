@@ -1,6 +1,6 @@
-task :get_all_daily_specs => :environment do
+task :get_all_daily_specs,[:product_type, :category, :start_date, :end_date] => :environment do |t,args|
   require 'ruby-debug'
-  analyze_all_daily_raw_specs("drive_bestbuy","20028")
+  analyze_all_daily_raw_specs(args.product_type,args.category, args.start_date, args.end_date)
 end
 
 task :import_all_daily_attributes, [:start_date, :end_date] => :environment do |t, args|
@@ -40,12 +40,12 @@ def import_all_data(start_date, end_date)
       if (date >= start_date and date <= end_date)
         puts 'making records for date ' + date.to_s
         # import data from the snapshot to the temp database
-        puts "mysql -u monir -p m_222978 -h jaguar temp < #{directory}/#{snapshot}"
-        %x[mysql -u monir -pm_222978 -h jaguar temp < #{directory}/#{snapshot}]
+        puts "mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
+        %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
 
         #username and password cannot be company's (optemo, tiny******)
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-          :username => "monir", :password => "m_222978")
+          :username => "optemo", :password => "***REMOVED***")
          specs = get_all_instock_attributes(date)
    
         ActiveRecord::Base.establish_connection(:development)
@@ -129,11 +129,9 @@ def update_all_daily_specs(date, specs)
   AllDailySpec.import alldailyspecs
 end
 
-def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="20243")
+def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="", start_date= '2011-11-01', end_date='2011-12-31')
 
-  start_date = '2011-11-01'
-  end_date = '2011-12-31'
-  output_name =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/raw_data_#{category}_#{start_date}_#{end_date}.txt"
+  output_name =  "/optemo/data_analysis/Drive_bestbuy/raw_data_#{product_type}#{category}_#{start_date}_#{end_date}.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
@@ -185,7 +183,6 @@ def get_all_features(category="20243")
   # when we want to get the features of a specific subcategory of a product_type
    products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='#{category}'").map(&:sku)
    skus = products.join(", ")
-   #puts "skus #{skus}"
    cont_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'cont'").map(&:name)
     cont_sp.each do |r|
      features[r] = 0
@@ -198,7 +195,6 @@ def get_all_features(category="20243")
    bin_sp.each do |r|
      features[r]=0
    end
- # puts "#{features}"
   features
 end
 
@@ -210,8 +206,6 @@ def insert_regression_coefficient(product_type, file_path)
       a = line.split
       puts "#{a[0]} #{a[1]} #{a[2]} #{a[3]}"
       coeffs << Facet.new(name: a[0].to_str, feature_type: a[3], used_for: "utility", value:(a[1].to_f * (1-a[2].to_f)), active: 1, product_type: product_type)   
-      #puts "#{a[0]} #{a[1]} #{a[2]}"
-      #coeffs << Facet.new(name: a[0].to_str, feature_type: a[2], used_for: "utility", value: a[1].to_f, active: 1, product_type: product_type)     
   end
   Facet.import coeffs
 end
@@ -222,11 +216,12 @@ def delete_some_categories_data
   AllDailySpec.delete_all(["sku in (?)", skus])    
 end
 
+#convert a file obtained by  the 'analyze_all_daily_raw_specs' function into svm_light foramt (a format needed for CRR analysis)
 def convert_to_svm_format(product_type="camera_bestbuy")
-  data_path =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/"
+  data_path =  "/Users/optemo/data_analysis/Camera_bestbuy/"
   fname = "df_used_for_CRR_test.txt"
   f = File.open(data_path + fname, 'r')
-  output_name =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/#{product_type}_svm_light_format_test.txt"
+  output_name =  "/Users/optemo/data_analysis/Camera_bestbuy/#{product_type}_svm_light_format_test.txt"
   out_file = File.open(output_name,'w')
   
   lines = f.readlines
