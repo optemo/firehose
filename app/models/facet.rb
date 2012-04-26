@@ -9,8 +9,8 @@ class Facet < ActiveRecord::Base
        facet.active = (products_counts > 0 ? 1 : 0)
        facets_to_save << facet
      end
-     pp 'determined active: '
-     pp facets_to_save
+     p 'determined active: '
+     p facets_to_save
      Facet.import facets_to_save, :on_duplicate_key_update => [:active] if facets_to_save.size > 0
    end
    
