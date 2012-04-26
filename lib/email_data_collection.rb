@@ -30,7 +30,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
       imap.login('auto@optemo.com', '***REMOVED***')
     end
     imap.select('INBOX') 
-    p 'logged in'
     
     # Get the messages wanted
     if (start_date || end_date) && !daily_updates # If a date is given or it is not running the production update...
@@ -54,7 +53,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
     
     # Read each message 
     msgs.reverse.each do |msgID| 
-      p 'processing a message'
       msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
     
     # Only those with 'SOMETEXT' in subject are of our interest 
@@ -76,7 +74,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
     # Save message, BASE64 decoded 
           File.open(cName,'wb+') do |f|
             f.write(attachment.unpack('m')[0])
-            p "Decoding block run"
           end
         
     # Unzip file
@@ -89,7 +86,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
                FileUtils.mkdir_p(File.dirname(f_path))
                zip_file.extract(f, f_path) unless File.exist?(f_path)
              end
-             p "Unzipping block run"
           end
 
     # Open csv file, process data, save sales or pageviews
@@ -116,23 +112,17 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
               end
             
               after_whole = Time.now()
-              p "Time for #{spec} of #{data_date}: #{after_whole-before_whole}"
-              p "Saving block run"
             end
           end
         
           # Delete files used
           File.delete(cName,csvfile)
-        
-          p "Finding attachment block run"
         end 
 
         if only_last && retailers_received.uniq.length == NUMBER_OF_RETAILERS
           break; #Only process the first email, unless that email is a weekly email
         end
-        p "Email match block run"
       end 
-      p "Reading each email block run"
     end 
     imap.close
   rescue Exception => e
