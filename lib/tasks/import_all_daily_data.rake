@@ -5,12 +5,12 @@ end
 
 task :import_all_daily_attributes, [:start_date, :end_date] => :environment do |t, args|
   # get historical data on raw product attributes data and write to daily specs
-
   import_all_data(Date.strptime(args.start_date, '%Y%m%d'), Date.strptime(args.end_date, '%Y%m%d'))
 end
 
-task :import_coeffs => :environment do
- insert_regression_coefficient
+#rake import_coeffs["B20028","/optemo/data_analysis/Drive_bestbuy/Inputs&Outputs/Coefficient_20028_Test4.txt"]
+task :import_coeffs, [:product_type, :file_path] => :environment do |t, args|
+ insert_regression_coefficient(args.product_type, args.file_path)
 end
 task :get_features => :environment do
   get_all_features
@@ -18,6 +18,9 @@ end
 
 task :delete_some_data  => :environment do
 delete_some_categories_data
+end
+task :svm_light => :environment do
+  convert_to_svm_format
 end
 
 def import_all_data(start_date, end_date)
@@ -199,11 +202,8 @@ def get_all_features(category="20243")
   features
 end
 
-def insert_regression_coefficient
-  data_path =  "/Users/Monir/optemo/data_analysis/Drive_bestbuy/Inputs&Outputs/"
-  fname = "Coefficient_20028_Test4.txt"
-  product_type= "B20028"
-  f = File.open(data_path + fname, 'r')
+def insert_regression_coefficient(product_type, file_path)
+  f = File.open(file_path, 'r')
   lines = f.readlines
   coeffs =[]
   lines.each do |line|
@@ -220,4 +220,28 @@ def delete_some_categories_data
   
   skus = AllDailySpec.where("name = 'category' and value_txt in ('20237','20239')").select("DISTINCT(sku)").map(&:sku)
   AllDailySpec.delete_all(["sku in (?)", skus])    
+end
+
+def convert_to_svm_format(product_type="camera_bestbuy")
+  data_path =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/"
+  fname = "df_used_for_CRR_test.txt"
+  f = File.open(data_path + fname, 'r')
+  output_name =  "/Users/Monir/optemo/data_analysis/Camera_bestbuy/#{product_type}_svm_light_format_test.txt"
+  out_file = File.open(output_name,'w')
+  
+  lines = f.readlines
+ 
+  lines.each do |line|
+      output = ""
+      index =0 
+      a = line.split
+      puts "#{a}"
+      output += a[a.length-1]+" "
+      (2..(a.length-2)).each do |e|
+        index +=1
+        #puts "#{a[e]}"
+        output = output + (index.to_s) + ":"+ a[e]+ " " if (a[e].to_f != 0.0)
+      end
+      out_file.write(output + "\n")      
+  end  
 end
