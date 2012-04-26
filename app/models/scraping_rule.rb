@@ -135,10 +135,11 @@ class ScrapingRule < ActiveRecord::Base
             p "No french translations were found for product #{bbproduct.id}"
           else
             begin
-              if fr_trans[lf][0].nil? # If no french result parsed, use the english one
-                translations << ['en', key, parsed]
-              else
+              unless fr_trans[lf].nil? # Don't save a french translation if nothing is scraped
                 translations << ['fr', key, fr_trans[lf][0]]
+              #  if fr_trans[lf][1] != en_trans[lf][1]+1
+              #    p "Product #{bbproduct.id} 's fr and en results are not scraped from the same rule for #{lf}. \nFrench priority: #{fr_trans[lf][1]}, English priority: #{en_trans[lf][1]}"
+              #  end
               end
             rescue
               p "A french translation may have not been defined for product #{bbproduct.id} #{lf}, or its value is missing"
@@ -152,11 +153,6 @@ class ScrapingRule < ActiveRecord::Base
     else
       [translations, candidates]
     end
-  end
-  
-  def self.rules_by_priority(data)
-    # This function checks the data passed in to see if there are multiple remote features being put into a single remote feature.
-    data.to_a.sort{|a,b| a[1]["rule"].priority <=> b[1]["rule"].priority}
   end
   
   def self.get_rules(rules, multi)
