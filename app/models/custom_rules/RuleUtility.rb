@@ -1,6 +1,6 @@
 class RuleUtility < Customization
   @feature_name = 'utility'
-  @product_type = ["BDepartments"]
+  @product_type = ["BDepartments", "FDepartments"]
   @needed_features = []
   @rule_type = 'Continuous'
   
@@ -33,6 +33,8 @@ class RuleUtility < Customization
         break unless lr_features.empty?
       end
       feature_types[non_default] = lr_features unless lr_features.empty?
+      puts 'adding lr utility for ' + Session.product_type_path.to_s unless lr_features.empty?
+      
       #compute coefficients for the default rule-based utility
       feature_types[default].each do |f|
         max= 0
