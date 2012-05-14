@@ -365,14 +365,14 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:cat_spec, product_id: unadv2.id, name: "brand", value: "CANON")
     create(:bin_spec, product_id: unadv2.id, name: "hdmi", value: 1)
     create(:cont_spec, product_id: unadv2.id, name: "customerRating", value: 4)
-    create(:cont_spec, product_id: unadv2.id, name: "price", value: 99.99)
-    create(:cont_spec, product_id: unadv2.id, name: "saleprice", value: 69.99)
+    create(:cont_spec, product_id: unadv2.id, name: "price", value: 299.99)
+    create(:cont_spec, product_id: unadv2.id, name: "saleprice", value: 269.99)
     create(:cat_spec, product_id: unadv2.id, name: "displayDate", value: "2011-05-12")
     create(:cat_spec, product_id: unadv2.id, name: "saleEndDate", value: "2012-05-20")
 
     # Best seller, high page views
-    create(:cont_spec, product_id: best1.id, name: "price", value: 299.99)
-    create(:cont_spec, product_id: best1.id, name: "saleprice", value: 199.99)
+    create(:cont_spec, product_id: best1.id, name: "price", value: 229.99)
+    create(:cont_spec, product_id: best1.id, name: "saleprice", value: 229.99)
     create(:cat_spec, product_id: best1.id, name: "displayDate", value: "2011-11-20")
     create(:cont_spec, product_id: best1.id, name: "averageSales", value: 7.4)
     create(:cont_spec, product_id: best1.id, name: "averagePageviews", value: 12)
@@ -394,8 +394,6 @@ class CustomizationTest < ActiveSupport::TestCase
 
     result = RuleUtility.compute_utility( [ adv1.id, adv2.id, adv_no_save1.id, adv_no_save2.id, unadv1.id, unadv2.id, best1.id, best2.id ] )
     
-    #puts "RESULT TEST NEW: #{result}"
-    
     # Test for successful computation
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == adv1.id}.map(&:value)
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == adv2.id}.map(&:value)
@@ -406,28 +404,29 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == best1.id}.map(&:value)
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == best2.id}.map(&:value)
 
-    # Test for order
 
+    # Test for order
     # adv1 should be befor adv2
     assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == adv2.id}.map(&:value)[0]
 
     # adv2 should be before adv_no_sales1
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_sales1.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_save1.id}.map(&:value)[0]
 
     # adv_no_sales1 should be before adv_no_sales2
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_sales1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_sales2.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_save1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_save2.id}.map(&:value)[0]
 
     # adv_no_sales2 should be before unadv1
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_sales2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == unadv1.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == adv_no_save2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == unadv1.id}.map(&:value)[0]
 
     # unadv1 should be before unadv2
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == unadv1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == unadv2.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == unadv1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == unadv2.id}.map(&:value)[0]
 
     # unadv2 should be before best1
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == unadv2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == best1.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == unadv2.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == best1.id}.map(&:value)[0]
 
     # best1 should be before best 2
-#    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == best1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == best2.id}.map(&:value)[0]
+    assert_operator result.select{|spec| spec.name == "utility" && spec.product_id == best1.id}.map(&:value)[0], :>=, result.select{|spec| spec.name == "utility" && spec.product_id == best2.id}.map(&:value)[0]
+
 
     # Test that out-of-stock products do not get computed
     assert_empty result.select{|spec| spec.name = "utility" && spec.product_id == out_of_stock.id}
