@@ -25,16 +25,6 @@ GIT
       nokogiri
       sunspot (= 2.0.0.pre.111215)
 
-PATH
-  remote: /usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13
-  specs:
-    linecache19 (0.5.13)
-
-PATH
-  remote: /usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26
-  specs:
-    ruby-debug-base19 (0.11.26)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -90,7 +80,6 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.2.0)
-    columnize (0.3.6)
     dalli (1.0.2)
     erubis (2.7.0)
     escape (0.0.4)
@@ -171,10 +160,6 @@ GEM
       json (~> 1.4)
     rsolr (1.0.7)
       builder (>= 2.1.2)
-    ruby-debug19 (0.11.6)
-      columnize (>= 0.3.1)
-      linecache19 (>= 0.5.11)
-      ruby-debug-base19 (>= 0.11.19)
     ruby-prof (0.10.8)
     ruby_core_source (0.1.5)
       archive-tar-minitar (>= 0.5.2)
@@ -220,13 +205,10 @@ DEPENDENCIES
   jquery-rails
   json
   jstree-rails!
-  linecache19 (= 0.5.13)!
   mysql2 (> 0.3)
   progress_bar
   rails (= 3.2.2)
   rb-fsevent
-  ruby-debug-base19 (= 0.11.26)!
-  ruby-debug19
   ruby-prof
   ruby_core_source
   rubyzip

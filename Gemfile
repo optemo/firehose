@@ -46,9 +46,6 @@ gem 'ruby_core_source'
 gem 'progress_bar'
 
 group :development do
-  gem "linecache19", "0.5.13", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
-  gem "ruby-debug-base19", "0.11.26", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
-  gem "ruby-debug19", :require => 'ruby-debug'
 end
 
 group :production do
@@ -56,9 +53,6 @@ group :production do
 end
 
 group :test do
-  gem "linecache19", "0.5.13", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
-  gem "ruby-debug-base19", "0.11.26", :path => "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
-  gem "ruby-debug19", :require => 'ruby-debug'
   gem 'spork', '> 0.9.0.rc'
   gem 'spork-testunit'
   gem 'guard-test'
@@ -70,9 +64,6 @@ group :test do
 end
 
 group :accessories do
-  gem "linecache19", "0.5.13", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/linecache19-0.5.13/"
-  gem "ruby-debug-base19", "0.11.26", :path =>  "/usr/local/rvm/gems/ruby-1.9.3-p0/gems/ruby-debug-base19-0.11.26/"
-  gem "ruby-debug19", :require => 'ruby-debug'
 end
 
 # Gems used only for assets and not required
