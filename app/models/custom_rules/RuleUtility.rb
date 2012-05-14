@@ -21,7 +21,6 @@ class RuleUtility < Customization
       all_products = Product.where(["id IN (?) and instock = ?", pids, 1])
       prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
       records["saleprice"] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "saleprice"]).group_by(&:product_id)
-
       
       ptype_path = Session.product_type_path 
       #puts"path #{ptype_path.reverse}"
@@ -29,7 +28,7 @@ class RuleUtility < Customization
       feature_types[default] = Facet.find_all_by_used_for_and_product_type("utility","BDepartments")
       lr_features= []
       ptype_path.reverse.each do |path|  
-       lr_features = Facet.find_all_by_used_for_and_product_type("utility",path) if path != "BDepartments"
+       lr_features = Facet.find_all_by_used_for_and_product_type("utility",path) if (path != "BDepartments" and path != "FDepartments")
         break unless lr_features.empty?
       end
       feature_types[non_default] = lr_features unless lr_features.empty?
