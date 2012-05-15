@@ -42,6 +42,9 @@ class Product < ActiveRecord::Base
       end
     end
    end
+    float :lr_utility, trie: true do
+      cont_specs.find_by_name(:lr_utility).try(:value)
+    end
     autosuggest :product_name, :using => :instock?                  
   end
   
