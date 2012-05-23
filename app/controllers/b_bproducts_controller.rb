@@ -5,7 +5,7 @@ class BBproductsController < ApplicationController
 
   def show
     @id = params[:id]
-    candidates, @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => nil),true).last
+    @raw_info = ScrapingRule.scrape(BBproduct.new(:id => @id, :category => nil),true)[:raw]
     render :layout => false
   end
 end

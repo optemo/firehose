@@ -111,9 +111,9 @@ class Product < ActiveRecord::Base
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
 
     holding = ScrapingRule.scrape(product_skus,false,[],true,false)
-    candidates_multi = holding.last
-    translations = holding.first.uniq
-    candidates = ScrapingRule.scrape(product_skus,false,[],false,false).last
+    candidates_multi = holding[:candidates]
+    translations = holding[:translations].uniq
+    candidates = ScrapingRule.scrape(product_skus,false,[],false,false)[:candidates]
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     
     # Reset the instock flags

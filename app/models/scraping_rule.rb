@@ -148,11 +148,7 @@ class ScrapingRule < ActiveRecord::Base
         end
       end
     end
-    if ret_raw
-      [translations, [candidates,ret_raw]]
-    else
-      [translations, candidates]
-    end
+    {translations: translations, candidates: candidates, raw: ret_raw}
   end
   
   def self.get_rules(rules, multi)
