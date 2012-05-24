@@ -40,12 +40,12 @@ def import_all_data(start_date, end_date)
       if (date >= start_date and date <= end_date)
         puts 'making records for date ' + date.to_s
         # import data from the snapshot to the temp database
-        puts "mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}"
-        %x[mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
+        puts "mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}"
+        %x[mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}]
 
         #username and password cannot be company's (optemo, tiny******)
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-          :username => "optemo", :password => "***REMOVED***")
+          :username => "oana", :password => "cleanslate")
          specs = get_all_instock_attributes(date)
    
         ActiveRecord::Base.establish_connection(:development)
@@ -77,7 +77,7 @@ def get_all_instock_attributes(date)
   end
   
   #instock = Product.find_all_by_instock_and_product_type(1, product_type)
-  some_prodcuts = CatSpec.where("name='category' and value= '29583'").map(&:product_id)
+  some_products = CatSpec.where("name='category' and value= '29583'").map(&:product_id)
   instock = Product.where("id in (?) and instock = ?",some_products,1)
   
   instock.each do |p|
