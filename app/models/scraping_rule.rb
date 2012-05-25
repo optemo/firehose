@@ -87,33 +87,23 @@ class ScrapingRule < ActiveRecord::Base
               #Validation Tests
               parsed = "**LOW" if r[:rule].min && parsed && parsed.to_f < r[:rule].min
               parsed = "**HIGH" if r[:rule].max && parsed && parsed.to_f > r[:rule].max
-              #debugger if r.rule_type == "Categorical" && !r.valid_inputs.blank? && !r.valid_inputs.split("*").include?(parsed)
               parsed = "**INVALID" if r[:rule].rule_type == "Categorical" && parsed && !r[:rule].valid_inputs.blank? && !r[:rule].valid_inputs.split("*").include?(parsed)
               
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
-            
-            if r[:rule].bilingual && !to_show
-              local_featurename = r[:rule].local_featurename
-              if r[:rule].french
-                trans = fr_trans
-              else
-                trans = en_trans
-                candidates << Candidate.new(:parsed => parsed.try(:downcase), :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => local_featurename)
-              end
 
-              if trans.has_key?(local_featurename) && !delinquent
-                # Store the highest priority match only
-                if r[:rule].priority < trans[local_featurename][1]
-                  trans[local_featurename] = [parsed, r[:rule].priority]
-                end
-              elsif !delinquent
+            unless to_show
+              local_featurename = r[:rule].local_featurename
+              trans = r[:rule].french ? fr_trans : en_trans
+              # Store the translation and if it's already there only store the highest priority match
+              if !delinquent && (!trans.has_key?(local_featurename) || r[:rule].priority < trans[local_featurename][1])
                 trans[local_featurename] = [parsed, r[:rule].priority]
               end
-
-            else
+            end
+            if !(r[:rule].bilingual && !to_show && r[:rule].french) #Don't save data twice, so don't save it for french
              # Save the new candidate
-             candidates << Candidate.new(:parsed => parsed, :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
+             candidates << Candidate.new(:parsed => (r[:rule].local_featurename == "product_type" ? parsed : parsed.try(:downcase)), :raw => raw.to_s, :scraping_rule_id => r[:rule].id, :sku => bbproduct.id, :delinquent => delinquent, :scraping_correction_id => (corr ? corr.id : nil), :model => r[:rule].rule_type, :name => r[:rule].local_featurename)
+             #Note: we really should take product_type out of scraping_rules and hard code it
             end
           end
         end
@@ -129,7 +119,7 @@ class ScrapingRule < ActiveRecord::Base
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first
-          key = "cat_option.#{lf}.#{parsed.gsub('.',',').downcase}"
+          key = "cat_option.#{Session.retailer}.#{lf}.#{parsed.gsub('.',',').downcase}"
           translations << ['en', key, parsed]
           if fr_trans.empty? && multi == true
             p "No french translations were found for product #{bbproduct.id}"

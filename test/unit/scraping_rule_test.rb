@@ -43,15 +43,15 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     
     # Check candidates
       # regular regex
-      assert_equal candidates1[0].parsed, "Black", "Data should have matched"
+      assert_equal candidates1[0].parsed, "black", "Data should have matched"
       assert_equal candidates2[0].parsed, nil,  "Data should not have matched"
       
       # consecutive_fr_trans regex
-      assert_equal candidates1[1].parsed, "Noir", "Data should have matched"
+      assert_equal candidates1[1].parsed, "noir", "Data should have matched"
       assert_equal candidates2[1].parsed, nil,  "Data should not have matched"
         
       # consecutive_order
-      assert_equal candidates1[2].parsed, "Noi", "Should have returned the first match"
+      assert_equal candidates1[2].parsed, "boi", "Should have returned the first match"
       assert_equal candidates2[2].parsed, nil,  "Data should not have matched"
       
     # Check translations
