@@ -9,38 +9,25 @@ class RuleCapitalizeBrand < Customization
   def RuleCapitalizeBrand.compute_feature (values, pid)
     
     specs = []
-    brand = Translation.where("locale = ? AND `key` REGEXP ?","en","brand.#{values.first}").first
-    brand_fr = Translation.where("locale = ? AND `key` REGEXP ?","fr","brand.#{values.first}").first
+    brand = Translation.where("locale = ? AND `key` REGEXP ?","en","#{Session.retailer}\.brand\.#{values.first}").first
+    brand_fr = Translation.where("locale = ? AND `key` REGEXP ?","fr","#{Session.retailer}\.brand.#{values.first}").first
     
     /--- (?<brand_value>[^\n]*)/ =~ brand.try(:value)
     /--- (?<brand_fr_value>[^\n]*)/ =~ brand_fr.try(:value)
-#    debugger if brand_value == "IPRODRIVE" || brand_value == "iprodrive"
-    # English brand
-    unless brand.nil?
-      if brand_value == nil
-        capitalized_brand = nil
-      else
-        capitalized_brand = "" 
-        brand_value.upcase.try(:split).each do |word|
-          capitalized_brand << capitalize_word(word) << " "
+
+    # English/French loop
+    [[brand,brand_value],[brand_fr,brand_fr_value]].each do |brand_name, brand_val|
+      unless brand_name.nil?
+        if brand_val == nil
+          capitalized_brand = nil
+        else
+          capitalized_brand = brand_val.upcase.split.map do |word|
+            capitalize_word(word)
+          end.join(" ")
         end
+        brand_name.value = "--- #{capitalized_brand}\n...\n"
+        brand_name.save
       end
-      brand.value = "--- #{capitalized_brand.strip}\n...\n"
-      brand.save
-    end
-  
-    #French brand
-    unless brand_fr.nil?
-      if brand_fr_value == nil
-        capitalized_brand = nil
-      else
-        capitalized_brand = "" 
-        brand_fr_value.upcase.try(:split).each do |word|
-          capitalized_brand << capitalize_word(word) << " "
-        end
-      end
-      brand_fr.value = "--- #{capitalized_brand.strip}\n...\n"
-      brand_fr.save
     end
     
     return nil

@@ -34,22 +34,24 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     create :scraping_rule, local_featurename: 'bi_consecutive_order', remote_featurename: 'specs.Physical Features.Colour', rule_type: 'Categorical', regex: 'Pink/Rose^^Bla/Noi^^Black/Noir', bilingual: true
     
     # Call scraping on products
-    candidates1 = ScrapingRule.scrape((BBproduct.new id: "100000", category: "B20218"),false,[],false).last # Colour: Black
-    candidates2 = ScrapingRule.scrape((BBproduct.new id: "100001", category: "B20218"),false,[],false).last # Colour: Silver
-    translations1 = ScrapingRule.scrape((BBproduct.new id: "100000", category: "B20218"),false,[],false).first # Colour: Black
-    translations2 = ScrapingRule.scrape((BBproduct.new id: "100001", category: "B20218"),false,[],false).first # Colour: Silver
+    number1 = ScrapingRule.scrape((BBproduct.new id: "100000", category: "B20218"),false,[],false)
+    candidates1 = number1[:candidates] # Colour: Black
+    translations1 = number1[:translations] # Colour: Black
+    number2 = ScrapingRule.scrape((BBproduct.new id: "100001", category: "B20218"),false,[],false)
+    candidates2 = number2[:candidates] # Colour: Silver
+    translations2 = number2[:translations] # Colour: Silver
     
     # Check candidates
       # regular regex
-      assert_equal candidates1[0].parsed, "Black", "Data should have matched"
+      assert_equal candidates1[0].parsed, "black", "Data should have matched"
       assert_equal candidates2[0].parsed, nil,  "Data should not have matched"
       
       # consecutive_fr_trans regex
-      assert_equal candidates1[1].parsed, "Noir", "Data should have matched"
+      assert_equal candidates1[1].parsed, "noir", "Data should have matched"
       assert_equal candidates2[1].parsed, nil,  "Data should not have matched"
         
       # consecutive_order
-      assert_equal candidates1[2].parsed, "Noi", "Should have returned the first match"
+      assert_equal candidates1[2].parsed, "boi", "Should have returned the first match"
       assert_equal candidates2[2].parsed, nil,  "Data should not have matched"
       
     # Check translations

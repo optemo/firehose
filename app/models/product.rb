@@ -111,9 +111,9 @@ class Product < ActiveRecord::Base
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
 
     holding = ScrapingRule.scrape(product_skus,false,[],true,false)
-    candidates_multi = holding.last
-    translations = holding.first.uniq
-    candidates = ScrapingRule.scrape(product_skus,false,[],false,false).last
+    candidates_multi = holding[:candidates]
+    translations = holding[:translations].uniq
+    candidates = ScrapingRule.scrape(product_skus,false,[],false,false)[:candidates]
     candidates += Candidate.multi(candidates_multi,false) #bypass sorting
     
     # Reset the instock flags
@@ -186,9 +186,8 @@ class Product < ActiveRecord::Base
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
     
-    translations.each do |data|
-      path = data[1].split('.')   #   locale   ------------- key -------------    value
-      I18n.backend.store_translations(data[0], path[0] => {path[1] => {path[2] => data[2]}})
+    translations.each do |locale, key, value|
+      I18n.backend.store_translations(locale, {key => value}, {escape: false})
     end
     
     specs_to_save.each do |s_class, v|

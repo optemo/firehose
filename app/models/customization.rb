@@ -60,11 +60,7 @@ class Customization
             table_name = spec_feature.keys[0]
             feature_name = spec_feature.values[0]
             spec_row = table_name.find_by_product_id_and_name(pid, feature_name)
-            if spec_row.nil?
-              values += [nil]
-            else
-              values += [spec_row.value]
-            end
+            values += [spec_row.try(:value)]
           end
           # actual computation logic
           spec = rule.compute_feature(values, pid)
