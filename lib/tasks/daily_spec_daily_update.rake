@@ -9,6 +9,7 @@ task :update_daily_specs => :environment do |t,args|
   # if it hasn't been run in a while the products table is out of date)
   date = Date.today.prev_day
   last_date_in_table = DailySpec.select("DISTINCT(date)").order("date DESC").limit(1).first.date
+
   unless last_date_in_table == date.prev_day
     p "Unsuccessful: DailySpec is missing one or more days of data. Please use the catchup rake task."
     raise "DailySpec is missing one or more days of data. Please use the catchup rake task."
