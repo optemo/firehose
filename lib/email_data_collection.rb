@@ -1,6 +1,11 @@
 # CHANGE THIS TO 2 WHEN FUTURESHOP ALSO GIVES EMAILS 
 NUMBER_OF_RETAILERS = 2
 
+FUTURE_SHOP_PAGEVIEWS_KEY = "/1js8v"
+FUTURE_SHOP_ORDERS_KEY = "/1js8w"
+BEST_BUY_PAGEVIEWS_KEY = "/1ko3s"
+BEST_BUY_ORDERS_KEY = "/1ko3r"
+
 # Set extra data options given the spec and table names
 def set_needed_fields (spec_name, table_name)
   if spec_name =~ /[Pp]ageviews?/
@@ -23,31 +28,16 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
     spec = task_data[:spec]
     retailers_received = []
     
-    # May need to login to both e-mail addresses
-    # This will work even after Best Buy starts sending both e-mails to auto@optemo.com, though it will unecessarily access files@optemo.com
-    
-    addresses = 0
-    if spec == "pageviews"
-      addresses = 2
-    else
-      addresses = 1
-    end
-    
-    while addresses > 0
       imap = Net::IMAP.new('imap.1and1.com')
-      if addresses == 2
-        imap.login('files@optemo.com', '***REMOVED***')
-      else
-        imap.login('auto@optemo.com', '***REMOVED***')
-      end
-      addresses -= 1
+
+      imap.login('auto@optemo.com', '***REMOVED***')
       search_for = ""
       if spec == "pageviews"
-        search_for_bb = "/x5lp"
-        search_for_fs = "/1js8v"
+        search_for_bb = BEST_BUY_PAGEVIEWS_KEY
+        search_for_fs = FUTURE_SHOP_PAGEVIEWS_KEY
       else
-        search_for_bb = "/rzf4"
-        search_for_fs = "/1js8w"
+        search_for_bb = BEST_BUY_ORDERS_KEY
+        search_for_fs = FUTURE_SHOP_ORDERS_KEY
       end
 
       imap.select('INBOX') 
@@ -75,11 +65,20 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
       
         msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}", "OR", "BODY", search_for_fs, "BODY", search_for_bb])
       end
-    
+      
+      if msgs.length == 0
+        puts "\nERROR: No e-mails found. Check the webmail inbox and see if the following key-phrases in the message bodies have changed:"
+        puts "Future Shop Pageviews: https://www2.omniture.com/x/#{FUTURE_SHOP_PAGEVIEWS_KEY}"
+        puts "Future Shop Orders: https://www2.omniture.com/x/#{FUTURE_SHOP_ORDERS_KEY}"
+        puts "Best Buy Pageviews: https://www2.omniture.com/x/#{BEST_BUY_PAGEVIEWS_KEY}"
+        puts "Best Buy Orders: https://www2.omniture.com/x/#{BEST_BUY_ORDERS_KEY}"
+        puts "If these do not match the webmail messages, update the variables in firehose/lib/email_data_collection.rb\n\n"
+      end
+      
       # Read each message 
       msgs.reverse.each do |msgID| 
-        msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY"] )[0]
-    
+        msg = imap.fetch(msgID, ["ENVELOPE","UID","BODY", "BODY[TEXT]"] )[0]
+        
       # Only those with 'SOMETEXT' in subject are of our interest 
         if msg.attr["ENVELOPE"].from[0].host == "omniture.com"
           body = msg.attr["BODY"] 
@@ -96,16 +95,21 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
             p then_date
             cName = ""
-            fs_type = ""
+            type = ""
             unless type_csv
               cName = "#{Rails.root}/tmp/#{then_date}.zip"
             else
-              if search_for_fs == "/1js8v"
-                fs_type = "FutureShopPageviews - #{then_date.strftime("%a. %d %m %Y")}.csv"
-              else
-                fs_type = "FutureShopOrders - #{then_date.strftime("%a. %d %m %Y")}.csv"
+              text = msg.attr["BODY[TEXT]"]
+              if text.include?(FUTURE_SHOP_PAGEVIEWS_KEY)
+                type = "FutureShop Pageviews - #{then_date.strftime("%a. %d %m %Y")}.csv"
+              elsif text.include?(FUTURE_SHOP_ORDERS_KEY)
+                type = "FutureShop Orders - #{then_date.strftime("%a. %d %m %Y")}.csv"
+              elsif text.include?(BEST_BUY_PAGEVIEWS_KEY)
+                type = "BestBuy Pageviews - #{then_date.strftime("%a. %d %m %Y")}.csv"
+              elsif text.include?(BEST_BUY_ORDERS_KEY)
+                type = "BestBuy Orders - #{then_date.strftime("%a. %d %m %Y")}.csv"
               end
-              cName = "#{Rails.root}/tmp/#{fs_type}"
+              cName = "#{Rails.root}/tmp/#{type}"
               tmpfile = File.new(cName, 'w')
               tmpfile.close
             end
@@ -129,7 +133,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
                  end
               end
             else
-              csvfile = File.join("#{Rails.root}/tmp/", fs_type)
+              csvfile = File.join("#{Rails.root}/tmp/", type)
             end
 
       # Open csv file, process data, save sales or pageviews
@@ -173,7 +177,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
       end
       imap.close
       imap.disconnect
-    end
   rescue Exception => e
     puts e.message
     raise e
