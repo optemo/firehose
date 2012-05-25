@@ -43,8 +43,9 @@ task :update => :environment do
     #Run the update task for this leaf node
     Session.new node
     begin 
+      print 'Started scraping category ' + node.to_s
       Product.feed_update
-      puts 'Finished scraping category ' + node.to_s
+      puts '...Finished'
     rescue BestBuyApi::RequestError => error
       puts 'Got the following error in scraping current category: '
       puts error.to_s
