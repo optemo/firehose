@@ -45,7 +45,7 @@ def import_instock_data(start_date,end_date)
   #for local runs (change to own directory)
   #directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
-  directory = "/mysql_backup/slicehost"
+  directory = "/Users/milocarbol/Stuff/DatabaseDumps"#"/mysql_backup/slicehost"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|

@@ -51,13 +51,13 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             before = (end_date+2).strftime("%d-%b-%Y")
 
             msgs = imap.search(["SINCE", since, "BEFORE", before, "OR", "BODY", search_for_fs, "BODY", search_for_bb])
-          
+
           else # If no end date specified, go to last email received ('today')
             msgs = imap.search(["SINCE", since, "BEFORE", Date.today.strftime("%d-%b-%Y"), "OR", "BODY", search_for_fs, "BODY", search_for_bb])
           end
         elsif end_date # If no start date given, but end date is, go from first email to end_date
           before = (end_date+2).strftime("%d-%b-%Y") 
-        
+          
           msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}","BEFORE", before, "OR", "BODY", search_for_fs, "BODY", search_for_bb])
         end
       else
@@ -65,13 +65,13 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
       
         msgs = imap.search(["SINCE", "#{task_data[:first_possible_date]}", "OR", "BODY", search_for_fs, "BODY", search_for_bb])
       end
-      
+
       if msgs.length == 0
         puts "\nERROR: No e-mails found. Check the webmail inbox and see if the following key-phrases in the message bodies have changed:"
-        puts "Future Shop Pageviews: https://www2.omniture.com/x/#{FUTURE_SHOP_PAGEVIEWS_KEY}"
-        puts "Future Shop Orders: https://www2.omniture.com/x/#{FUTURE_SHOP_ORDERS_KEY}"
-        puts "Best Buy Pageviews: https://www2.omniture.com/x/#{BEST_BUY_PAGEVIEWS_KEY}"
-        puts "Best Buy Orders: https://www2.omniture.com/x/#{BEST_BUY_ORDERS_KEY}"
+        puts "Future Shop Pageviews: https://www2.omniture.com/x#{FUTURE_SHOP_PAGEVIEWS_KEY}"
+        puts "Future Shop Orders: https://www2.omniture.com/x#{FUTURE_SHOP_ORDERS_KEY}"
+        puts "Best Buy Pageviews: https://www2.omniture.com/x#{BEST_BUY_PAGEVIEWS_KEY}"
+        puts "Best Buy Orders: https://www2.omniture.com/x#{BEST_BUY_ORDERS_KEY}"
         puts "If these do not match the webmail messages, update the variables in firehose/lib/email_data_collection.rb\n\n"
       end
       
