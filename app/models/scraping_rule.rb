@@ -103,7 +103,7 @@ class ScrapingRule < ActiveRecord::Base
             if !(r[:rule].bilingual && !to_show && r[:rule].french) #Don't save data twice, so don't save it for french
               # Save the new candidate
               candidates << Candidate.new(
-                parsed: parsed.nil? ? nil : CGI::escape(r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : parsed.downcase),
+                parsed: (r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : (parsed.nil? ? nil : CGI::escape(parsed.downcase))),
                 raw: raw.to_s,
                 scraping_rule_id: r[:rule].id,
                 sku: bbproduct.id,
@@ -128,7 +128,7 @@ class ScrapingRule < ActiveRecord::Base
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first
-          key = "cat_option.#{Session.retailer}.#{lf}.#{parsed.gsub('.',',').downcase}"
+          key = "cat_option.#{Session.retailer}.#{lf}.#{CGI::escape(parsed.gsub('.','-').downcase)}"
           translations << ['en', key, parsed]
           if fr_trans.empty? && multi == true
             p "No french translations were found for product #{bbproduct.id}"
