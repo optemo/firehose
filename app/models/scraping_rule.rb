@@ -103,7 +103,7 @@ class ScrapingRule < ActiveRecord::Base
             if !(r[:rule].bilingual && !to_show && r[:rule].french) #Don't save data twice, so don't save it for french
               # Save the new candidate
               candidates << Candidate.new(
-                parsed: (r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : parsed.try(:downcase)),
+                parsed: CGI:escape(r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : parsed.try(:downcase)),
                 raw: raw.to_s,
                 scraping_rule_id: r[:rule].id,
                 sku: bbproduct.id,
