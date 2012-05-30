@@ -9,8 +9,8 @@ class RuleCapitalizeBrand < Customization
   def RuleCapitalizeBrand.compute_feature (values, pid)
     
     specs = []
-    brand = Translation.where("locale = ? AND `key` REGEXP ?","en","#{Session.retailer}\.brand\.#{values.first}").first
-    brand_fr = Translation.where("locale = ? AND `key` REGEXP ?","fr","#{Session.retailer}\.brand.#{values.first}").first
+    brand = Translation.where(locale: :en, key: "cat_option.#{Session.retailer}\.brand\.#{values.first.gsub('.','-')}").first
+    brand_fr = Translation.where(locale: :fr, key: "cat_option.#{Session.retailer}\.brand\.#{values.first.gsub('.','-')}").first
     
     /--- (?<brand_value>[^\n]*)/ =~ brand.try(:value)
     /--- (?<brand_fr_value>[^\n]*)/ =~ brand_fr.try(:value)
