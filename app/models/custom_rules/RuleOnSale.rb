@@ -2,7 +2,7 @@
 class RuleOnSale < Customization
   @feature_name = 'onsale'
   @product_type = ['BDepartments', 'FDepartments']
-  @needed_features = [{CatSpec => 'saleEndDate'}, {ContSpec => 'salePrice'}, {ContSpec => 'regularPrice'}]
+  @needed_features = [{CatSpec => 'saleEndDate'}, {ContSpec => 'price'}, {ContSpec => 'saleprice'}]
   @rule_type = 'Binary'
   
   def RuleOnSale.compute_feature(values, pid)
@@ -12,7 +12,7 @@ class RuleOnSale < Customization
     if date == nil
       derived_value = false
     else
-      derived_value = (Date.parse(val) - Date.today >= 0) && (rPrice > sPrice)
+      derived_value = (Date.parse(date) - Date.today >= 0) && (rPrice > sPrice)
     end
     spec_class = Customization.rule_type_to_class(@rule_type)
     # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
