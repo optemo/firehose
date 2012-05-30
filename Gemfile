@@ -22,9 +22,9 @@ gem 'mysql2', '> 0.3'
 # Bundle gems for the local environment. Make sure to
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
- group :development, :test do
-   gem 'debugger'
- end
+group :development, :test do
+  gem 'debugger'
+end
 
 gem 'i18n-active_record',
     #:git => 'git://github.com/svenfuchs/i18n-active_record.git',
@@ -46,6 +46,7 @@ gem 'ruby_core_source'
 gem 'progress_bar'
 
 group :development do
+  gem "debugger"
 end
 
 group :production do

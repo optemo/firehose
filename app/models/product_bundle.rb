@@ -10,7 +10,7 @@ class ProductBundle < ActiveRecord::Base
         data.map{|d|d["sku"]}.each do |sku|
           p_copy = Product.find_by_sku_and_retailer(sku, Session.retailer)
           #Filtering out accessories
-          if p_copy
+          if p_copy && p_copy.instock
           # if p_copy && CatSpec.find_by_name_and_product_id("product_type", p_copy.id).try(:value) == CatSpec.find_by_name_and_product_id("product_type", bundle.product_id).try(:value)
             # Get or create new product bundle
             p = ProductBundle.find_or_initialize_by_bundle_id(bundle.product_id)
