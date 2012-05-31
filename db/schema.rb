@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120417191944) do
+ActiveRecord::Schema.define(:version => 20120531182041) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -101,14 +101,6 @@ ActiveRecord::Schema.define(:version => 20120417191944) do
     t.string  "ui"
   end
 
-  create_table "keyword_searches", :force => true do |t|
-    t.string  "keyword"
-    t.integer "product_id"
-  end
-
-  add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
-  add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
-
   create_table "product_bundles", :force => true do |t|
     t.integer  "bundle_id"
     t.integer  "product_id"
@@ -180,6 +172,19 @@ ActiveRecord::Schema.define(:version => 20120417191944) do
     t.string   "product_type"
   end
 
+  create_table "surveys", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "session_id"
+    t.string   "firstname"
+    t.string   "lastname"
+    t.string   "rating"
+    t.boolean  "followup"
+    t.string   "email"
+    t.text     "experience"
+    t.text     "improvements"
+  end
+
   create_table "text_specs", :force => true do |t|
     t.integer  "product_id"
     t.string   "name"
@@ -224,10 +229,6 @@ ActiveRecord::Schema.define(:version => 20120417191944) do
     t.float    "max"
     t.datetime "created_at"
     t.datetime "updated_at"
-  end
-
-  create_table "users", :force => true do |t|
-    t.datetime "created_at"
   end
 
 end

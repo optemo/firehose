@@ -123,14 +123,14 @@ class ScrapingRule < ActiveRecord::Base
           ret_raw = raw_return
         end
       end
-      if en_trans.empty? && multi == true
+      if en_trans.empty?
         p "No english translations found for product #{bbproduct.id}. Please ensure each scraping rule needing a translation has an english version."
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first
           key = "cat_option.#{Session.retailer}.#{lf}.#{CGI::escape(parsed.gsub('.','-').downcase)}"
           translations << ['en', key, parsed]
-          if fr_trans.empty? && multi == true
+          if fr_trans.empty?
             p "No french translations were found for product #{bbproduct.id}"
           else
             begin
