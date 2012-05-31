@@ -45,10 +45,6 @@ gem 'sunspot_rails', :git=> "git://github.com/wildoats/sunspot.git", :branch=>"o
 gem 'ruby_core_source'
 gem 'progress_bar'
 
-group :development do
-  gem "debugger"
-end
-
 group :production do
 #  gem 'newrelic_rpm'
 end

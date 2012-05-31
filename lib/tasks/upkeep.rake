@@ -12,12 +12,10 @@ task :upkeep => :environment do
     end
   end
   #!!!!!! For testing only
-#  Result.upkeep_pre
 #  #Calculate new spec factors
 #  Product.calculate_factors
 # #Get the color relationships loaded
     ProductSibling.get_relations
-#  Result.upkeep_post
 end
 
 desc "Update data automatically"
