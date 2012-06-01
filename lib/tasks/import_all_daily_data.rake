@@ -130,7 +130,7 @@ def update_all_daily_specs(date, specs)
 end
 
 def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="", start_date= '2011-11-01', end_date='2011-12-31')
-  output_name =  "/Users/milocarbol/Desktop/raw_data_#{product_type}#{category}_#{start_date}_#{end_date}.txt"
+  output_name =  "/optemo/data_analysis/raw_data_#{product_type}#{category}_#{start_date}_#{end_date}.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
@@ -216,10 +216,10 @@ end
 
 #convert a file obtained by  the 'analyze_all_daily_raw_specs' function into svm_light foramt (a format needed for CRR analysis)
 def convert_to_svm_format(product_type="camera_bestbuy")
-  data_path =  "/Users/milocarbol/Desktop/"
+  data_path =  "/optemo/data_analysis/"
   fname = "df_used_for_CRR_test.txt"
   f = File.open(data_path + fname, 'r')
-  output_name =  "/Users/milocarbol/Desktop/#{product_type}_svm_light_format_test.txt"
+  output_name =  "/optemo/data_analysis/#{product_type}_svm_light_format_test.txt"
   out_file = File.open(output_name,'w')
   
   lines = f.readlines
