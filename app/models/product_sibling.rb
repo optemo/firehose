@@ -8,7 +8,8 @@ class ProductSibling < ActiveRecord::Base
       if data && !data.empty?
         p_id = record.product_id
         skus = []
-        data.each{|sk| skus<<sk["sku"] if sk["type"]=="Variant"} # AdditionalMedia -- has the other image urls. Save these other small image urls instead of colors.
+        isB = BinSpec.find_by_product_id_and_name(p_id, 'isBundle')
+        data.each{|sk| skus<<sk["sku"] if sk["type"]=="Variant" && (!isB || sk["sku"].match('B') && (!sk["sku"].match('B') || isB))} # AdditionalMedia -- has the other image urls. Save these other small image urls instead of colors.
         #Check if the product is in our database
         sibs = skus.map{|sku|Product.find_by_sku_and_retailer(sku, Session.retailer).try(:id)}.compact
         sibs.each do |sib_id|
