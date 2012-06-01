@@ -19,7 +19,8 @@ class Product < ActiveRecord::Base
     end
     text :sku
     boolean :instock
-    string :eq_id_str 
+    string :eq_id_str
+    integer :isBundleCont
     string :product_type do
       cat_specs.find_by_name(:product_type).try(:value)
     end
