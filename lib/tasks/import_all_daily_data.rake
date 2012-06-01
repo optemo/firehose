@@ -130,8 +130,7 @@ def update_all_daily_specs(date, specs)
 end
 
 def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="", start_date= '2011-11-01', end_date='2011-12-31')
-
-  output_name =  "/optemo/data_analysis/Drive_bestbuy/raw_data_#{product_type}#{category}_#{start_date}_#{end_date}.txt"
+  output_name =  "/Users/milocarbol/Desktop/raw_data_#{product_type}#{category}_#{start_date}_#{end_date}.txt"
   out_file = File.open(output_name,'w')
   daily_product ={}
   sku = ""
@@ -145,57 +144,56 @@ def analyze_all_daily_raw_specs(product_type="camera_bestbuy", category="", star
   features.delete("imglurl")
   features.delete("img150url")
   out_file.write("date sku "+ features.keys.join(" ") + "\n")
-  days= AllDailySpec.where("date >= ? and date <= ?", start_date, end_date).select("Distinct(date)").order("date")
-  
+  days = AllDailySpec.where("date >= ? and date <= ?", start_date, end_date).select("Distinct(date)").order("date")
   days.each do |day|
-   puts "day #{day.date}"  
-   all_records = AllDailySpec.where("date = ?",day.date)
-   puts "all_records_size #{all_records.size}"
-     date = day.date
-     grouped_sku = all_records.group_by(&:sku)
-     grouped_sku.each do |skus, k|
-       sku = skus
-       daily_product ={}
-       k.each do |record_sub|
-         value = 
-         case record_sub.spec_type
-           when "cat"
-             record_sub.value_txt.gsub(/\s+/, '_')
-           when "bin"
-             record_sub.value_bin == true ? 1 : 0
-           when "cont"
-             record_sub.value_flt
-         end
-         daily_product[record_sub.name] = value
-       end
-       # output a specification of the product to file
-       output_line= [date, sku]
-        output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
-        out_file.write(output_line + "\n")
-     end
+    puts "day #{day.date}"  
+    all_records = AllDailySpec.where("date = ?",day.date)
+    puts "all_records_size #{all_records.size}"
+    date = day.date
+    grouped_sku = all_records.group_by(&:sku)
+    grouped_sku.each do |skus, k|
+      sku = skus
+      daily_product ={}
+      k.each do |record_sub|
+        value = 
+        case record_sub.spec_type
+          when "cat"
+            record_sub.value_txt.gsub(/\s+/, '_')
+          when "bin"
+            record_sub.value_bin == true ? 1 : 0
+          when "cont"
+            record_sub.value_flt
+        end
+        daily_product[record_sub.name] = value
+      end
+      # output a specification of the product to file
+      output_line= [date, sku]
+      output_line = features.keys.inject(output_line){|res,ele| res<< (daily_product[ele]||features[ele])}.join(" ")
+      out_file.write(output_line + "\n")
+    end
   end
-  
 end
 
 
-def get_all_features(category="20243")
+def get_all_features(category="20218")
   features={}
   # when we want to get the features of a specific subcategory of a product_type
-   products = AllDailySpec.find_by_sql("select distinct sku from all_daily_specs where name= 'category' and value_txt='#{category}'").map(&:sku)
-   skus = products.join(", ")
-   cont_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'cont'").map(&:name)
+   products = AllDailySpec.find_by_sql("SELECT DISTINCT `sku` FROM `all_daily_specs` WHERE `name` = 'category'").map(&:sku)
+   #products = AllDailySpec.find_by_sql("SELECT DISTINCT `sku` FROM `all_daily_specs` WHERE `name` = 'category' AND `value_txt` = '#{category}'").map(&:sku)
+   skus = "'#{products.join("', '")}'"
+   cont_sp= AllDailySpec.find_by_sql("SELECT DISTINCT `name` FROM `all_daily_specs` WHERE `sku` IN (#{skus}) AND `spec_type` = 'cont'").map(&:name)
     cont_sp.each do |r|
      features[r] = 0
     end
-   cat_sp = AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type = 'cat'").map(&:name)
+   cat_sp = AllDailySpec.find_by_sql("SELECT DISTINCT `name` FROM `all_daily_specs` WHERE `sku` IN (#{skus}) AND `spec_type` = 'cat'").map(&:name)
    cat_sp.each do |r|
      features[r]="NAM"
    end
-   bin_sp= AllDailySpec.find_by_sql("select DISTINCT name from all_daily_specs where sku in (#{skus}) and spec_type= 'bin'").map(&:name)
+   bin_sp= AllDailySpec.find_by_sql("SELECT DISTINCT `name` FROM `all_daily_specs` WHERE `sku` IN (#{skus}) AND `spec_type` = 'bin'").map(&:name)
    bin_sp.each do |r|
      features[r]=0
    end
-  features
+   features
 end
 
 def insert_regression_coefficient(product_type, file_path)
@@ -218,10 +216,10 @@ end
 
 #convert a file obtained by  the 'analyze_all_daily_raw_specs' function into svm_light foramt (a format needed for CRR analysis)
 def convert_to_svm_format(product_type="camera_bestbuy")
-  data_path =  "/Users/optemo/data_analysis/Camera_bestbuy/"
+  data_path =  "/Users/milocarbol/Desktop/"
   fname = "df_used_for_CRR_test.txt"
   f = File.open(data_path + fname, 'r')
-  output_name =  "/Users/optemo/data_analysis/Camera_bestbuy/#{product_type}_svm_light_format_test.txt"
+  output_name =  "/Users/milocarbol/Desktop/#{product_type}_svm_light_format_test.txt"
   out_file = File.open(output_name,'w')
   
   lines = f.readlines
