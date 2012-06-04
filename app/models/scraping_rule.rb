@@ -92,7 +92,7 @@ class ScrapingRule < ActiveRecord::Base
               delinquent = parsed.blank? || (parsed == "**LOW") || (parsed == "**HIGH") || (parsed == "**Regex Error") || (parsed == "**INVALID")
             end
 
-            unless to_show
+            unless to_show || r[:rule].rule_type != "Categorical" #Only translate categorical features
               local_featurename = r[:rule].local_featurename
               trans = r[:rule].french ? fr_trans : en_trans
               # Store the translation and if it's already there only store the highest priority match
@@ -124,25 +124,21 @@ class ScrapingRule < ActiveRecord::Base
         end
       end
       if en_trans.empty?
-        p "No english translations found for product #{bbproduct.id}. Please ensure each scraping rule needing a translation has an english version."
+        p "No english translations found for product #{bbproduct.id}. Please ensure each scraping rule needing a translation has an english version." unless to_show
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first
           key = "cat_option.#{Session.retailer}.#{lf}.#{CGI::escape(parsed.gsub('.','-').downcase)}"
           translations << ['en', key, parsed]
-          if fr_trans.empty?
-            p "No french translations were found for product #{bbproduct.id}"
-          else
-            begin
-              unless fr_trans[lf].nil? # Don't save a french translation if nothing is scraped
-                translations << ['fr', key, fr_trans[lf][0]]
-              #  if fr_trans[lf][1] != en_trans[lf][1]+1
-              #    p "Product #{bbproduct.id} 's fr and en results are not scraped from the same rule for #{lf}. \nFrench priority: #{fr_trans[lf][1]}, English priority: #{en_trans[lf][1]}"
-              #  end
-              end
-            rescue
-              p "A french translation may have not been defined for product #{bbproduct.id} #{lf}, or its value is missing"
+          begin
+            unless fr_trans[lf].nil? # Don't save a french translation if nothing is scraped
+              translations << ['fr', key, fr_trans[lf][0]]
+            #  if fr_trans[lf][1] != en_trans[lf][1]+1
+            #    p "Product #{bbproduct.id} 's fr and en results are not scraped from the same rule for #{lf}. \nFrench priority: #{fr_trans[lf][1]}, English priority: #{en_trans[lf][1]}"
+            #  end
             end
+          rescue
+            p "A french translation may have not been defined for product #{bbproduct.id} #{lf}, or its value is missing"
           end
         end
       end
