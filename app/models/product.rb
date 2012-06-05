@@ -1,5 +1,4 @@
 class Product < ActiveRecord::Base
-  require 'sunspot_autocomplete'
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
@@ -8,6 +7,7 @@ class Product < ActiveRecord::Base
   has_many :product_siblings
   has_many :product_bundles
   attr_writer :product_name
+  SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
   searchable(auto_index: false) do
     text :title do
@@ -186,7 +186,7 @@ class Product < ActiveRecord::Base
       end
     end
     
-    raise ValidationError, "No products are instock" if specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0
+    raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
     
