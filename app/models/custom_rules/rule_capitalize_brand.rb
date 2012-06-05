@@ -6,7 +6,7 @@ class RuleCapitalizeBrand < Customization
   # These should be exempt from the short word rule (ie: they should not be all caps)
   @small_exceptions = ["PRO","HIP"]
       
-  def RuleCapitalizeBrand.compute_feature (values, pid)
+  def RuleCapitalizeBrand.compute(values, pid)
     
     specs = []
     brand = Translation.where(locale: :en, key: "cat_option.#{Session.retailer}\.brand\.#{values.first.try(:gsub,'.','-')}").first

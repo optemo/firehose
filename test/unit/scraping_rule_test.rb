@@ -43,28 +43,28 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     
     # Check candidates
       # regular regex
-      assert_equal candidates1[0].parsed, "black", "Data should have matched"
-      assert_equal candidates2[0].parsed, nil,  "Data should not have matched"
+      assert_equal "black", candidates1[0].parsed, "Data should have matched"
+      assert_equal nil, candidates2[0].parsed,  "Data should not have matched"
       
       # consecutive_fr_trans regex
-      assert_equal candidates1[1].parsed, "noir", "Data should have matched"
-      assert_equal candidates2[1].parsed, nil,  "Data should not have matched"
+      assert_equal "noir", candidates1[1].parsed, "Data should have matched"
+      assert_equal nil, candidates2[1].parsed,  "Data should not have matched"
         
       # consecutive_order
-      assert_equal candidates1[2].parsed, "boi", "Should have returned the first match"
-      assert_equal candidates2[2].parsed, nil,  "Data should not have matched"
+      assert_equal "noi", candidates1[2].parsed, "Should have returned the first match"
+      assert_equal nil, candidates2[2].parsed,  "Data should not have matched"
       
     # Check translations
       # regular regex
-      assert_equal translations1[0][2], "Black", "Data should have matched"
-      assert_equal translations2[0], nil,  "There should be no translations"
+      assert_equal "Black", translations1[0][2], "Data should have matched"
+      assert_equal nil, translations2[0],  "There should be no translations"
 
       # consecutive_fr_trans regex
-      assert_equal translations1[1][2], "Noir", "Data should have matched"
-      assert_equal translations2[1], nil,  "There should be no translations"
+      assert_equal "Noir", translations1[1][2], "Data should have matched"
+      assert_equal nil, translations2[1],  "There should be no translations"
 
       # consecutive_order
-      assert_equal translations1[2][2], "Noi", "Should have returned the first match"
-      assert_equal translations2[2], nil,  "There should be no translations"
+      assert_equal "Noi", translations1[2][2], "Should have returned the first match"
+      assert_equal nil, translations2[2],  "There should be no translations"
   end
 end

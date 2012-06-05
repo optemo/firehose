@@ -1,4 +1,5 @@
 class Product < ActiveRecord::Base
+  require 'sunspot_autocomplete'
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all

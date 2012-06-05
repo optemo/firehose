@@ -27,21 +27,21 @@ class CustomizationTest < ActiveSupport::TestCase
   test "Coming Soon Rule" do
     # preorder date < today : false
     preorderDate = Date.today - 1
-    result = RuleComingSoon.compute_feature([preorderDate.to_s], pid = 999)
+    result = RuleComingSoon.compute([preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleComingSoon.feature_name)
     assert_nil saved_spec, 'BinSpec should not be present for false rule value'
     
     # preorder date = today : false
     preorderDate = Date.today
-    result = RuleComingSoon.compute_feature([preorderDate.to_s], pid = 999)
+    result = RuleComingSoon.compute([preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleComingSoon.feature_name)
     assert_nil saved_spec, 'BinSpec should not be present for false rule value'
     
     # preorder date > today : true
     preorderDate = Date.today + 1
-    result = RuleComingSoon.compute_feature([preorderDate.to_s], pid = 999)
+    result = RuleComingSoon.compute([preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleComingSoon.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for product that is new'
@@ -49,7 +49,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # test invalid preorder date : catch exception thrown
     preorderDate = "2010-10-00"
-    assert_raise(ArgumentError) { RuleComingSoon.compute_feature([preorderDate.to_s], pid = 999) }
+    assert_raise(ArgumentError) { RuleComingSoon.compute([preorderDate.to_s], pid = 999) }
   end
   
   test "Rule On Sale" do
@@ -57,7 +57,7 @@ class CustomizationTest < ActiveSupport::TestCase
     # is now has saleEndDate set to future date -> onSale
     assert_nil BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     saleEndDate = Date.today + 1
-    result = RuleOnSale.compute_feature([saleEndDate.to_s], pid = 911)
+    result = RuleOnSale.compute([saleEndDate.to_s], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for true condition'
@@ -67,7 +67,7 @@ class CustomizationTest < ActiveSupport::TestCase
     old_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil old_spec, 'prerequisite for test'
     saleEndDate = Date.today
-    result = RuleOnSale.compute_feature([saleEndDate.to_s], pid = 911)
+    result = RuleOnSale.compute([saleEndDate.to_s], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for true condition'
@@ -77,19 +77,19 @@ class CustomizationTest < ActiveSupport::TestCase
     old_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil old_spec, 'prerequisite for test'
     saleEndDate = Date.today - 1
-    result = RuleOnSale.compute_feature([saleEndDate.to_s], pid = 911)
+    result = RuleOnSale.compute([saleEndDate.to_s], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_nil saved_spec, 'BinSpec should not be present for false rule value'
     
     # no saleEndDate -> not on sale
-    result = RuleOnSale.compute_feature([nil], pid = 911)
+    result = RuleOnSale.compute([nil], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_nil saved_spec, 'BinSpec should not be present for false rule value'
     
     saleEndDate = "2010-10-00"
-    assert_raise(ArgumentError) { RuleOnSale.compute_feature([saleEndDate.to_s], pid = 911) }
+    assert_raise(ArgumentError) { RuleOnSale.compute([saleEndDate.to_s], pid = 911) }
   end
   
   test "Rule New" do
@@ -97,7 +97,7 @@ class CustomizationTest < ActiveSupport::TestCase
     # displayDate > 30days ago, < today AND preorderDate = 30 days ago
     displayDate = Date.today - 29
     preorderDate = Date.today - 30
-    result = RuleNew.compute_feature([displayDate.to_s, preorderDate.to_s], pid = 999)
+    result = RuleNew.compute([displayDate.to_s, preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
@@ -106,7 +106,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # displayDate < 30days ago, no preorderDate
     displayDate = Date.today - 31
-    result = RuleNew.compute_feature([displayDate.to_s, nil], pid = 999)
+    result = RuleNew.compute([displayDate.to_s, nil], pid = 999)
     result.save unless result.nil?
     # check that there was a binspec saved
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
@@ -114,14 +114,14 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # preorderDate = 31 days ago, no displayDate
     preorderDate = Date.today - 31
-    result = RuleNew.compute_feature([nil, preorderDate.to_s], pid = 999)
+    result = RuleNew.compute([nil, preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_nil saved_spec, 'BinSpec for new should not be present for product that is not new'
     
     # displayDate = today
     displayDate = Date.today
-    result = RuleNew.compute_feature([displayDate.to_s, nil], pid = 999)
+    result = RuleNew.compute([displayDate.to_s, nil], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for product that is new'
@@ -129,7 +129,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # preorderDate = today
     preorderDate = Date.today
-    result = RuleNew.compute_feature([nil, preorderDate.to_s], pid = 999)
+    result = RuleNew.compute([nil, preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for product that is new'
@@ -137,7 +137,7 @@ class CustomizationTest < ActiveSupport::TestCase
     
     # preorderDate > now, no displayDate
     preorderDate = Date.today + 1
-    result = RuleNew.compute_feature([nil, preorderDate.to_s], pid = 999)
+    result = RuleNew.compute([nil, preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_nil saved_spec, 'BinSpec for new should not be present for product that is not new'
@@ -145,7 +145,7 @@ class CustomizationTest < ActiveSupport::TestCase
     # displayDate > today (?), preorderDate > today
     displayDate = Date.today + 1
     preorderDate = Date.today + 20
-    result = RuleNew.compute_feature([nil, preorderDate.to_s], pid = 999)
+    result = RuleNew.compute([nil, preorderDate.to_s], pid = 999)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(999, RuleNew.feature_name)
     assert_nil saved_spec, 'BinSpec for new should not be present for product that is not new'
@@ -392,7 +392,7 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")
     create(:facet, name: "frontlcd", feature_type: "Binary", used_for: "utility", value: 0.4, product_type: "B20218")
 
-    result = RuleUtility.compute_utility( [ adv1.id, adv2.id, adv_no_save1.id, adv_no_save2.id, unadv1.id, unadv2.id, best1.id, best2.id ] )
+    result = RuleUtility.group_computation( [ adv1.id, adv2.id, adv_no_save1.id, adv_no_save2.id, unadv1.id, unadv2.id, best1.id, best2.id ] )
     
     # Test for successful computation
     assert_not_nil result.select{|spec| spec.name == "utility" && spec.product_id == adv1.id}.map(&:value)

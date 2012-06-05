@@ -1,14 +1,5 @@
-
 class Customization
-  require 'custom_rules/RuleAverageSales'
-  require 'custom_rules/RuleBestSeller'
-  require 'custom_rules/RuleCapitalizeBrand'
-  require 'custom_rules/RuleComingSoon'
-  require 'custom_rules/RuleNew'
-  require 'custom_rules/RuleOnSale'
-  require 'custom_rules/RuleTopViewed'
-  require 'custom_rules/RuleUtility'
-  
+
   class << self 
     attr_accessor :feature_name
     attr_accessor :needed_features
@@ -20,14 +11,9 @@ class Customization
     ObjectSpace.each_object(Class).select { |klass| klass < self }
   end
   
-  def Customization.all
-    [RuleComingSoon, RuleNew, RuleOnSale, RuleUtility, RuleBestSeller, RuleTopViewed, RuleAverageSales, RuleCapitalizeBrand]
-    #Customization.subclasses
-  end
-  
   def Customization.find_all_by_product_type(product_types)
     product_types = [product_types] unless product_types.class == Array
-    Customization.all.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
+    Customization.subclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
   end
   
   def Customization.rule_type_to_class(type)
@@ -45,25 +31,23 @@ class Customization
     results = {}
     # execute each of the rules
     rules.each do |rule|
-      if (rule == RuleBestSeller || rule == RuleTopViewed || rule == RuleAverageSales)
+      rule_results = []
+      if rule.method_defined? :group_computation
+        #Aggregate computation
         rule_results = rule.group_computation(pids)
-      elsif rule == RuleUtility
-        rule_results = RuleUtility.compute_utility(pids)
-      else
+      elsif rule.method_defined? :compute
+        #Individual Computation
         spec_features = rule.needed_features
-        #spec_features = Customization.get_needed_features(rule.needed_features)
-        rule_results = []
-        # if an sku doesn't have a required spec value in the table, passing nil value to feature computation
         pids.each do |pid|
           values = []
-          spec_features.each do |spec_feature|
+          (spec_features || []).each do |spec_feature|
             table_name = spec_feature.keys[0]
             feature_name = spec_feature.values[0]
             spec_row = table_name.find_by_product_id_and_name(pid, feature_name)
             values += [spec_row.try(:value)]
           end
           # actual computation logic
-          spec = rule.compute_feature(values, pid)
+          spec = rule.compute(values, pid)
           rule_results += [spec].flatten unless spec.nil?
         end
       end

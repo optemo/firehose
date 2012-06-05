@@ -5,7 +5,7 @@ class RuleOnSale < Customization
   @needed_features = [{CatSpec => 'saleEndDate'}, {ContSpec => 'price'}, {ContSpec => 'saleprice'}]
   @rule_type = 'Binary'
   
-  def RuleOnSale.compute_feature(values, pid)
+  def RuleOnSale.compute(values, pid)
     date = values[0]
     rPrice = values[1]
     sPrice = values[2]

@@ -4,7 +4,7 @@ class RuleUtility < Customization
   @needed_features = []
   @rule_type = 'Continuous'
   
-  def RuleUtility.compute_utility(pids)
+  def RuleUtility.group_computation(pids)
     
       default ="utility"
       non_default = "lr_utility"

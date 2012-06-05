@@ -4,7 +4,7 @@ class RuleComingSoon < Customization
   @product_type = ['BDepartments','FDepartments']
   @rule_type = 'Binary'
   
-  def RuleComingSoon.compute_feature(values, pid)
+  def RuleComingSoon.compute(values, pid)
     preoder_val = values[0]
     if preoder_val == nil
       derived_value = false
