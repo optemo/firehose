@@ -50,7 +50,6 @@ class RuleImageURLs < Customization
           # Save if URL is different from the default
           unless uses_default_url
             spec_class.create(product_id: pid, name: "image_url_#{size_tag}", value: "#{base_url}#{size}x#{size}/#{sku_url}")
-            puts "#{sku} - #{name}: #{base_url}#{size}x#{size}/#{sku_url}"
           end
         else
           # Save other image size (ideally larger) in its place
@@ -58,35 +57,26 @@ class RuleImageURLs < Customization
           when "s"
             if medium_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}")
-              puts "#{sku} - Small replaced with medium: #{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}"
             elsif large_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
-              puts "#{sku} - Small replaced with large: #{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}"
             else
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
-              puts "#{sku} - Small replaced with thumbnail: #{base_url}#{thumbnail_url}"
             end
           when "m"
             if large_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
-              puts "#{sku} - Medium replaced with large: #{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}"
             elsif small_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
-              puts "#{sku} - Medium replaced with small: #{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}"
             else
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
-              puts "#{sku} - Medium replaced with thumbnail: #{base_url}#{thumbnail_url}"
             end
           when "l"
             if medium_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}")
-              puts "#{sku} - Large replaced with medium: #{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}"
             elsif small_exists
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
-              puts "#{sku} - Large replaced with small: #{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}"
             else
               add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
-              puts "#{sku} - Large replaced with thumbnail: #{base_url}#{thumbnail_url}"
             end
           end
         end
