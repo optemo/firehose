@@ -241,8 +241,8 @@ class Product < ActiveRecord::Base
   
   def img_url
     retailer = cat_specs.find_by_name_and_product_id("product_type",id).try(:value)
-    url = TextSpec.where(product_id: id, name: 'image_url_s').first.value
-    if url.nil?
+    url_spec = TextSpec.where(product_id: id, name: 'image_url_s').first
+    if url_spec.nil?
       if retailer =~ /^B/
         url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
       elsif retailer =~ /^F/
@@ -252,7 +252,7 @@ class Product < ActiveRecord::Base
       end
       url += sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
     else
-      url
+      url_spec.value
     end
   end
   

@@ -1,13 +1,13 @@
 require 'net/http'
 class RuleImageURLs < Customization
-  @image_sizes = Hash[ "small" => 150, "medium" => 250, "large" => 500 ]
+  @image_sizes = Hash[ "small" => 100, "medium" => 150, "large" => 250 ]
   @product_type = ['BDepartments','FDepartments']
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
   
   def RuleImageURLs.compute_feature(values, pid)
     unless values[0] =~ /noimage/
-      /.*Products\/(?<thumbnail_url>.*)/ =~ values[0]
+      /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]
       spec_class = Customization.rule_type_to_class(@rule_type)
       retailer = Product.find(pid).retailer
       base_url = ""
@@ -26,14 +26,14 @@ class RuleImageURLs < Customization
         sku_url = sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
       else
         # Image URL is different
-        /.*\/\d{2,3}x\d{2,3}\/(?<sku_url>.+)/ =~ thumbnail_url
+        /.*\d{2,3}x\d{2,3}\/(?<sku_url>.+)/ =~ thumbnail_url
         uses_default_url = false
       end
       # Check existence of each size
       small_exists = false
       medium_exists = false
       large_exists = false
-    
+      
       if size_exists?("#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
         small_exists = true
       end
@@ -43,13 +43,13 @@ class RuleImageURLs < Customization
       if size_exists?("#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
         large_exists = true
       end
-    
+      
       @image_sizes.each do |name, size|
         /(?<size_tag>\w).*/ =~ name
         if size_exists?("#{base_url}#{size}x#{size}/#{sku_url}")
           # Save if URL is different from the default
           unless uses_default_url
-            spec_class.create(product_id: pid, name: "image_url_#{size_tag}", value: "#{base_url}#{size}x#{size}/#{sku_url}")
+            add(spec_class, pid, "image_url_#{size_tag}", "#{base_url}#{size}x#{size}/#{sku_url}")
           end
         else
           # Save other image size (ideally larger) in its place
@@ -89,7 +89,7 @@ class RuleImageURLs < Customization
   
   def RuleImageURLs.size_exists?(url)
     # Check for existence
-    url = URI.parse(url)
+    url = URI.parse(url.gsub('[', '%5B').gsub(']', '%5D'))
     return Net::HTTP.start(url.host, url.port).head(url.request_uri).code == "200"
   end
   
