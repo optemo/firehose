@@ -1,8 +1,9 @@
 class RuleName < Customization
   @feature_name = 'rule_template' #The name of the feature in the database
-  @product_type = ['BDepartments','FDepartments'] #What categories is this rule applicable to
+  @product_type = ['BNoDepartment'] #What categories is this rule applicable to
   @needed_features = [{CatSpec => 'displayDate'}, {CatSpec => 'preorderReleaseDate'}] #This is data required for this computation
   @rule_type = 'Binary' #Type of the feature defines which db table to put this in
+  @only_once = true #This rule should only be run once on a product, as opposed to every time update is run
 
   #Pick one of the following to define depending on what type of rule is being created
   

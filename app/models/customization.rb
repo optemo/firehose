@@ -7,13 +7,12 @@ class Customization
     attr_accessor :product_type
   end
   
-  def Customization.subclasses
-    ObjectSpace.each_object(Class).select { |klass| klass < self }
-  end
+  #Require all the custom rules, so that they can be found by the subclasses file
+  Dir["#{Rails.root}/app/models/custom_rules/*.rb"].each {|file| require file }
   
   def Customization.find_all_by_product_type(product_types)
     product_types = [product_types] unless product_types.class == Array
-    Customization.subclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
+    subclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
   end
   
   def Customization.rule_type_to_class(type)
