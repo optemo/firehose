@@ -5,7 +5,7 @@ class RuleImageURLs < Customization
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
   
-  def RuleImageURLs.compute_feature(values, pid)
+  def RuleImageURLs.compute(values, pid)
     unless values[0] =~ /noimage/
       /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]
       spec_class = Customization.rule_type_to_class(@rule_type)
