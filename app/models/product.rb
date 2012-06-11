@@ -1,3 +1,6 @@
+require "sunspot"
+require 'sunspot_autocomplete'
+
 class Product < ActiveRecord::Base
   require 'sunspot_autocomplete'
   has_many :accessories, :dependent=>:delete_all
@@ -238,14 +241,19 @@ class Product < ActiveRecord::Base
   
   def img_url
     retailer = cat_specs.find_by_name_and_product_id("product_type",id).try(:value)
-    if retailer =~ /^B/
-      url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
-    elsif retailer =~ /^F/
-      url = "http://www.futureshop.ca/multimedia/Products/250x250/"
+    url_spec = TextSpec.where(product_id: id, name: 'image_url_s').first
+    if url_spec.nil?
+      if retailer =~ /^B/
+        url = "http://www.bestbuy.ca/multimedia/Products/150x150/"
+      elsif retailer =~ /^F/
+        url = "http://www.futureshop.ca/multimedia/Products/250x250/"
+      else
+        raise "No known image link for product: #{sku}"
+      end
+      url += sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
     else
-      raise "No known image link for product: #{sku}"
+      url_spec.value
     end
-    url += sku[0..2].to_s+"/"+sku[0..4].to_s+"/"+sku.to_s+".jpg"
   end
   
   def store_sales
