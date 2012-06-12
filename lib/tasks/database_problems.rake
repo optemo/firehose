@@ -221,8 +221,8 @@ end
 
 task :find_products_with_multiple_categories => :environment do
   category_duplicates = CatSpec.find_by_sql 'SELECT product_id, name, count(*) FROM `cat_specs` GROUP BY product_id, name HAVING count(*) > 1'
-  pids = results.select{|p| p.name == "product_type"}.map(&:product_id)
-  products_with_problems = Product.find(results2)
+  pids = category_duplicates.select{|p| p.name == "product_type"}.map(&:product_id)
+  products_with_problems = Product.find(pids)
   puts 'enter either category_duplicates or products_with_problems to view the problem specs and products'
   debugger
   puts 'done'
