@@ -45,7 +45,7 @@ def import_instock_data(start_date,end_date)
   #for local runs (change to own directory)
   #directory = "/optemo/snapshots/slicehost"
   #for runs on jaguar
-  directory = "/mysql_backup/slicehost"
+  directory = "/Users/milocarbol/Stuff/DatabaseDumps"
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -65,11 +65,11 @@ def import_instock_data(start_date,end_date)
         
         # import data from the snapshot to the temp database
         
-        #puts "/usr/local/mysql/bin/mysql -u milocarbol -p[...] -h jaguar temp < #{directory}/#{snapshot}"
-        #%x[/usr/local/mysql/bin/mysql -u milocarbol -ph2TTnMDHAGsDWbvV -h temp < #{directory}/#{snapshot}]
+        puts "/usr/local/mysql/bin/mysql -u milocarbol -p[...] -h jaguar temp < #{directory}/#{snapshot}"
+        %x[/usr/local/mysql/bin/mysql -u milocarbol -ph2TTnMDHAGsDWbvV -h jaguar temp < #{directory}/#{snapshot}]
         
         # Must be local user's credentials if run locally
-        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "firehose_development", :host => "jaguar",
+        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
           :username => "milocarbol", :password => "h2TTnMDHAGsDWbvV")
         
         specs = []
