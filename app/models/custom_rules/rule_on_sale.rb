@@ -1,4 +1,3 @@
-
 class RuleOnSale < Customization
   @feature_name = 'onsale'
   @product_type = ['BDepartments', 'FDepartments']

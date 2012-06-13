@@ -210,24 +210,22 @@ class Product < ActiveRecord::Base
     #Get the color relationships loaded
     ProductSibling.get_relations
     Equivalence.fill
-    Product.compute_custom_specs(Product.current_type)
-    #This assumes Firehose is running with the same memcache as the Discovery Platform
+    #Customizations
+    custom_specs_to_save = Customization.run(products_to_save.values.map(&:id),products_to_update.values.map(&:id))
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
+    end
     
     #Reindex sunspot
     Sunspot.index(products_to_save.values)
     Sunspot.index(products_to_update.values)
     Sunspot.commit
+    
+    #This assumes Firehose is running with the same memcache as the Discovery Platform
     begin
       Rails.cache.clear
     rescue Dalli::NetworkError
       puts "Memcache not available"
-    end
-  end
-  
-  def self.compute_custom_specs(bb_prods)
-    custom_specs_to_save = Customization.compute_specs(bb_prods.map(&:id))
-    custom_specs_to_save.each do |spec_class, spec_values|
-      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
     end
   end
   

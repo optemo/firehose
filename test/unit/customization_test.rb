@@ -13,16 +13,18 @@ class CustomizationTest < ActiveSupport::TestCase
     Session.new('F1127')
   end
   
-#  test "compute specs" do
-#    p1 = create(:product, sku: 901)
-#    p2 = create(:product, sku: 903)
-#    # onsale
-#    CatSpec.create(:product_id => p1.id, :name => 'saleEndDate', :value => Date.today.to_s)
-#    CatSpec.create(:product_id => p2.id, :name => 'saleEndDate', :value => (Date.today-10).to_s)
-#    results = Customization.compute_specs([p1.id, p2.id])[BinSpec]
-#    assert_not_empty results.select{|spec| spec.name == "onsale" && spec.product_id = p1.id && spec.value == true}
-#    assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
-#  end
+  test "compute specs" do
+    p1 = create(:product, sku: 901)
+    p2 = create(:product, sku: 903)
+    # onsale
+    CatSpec.create(:product_id => p1.id, :name => 'saleEndDate', :value => Date.today.to_s)
+    ContSpec.create(:product_id => p1.id, :name => 'price', :value => 100)
+    ContSpec.create(:product_id => p1.id, :name => 'saleprice', :value => 99.95)
+    CatSpec.create(:product_id => p2.id, :name => 'saleEndDate', :value => (Date.today-10).to_s)
+    results = Customization.run([p1.id, p2.id])[BinSpec]
+    assert_not_empty results.select{|spec| spec.name == "onsale" && spec.product_id = p1.id && spec.value == true}
+    assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
+  end
   
   test "Coming Soon Rule" do
     # preorder date < today : false
