@@ -4,7 +4,6 @@ DAYS_BACK = 60
 # Saves data to daily_specs
 task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
   require 'email_data_collection'
- 
   start_date = Date.strptime(args.start_date, "%Y%m%d")
   end_date = Date.strptime(args.end_date, "%Y%m%d")
   (start_date..end_date).each do |date|
@@ -74,6 +73,7 @@ def import_instock_data(start_date,end_date)
         
         specs = []
         instock = Product.find_all_by_instock(1)
+        puts instock.length
         instock.each do |p|
           sku = p.sku
           p_cat_spec = CatSpec.where(product_id: p.id, name: "product_type").first
@@ -82,7 +82,7 @@ def import_instock_data(start_date,end_date)
           
           specs.push([sku,'instock','bin',p.instock,p_type,date])
         end
-        ActiveRecord::Base.establish_connection(:development)
+        ActiveRecord::Base.establish_connection(ENV["RAILS_ENV"])
         columns = %W( sku name spec_type value_bin product_type date )
         DailySpec.import(columns,specs)
       end

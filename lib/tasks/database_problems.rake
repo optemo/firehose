@@ -219,6 +219,22 @@ task :get_rid_of_siblings_duplicates => :environment do
   end
 end
 
+task :find_products_with_multiple_categories => :environment do
+  category_duplicates = CatSpec.find_by_sql 'SELECT product_id, name, count(*) FROM `cat_specs` GROUP BY product_id, name HAVING count(*) > 1'
+  pids = category_duplicates.select{|p| p.name == "product_type"}.map(&:product_id)
+  products_with_problems = Product.find(pids)
+  puts 'enter either category_duplicates or products_with_problems to view the problem specs and products'
+  debugger
+  puts 'done'
+  #Product.find(results2).map(&:destroy)
+end
+
+task :throw_an_error => :environment do
+  p 'about to throw an error'
+  raise RuntimeError, 'an error has occurred here'
+  p 'done throwing error'
+end
+
 task :get_rid_of_duplicates => :environment do
   results = Product.find_by_sql 'SELECT *, count(*) FROM `products` GROUP BY sku, retailer HAVING count(*) > 1'
   #records = ActiveRecord::Base.connection.execute('SELECT product_id, value, count(*) FROM `product_siblings` GROUP BY product_id, value HAVING count(*) > 1')
