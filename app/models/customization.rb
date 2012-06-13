@@ -29,7 +29,7 @@ class Customization
       end
     end
     
-    def run(newproducts = [],oldproducts = [])
+    def run(newproducts,oldproducts = [])
       results = Hash.new{|h,k| h[k] = []} #New values in the hash an empty array instead of nil
       # get all the customizations applicable to this product_type and ancestors that only need to be run once
       find_all_by_product_type_and_only_once(Session.product_type_path,true).each do |rule|
