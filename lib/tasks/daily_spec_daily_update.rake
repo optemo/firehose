@@ -31,23 +31,23 @@ task :update_daily_specs => :environment do |t,args|
     raise "DailySpec is missing yesterday's instock data."
   end
 
-  # require 'email_data_collection'
-  #   
-  #   before_whole = Time.now
-  # 
-  #   # Load online_orders based on previous day's instock
-  #   save_email_data({:first_possible_date => "09-Sep-2011", :spec => "online_orders", :table => "daily_specs"}, true, date, date)
-  # 
-  #   # Load pageviews based on previous day's products (all)
-  #   save_email_data({:first_possible_date => "29-Oct-2011", :spec => "pageviews", :table => "daily_specs"}, true, date, date)
-  #   
-  #   # Delete oldest record if daily_specs goes back more than 'DAYS_BACK' days
-  #   dates_saved = DailySpec.select("DISTINCT(date)").order("date ASC").map(&:date)
-  #   unless dates_saved.length <= DAYS_BACK 
-  #     DailySpec.delete_all(:date => dates_saved.first)
-  #   end
-  # 
-  #   after_whole = Time.now
-  #   p "Total time for #{date}: #{after_whole-before_whole} s"
+  require 'email_data_collection'
+  
+  before_whole = Time.now
+
+  # Load online_orders based on previous day's instock
+  save_email_data({:first_possible_date => "09-Sep-2011", :spec => "online_orders", :table => "daily_specs"}, true, date, date)
+
+  # Load pageviews based on previous day's products (all)
+  save_email_data({:first_possible_date => "29-Oct-2011", :spec => "pageviews", :table => "daily_specs"}, true, date, date)
+  
+  # Delete all records if they are more than DAYS_BACK days when sorted in daily specs
+  dates_saved = DailySpec.select("DISTINCT(date)").order("date ASC").map(&:date)
+  unless dates_saved.length <= DAYS_BACK 
+    DailySpec.delete_all(:date => dates_saved[0, dates_saved.length-DAYS_BACK])
+  end
+
+  after_whole = Time.now
+  p "Total time for #{date}: #{after_whole-before_whole} s"
 end
 

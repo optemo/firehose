@@ -29,7 +29,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
     retailers_received = []
     
       imap = Net::IMAP.new('imap.1and1.com')
-
+      
       imap.login('auto@optemo.com', '***REMOVED***')
       search_for = ""
       if spec == "pageviews"
@@ -39,7 +39,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
         search_for_bb = BEST_BUY_ORDERS_KEY
         search_for_fs = FUTURE_SHOP_ORDERS_KEY
       end
-
+      
       imap.select('INBOX') 
     
       # Get the messages wanted
@@ -93,7 +93,6 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
             type_csv = true if body.parts[i-1].media_type == "TEXT"
             csvfile = ""
             then_date = Date.parse(msg.attr["ENVELOPE"].date)-1
-            p then_date
             cName = ""
             type = ""
             unless type_csv
