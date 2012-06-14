@@ -76,7 +76,6 @@ def import_instock_data(start_date,end_date)
         
         specs = []
         instock = Product.find_all_by_instock(1)
-        puts instock.length
         instock.each do |p|
           sku = p.sku
           p_cat_spec = CatSpec.where(product_id: p.id, name: "product_type").first
