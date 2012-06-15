@@ -222,11 +222,12 @@ class Product < ActiveRecord::Base
     Sunspot.commit
     
     #This assumes Firehose is running with the same memcache as the Discovery Platform
-    begin
-      Rails.cache.clear
-    rescue Dalli::NetworkError
-      puts "Memcache not available"
-    end
+    #This assumtion no longer holds
+    #begin
+    #  Rails.cache.clear
+    #rescue Dalli::NetworkError
+    #  puts "Memcache not available"
+    #end
   end
   
   def name

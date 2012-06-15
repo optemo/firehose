@@ -1,6 +1,6 @@
 set :application, "production"
 set :repository,  "git@jaguar:site.git"
-set :domain, "linode"
+set :domain, "fremont"
 set :branch, "staging"
 set :user, "#{ `whoami`.chomp.downcase }"
 
