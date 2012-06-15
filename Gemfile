@@ -11,7 +11,9 @@ gem 'mysql2', '> 0.3'
 # gem 'unicorn'
 
 # Deploy with Capistrano
-# gem 'capistrano'
+gem 'capistrano'
+gem 'capistrano-ext'
+gem 'rvm-capistrano'
 
 # Bundle the extra gems:
 # gem 'bj'
