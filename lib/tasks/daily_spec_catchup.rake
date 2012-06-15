@@ -3,6 +3,9 @@ DAYS_BACK = 60
 # Imports instock products from snapshots, then gets online_orders/pageviews for those products
 # Saves data to daily_specs
 task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
+  ## Not tested yet, so trowing an exception in case of attempt to run it
+  raise "Catchup task not tested yet, fix and test the code before running"
+  
   require 'email_data_collection'
   start_date = Date.strptime(args.start_date, "%Y%m%d")
   end_date = Date.strptime(args.end_date, "%Y%m%d")
@@ -73,7 +76,6 @@ def import_instock_data(start_date,end_date)
         
         specs = []
         instock = Product.find_all_by_instock(1)
-        puts instock.length
         instock.each do |p|
           sku = p.sku
           p_cat_spec = CatSpec.where(product_id: p.id, name: "product_type").first

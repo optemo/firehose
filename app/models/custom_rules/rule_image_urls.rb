@@ -4,9 +4,10 @@ class RuleImageURLs < Customization
   @product_type = ['BDepartments','FDepartments']
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
+  @size_existence = Hash[ "small" => false, "medium" => false, "large" => false ]
   
   def RuleImageURLs.compute(values, pid)
-    unless values[0] =~ /noimage/
+    unless values[0] =~ /noimage/ || values[0] !~ /.*[Pp]roducts\/.*/
       /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]
       retailer = Product.find(pid).retailer
       base_url = ""
@@ -29,24 +30,25 @@ class RuleImageURLs < Customization
         uses_default_url = false
       end
       # Check existence of each size
-      small_exists = false
-      medium_exists = false
-      large_exists = false
+      
+      @size_existence['small'] = false
+      @size_existence['medium'] = false
+      @size_existence['large'] = false
       
       if size_exists?("#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
-        small_exists = true
+        @size_existence['small'] = true
       end
       if size_exists?("#{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}")
-        medium_exists = true
+        @size_existence['medium'] = true
       end
       if size_exists?("#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
-        large_exists = true
+        @size_existence['large'] = true
       end
       
       res = []
       @image_sizes.each do |name, size|
         /(?<size_tag>\w).*/ =~ name
-        if size_exists?("#{base_url}#{size}x#{size}/#{sku_url}")
+        if @size_existence[name]
           # Save if URL is different from the default
           unless uses_default_url
             res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{size}x#{size}/#{sku_url}")
@@ -55,25 +57,25 @@ class RuleImageURLs < Customization
           # Save other image size (ideally larger) in its place
           case size_tag
           when "s"
-            if medium_exists
+            if @size_existence['medium']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}")
-            elsif large_exists
+            elsif @size_existence['large']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
             else
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
             end
           when "m"
-            if large_exists
+            if @size_existence['large']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
-            elsif small_exists
+            elsif @size_existence['small']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
             else
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
             end
           when "l"
-            if medium_exists
+            if @size_existence['medium']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["medium"]}x#{@image_sizes["medium"]}/#{sku_url}")
-            elsif small_exists
+            elsif @size_existence['small']
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{@image_sizes["small"]}x#{@image_sizes["small"]}/#{sku_url}")
             else
               res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{thumbnail_url}")
