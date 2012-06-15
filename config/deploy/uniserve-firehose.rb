@@ -1,6 +1,6 @@
 set :application, "firehose"
 set :repository,  "git@jaguar:firehose.git"
-set :domain, "linode"
+set :domain, "uniserve"
 set :branch, "master"
 set :user, "#{ `whoami`.chomp.downcase }"
 

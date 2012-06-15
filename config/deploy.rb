@@ -1,4 +1,4 @@
-set :stages, %w(jaguar linode slicehost linode-firehose)
+set :stages, %w(jaguar linode slicehost uniserve-firehose)
 require 'capistrano/ext/multistage'
 require 'bundler/capistrano'
 # The next two lines are needed for integration with Ruby Version Manager:
