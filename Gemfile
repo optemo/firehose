@@ -70,4 +70,6 @@ group :assets do
   gem 'coffee-rails'
   gem 'uglifier'
   gem 'yui-compressor'
+  gem 'execjs'
+  gem 'therubyracer'
 end
