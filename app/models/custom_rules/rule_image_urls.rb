@@ -7,7 +7,7 @@ class RuleImageURLs < Customization
   @size_existence = Hash[ "small" => false, "medium" => false, "large" => false ]
   
   def RuleImageURLs.compute(values, pid)
-    unless values[0] =~ /noimage/
+    unless values[0] == /.*[Pp]roducts\/.*)/ || values[0] =~ /noimage/
       /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]
       retailer = Product.find(pid).retailer
       base_url = ""
