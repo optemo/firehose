@@ -16,7 +16,7 @@ task :save_daily_instock => :environment do |t,args|
     product_type = CatSpec.where(:name => "product_type", :product_id => prod.id).first.try(:value)
     specs_to_save.push(DailySpec.new :sku => sku, :name => 'instock', :spec_type => 'bin', :value_bin => true, :product_type => product_type, :date => yesterday)
   end
-  DailySpec.import specs_to_save # is this the right syntax?  
+  DailySpec.import specs_to_save
   # also delete instock specs older than 60 days here?
 end
 
