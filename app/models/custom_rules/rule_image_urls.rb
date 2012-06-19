@@ -48,7 +48,7 @@ class RuleImageURLs < Customization
       res = []
       @image_sizes.each do |name, size|
         /(?<size_tag>\w).*/ =~ name
-        if @size_existence[name]
+        if @size_existence[name] && !sku_url.empty?
           # Save if URL is different from the default
           unless uses_default_url
             res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{size}x#{size}/#{sku_url}")
