@@ -37,11 +37,9 @@ task :catchup_daily_specs,[:start_date,:end_date] => :environment do |t,args|
 end
 
 def import_instock_data(start_date,end_date)
-  # FIXME: make sure that the directory here is the right one!!!
-  #for local runs (change to own directory)
-  #directory = "/optemo/dumps"
-  #for runs on jaguar
-  directory = "/mysql_backup/slicehost"
+  # the directory to get the daily database snapshots from
+  #directory = "/optemo/dumps" #for local runs (change to own directory)
+  directory = "/mysql_backup/snapshots" #for runs on jaguar
   
   # loop over the files in the directory, unzipping gzipped files
   Dir.foreach(directory) do |entry|
@@ -50,25 +48,24 @@ def import_instock_data(start_date,end_date)
     end
   end
   
-  # loop over each daily snapshot of the database (.sql file),
-  # if it is in the date range given: import it into the temp database + get instock products
+  # Loop over each daily snapshot of the database (.sql file),
+  # and if the snapshot date is in the date range given, and daily spec doesn't have instock records for that date,
+  # import it into the temp database and get instock products
   Dir.foreach(directory) do |snapshot|
     if snapshot =~ /\.sql/
       date_string = snapshot.gsub(/\D*(\d+).*/,'\1')
       date = Date.parse(date_string)
-      
+
       if (start_date..end_date) === date && DailySpec.where(:name => 'instock', :date => date).limit(1).empty?          
         
         puts 'making instock records for date ' + date.to_s
-        
         # import data from the snapshot to the temp database
-        
         puts "/usr/bin/mysql -u optemo -p[...] -h jaguar temp < #{directory}/#{snapshot}"
         %x[/usr/bin/mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
         
         # Must be local user's credentials if run locally
         ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
-          :username => "oana", :password => "cleanslate")
+          :username => "optemo", :password => "***REMOVED***")
         
         specs = []
         instock = Product.find_all_by_instock(1)
