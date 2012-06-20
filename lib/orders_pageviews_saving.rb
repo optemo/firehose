@@ -15,24 +15,13 @@ def save_online_orders(filename,date,daily_updates,table,retailer)
   case table
   when /^[Dd]aily((Spec)|(_specs))/  # Save sales to daily_specs
     rows = []
-    if daily_updates  # FIXME: see if when not daily_updates (i.e. catchup task) the same thing has to happen
-      products = DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?", date, 'instock', retailer).select("DISTINCT(sku),product_type")
-      products.each do |prod|
-        sku = prod.sku         
-        product_type = prod.product_type
-        orders_spec = orders_map[sku].try(:delete,',')
-        orders = (orders_spec.nil?) ? "0" : orders_spec
-        rows.push(["cont",sku,"online_orders",orders,date,product_type])
-      end
-    else  # Get instock products from daily_specs
-      products = DailySpec.where("date = ? AND product_type REGEXP ?",date,retailer).select("DISTINCT(sku),product_type")
-      products.each do |prod|
-        sku = prod.sku         
-        product_type = prod.product_type
-        orders_spec = orders_map[sku].try(:delete,',') # For sales of over 999 (comma messes things up)
-        orders = (orders_spec.nil?) ? "0" : orders_spec
-        rows.push(["cont",sku,"online_orders",orders,date,product_type])
-      end
+    products = DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?", date, 'instock', retailer).select("DISTINCT(sku),product_type")
+    products.each do |prod|
+      sku = prod.sku         
+      product_type = prod.product_type
+      orders_spec = orders_map[sku] # For sales of over 999 (comma messes things up)
+      orders = (orders_spec.nil?) ? "0" : orders_spec.delete(',')
+      rows.push(["cont",sku,"online_orders",orders,date,product_type])
     end
     columns = %W( spec_type sku name value_flt date product_type )
     DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt]) 
@@ -65,24 +54,14 @@ def save_pageviews(filename,date,daily_updates,table,retailer)
   case table
   when /^[Dd]aily((Spec)|(_specs))/  # Save sales to daily_specs
     rows = []
-    if daily_updates # FIXME: also update the catchup task code under else
-      products = DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?", date, 'instock', retailer).select("DISTINCT(sku),product_type")
-      products.each do |prod|
-        sku = prod.sku
-        product_type = prod.product_type
-        views_spec = views_map[sku]
-        views = (views_spec.nil?) ? "0" : views_spec.delete(',')
-        rows.push(["cont",sku,"pageviews",views,date,product_type])
-      end
-    else # Get products from daily_spec 
-      products = DailySpec.where(:name => "instock", :date => date)
-      products.each do |prod|
-        sku = prod.sku         
-        product_type = prod.product_type
-        views_spec = views_map[sku]
-        views = (views_spec.nil?) ? "0" : views_spec.delete(',')
-        rows.push(["cont",sku,"pageviews",views,date,product_type])
-      end
+    # FIXME: this code is almost identical to the one for orders TODO: refactor the two together with pageviews / orders param
+    products = DailySpec.where("date = ? AND name = ? AND product_type REGEXP ?", date, 'instock', retailer).select("DISTINCT(sku),product_type")
+    products.each do |prod|
+      sku = prod.sku
+      product_type = prod.product_type
+      views_spec = views_map[sku]
+      views = (views_spec.nil?) ? "0" : views_spec.delete(',')  # the one difference is where this delete comma is done  
+      rows.push(["cont",sku,"pageviews",views,date,product_type])
     end
     columns = %W( spec_type sku name value_flt date product_type )
     DailySpec.import(columns,rows,:on_duplicate_key_update=>[:value_flt])
