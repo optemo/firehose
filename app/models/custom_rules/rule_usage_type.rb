@@ -51,7 +51,6 @@ class RuleUsageType < Customization
     end
     # save translations here
     translations = []
-    debugger
     
     possible_values_fr = BestBuyApi.get_filter_values(usage_type_node, "Type", 'fr')
     possible_values.each_with_index do |usage_label, index|
