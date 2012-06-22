@@ -1,8 +1,11 @@
 require 'test_helper'
 
 class ScrapingCorrectionTest < ActiveSupport::TestCase
-  # Replace this with your real tests.
-
+  setup do
+    # set the session department to a bestbuy department for the API calls to the BestBuy API
+    Session.new 'BDepartments'
+  end
+  
   test "Best buy API" do
     assert( BestBuyApi.product_search(id = 28381, includeall = false, english = true))
     assert BestBuyApi.listing (21344)
@@ -32,16 +35,28 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
     ids= BestBuyApi.category_ids(id = "B28381")
     assert(!ids.empty?, "Category ids should accept product type")
   end
- 
+   
   test "get subcategories" do  
     subcats = BestBuyApi.get_subcategories(id= 20243, english = true)
     keys = subcats.keys
     assert_equal(3, subcats.values_at("20243"=> keys[0].values_at("20243")[0])[0].to_a.length, "there should be 3 subcategories for 'the USB Flash Drivers' category")
   end
- 
+   
   test "keyword search" do
     skus = BestBuyApi.keyword_search ("Camera")
     assert_equal(skus.size, skus.uniq.size,"there is no duplicate in skus")
+  end
+  
+  test "getting product ids matching a filter" do
+    Session.new 'F1002' # For the API calls to use the Future Shop API
+    usage_type_node = '1002'
+    filter_name = "Usage Type"
+    filter_value = "Ultrabook"
+    all_results = {}
+    BestBuyApi.get_filter_values(usage_type_node, filter_name).each { |value| all_results[value] = BestBuyApi.search_with_filter(usage_type_node, filter_name, value) }
+    pp all_results
+    results_ultrabooks = all_results[filter_value]
+    assert_not_equal results_ultrabooks.length, 0
   end
   
 end

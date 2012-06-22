@@ -60,11 +60,11 @@ def import_instock_data(start_date,end_date)
         
         puts 'making instock records for date ' + date.to_s
         # import data from the snapshot to the temp database
-        puts "/usr/bin/mysql -u optemo -p[...] -h jaguar temp < #{directory}/#{snapshot}"
-        %x[/usr/bin/mysql -u optemo -p***REMOVED*** -h jaguar temp < #{directory}/#{snapshot}]
+        puts "/usr/bin/mysql -u oana -p[...] -h jaguar temp < #{directory}/#{snapshot}"
+        %x[/usr/bin/mysql -u oana -pcleanslate -h jaguar temp < #{directory}/#{snapshot}]
         
         # Must be local user's credentials if run locally
-        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "jaguar",
+        ActiveRecord::Base.establish_connection(:adapter => "mysql2", :database => "temp", :host => "localhost",
           :username => "optemo", :password => "***REMOVED***")
         
         specs = []

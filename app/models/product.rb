@@ -211,6 +211,7 @@ class Product < ActiveRecord::Base
     ProductSibling.get_relations
     Equivalence.fill
     #Customizations
+    
     custom_specs_to_save = Customization.run(products_to_save.values.map(&:id),products_to_update.values.map(&:id))
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
