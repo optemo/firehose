@@ -26,6 +26,42 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
   end
   
+  test "Usage Type Rule" do
+    # for an sku that's in category x, run the rule computation, check that there's a spec created for that category and that product
+    # 10206581 is in everyday but no other category
+    p1 = create(:product, sku: '10206581')
+    #CatSpec.create(:product_id => p1.id, :name => 'product_type', :value => 'F28357')
+    result = RuleUsageType.group_computation([p1.id])
+    assert_equal 1, result.length, 'Only one usage type should be present for this sku'
+    result.map(&:save) unless result.nil?
+    
+    saved_spec = CatSpec.find_by_product_id_and_name(p1.id, RuleUsageType.feature_name)
+    assert_not_nil saved_spec, 'CatSpec should be present'
+    assert_equal "Everyday", saved_spec.value, 'Value saved should be as expected'
+    
+    # for sku 10195304 that is in 2 categories (Microsoft Premium Collection PC and Ultrabook)
+    p2 = create(:product, sku: '10195304')
+    #CatSpec.create(:product_id => p2.id, :name => 'product_type', :value => 'F28357')
+    result = RuleUsageType.group_computation([p2.id])
+    assert_equal 2, result.length, 'Two usage types should be present for this sku'
+    result.map(&:save) unless result.nil?
+    
+    first_saved_spec = CatSpec.find_by_product_id_and_name_and_value(p2.id, RuleUsageType.feature_name, "Microsoft Premium Collection PC")
+    second_saved_spec = CatSpec.find_by_product_id_and_name_and_value(p2.id, RuleUsageType.feature_name, "Ultrabook")
+    assert_not_nil first_saved_spec, "Usage type should be saved as expected"
+    assert_not_nil second_saved_spec, "Usage type should be saved as expected"
+    
+    # An sku that's in none of those categories - a macbook - 10173232 ...
+    p3 = create(:product, sku: '10178804')
+    # FIXME: look into this - removing spec if the product had a spec before!
+    # CatSpec.create(:product_id => p3.id, :name => RuleUsageType.feature_name, :value => "Ultrabook")
+    #CatSpec.create(:product_id => p3.id, :name => 'product_type', :value => 'F23016')
+    result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
+    result.map(&:save) unless result.nil?
+    saved_spec = CatSpec.find_by_product_id_and_name(p3.id, RuleUsageType.feature_name)
+    assert_nil saved_spec, "No usage type should be saved for a product not in any of the categories"
+  end
+  
   test "Coming Soon Rule" do
     # preorder date < today : false
     preorderDate = Date.today - 1
@@ -57,6 +93,8 @@ class CustomizationTest < ActiveSupport::TestCase
   test "Rule On Sale" do
     # saleEndDate was not present or past (i.e. product didn't have an onsale spec),
     # is now has saleEndDate set to future date -> onSale
+    flunk('this test throws an error for rule_on_sale line 14 NoMethodError: undefined method > for nil:NilClass')
+    
     assert_nil BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     saleEndDate = Date.today + 1
     result = RuleOnSale.compute([saleEndDate.to_s], pid = 911)
@@ -65,7 +103,7 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_not_nil saved_spec, 'BinSpec should be saved for true condition'
     assert saved_spec.value, 'BinSpec value should be true'
     
-    # saleEndDate was present / future and is now set to today -> onSale [FIXME: check that this is right]
+    # saleEndDate was present / future and is now set to today -> onSale
     old_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil old_spec, 'prerequisite for test'
     saleEndDate = Date.today

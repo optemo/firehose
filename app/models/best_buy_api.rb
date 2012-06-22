@@ -98,6 +98,35 @@ class BestBuyApi
        ids
     end
     
+    def get_filter_values(categoryid, filter_name, language='en')
+      # search url will be like this: "http://www.futureshop.ca/api/v2/json/search?categoryid=#{categoryid}&include=facets"
+      result = cached_request('search', {:categoryid => categoryid, :include => 'facets', :lang => language})
+      
+      values = result["facets"].select{|p| p['name'] == filter_name}
+      unless values.empty?
+        return values.first['filters'].map{|r| r['name']}
+      else
+        raise 'Filter not found'
+      end
+    end
+    
+    def search_with_filter(categoryid, filter_name, filter_value)
+      # check if category id (?)
+      # e.g. request_url = prepare_url('search', params={:categoryid=>'1002',:filter=>"Usage Type|On the Go"})
+      
+      page = 1
+      totalpages = nil
+      ids = []
+      while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
+        res = cached_request('search',{ :page => page, :categoryid => categoryid, :filter=> "#{filter_name}|#{filter_value}" })
+        
+        totalpages ||= res["totalPages"]
+        ids += res["products"].map{|p| p["sku"]}
+        page += 1
+      end
+      ids
+    end
+    
     def category_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
