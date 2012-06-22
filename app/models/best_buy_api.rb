@@ -5,7 +5,8 @@ class BestBuyApi
   class TimeoutError < StandardError; end
   class << self
     URL = {"B" => "http://www.bestbuy.ca/api/v2",
-           "F" => "http://www.futureshop.ca/api/v2"}
+           "F" => "http://www.futureshop.ca/api/v2",
+          }
     DEBUG = false
     
     #Find BestBuy products
@@ -34,14 +35,29 @@ class BestBuyApi
     end
     
     def get_subcategories(id, english = true)
-      q = english ? {:lang => "en"} : {:lang => "fr"}
-      q[:id] = id
-      subcats = {}
-      #puts "#{q}"
-      res = cached_request('category',q)      
-      children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
-      subcats = {{res["id"] => res["name"]} => children}
-      subcats
+      unless Session.retailer == 'A'
+        q = english ? {:lang => "en"} : {:lang => "fr"}
+        q[:id] = id
+        subcats = {}
+        #puts "#{q}"
+        res = cached_request('category',q)      
+        children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
+        subcats = {{res["id"] => res["name"]} => children}
+        subcats
+      else
+        if id =~ /Departments/
+          subcats = {  {'Departments' => 'Departments'} =>
+                      [ {'movie_amazon' => 'movie_amazon'},
+                        {'tv_amazon' => 'tv_amazon'},
+                        {'camera_amazon' => 'camera_amazon'},
+                        {'software_amazon' => 'software_amazon'}
+                      ]
+                    }
+        else
+          subcats = { {id => id} => nil }
+        end
+        subcats
+      end
     end
     
     def get_category(id, english = true)
@@ -90,7 +106,7 @@ class BestBuyApi
       ids = []
       id.each do |my_id|
         #Check if ProductType or feed_id
-        my_id = my_id.to_s[1..-1] if /^[BF]/ =~ my_id.to_s
+        my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => num})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
@@ -105,7 +121,7 @@ class BestBuyApi
       ids = []
       id.each do |my_id|
         #Check if ProductType or feed_id
-        my_id = my_id.to_s[1..-1] if /^[BF]/ =~ my_id.to_s
+        my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
         # check if the category is an invalid one (no parents, but many products listed)
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
