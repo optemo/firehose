@@ -1,8 +1,19 @@
 # Put code for getting info about/figuring out/fixing database issues here
 # Leave a comment containing the date and a description of the problem, and whether or not the issue is resolved (you can also just delete the relevant code)
 
-
-
+# Jue 25th 2012
+# Some products were present in the DB with no product_type, these can't be found in the site, so deleting them
+task :find_products_with_no_product_type => :environment do
+  products_to_delete = []
+  Product.all.each do |prod|
+    if CatSpec.find_by_product_id_and_name(prod.id, 'product_type').nil?
+      products_to_delete << prod
+    end
+  end
+  puts products_to_delete
+  debugger
+  sleep(1)
++end
 
 # Some product features are scraped by different rules in En vs. Fr
 # this code was not helpful in finding such products, but may be useful for something else

@@ -31,6 +31,7 @@ class ScrapingRule < ActiveRecord::Base
           begin
             raw_info = BestBuyApi.product_search(bbproduct.id,false, language == "English")
           rescue BestBuyApi::RequestError
+            puts 'Error in the feed: returned nil for ' + bbproduct.id
             next
           end
         rescue BestBuyApi::TimeoutError

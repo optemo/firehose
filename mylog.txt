@@ -1,0 +1,15 @@
+Started scraping category F31083...Finished
+Started scraping category F23016...Finished
+Started scraping category F30214...Finished
+Started scraping category F28357...Finished
+Started scraping category F25313...Finished
+Started scraping category F25314...Finished
+Started scraping category F25315...Finished
+Started scraping category F26917...Finished
+Started scraping category F25316Error in the feed: returned nil for 10185920
+Error in the feed: returned nil for 10185920
+"No english translations found for product 10185920. Please ensure each scraping rule needing a translation has an english version."
+Error in the feed: returned nil for 10185920
+Error in the feed: returned nil for 10185920
+"No english translations found for product 10185920. Please ensure each scraping rule needing a translation has an english version."
+...Finished

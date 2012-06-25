@@ -150,6 +150,7 @@ class Product < ActiveRecord::Base
         end
       end
     end
+    
     candidates.each do |candidate|
       spec_class = case candidate.model
         when "Categorical" then CatSpec
@@ -204,7 +205,8 @@ class Product < ActiveRecord::Base
     
     specs_to_delete.each(&:destroy)
     #Save products and associated specs
-    products_to_save.values.each(&:save)
+    products_to_save = products_to_save.values.select{|p| !p.cat_specs.select{|cs| cs.name == "product_type"}.empty? }
+    products_to_save.map(&:save)
     
     ProductBundle.get_relations
     #Get the color relationships loaded
@@ -212,13 +214,13 @@ class Product < ActiveRecord::Base
     Equivalence.fill
     #Customizations
     
-    custom_specs_to_save = Customization.run(products_to_save.values.map(&:id),products_to_update.values.map(&:id))
+    custom_specs_to_save = Customization.run(products_to_save.map(&:id),products_to_update.values.map(&:id))
     custom_specs_to_save.each do |spec_class, spec_values|
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
     end
     
     #Reindex sunspot
-    Sunspot.index(products_to_save.values)
+    Sunspot.index(products_to_save)
     Sunspot.index(products_to_update.values)
     Sunspot.commit
     
