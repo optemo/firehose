@@ -13,7 +13,7 @@ task :find_products_with_no_product_type => :environment do
   puts products_to_delete
   debugger
   sleep(1)
-+end
+end
 
 # Some product features are scraped by different rules in En vs. Fr
 # this code was not helpful in finding such products, but may be useful for something else
