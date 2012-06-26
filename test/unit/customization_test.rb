@@ -35,18 +35,16 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_equal 1, result.length, 'Only one usage type should be present for this sku'
     result.map(&:save) unless result.nil?
     
-    saved_spec = CatSpec.find_by_product_id_and_name(p1.id, RuleUsageType.feature_name)
-    assert_not_nil saved_spec, 'CatSpec should be present'
-    assert_equal "Everyday", saved_spec.value, 'Value saved should be as expected'
+    saved_spec = BinSpec.find_by_product_id_and_name(p1.id, "usageType_Everyday")
+    assert_not_nil saved_spec, 'BinSpec should be present'
     
     # for sku 10195304 that is in 2 categories (Microsoft Premium Collection PC and Ultrabook)
     p2 = create(:product, sku: '10195304')
-    #CatSpec.create(:product_id => p2.id, :name => 'product_type', :value => 'F28357')
     result = RuleUsageType.group_computation([p2.id])
     assert_equal 2, result.length, 'Two usage types should be present for this sku'
     result.map(&:save) unless result.nil?
-    first_saved_spec = CatSpec.find_by_product_id_and_name_and_value(p2.id, RuleUsageType.feature_name, "Microsoft+Premium+Collection+PC")
-    second_saved_spec = CatSpec.find_by_product_id_and_name_and_value(p2.id, RuleUsageType.feature_name, "Ultrabook")
+    first_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "MicrosoftPremiumCollectionPC")
+    second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "Ultrabook")
     assert_not_nil first_saved_spec, "Usage type should be saved as expected"
     assert_not_nil second_saved_spec, "Usage type should be saved as expected"
     
@@ -57,7 +55,7 @@ class CustomizationTest < ActiveSupport::TestCase
     #CatSpec.create(:product_id => p3.id, :name => 'product_type', :value => 'F23016')
     result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
     result.map(&:save) unless result.nil?
-    saved_spec = CatSpec.find_by_product_id_and_name(p3.id, RuleUsageType.feature_name)
+    saved_spec = BinSpec.find_by_product_id(p3.id)
     assert_nil saved_spec, "No usage type should be saved for a product not in any of the categories"
   end
   

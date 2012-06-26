@@ -9,9 +9,16 @@ class Customization
     #Require all the custom rules, so that they can be found by the subclasses file
     Dir["#{Rails.root}/app/models/custom_rules/*.rb"].each {|file| require file }
     
+    def my_subclasses
+      [RuleAverageSales, RuleBestSeller, RuleCapitalizeBrand, RuleComingSoon, RuleImageURLs, RuleNew, RuleOnSale, 
+        RuleTopViewed, RuleUsageType, RuleUtility]
+    end
+    
     def find_all_by_product_type(product_types)
       product_types = [product_types] unless product_types.class == Array
-      potentialclasses = Rails.env.test? ? subclasses.reject{|r|r == RuleUtility} : subclasses
+      # the subclasses call only returns the subclasses on its first call
+      #potentialclasses = Rails.env.test? ? subclasses.reject{|r|r == RuleUtility} : subclasses
+      potentialclasses = Rails.env.test? ? my_subclasses.reject{|r|r == RuleUtility} : my_subclasses
       #Don't test rule utility because it needs to be refactored and until then it won't pass the test
       potentialclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
     end

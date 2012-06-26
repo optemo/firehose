@@ -23,16 +23,32 @@ class FacetsController < ApplicationController
     type_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
     results = (type_rules.nil? or type_rules.empty?) ? [] : type_rules.map(&:local_featurename).uniq
     # add custom rules
-    custom_rules = Customization.find_all_by_product_type(parent_types).select{|sr| sr.feature_name != nil}
-    type_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical|Binary/}
-    results += (type_custom_rules.nil? or type_custom_rules.empty?) ? [] : type_custom_rules.map(&:feature_name).uniq
+    raw_custom_rules = Customization.find_all_by_product_type(parent_types).select{|sr| sr.feature_name != nil}
+    all_custom_rules = []
+    contcat_custom_rules = []
+    raw_custom_rules.each do |cr|
+      if cr.rule_type =~ /Continuous|Categorical|Binary/
+        to_add = []
+        if cr.singleton_class.method_defined?(:local_featureList)
+          to_add += cr.local_featureList
+        else
+          to_add << cr.feature_name
+        end
+        all_custom_rules += to_add
+        if cr.rule_type =~ /Continuous|Categorical/
+          contcat_custom_rules += to_add
+        end
+      end
+    end
+    
+    custom_rules = raw_custom_rules
+    results += all_custom_rules
     @sr_filters = results.nil? ? [] : results.sort
     @sr_compare = @sr_filters
     
     cont_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical/}  
-    cont_custom_rules = custom_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical/}
     results = (cont_rules.nil? or cont_rules.empty?) ? [] : cont_rules.map(&:local_featurename).uniq
-    results += (cont_custom_rules.nil? or cont_custom_rules.empty?) ? [] : cont_custom_rules.map(&:feature_name).uniq
+    results += contcat_custom_rules
     @sr_sortby = results.nil? ? [] : results.sort
     @categories_with_order = @sr_filters.select { |f| !getOrdering(f, @p_type).empty? }
   end
@@ -75,8 +91,8 @@ class FacetsController < ApplicationController
       product_path = Session.product_type_path.reverse
       i = 0
       f_type = nil
+      custom_rule = Customization.find_all_by_product_type(product_path).select { |cr| cr.feature_name == params[:name] or !params[:name][/#{cr.feature_name}/].blank? }
       
-      custom_rule = Customization.find_all_by_product_type(product_path).select{ |cr| cr.feature_name == params[:name]}
       unless custom_rule.empty?
         f_type = custom_rule.first.rule_type
       else
