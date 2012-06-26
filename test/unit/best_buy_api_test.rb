@@ -54,7 +54,6 @@ class ScrapingCorrectionTest < ActiveSupport::TestCase
     filter_value = "Ultrabook"
     all_results = {}
     BestBuyApi.get_filter_values(usage_type_node, filter_name).each { |value| all_results[value] = BestBuyApi.search_with_filter(usage_type_node, filter_name, value) }
-    pp all_results
     results_ultrabooks = all_results[filter_value]
     assert_not_equal results_ultrabooks.length, 0
   end

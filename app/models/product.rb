@@ -190,7 +190,6 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    
     raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]

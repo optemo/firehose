@@ -19,6 +19,7 @@ class ProductTest < ActiveSupport::TestCase
 
   test "Product and Spec import from BBY API" do
     sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription", rule_type: "Text")
+    sr = create(:scraping_rule, local_featurename: "product_type", remote_featurename: "category_id", rule_type: "Categorical", regex: '(.*)/B\1')
     Product.feed_update
     #Put the first product back in stock since it is defined in the fixtures
     Product.first.update_attribute(:instock, true)
@@ -30,6 +31,7 @@ class ProductTest < ActiveSupport::TestCase
   
   test "Product and Spec import for bundles from BBY API" do
     sr = create(:scraping_rule, local_featurename: "price", remote_featurename: "regularPrice", rule_type: "Continuous")
+    sr = create(:scraping_rule, local_featurename: "product_type", remote_featurename: "category_id", rule_type: "Categorical", regex: '(.*)/B\1')
     Product.feed_update
     #Put the first product back in stock since it is defined in the fixtures
     Product.first.update_attribute(:instock, true)
