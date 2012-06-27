@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120531182041) do
+ActiveRecord::Schema.define(:version => 20120627215455) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -100,6 +100,8 @@ ActiveRecord::Schema.define(:version => 20120531182041) do
     t.string  "product_type"
     t.string  "ui"
   end
+
+  add_index "facets", ["used_for"], :name => "index_facets_on_used_for"
 
   create_table "product_bundles", :force => true do |t|
     t.integer  "bundle_id"
