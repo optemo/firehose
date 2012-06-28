@@ -46,6 +46,11 @@ gem 'jstree-rails', :git => 'git://github.com/tristanm/jstree-rails.git'
 gem 'sunspot_rails', :git=> "git://github.com/wildoats/sunspot.git", :branch=>"optemo"
 gem 'ruby_core_source'
 gem 'progress_bar'
+# for amazon
+gem 'aws-sdk'
+#gem 'ruby-aws'
+gem 'ruby-aaws'
+gem 'nokogiri'
 
 group :production do
 #  gem 'newrelic_rpm'
