@@ -43,7 +43,7 @@ class ScrapingRule < ActiveRecord::Base
         unless raw_info.nil?
           #Insert category id spec
           raw_info["category_id"] = bbproduct.category
-
+          raise ValidationError, "No rules apply to this product #{bbproduct.id}" if rules_hash.empty?
           rules_hash.each do |r|
             next unless (!r[:rule].french && language == "English") || (r[:rule].french && language=="French")
             #Traverse the hash hierarchy
