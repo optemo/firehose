@@ -37,9 +37,6 @@ task :update => :environment do
     raise "Product type: #{ENV["product_type"]} not found"
   end
   
-  # This is required for matrix calculations relating to product siblings. See product_sibling.rb#get_relations
-  require 'warshall_algorithm.rb'
-  
   leaves.each do |node|
     #Run the update task for this leaf node
     Session.new node
