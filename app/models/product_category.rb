@@ -16,7 +16,7 @@ class ProductCategory < ActiveRecord::Base
     
     def multi_node(name,nodes,left,right,level = nil)
       nodes = Array(nodes) #Casts nodes into an array
-      CachingMemcached.cache_lookup("PCat#{name}#{nodes.join("-")}") do
+      CachingMemcached.cache_lookup("PCat#{name}#{nodes.join("-")}#{left}#{right}#{level}") do
         search = build_query(nodes,left,right,level)
         if search
           ProductCategory.where(block_given? ? yield(search) : search).map(&:product_type)
