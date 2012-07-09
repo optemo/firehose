@@ -15,7 +15,7 @@ class Product < ActiveRecord::Base
   
   searchable(auto_index: false) do
     text :title do
-      cat_specs.find_by_name("title").try(:value)
+      text_specs.find_by_name("title").try(:value)
     end
      
     text :description do
@@ -52,7 +52,16 @@ class Product < ActiveRecord::Base
     float :lr_utility, trie: true do
       cont_specs.find_by_name(:lr_utility).try(:value)
     end
-    autosuggest :product_name, :using => :instock?                  
+    autosuggest :all_searchable_data, :using => :get_title
+    autosuggest :product_instock_title, :using => :instock?
+  end
+  
+  def get_title
+    name = text_specs.find_by_name("title").try(:value)
+    if name.nil?  
+      name = "Unknown Title / Title Not In Database"
+    end
+    name
   end
   
   def first_ancestors
@@ -75,7 +84,7 @@ class Product < ActiveRecord::Base
   
   def instock?
     if (instock)
-      cat_specs.find_by_name("title").try(:value)
+      text_specs.find_by_name("title").try(:value)
     else
       false
     end
@@ -232,7 +241,7 @@ class Product < ActiveRecord::Base
   end
   
   def name
-    name = cat_specs.find_by_name("title").try(:value)
+    name = text_specs.find_by_name("title").try(:value)
     if name.nil?  
       name = "Unknown Name / Name Not In Database"
     end

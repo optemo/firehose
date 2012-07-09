@@ -14,6 +14,8 @@ def create_amazon_specs(item, id)
   # Create product_type (not a rule in scraping rules)
   c = CatSpec.find_or_initialize_by_product_id_and_name(id, 'product_type')
   c.update_attributes(value: item['product_type'])
+  c = ContSpec.find_or_initialize_by_product_id_and_name(id, 'saleprice')
+  c.update_attributes(value: item['saleprice'])
   # Get all the rules that apply to the parent category or this item's category
   for rule in ScrapingRule.find_by_sql("select * from `scraping_rules` where `product_type` in ('ADepartments', '#{item['product_type']}')")
     rule_type = CatSpec
@@ -39,19 +41,50 @@ def save(items)
   completed = 0
   products_to_save = []
   for item in items
-    puts "Uploading to database: #{completed*100/total_items}%"
     if item['title'] # Don't upload products without names
+      puts "Uploading to database: #{completed*100/total_items}%"
       # Make sure not to duplicate products - check if they're already in the table
       prod = Product.find_or_initialize_by_sku_and_retailer(item['sku'], retailer)
       prod.update_attributes(instock: true)
+      
       create_amazon_specs(item, Product.find_by_sku_and_retailer(item['sku'], retailer).id)
       products_to_save << prod
+      completed += 1
     end
-    completed += 1
   end
+  
+  #Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
+  
+  # translations.each do |locale, key, value|
+  #   I18n.backend.store_translations(locale, {key => value}, {escape: false})
+  # end
+  # 
+  # specs_to_save.each do |s_class, v|
+  #   s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value] # Bulk insert/update for efficiency
+  # end
+  
+  puts 'running custom rules and equivalences'
+  # save equivalences
+  categories = ['Acamera_amazon', 'Atv_amazon', 'Amovie_amazon', 'Asoftware_amazon']
+  
+  categories.each do |category|
+    Session.new category
+    custom_specs_to_save = Customization.run(products_to_save.map(&:id))
+    puts custom_specs_to_save
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
+    end
+    Equivalence.fill
+  end
+  
+  puts 'indexing products to sunspot'
   #Reindex sunspot
+  puts Sunspot.search(Product).total
+  
   Sunspot.index(products_to_save)
   Sunspot.commit
+  
+  puts Sunspot.search(Product).total
   
   puts "Save complete: #{Product.where(retailer: retailer).length} products saved"
 end
@@ -85,7 +118,6 @@ end
 def scrape(product_type, string_array)
 # Uses the scraping rules to gather all data from the Amazon string array
   scraping_rules = get_scraping_rules(product_type)
-  
   i = 0
   item_index = -1
   items = []
@@ -99,6 +131,16 @@ def scrape(product_type, string_array)
         items[item_index]['product_type'] = product_type
         # Fix formatting
         items[item_index]['screen_type'].upcase! if items[item_index]['screen_type'] && items[item_index]['screen_type'] !~ /plasma/i
+        items[item_index]['price'] = items[item_index]['price'].to_i/100.0 if items[item_index]['price']
+        items[item_index]['price_new'] = items[item_index]['price_new'].to_i/100.0 if items[item_index]['price_new']
+        items[item_index]['price_used'] = items[item_index]['price_used'].to_i/100.0 if items[item_index]['price_used']
+        if items[item_index]['price_new']
+          items[item_index]['saleprice'] = items[item_index]['price_new']
+          items[item_index]['price'] = items[item_index]['price_new'] unless items[item_index]['price']
+        elsif items[item_index]['price_used']
+          items[item_index]['saleprice'] = items[item_index]['price_used']
+          items[item_index]['price'] = items[item_index]['price_used'] unless items[item_index]['price']
+        end
         
         # Add default values where necessary
         items[item_index]['image_url_t'] = 'noimage' if items[item_index]['image_url_t'].nil?
@@ -231,6 +273,5 @@ task :scrape_amazon_data => :environment do |t,args|
   end
 
   puts "Download complete: #{items.length} products returned"
-  
   save(items)
 end
