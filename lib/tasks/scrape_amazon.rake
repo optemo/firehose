@@ -35,6 +35,7 @@ end
 
 def create_amazon_specs(item, id)
 # Creates all specs for a given item
+
   make_cat_spec(id, 'product_type', item['product_type'])
   make_cat_spec(id, 'amazon_sku', item['amazon_sku']) if item['amazon_sku']
   make_cat_spec(id, 'brand', item['brand']) if item['brand']
@@ -47,13 +48,21 @@ def create_amazon_specs(item, id)
   make_cat_spec(id, 'screen_type', item['screen_type']) if item['screen_type']
   
   make_cat_spec(id, 'hd_video', item['hd_video']) if item['hd_video']
-  make_cat_spec(id, 'colour', item['colour']) if item['colour']
+  make_cat_spec(id, 'color', item['color']) if item['color']
   
   make_cat_spec(id, 'app_type', item['app_type']) if item['app_type']
   make_cat_spec(id, 'platform', item['platform']) if item['platform']
   
-  make_cont_spec(id, 'price_new', item['price_new']) if item['price_new']
-  make_cont_spec(id, 'price_used', item['price_used']) if item['price_used']
+  make_cont_spec(id, 'price', item['price'].to_i / 100.0) if item['price']
+  make_cont_spec(id, 'price_new', item['price_new'].to_i / 100.0) if item['price_new']
+  make_cont_spec(id, 'price_used', item['price_used'].to_i / 100.0) if item['price_used']
+  if item['price_new']
+    make_cont_spec(id, 'saleprice', item['price_new'].to_i / 100.0)
+    make_cont_spec(id, 'price', item['price_new'].to_i / 100.0) unless item['price']
+  elsif item['price_used']
+    make_cont_spec(id, 'saleprice', item['price_used'].to_i / 100.0)
+    make_cont_spec(id, 'price', item['price_used'].to_i / 100.0) unless item['price']
+  end
   
   make_cont_spec(id, 'size', item['size']) if item['size']
   make_cont_spec(id, 'ref_rate', item['ref_rate']) if item['ref_rate']
@@ -65,6 +74,7 @@ def create_amazon_specs(item, id)
   
   make_text_spec(id, 'title', item['title'])
   make_text_spec(id, 'image_url_t', item['image_url_t'])
+  make_text_spec(id, 'thumbnail_url', item['image_url_m'])
   make_text_spec(id, 'image_url_s', item['image_url_s'])
   make_text_spec(id, 'image_url_m', item['image_url_m'])
   make_text_spec(id, 'image_url_l', item['image_url_l'])
@@ -77,19 +87,50 @@ def save(items)
   completed = 0
   products_to_save = []
   for item in items
-    puts "Uploading to database: #{completed*100/total_items}%"
     if item['title'] # Don't upload products without names
+      puts "Uploading to database: #{completed*100/total_items}%"
       # Make sure not to duplicate products - check if they're already in the table
       prod = Product.find_or_initialize_by_sku_and_retailer(item['sku'], retailer)
       prod.update_attributes(instock: true)
+      
       create_amazon_specs(item, Product.find_by_sku_and_retailer(item['sku'], retailer).id)
       products_to_save << prod
+      completed += 1
     end
-    completed += 1
   end
+  
+  #Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
+  
+  # translations.each do |locale, key, value|
+  #   I18n.backend.store_translations(locale, {key => value}, {escape: false})
+  # end
+  # 
+  # specs_to_save.each do |s_class, v|
+  #   s_class.import v, :on_duplicate_key_update=>[:product_id, :name, :value] # Bulk insert/update for efficiency
+  # end
+  
+  puts 'running custom rules and equivalences'
+  # save equivalences
+  categories = ['Acamera_amazon', 'Atv_amazon', 'Amovie_amazon', 'Asoftware_amazon']
+  
+  categories.each do |category|
+    Session.new category
+    custom_specs_to_save = Customization.run(products_to_save.map(&:id))
+    puts custom_specs_to_save
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
+    end
+    Equivalence.fill
+  end
+  
+  puts 'indexing products to sunspot'
   #Reindex sunspot
+  puts Sunspot.search(Product).total
+  
   Sunspot.index(products_to_save)
   Sunspot.commit
+  
+  puts Sunspot.search(Product).total
   
   puts "Save complete: #{Product.where(retailer: retailer).length} products saved"
 end
@@ -123,7 +164,6 @@ end
 def scrape(product_type, string_array)
 # Uses the scraping rules to gather all data from the Amazon string array
   scraping_rules = get_scraping_rules(product_type)
-  
   i = 0
   item_index = -1
   items = []
@@ -217,7 +257,7 @@ task :scrape_amazon_data => :environment do |t,args|
                       ['Amovie_amazon', 'Video', {'Title' => 'Indiana Jones'}],
                       ['Amovie_amazon', 'Video', {'Title' => 'King Kong'}],
                       ['Amovie_amazon', 'Video', {'Title' => 'Looney Toons'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 1080p'}],
+                                            ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 1080p'}],
                       ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 720p'}],
                       ['Atv_amazon', 'Electronics', {'Manufacturer' => 'ViewSonic', 'Keywords' => 'tv'}],
                       ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'tv 1080p'}],
@@ -269,6 +309,5 @@ task :scrape_amazon_data => :environment do |t,args|
   end
 
   puts "Download complete: #{items.length} products returned"
-  
   save(items)
 end
