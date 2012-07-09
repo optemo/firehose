@@ -8,7 +8,7 @@ class BestBuyApi
            "F" => "http://www.futureshop.ca/api/v2"}
     DEBUG = false
     
-    #Find BestBuy products
+    # Get BestBuy product info, given product ID.
     def product_search(id, includeall = true, english = true)
       q = english ? {} : {:lang => "fr"}
       q[:id] = id
@@ -127,6 +127,7 @@ class BestBuyApi
       ids
     end
     
+    # Gets products for given category id. It returns an array of BBproduct instances, which hold the sku and the category id.
     def category_ids(id)
       #This can accept an array or a single id
       id = [id] unless id.class == Array

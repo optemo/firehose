@@ -98,6 +98,7 @@ class Product < ActiveRecord::Base
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
+  # Update the specs for each product under a given product type (as specified by Session.product_type).
   def self.feed_update
     raise ValidationError unless Session.product_type
     
