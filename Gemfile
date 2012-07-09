@@ -21,6 +21,11 @@ gem 'rvm-capistrano'
 # gem 'sqlite3-ruby', :require => 'sqlite3'
 # gem 'aws-s3', :require => 'aws/s3'
 
+group :development do
+   gem 'sunspot_solr', :git=> "git://github.com/wildoats/sunspot.git", :branch=>"optemo" # optional pre-packaged Solr distribution for use in development
+   #gem 'sunspot_solr', :git=> "git://github.com/sunspot/sunspot.git" # optional pre-packaged Solr distribution for use in development
+end
+
 # Bundle gems for the local environment. Make sure to
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
