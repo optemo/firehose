@@ -9,65 +9,27 @@ def search_for(search_type, params)
   string_array = resp.item_search_response[0].to_s.gsub!("\n", '|').split('|')
 end
 
-def make_cat_spec(id, name, value)
-# Creates an entry in the cat_specs table
-  c = CatSpec.find_or_initialize_by_product_id_and_name(id, name)
-  c.update_attributes(value: value)
-end
-
-def make_cont_spec(id, name, value)
-# Creates an entry in the cont_specs table
-  c = ContSpec.find_or_initialize_by_product_id_and_name(id, name)
-  c.update_attributes(value: value)
-end
-
-def make_bin_spec(id, name)
-# Creates an entry in the bin_specs table
-  b = BinSpec.find_or_initialize_by_product_id_and_name(id, name)
-  b.update_attributes(value: true)  
-end
-
-def make_text_spec(id, name, value)
-# Creates an entry in the text_specs table
-  t = TextSpec.find_or_initialize_by_product_id_and_name(id, name)
-  t.update_attributes(value: value)
-end
-
 def create_amazon_specs(item, id)
 # Creates all specs for a given item
-  make_cat_spec(id, 'product_type', item['product_type'])
-  make_cat_spec(id, 'amazon_sku', item['amazon_sku']) if item['amazon_sku']
-  make_cat_spec(id, 'brand', item['brand']) if item['brand']
-  
-  make_cat_spec(id, 'mpaa_rating', item['mpaa_rating']) if item['mpaa_rating']
-  make_cat_spec(id, 'format', item['format']) if item['format']
-  make_cat_spec(id, 'language', item['language']) if item['language']
-  
-  make_cat_spec(id, 'resolution', item['resolution']) if item['resolution']
-  make_cat_spec(id, 'screen_type', item['screen_type']) if item['screen_type']
-  
-  make_cat_spec(id, 'hd_video', item['hd_video']) if item['hd_video']
-  make_cat_spec(id, 'colour', item['colour']) if item['colour']
-  
-  make_cat_spec(id, 'app_type', item['app_type']) if item['app_type']
-  make_cat_spec(id, 'platform', item['platform']) if item['platform']
-  
-  make_cont_spec(id, 'price_new', item['price_new']) if item['price_new']
-  make_cont_spec(id, 'price_used', item['price_used']) if item['price_used']
-  
-  make_cont_spec(id, 'size', item['size']) if item['size']
-  make_cont_spec(id, 'ref_rate', item['ref_rate']) if item['ref_rate']
-  
-  make_cont_spec(id, 'mp', item['mp']) if item['mp']
-  
-  make_bin_spec(id, 'hdmi') if item['hdmi']
-  make_bin_spec(id, '3d') if item['3d']
-  
-  make_text_spec(id, 'title', item['title'])
-  make_text_spec(id, 'image_url_t', item['image_url_t'])
-  make_text_spec(id, 'image_url_s', item['image_url_s'])
-  make_text_spec(id, 'image_url_m', item['image_url_m'])
-  make_text_spec(id, 'image_url_l', item['image_url_l'])
+  # Create product_type (not a rule in scraping rules)
+  c = CatSpec.find_or_initialize_by_product_id_and_name(id, 'product_type')
+  c.update_attributes(value: item['product_type'])
+  # Get all the rules that apply to the parent category or this item's category
+  for rule in ScrapingRule.find_by_sql("select * from `scraping_rules` where `product_type` in ('ADepartments', '#{item['product_type']}')")
+    rule_type = CatSpec
+    case rule.rule_type
+    when 'Continuous'
+      rule_type = ContSpec
+    when 'Binary'
+      rule_type = BinSpec
+    when 'Text'
+      rule_type = TextSpec
+    end
+    if item[rule.local_featurename]
+      spec = rule_type.find_or_initialize_by_product_id_and_name(id, rule.local_featurename)
+      spec.update_attributes(value: item[rule.local_featurename])\
+    end
+  end
 end
 
 def save(items)
