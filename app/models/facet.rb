@@ -71,17 +71,22 @@ class Facet < ActiveRecord::Base
        
        if used_for == 'filter'
          cleared = vals[6]
+         
+         # save the ordering of the categories, if there is a list of categories as one of the input params
          current_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name)
          categories = vals[7..-1]
-         ordering_to_delete = current_order.select{ |p| !categories.include?(p.name) }
-         # save the ordering of the categories, if there is a list of categories in the params
-         ordering_to_delete.each {|instance| instance.destroy}
+         unless categories.empty?
+           # delete the existing order of the categories not present in the new order
+           ordering_to_delete = current_order.select{ |p| !categories.include?(p.name) }
+           ordering_to_delete.each {|instance| instance.destroy}
+         end
          categories.each_with_index do |name, index|
            fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, facet_name, product_type, 'ordering')
            fn.value = index
            fn.active = true
            fn.save
          end
+         # delete the existing ordering if the order was manually cleared
          if cleared == "true"
              current_order.each {|instance| instance.destroy}
          end
@@ -100,7 +105,7 @@ class Facet < ActiveRecord::Base
              product_type => {
                used_for => {
                  fn[:name] + suffix => { 'unit' => vals[4] }
-               }
+               } 
              })
           end
        end

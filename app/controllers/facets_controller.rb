@@ -54,7 +54,7 @@ class FacetsController < ApplicationController
   end
   
   def getOrdering(name, product_type)
-    results = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, name)
+    results = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, name, :order => 'value')
   end
   
   def create
@@ -68,8 +68,7 @@ class FacetsController < ApplicationController
   def edit
     @product_type = params[:product_type_id]
     @facet_name = params[:id]
-    existing_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', @product_type, @facet_name)
-    
+    existing_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', @product_type, @facet_name, :order => 'value')
     unless existing_order.empty?
       @categories = existing_order.map(&:name)
     else
