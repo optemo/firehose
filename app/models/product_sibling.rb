@@ -4,8 +4,10 @@ class ProductSibling < ActiveRecord::Base
     siblings_activerecords = []
     siblings_unchanged = []
     TextSpec.joins("INNER JOIN `cat_specs` ON `text_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type",value: Session.product_type_leaves}, text_specs: {name: "relations"}).each do |record|
+      #Delete old siblings
+      ProductSibling.delete_all(product_id: record.product_id)
+      ProductSibling.delete_all(sibling_id: record.product_id)
       data = JSON.parse(record.value.gsub("=>",":"))
-      
       if data && !data.empty?
         p_id = record.product_id
         skus = []
@@ -26,9 +28,6 @@ class ProductSibling < ActiveRecord::Base
             siblings_unchanged << ps
           end
         end
-      else
-        #Delete old siblings
-        ProductSibling.delete_all(product_id: record.product_id)
       end  
     end
     # make sure color relationship is symmetric (R(a,b) => R(b,a))
@@ -71,7 +70,7 @@ class ProductSibling < ActiveRecord::Base
     
     # (3) Run algorithm
     pathMatrix = Warshall.new(adjMatrix).getPathMatrix
-
+    
     siblings_to_create = []
     # (4) Transform back to sibling relationships
     for i in 0...dim do
