@@ -12,9 +12,7 @@ class ProductSibling < ActiveRecord::Base
         p_id = record.product_id
         skus = []
         isB = BinSpec.find_by_product_id_and_name(p_id, 'isBundle')
-        data.each do |sk|
-          skus<<sk["sku"] if sk["type"]=="Variant" && (!isB || (sk["sku"].match('B'))) && (!sk["sku"].match('B') || isB)
-        end # AdditionalMedia -- has the other image urls. Save these other small image urls instead of colors.
+        data.each{|sk| skus<<sk["sku"] if sk["type"]=="Variant" && (!isB || sk["sku"].match('B') && (!sk["sku"].match('B') || isB))} # AdditionalMedia -- has the other image urls. Save these other small image urls instead of colors.
         #Check if the product is in our database
         sibs = skus.map{|sku|Product.find_by_sku_and_retailer(sku, Session.retailer).try(:id)}.compact
         sibs.each do |sib_id|
@@ -29,7 +27,7 @@ class ProductSibling < ActiveRecord::Base
           end
         end
       end  
-    end
+    end    
     # make sure color relationship is symmetric (R(a,b) => R(b,a))
     (siblings_unchanged + siblings_activerecords).each do |p|
        unless (siblings_unchanged + siblings_activerecords).inject(false){|res,sib| res || (sib.product_id == p.sibling_id  && sib.sibling_id==p.product_id) }
@@ -78,14 +76,7 @@ class ProductSibling < ActiveRecord::Base
         siblings_to_create << ProductSibling.new({:product_id => keys[i], :sibling_id => keys[j]}) if pathMatrix[i][j]
       end
     end
-
-    # (5) Fill out activerecords
-    siblings_to_create = siblings_to_create.select{|s| s.product_id != s.sibling_id}
-    siblings_to_create.each do |s| 
-      s.value = CatSpec.find_by_product_id_and_name(s.sibling_id,"color").try(:value)
-      s.name = "color"
-    end
-
-    ProductSibling.import(siblings_to_create)
+    #Write the new relations
+    ProductSibling.import(siblings_activerecords)
   end
 end

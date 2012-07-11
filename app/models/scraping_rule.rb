@@ -11,6 +11,15 @@ class ScrapingRule < ActiveRecord::Base
 
   REGEXES = {"any" => ".*", "price" => "\d*(\.\d+)?", "imgsurl" => '^(.*)/http://www.bestbuy.ca\1', "imgmurl" => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'imglurl' => '^(.*)55x55(.*)/http://www.bestbuy.ca\1100x100\2', 'Not Avaliable' =>'(Information Not Available)|(Not Applicable)/0' }
   
+  # Get list of candidate scraping rules to be applied for specified array of BBproduct instances.
+  # Also gathers translations for categorical feature attributes.
+  # Returns hash of {translations, candidates, raw}.
+  #   - translations: Array of arrays of form ['en'/'fr', key, parsed]. Key has form
+  #                   "cat_option.<retailer>.<local feature name>.<English version of parsed value>". Duplicates entries may be returned.
+  #                   It is also possible for multiple French translations to be returned with the same key.
+  #   - candidates: Candidate scraping rules to be applied for the products provided. Multiple candidates may be returned for the same local 
+  #                 feature, the decision about which candidate to apply in such cases is made later.
+  #   - raw: Raw data returned by BestBuy API for the *first* product in the list provided.
   def self.scrape(ids,ret_raw = false,rules = [], multi = nil, to_show = false) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
     candidates = []
@@ -21,8 +30,10 @@ class ScrapingRule < ActiveRecord::Base
     corrections = ScrapingCorrection.all
     ids.each do |bbproduct|
       raw_return = nil
+      # We acquire translations of feature values for each product, duplicates are filtered later.
       en_trans = {}
       fr_trans = {}
+      # For each product, we query both English and French product information.
       ["English","French"].each do |language|
         begin
           raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
@@ -102,7 +113,8 @@ class ScrapingRule < ActiveRecord::Base
               end
             end
             if !(r[:rule].bilingual && !to_show && r[:rule].french) #Don't save data twice, so don't save it for french
-              # Save the new candidate
+              # Save the new candidate - if multi is true, we may save multiple candidates for the same local feature.
+              # We will choose the one that actually gets applied later.
               candidates << Candidate.new(
                 parsed: (r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : (parsed.nil? ? nil : CGI::escape(parsed.downcase))),
                 raw: raw.to_s,
