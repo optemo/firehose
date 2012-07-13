@@ -2,10 +2,11 @@ require "sunspot"
 require 'sunspot_autocomplete'
 
 class ProductCategory < ActiveRecord::Base
-  # NOTE: ADDED this searchable block AFTER reindexing
   searchable do
-    autosuggest :all_searchable_data, using: :find_product_category
-    autosuggest :product_category, using: :find_product_category
+    text :product_category do
+      I18n.t "#{product_type}.name"
+    end
+    autosuggest :all_searchable_data, using: :get_category
   end
   
   def find_product_category

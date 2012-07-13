@@ -13,7 +13,7 @@ task :upload_amazon_rules => :environment do |t, args|
   
   rules = []
 
-  rules << ['title', 'title = ', '(.*title = )(.*)/\2', 'ADepartments', 'Categorical']
+  rules << ['title', 'title = ', '(.*title = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['sku', 'asin = ', '(.*asin = )(.*)/\2', 'ADepartments', 'Categorical']
   rules << ['amazon_sku', 'sku = ', '(.*sku = )(.*)/\2', 'ADepartments', 'Categorical']
   rules << ['price', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
@@ -68,7 +68,7 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['brand', '(brand|publisher) = ', '2k/2K', 'Asoftware_amazon', 'Categorical']
   rules << ['brand', '(brand|publisher) = ', 'nuance/Nuance Communications', 'Asoftware_amazon', 'Categorical']
   rules << ['brand', '(brand|publisher) = ', 'encore/Encore', 'Asoftware_amazon', 'Categorical']
-  rules << ['title', 'title = ', '(.*title = )(.*\s\d+)([-\s][Ii]nch(es)?|\")(.*)/\2"\5', 'Atv_amazon', 'Categorical']
+  rules << ['title', 'title = ', '(.*title = )(.*\s\d+)([-\s][Ii]nch(es)?|\")(.*)/\2"\5', 'Atv_amazon', 'Text']
   rules << ['size', 'title = ', '(.*title =.*\s)(\d+)(([-\s][Ii]nch(es)?|\"|[Ii][Nn] ).*)/\2', 'Atv_amazon', 'Continuous']
   rules << ['format', 'product_group = ', '(.*product_group = )(.*)/\2', 'Amovie_amazon', 'Categorical']
   rules << ['mpaa_rating', 'audience_rating = ', '(.*audience_rating = )([\w\+-]+)(\s\(.*\))?/\2', 'Amovie_amazon', 'Categorical']

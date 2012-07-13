@@ -33,18 +33,20 @@ class RuleUtility < Customization
       end
       feature_types[non_default] = lr_features unless lr_features.empty?
       puts 'adding lr utility for ' + Session.product_type_path.to_s unless lr_features.empty?
-      
+      debugger
       #compute coefficients for the default rule-based utility
       feature_types[default].each do |f|
         max= 0
         unless (f.name == 'onsale_factor' || f.name == 'displayDate' || f.name =="isAdvertised")  
          model = Customization.rule_type_to_class(f.feature_type)
+         debugger if f.name == 'averagePageviews'
          max = model.maximum(:value, :conditions => ['name = ?', f.name])
          f.value = max.to_f if max
         else
           f.value = 1 #max value for onsale_factor and displayDate and isAdvertised
         end
       end
+      
       feature_types[default] = calculate_default_coefs(feature_types[default])
       
       #check for brand if there is any non-default utility calculation
@@ -174,12 +176,14 @@ class RuleUtility < Customization
   end
   
   def self.calculate_default_coefs (features)
-    max_f = Hash.new  
+    debugger
+    max_f = Hash.new
     hash_f = Hash.new
     features.each do |ele| 
       max_f[ele.name] = ele.value
       hash_f[ele.name] = ele.value
-    end 
+    end
+    debugger
       hash_f['saleprice'] = (10/(max_f['saleprice']||1)) 
       hash_f['averagePageviews'] = ((max_f['saleprice']||1)+2) * (hash_f['saleprice'])
       hash_f['averageSales'] = ((max_f['averagePageviews']||1)+2) * hash_f['averagePageviews']
