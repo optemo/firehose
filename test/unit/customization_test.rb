@@ -29,7 +29,7 @@ class CustomizationTest < ActiveSupport::TestCase
   test "Usage Type Rule" do
     # for an sku that's in category x, run the rule computation, check that there's a spec created for that category and that product
     # 10206581 is in everyday but no other category
-    p1 = create(:product, sku: '10206581')
+    p1 = create(:product, sku: '10208202')
     #CatSpec.create(:product_id => p1.id, :name => 'product_type', :value => 'F28357')
     result = RuleUsageType.group_computation([p1.id])
     assert_equal 1, result.length, 'Only one usage type should be present for this sku'
