@@ -100,8 +100,6 @@ class RuleUtility < Customization
              end
            end
            feature_value = (feature_value + 1) if (feature_value > 0 && key == default)
-           puts f.name if feature_value == 750.99
-           puts "feature_value(#{feature_value})*f.value(#{f.value})=#{feature_value * f.value}"
            utility << (feature_value* (f.value))     
          end
         
@@ -153,7 +151,7 @@ class RuleUtility < Customization
     end
     cont_activerecords
   end
-  def self.calculateFactor_sale(fVal1, fVal2)
+  def self.calculateFactor_sale(fVal1, fVal2) 
      fVal1 > fVal2 ? ((fVal1-fVal2)/fVal1) : 0
   end
   
@@ -182,17 +180,17 @@ class RuleUtility < Customization
       max_f[ele.name] = ele.value
       hash_f[ele.name] = ele.value
     end 
-    hash_f['saleprice'] = (10/(max_f['saleprice']||1))
-    hash_f['averagePageviews'] = ((max_f['saleprice']||1)+2) * (hash_f['saleprice'])
-    hash_f['averageSales'] = ((max_f['averagePageviews']||1)+2) * hash_f['averagePageviews']
-    hash_f['displayDate'] =  ((max_f['averageSales']||1)+2) * hash_f['averageSales']
-    hash_f['onsale_factor'] = ((max_f['displayDate']||1)+2)*hash_f['displayDate'] # max of displayDate is 1
-    hash_f['isAdvertised'] = ((max_f['onsale_factor']||1)+2)*hash_f['onsale_factor'] # max of onsale_factor is 1
- 
-    features.each do |f|
-      f.value = hash_f[f.name]
-     # puts "#{f.name} f.value #{f.value}"
-    end
+      hash_f['saleprice'] = (10/(max_f['saleprice']||1)) 
+      hash_f['averagePageviews'] = ((max_f['saleprice']||1)+2) * (hash_f['saleprice'])
+      hash_f['averageSales'] = ((max_f['averagePageviews']||1)+2) * hash_f['averagePageviews']
+      hash_f['displayDate'] =  ((max_f['averageSales']||1)+2) * hash_f['averageSales'] 
+      hash_f['onsale_factor'] = ((max_f['displayDate']||1)+2)*hash_f['displayDate'] # max of displayDate is 1
+      hash_f['isAdvertised'] = ((max_f['onsale_factor']||1)+2)*hash_f['onsale_factor'] # max of onsale_factor is 1    
+   
+      features.each do |f|
+        f.value = hash_f[f.name]
+       # puts "#{f.name} f.value #{f.value}"
+      end
     features
   end
     
