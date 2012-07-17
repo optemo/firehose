@@ -98,17 +98,30 @@ class Product < ActiveRecord::Base
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
-  # Update the specs for each product under a given product type (as specified by Session.product_type).
-  def self.feed_update
-    raise ValidationError unless Session.product_type
-    
+  # Returns the list of BBproduct instances for the specified product category.
+  def self.get_products(product_type)
+    products = []
     begin
-      product_skus = BestBuyApi.category_ids(Session.product_type)
+      products = BestBuyApi.category_ids(product_type)
     rescue BestBuyApi::TimeoutError
-      puts "Timeout"
+      puts "Timeout calling BestBuyApi.category_ids"
       sleep 30
       retry
     end
+    products
+  end
+
+  # Update the specs for each product under the current product category (as specified by Session.product_type).
+  #
+  # product_skus - Optional list of BBproduct instances to be updated. If this parameter is nil, the list 
+  #                of products for the current product category will be retrieved using the BestBuyApi.
+  def self.feed_update(product_skus = nil)
+    raise ValidationError unless Session.product_type
+    
+    if product_skus.nil?
+      product_skus = get_products(Session.product_type)
+    end
+
     #product_skus.uniq!{|a|a.id} #Uniqueness check
     
     products_to_update = {}
@@ -192,8 +205,11 @@ class Product < ActiveRecord::Base
       end
     end
     raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
+    # Select products that have actually been modified
+    modified_products = products_to_update.values.select(&:changed?) 
+
     # Bulk insert/update for efficiency
-    Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
+    Product.import modified_products, :on_duplicate_key_update=>[:instock]
     
     translations.each do |locale, key, value|
       I18n.backend.store_translations(locale, {key => value}, {escape: false})
@@ -221,7 +237,7 @@ class Product < ActiveRecord::Base
     
     #Reindex sunspot
     Sunspot.index(products_to_save)
-    Sunspot.index(products_to_update.values)
+    Sunspot.index(modified_products)
     Sunspot.commit
     
     #This assumes Firehose is running with the same memcache as the Discovery Platform

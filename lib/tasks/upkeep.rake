@@ -1,3 +1,5 @@
+require 'tempfile'
+require 'yaml'
 
 #Here is where general upkeep scripts are
 desc "This is for testing only"
@@ -55,6 +57,120 @@ task :update => :environment do
   Search.cleanup_history_data(7)
   #Report problem with script if it finishes too fast
   `touch tmp/r_updateproblem.txt` if (Time.now - start < 1.minute)
+end
+
+# This task takes a product category or list of product categories as an argument.
+# It determines the leaf nodes for these categories, and spawns subprocesses which 
+# execute the update_leaf task for each of these leaves in parallel.
+#
+# Use commas to separate multiple product categories, for example:
+#   rake update product_type=B20218,B29157,F1002
+desc "Update product data in parallel"
+task :update_parallel => :environment do
+  DEFAULT_CATEGORY = "B20218"
+
+  product_types = [DEFAULT_CATEGORY]
+  
+  if ENV.include?("product_type")
+    product_types = ENV["product_type"].split(/,/)
+  else 
+    puts "update_parallel: No product_type command-line argument, using default category " + DEFAULT_CATEGORY
+  end
+  puts "update_parallel started at " + Time.now.to_s + ", categories = " + product_types.to_s
+  
+  leaves = []
+  product_types.each do |type|
+    some_leaves = ProductCategory.get_leaves(type)
+    if some_leaves.nil? || some_leaves.empty?
+      puts "No leaves found for category " + type
+    else
+      leaves.concat(some_leaves)
+    end
+  end 
+  
+  if leaves.empty?
+    raise "No leaf nodes found for specified categories"
+  end
+
+  puts 'Found leaf nodes: ' + leaves.to_s
+
+  start = Time.now
+  # We first obtain the product list for each leaf category in series. Doing this step in parallel
+  # seems to result in strange behavior for Best Buy's search API call.
+  #
+  # We store the product list for each leaf category in a temporary file and pass the path 
+  # to the temp file to the child process responsible for scraping the category.
+  #
+  # We store temp file references in an array, to ensure they do not get garbage collected before 
+  # child processes have a chance to read them (the temp files are deleted when they are garbage collected).
+  temp_files = []
+  curr_child_process_count = 0
+  spawned_processes = 0
+  leaves.each do |node|
+    Session.new node
+    products = Product.get_products(node)
+
+    # Save product information to a temporary file
+    temp_file = Tempfile.open("category_products") { |temp_file|
+      YAML.dump(products, temp_file)
+      temp_file
+    }
+    temp_files << temp_file
+
+    if curr_child_process_count >= 10 
+      Process.wait
+      curr_child_process_count -= 1
+    end
+    Process.spawn("bundle exec rake update_leaf product_type=#{node} file=#{temp_file.path}")
+    curr_child_process_count += 1
+    spawned_processes += 1
+    puts "Spawned rake task for node " + node + " (" + spawned_processes.to_s + "/" + leaves.size.to_s + ")"
+  end
+                  
+  puts "Finished spawning child processes"
+
+  # Wait for all child processes to finish
+  Process.waitall
+
+  product_types.each do |product_type|
+    Session.new product_type #Reset session
+    #clean up inactive scraping rules not used any more
+    Facet.check_active
+  end
+
+  Search.cleanup_history_data(7)
+
+  #Report problem with script if it finishes too fast
+  `touch tmp/r_updateproblem.txt` if (Time.now - start < 1.minute)
+
+  puts "update_parallel finished at " + Time.now.to_s
+end
+
+# This task is not intended to be invoked directly. Instead it is invoked by 
+# update_parallel for each leaf node under a category.
+desc "Update data for a single leaf node"
+task :update_leaf => :environment do
+  
+  unless ENV.include?("product_type") && ENV.include?("file")
+    raise "usage: rake update_leaf product_type=? file=?"
+  end
+  
+  node = ENV["product_type"]
+  file_path = ENV["file"]
+
+  # Force BBproduct class to be auto-loaded.
+  BBproduct.new
+  products = YAML.load_file(file_path)
+
+  Session.new node
+  begin 
+    puts "update_leaf scraping " + products.size.to_s + " products for category " + node
+    Product.feed_update(products)
+    puts 'update_leaf finished scraping category ' + node
+  rescue BestBuyApi::RequestError => error
+    puts 'update_leaf got the following error in scraping category ' + node + ': '
+    puts error.to_s
+  end
 end
 
 namespace :cache do
