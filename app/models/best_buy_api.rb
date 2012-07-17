@@ -175,10 +175,10 @@ class BestBuyApi
     end
 
     def cached_request(type, params = {})
-      #Data is only valid for 1 hour
-      CachingMemcached.cache_lookup(type + params.to_s + Session.retailer + Time.now.strftime("%Y-%m-%d-%H")) do
+      # 1-hour cache disabled for now, as this will interfere with more frequent runs of update task
+      #CachingMemcached.cache_lookup(type + params.to_s + Session.retailer + Time.now.strftime("%Y-%m-%d-%H")) do
         send_request(type, params)
-      end
+      #end
     end
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.

@@ -1,6 +1,3 @@
-require 'tempfile'
-require 'yaml'
-
 #Here is where general upkeep scripts are
 desc "This is for testing only"
 task :upkeep => :environment do
@@ -64,7 +61,7 @@ end
 # execute the update_leaf task for each of these leaves in parallel.
 #
 # Use commas to separate multiple product categories, for example:
-#   rake update product_type=B20218,B29157,F1002
+#   rake update_parallel product_type=B20218,B29157,F1002
 desc "Update product data in parallel"
 task :update_parallel => :environment do
   DEFAULT_CATEGORY = "B20218"
@@ -111,7 +108,7 @@ task :update_parallel => :environment do
     products = Product.get_products(node)
 
     # Save product information to a temporary file
-    temp_file = Tempfile.open("category_products") { |temp_file|
+    temp_file = Tempfile.open("category_products", Rails.root.join('tmp')) { |temp_file|
       YAML.dump(products, temp_file)
       temp_file
     }
