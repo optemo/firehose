@@ -16,14 +16,14 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['title', 'title = ', '(.*title = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['sku', 'asin = ', '(.*asin = )(.*)/\2', 'ADepartments', 'Categorical']
   rules << ['amazon_sku', 'sku = ', '(.*sku = )(.*)/\2', 'ADepartments', 'Categorical']
-  rules << ['price', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
+  rules << ['listprice', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['price_new', 'lowest_new_price = amount = ', '(.*lowest_new_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['price_used', 'lowest_used_price = amount = ', '(.*lowest_used_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['image_url_t', 'thumbnail_image = url = ', '(.*thumbnail_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_s', 'tiny_image = url = ', '(.*tiny_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_m', 'medium_image = url = ', '(.*medium_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_l', 'large_image = url = ', '(.*large_image = url = )(.*)/\2', 'ADepartments', 'Text']
-  rules << ['release_date', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']#############
+  rules << ['displayDate', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']#############
   rules << ['sales_rank', 'sales_rank = ', '(.*sales_rank = )(\d+)(.*)/\2', 'ADepartments', 'Continuous']############
   rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Atv_amazon', 'Categorical']###########
   rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Acamera_amazon', 'Categorical']#########

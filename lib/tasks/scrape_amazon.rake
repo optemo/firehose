@@ -131,15 +131,22 @@ def scrape(product_type, string_array)
         items[item_index]['product_type'] = product_type
         # Fix formatting
         items[item_index]['screen_type'].upcase! if items[item_index]['screen_type'] && items[item_index]['screen_type'] !~ /plasma/i
-        items[item_index]['price'] = items[item_index]['price'].to_i/100.0 if items[item_index]['price']
-        items[item_index]['price_new'] = items[item_index]['price_new'].to_i/100.0 if items[item_index]['price_new']
+        
+        items[item_index]['saleprice'] = items[item_index]['price_new'].to_i/100.0 if items[item_index]['price_new']
         items[item_index]['price_used'] = items[item_index]['price_used'].to_i/100.0 if items[item_index]['price_used']
-        if items[item_index]['price_new']
-          items[item_index]['saleprice'] = items[item_index]['price_new']
-          items[item_index]['price'] = items[item_index]['price_new'] unless items[item_index]['price']
-        elsif items[item_index]['price_used']
-          items[item_index]['saleprice'] = items[item_index]['price_used']
-          items[item_index]['price'] = items[item_index]['price_used'] unless items[item_index]['price']
+        items[item_index]['price'] = items[item_index]['listprice'].to_i/100.0 if items[item_index]['listprice']
+        # Price corrections:
+        # If there is no list price but there is a new price, set list price to the new price
+        # If there is no list price and no new price, skip this product
+        unless items[item_index]['listprice']
+          if items[item_index]['price_new']
+            items[item_index]['price'] = items[item_index]['price_new'].to_i/100.0 
+          else
+            puts 'skipping item ' + items[item_index].to_s
+            items[item_index] = {}
+            i+=1
+            next
+          end
         end
         
         # Add default values where necessary
@@ -267,6 +274,7 @@ task :scrape_amazon_data => :environment do |t,args|
 
   # Fill the items array with all search results
   for params in search_params
+    
     puts "Downloading from Amazon: #{completed*100/total_params}%"
     (items << scrape(params[0], search_for(params[1], params[2]))).flatten!
     completed += 1
