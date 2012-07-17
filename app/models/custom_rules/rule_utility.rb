@@ -100,7 +100,6 @@ class RuleUtility < Customization
              end
            end
            feature_value = (feature_value + 1) if (feature_value > 0 && key == default)
-           puts f.name if feature_value == 750.99
            puts "feature_value(#{feature_value})*f.value(#{f.value})=#{feature_value * f.value}"
            utility << (feature_value* (f.value))     
          end
