@@ -64,7 +64,7 @@ class ProductTest < ActiveSupport::TestCase
     p.instock = true
     assert p.dirty?, "Changed products should be dirty"
     p2 = create(:product)
-    p2.dirty
+    p2.set_dirty
     assert p.dirty?, "Tainted products should be dirty"
   end
 

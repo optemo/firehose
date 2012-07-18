@@ -190,7 +190,7 @@ class Product < ActiveRecord::Base
             spec = spec_class.find_or_initialize_by_product_id_and_name(p.id, candidate.name)
           end
           spec.value = candidate.parsed
-          p.dirty if spec.changed? #Taint product for indexing
+          p.set_dirty if spec.changed? #Taint product for indexing
           specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
         elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
           #Product is new
@@ -282,7 +282,7 @@ class Product < ActiveRecord::Base
   end
   
   #Allows us to track association changes, but tainting products
-  def dirty
+  def set_dirty
     @dirty = true
   end
   
