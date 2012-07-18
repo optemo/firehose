@@ -205,11 +205,8 @@ class Product < ActiveRecord::Base
       end
     end
     raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
-    # Select products that have actually been modified
-    modified_products = products_to_update.values.select(&:changed?) 
-
     # Bulk insert/update for efficiency
-    Product.import modified_products, :on_duplicate_key_update=>[:instock]
+    Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
     
     translations.each do |locale, key, value|
       I18n.backend.store_translations(locale, {key => value}, {escape: false})
@@ -237,7 +234,7 @@ class Product < ActiveRecord::Base
     
     #Reindex sunspot
     Sunspot.index(products_to_save)
-    Sunspot.index(modified_products)
+    Sunspot.index(products_to_update.values)
     Sunspot.commit
     
     #This assumes Firehose is running with the same memcache as the Discovery Platform
