@@ -57,5 +57,15 @@ class ProductTest < ActiveSupport::TestCase
     myrules = ScrapingRule.get_rules([],false)
     assert_equal sr, myrules.first[:rule], "Get Rules should return the singular rules in this case"
   end
+  
+  test "Dirty Bit" do
+    p = create(:product, instock: false)
+    assert_false p.dirty?, "New products should not be dirty"
+    p.instock = true
+    assert p.dirty?, "Changed products should be dirty"
+    p2 = create(:product)
+    p2.dirty
+    assert p.dirty?, "Tainted products should be dirty"
+  end
 
 end
