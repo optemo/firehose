@@ -178,7 +178,7 @@ def scrape(product_type, string_array)
     end
     i += 1
   end
-  puts items
+  #puts items
   items
 end
 
