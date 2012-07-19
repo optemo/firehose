@@ -5,7 +5,6 @@ class RuleImageURLs < Customization
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
   @size_existence = Hash[ "small" => false, "medium" => false, "large" => false ]
-  @only_once = true # This rule should only be run once on a product, as opposed to every time update is run
 
   def RuleImageURLs.compute(values, pid)
     unless values[0] =~ /noimage/ || values[0] !~ /.*[Pp]roducts\/.*/
