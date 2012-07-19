@@ -5,7 +5,7 @@ class RuleImageURLs < Customization
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
   @size_existence = Hash[ "small" => false, "medium" => false, "large" => false ]
-  
+
   def RuleImageURLs.compute(values, pid)
     unless values[0] =~ /noimage/ || values[0] !~ /.*[Pp]roducts\/.*/
       /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]

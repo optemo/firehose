@@ -194,7 +194,7 @@ class RuleUtility < Customization
       feature_index += 1
     end
     
-    #maximums['averagePageviews'] = 11.0 ## THIS IS WRONG! The original utility code makes use of this number because it exists in the database,
+    maximums['averagePageviews'] = 11.0 ## THIS IS WRONG! The original utility code makes use of this number because it exists in the database,
                                         ## => so I've included it here such that comparing the results of this code versus the old code is actually possible.
                                         ## It will be removed when sufficient testing has been done.
     

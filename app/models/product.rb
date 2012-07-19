@@ -98,17 +98,30 @@ class Product < ActiveRecord::Base
   scope :instock, :conditions => {:instock => true}
   scope :current_type, lambda{ joins(:cat_specs).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})}
   
-  # Update the specs for each product under a given product type (as specified by Session.product_type).
-  def self.feed_update
-    raise ValidationError unless Session.product_type
-    
+  # Returns the list of BBproduct instances for the specified product category.
+  def self.get_products(product_type)
+    products = []
     begin
-      product_skus = BestBuyApi.category_ids(Session.product_type)
+      products = BestBuyApi.category_ids(product_type)
     rescue BestBuyApi::TimeoutError
-      puts "Timeout"
+      puts "Timeout calling BestBuyApi.category_ids"
       sleep 30
       retry
     end
+    products
+  end
+
+  # Update the specs for each product under the current product category (as specified by Session.product_type).
+  #
+  # product_skus - Optional list of BBproduct instances to be updated. If this parameter is nil, the list 
+  #                of products for the current product category will be retrieved using the BestBuyApi.
+  def self.feed_update(product_skus = nil)
+    raise ValidationError unless Session.product_type
+    
+    if product_skus.nil?
+      product_skus = get_products(Session.product_type)
+    end
+
     #product_skus.uniq!{|a|a.id} #Uniqueness check
     
     products_to_update = {}
@@ -177,6 +190,7 @@ class Product < ActiveRecord::Base
             spec = spec_class.find_or_initialize_by_product_id_and_name(p.id, candidate.name)
           end
           spec.value = candidate.parsed
+          p.set_dirty if spec.changed? #Taint product for indexing
           specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
         elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
           #Product is new
@@ -192,7 +206,8 @@ class Product < ActiveRecord::Base
       end
     end
     raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
-    # Bulk insert/update for efficiency
+
+    # Bulk insert/update for efficiency, of only products that have changed
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
     
     translations.each do |locale, key, value|
@@ -264,6 +279,15 @@ class Product < ActiveRecord::Base
   
   def total_acc_sales
     Accessory.select(:count).where("`accessories`.`product_id` = #{id} AND `accessories`.`name` = 'accessory_sales_total'").first.count
+  end
+  
+  #Allows us to track association changes, but tainting products
+  def set_dirty
+    @dirty = true
+  end
+  
+  def dirty?
+    changed? || !!@dirty
   end
 
 end
