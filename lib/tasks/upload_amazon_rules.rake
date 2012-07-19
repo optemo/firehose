@@ -16,33 +16,35 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['title', 'title = ', '(.*title = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['sku', 'asin = ', '(.*asin = )(.*)/\2', 'ADepartments', 'Categorical']
   rules << ['amazon_sku', 'sku = ', '(.*sku = )(.*)/\2', 'ADepartments', 'Categorical']
-  rules << ['listprice', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
+  rules << ['price', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
+  rules << ['saleprice', 'list_price = amount = ', '(.*list_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['price_new', 'lowest_new_price = amount = ', '(.*lowest_new_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['price_used', 'lowest_used_price = amount = ', '(.*lowest_used_price = amount = )(.*)/\2', 'ADepartments', 'Continuous']
   rules << ['image_url_t', 'thumbnail_image = url = ', '(.*thumbnail_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_s', 'tiny_image = url = ', '(.*tiny_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_m', 'medium_image = url = ', '(.*medium_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_l', 'large_image = url = ', '(.*large_image = url = )(.*)/\2', 'ADepartments', 'Text']
-  rules << ['displayDate', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']#############
+  rules << ['thumbnail_url', 'medium_image = url = ', '(.*medium_image = url = )(.*)/\2', 'ADepartments', 'Text']
+  rules << ['release_date', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']#############
   rules << ['sales_rank', 'sales_rank = ', '(.*sales_rank = )(\d+)(.*)/\2', 'ADepartments', 'Continuous']############
   rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Atv_amazon', 'Categorical']###########
   rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Acamera_amazon', 'Categorical']#########
   rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Asoftware_amazon', 'Categorical']#########
-  rules << ['producer', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Amovie_amazon', 'Categorical']###########
-  rules << ['producer', '(brand|publisher) = ', 'new line/New Line', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'mgm/MGM', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'hgv/HGV', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'warner/Warner', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'turner/Turner', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'disney/Disney', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'buena vista/Buena Vista', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'fox/20th Century Fox', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'columbia/Columbia', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'universal/Universal', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'hbo/HBO', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'sony/Sony', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'paramount/Paramount', 'Amovie_amazon', 'Categorical']
-  rules << ['producer', '(brand|publisher) = ', 'trimark/Trimark', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Amovie_amazon', 'Categorical']###########
+  rules << ['brand', '(brand|publisher) = ', 'new line/New Line', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'mgm/MGM', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'hgv/HGV', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'warner/Warner', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'turner/Turner', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'disney/Disney', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'buena vista/Buena Vista', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'fox/20th Century Fox', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'columbia/Columbia', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'universal/Universal', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'hbo/HBO', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'sony/Sony', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'paramount/Paramount', 'Amovie_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', 'trimark/Trimark', 'Amovie_amazon', 'Categorical']
   rules << ['brand', '(brand|publisher) = ', 'sony/Sony', 'Atv_amazon', 'Categorical']
   rules << ['brand', '(brand|publisher) = ', 'viewsonic/ViewSonic', 'Atv_amazon', 'Categorical']
   rules << ['brand', '(brand|publisher) = ', 'toshiba/Toshiba', 'Atv_amazon', 'Categorical']
@@ -93,6 +95,7 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['windows', 'platform = ', 'windows/1', 'Asoftware_amazon', 'Binary']
   rules << ['mac', 'platform = ', 'mac/1', 'Asoftware_amazon', 'Binary']
   rules << ['app_type', 'product_group = ', '[Gg]ame/video game', 'Asoftware_amazon', 'Categorical']
+  rules << ['product_type', 'product_group = ', '(.*product_group = )(.*)/\2', 'ADepartments', 'Categorical']
 
   puts "Creating Amazon scraping rules..."
 

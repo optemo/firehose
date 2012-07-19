@@ -11,6 +11,7 @@ class RuleSalesOrder < Customization
     sales_ranks = sales_ranks.group_by(&:product_id)
     
     specs = []
+    spec_class = Customization.rule_type_to_class(@rule_type)
     
     for pid in pids
       sales_rank = sales_ranks[pid]
@@ -20,8 +21,9 @@ class RuleSalesOrder < Customization
         sales_rank = sales_rank.first.value
       end
       salesOrder = sales_rank/max_rank
-      
-      specs << ContSpec.new(product_id: pid, value: salesOrder, name: @feature_name)
+      spec = spec_class.find_or_initialize_by_product_id_and_name(pid, @feature_name)
+      spec.value = salesOrder
+      specs << spec
     end
     
     specs

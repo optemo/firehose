@@ -4,7 +4,6 @@ task :create_amazon_categories => :environment do
   children = {'Amovie_amazon' => 'Movies', 'Atv_amazon' => 'TVs', 'Acamera_amazon' => 'Cameras', 'Asoftware_amazon' => 'Software' }
     
   id = 1
-  
   cat = ProductCategory.find_or_initialize_by_product_type_and_feed_id(root.keys.first, root.keys.first)
   cat.update_attributes(retailer: retailer, l_id: id, level: 1)
   
