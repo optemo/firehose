@@ -32,9 +32,9 @@ class RuleUtility < Customization
                             { 'title' => 'color',
                                   'match' => 'name', 'with' => '^color_', 'for' => ['B', 'F'] },
                             { 'title' => 'onsale_factor',
-                                  'match' => 'name', 'with' => 'onsale_factor', 'for' => ['B', 'F'] },
+                                  'match' => 'name', 'with' => 'onsale_factor', 'for' => ['B', 'F', 'A'] },
                             { 'title' => 'display_date',
-                                  'match' => 'name', 'with' => 'displayDate', 'for' => ['B', 'F'] },
+                                  'match' => 'name', 'with' => 'displayDate', 'for' => ['B', 'F', 'A'] },
                             { 'title' => 'sale_end_date',
                                   'match' => 'name', 'with' => 'saleEndDate', 'for' => ['B', 'F'] },
                             { 'title' => 'binary',
@@ -63,6 +63,12 @@ class RuleUtility < Customization
                                   Facet.new(name: 'displayDate', feature_type: 'Categorical'),
                                   Facet.new(name: 'onsale_factor', feature_type: 'Continuous'),
                                   Facet.new(name: 'isAdvertised', feature_type: 'Binary')
+                                ],
+                        'A' =>  [
+                                  Facet.new(name: 'saleprice', feature_type: 'Continuous'),
+                                  Facet.new(name: 'salesOrder', feature_type: 'Continuous'),
+                                  Facet.new(name: 'displayDate', feature_type: 'Continuous'),
+                                  Facet.new(name: 'onsale_factor', feature_type: 'Categorical')
                                 ],
                       }
   
@@ -194,7 +200,7 @@ class RuleUtility < Customization
       feature_index += 1
     end
     
-    maximums['averagePageviews'] = 11.0 ## THIS IS WRONG! The original utility code makes use of this number because it exists in the database,
+    #maximums['averagePageviews'] = 11.0 ## THIS IS WRONG! The original utility code makes use of this number because it exists in the database,
                                         ## => so I've included it here such that comparing the results of this code versus the old code is actually possible.
                                         ## It will be removed when sufficient testing has been done.
     
@@ -257,6 +263,18 @@ class RuleUtility < Customization
   #   end
   #   value
   # end
+  
+  def RuleUtility.compute_values_for_sales_order( pids, feature_name, utility_type )
+    data = ContSpec.where('product_id IN (?) and name = ?', pids, 'salesOrder').group_by(&:product_id)
+    sales_order_values = {}
+    
+    for pid in pids
+      
+      sales_order_values[pid] = value
+    end
+    
+    sales_order_values
+  end
   
   def RuleUtility.compute_values_for_display_date( pids, feature_name, utility_type )
     data = CatSpec.where('product_id IN (?) and name = ?', pids, 'displayDate').group_by(&:product_id)
