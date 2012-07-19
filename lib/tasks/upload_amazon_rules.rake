@@ -23,12 +23,12 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['image_url_s', 'tiny_image = url = ', '(.*tiny_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_m', 'medium_image = url = ', '(.*medium_image = url = )(.*)/\2', 'ADepartments', 'Text']
   rules << ['image_url_l', 'large_image = url = ', '(.*large_image = url = )(.*)/\2', 'ADepartments', 'Text']
-  rules << ['displayDate', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']#############
-  rules << ['sales_rank', 'sales_rank = ', '(.*sales_rank = )(\d+)(.*)/\2', 'ADepartments', 'Continuous']############
-  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Atv_amazon', 'Categorical']###########
-  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Acamera_amazon', 'Categorical']#########
-  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Asoftware_amazon', 'Categorical']#########
-  rules << ['producer', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Amovie_amazon', 'Categorical']###########
+  rules << ['displayDate', 'release_date = ', '(.*release_date = )(\d{4})-(\d{2})-(\d{2})(.*)/\2\3\4', 'ADepartments', 'Categorical']
+  rules << ['sales_rank', 'sales_rank = ', '(.*sales_rank = )(\d+)(.*)/\2', 'ADepartments', 'Continuous']
+  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Atv_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Acamera_amazon', 'Categorical']
+  rules << ['brand', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Asoftware_amazon', 'Categorical']
+  rules << ['producer', '(brand|publisher) = ', '(.*(brand|publisher) = )(.*)/\3', 'Amovie_amazon', 'Categorical']
   rules << ['producer', '(brand|publisher) = ', 'new line/New Line', 'Amovie_amazon', 'Categorical']
   rules << ['producer', '(brand|publisher) = ', 'mgm/MGM', 'Amovie_amazon', 'Categorical']
   rules << ['producer', '(brand|publisher) = ', 'hgv/HGV', 'Amovie_amazon', 'Categorical']
@@ -79,7 +79,7 @@ task :upload_amazon_rules => :environment do |t, args|
   rules << ['mpaa_rating', 'audience_rating = ', '(.*audience_rating = )([\w\+-]+)(\s\(.*\))?/\2', 'Amovie_amazon', 'Categorical']
   rules << ['language', 'languages = language = name = ', '(.*languages = language = name = )(.*)/\2', 'Amovie_amazon', 'Categorical']
   rules << ['language', 'title = ', '(.*)([Ss]panish|[Ff]rench)(.*)/\2', 'Amovie_amazon', 'Categorical']
-  rules << ['running_time', 'running_time = ', '(.*running_time = )(\d+)(.*)/\2', 'Amovie_amazon', 'Continuous']###############
+  rules << ['running_time', 'running_time = ', '(.*running_time = )(\d+)(.*)/\2', 'Amovie_amazon', 'Continuous']
   rules << ['hdmi', 'feature = ', '[Hh][Dd][Mm][Ii]/1', 'Atv_amazon', 'Binary']
   rules << ['hdmi', 'title = ', '[Hh][Dd][Mm][Ii]/1', 'Atv_amazon', 'Binary']
   rules << ['resolution', 'title = ', '(.*)((720|1080)[IiPp])(.*)/\2', 'Atv_amazon', 'Categorical']

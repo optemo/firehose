@@ -189,6 +189,7 @@ def scrape(product_type, string_array)
     
     i += 1
   end
+  puts items
   items
 end
 
@@ -228,44 +229,44 @@ task :scrape_amazon_data => :environment do |t,args|
                       ['Amovie_amazon', 'Video', {'Title' => 'Indiana Jones'}],
                       ['Amovie_amazon', 'Video', {'Title' => 'King Kong'}],
                       ['Amovie_amazon', 'Video', {'Title' => 'Looney Toons'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 1080p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 720p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'ViewSonic', 'Keywords' => 'tv'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'tv 1080p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'tv 720p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Toshiba', 'Keywords' => 'tv 1080p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Toshiba', 'Keywords' => 'tv 720p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Coby', 'Keywords' => 'tv 1080p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Coby', 'Keywords' => 'tv 720p'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'LG', 'Keywords' => 'tv'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Sharp', 'Keywords' => 'tv'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'RCA', 'Keywords' => 'tv'}],
-                      ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Vizio', 'Keywords' => 'tv'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Sony', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Canon', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Nikon', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'AgfaPhoto', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Fuji', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Kodak', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Olympus', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Polaroid', 'Keywords' => 'camera'}],
-                      ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Fotodiox', 'Keywords' => 'camera'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Microsoft', 'Keywords' => 'Software'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Microsoft', 'Keywords' => 'Game'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Apple', 'Keywords' => 'Software'}],
-                      ['Asoftware_amazon', 'Software', {'Keywords' => 'photo'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Activision'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => '2K'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Adobe'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Rosetta'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Encore'}],
-                      ['Asoftware_amazon', 'Software', {'Brand' => 'Communications'}]
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 1080p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'tv 720p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'ViewSonic', 'Keywords' => 'tv'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'tv 1080p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'tv 720p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Toshiba', 'Keywords' => 'tv 1080p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Toshiba', 'Keywords' => 'tv 720p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Coby', 'Keywords' => 'tv 1080p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Coby', 'Keywords' => 'tv 720p'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'LG', 'Keywords' => 'tv'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Sharp', 'Keywords' => 'tv'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'RCA', 'Keywords' => 'tv'}],
+                      # ['Atv_amazon', 'Electronics', {'Manufacturer' => 'Vizio', 'Keywords' => 'tv'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Sony', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Samsung', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Canon', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Nikon', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'AgfaPhoto', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Panasonic', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Fuji', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Kodak', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Olympus', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Polaroid', 'Keywords' => 'camera'}],
+                      # ['Acamera_amazon', 'Electronics', {'Manufacturer' => 'Fotodiox', 'Keywords' => 'camera'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Microsoft', 'Keywords' => 'Software'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Microsoft', 'Keywords' => 'Game'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Apple', 'Keywords' => 'Software'}],
+                      # ['Asoftware_amazon', 'Software', {'Keywords' => 'photo'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Activision'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => '2K'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Adobe'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Rosetta'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Encore'}],
+                      # ['Asoftware_amazon', 'Software', {'Brand' => 'Communications'}]
                     ]
   
   # Wipe Amazon from the database
-  Rake::Task['destroy_amazon_products'].execute
+  #Rake::Task['destroy_amazon_products'].execute
                
   items = []
 
@@ -281,5 +282,5 @@ task :scrape_amazon_data => :environment do |t,args|
   end
 
   puts "Download complete: #{items.length} products returned"
-  save(items)
+  #save(items)
 end
