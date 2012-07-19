@@ -264,18 +264,6 @@ class RuleUtility < Customization
   #   value
   # end
   
-  def RuleUtility.compute_values_for_sales_order( pids, feature_name, utility_type )
-    data = ContSpec.where('product_id IN (?) and name = ?', pids, 'salesOrder').group_by(&:product_id)
-    sales_order_values = {}
-    
-    for pid in pids
-      
-      sales_order_values[pid] = value
-    end
-    
-    sales_order_values
-  end
-  
   def RuleUtility.compute_values_for_display_date( pids, feature_name, utility_type )
     data = CatSpec.where('product_id IN (?) and name = ?', pids, 'displayDate').group_by(&:product_id)
     display_date_values = {}
