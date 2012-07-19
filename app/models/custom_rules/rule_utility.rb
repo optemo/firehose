@@ -1,200 +1,335 @@
 class RuleUtility < Customization
   @feature_name = 'utility'
-  @product_type = ["BDepartments", "FDepartments"]
+  @product_type = ["BDepartments", "FDepartments", "ADepartments"]
   @needed_features = []
   @rule_type = 'Continuous'
   
+  DEFAULT = 'utility'
+  NON_DEFAULT = 'lr_utility'
+  
+  ## The following array of hashes is used to tell the code what special methods should be called in which cases
+  ## The special method corresponds to the 'title' element of the hash (i.e. intercept corresponds to "compute_value_for_intercept")
+  ## For a given feature, the code will see if it can 'match' an attribute of that feature 'with' the regular expression
+  ## If it can, then it knows that the feature has a special computation method and will call it
+  ## Example 1: Element 1, intercept
+  ## => if feature.name =~ /Intercept/
+  ## =>  value = compute_value_for_intercept
+  ## => end
+  ## Example 2: Element 8, categorical
+  ## => if feature.feature_type =~ /Categorical/
+  ## =>  value = compute_value_for_categorical
+  ## => end
+  
+  ## To add new special methods:
+  ## 1. Add it to this hash.
+  ## 2. Write the computation method (method name must be in the form 'compute_value_for_<title>').'
+  ## => Make sure it behaves like the other methods do, returning a hash grouped by product ID containing the utility values for the products
+  ## => (i.e. {'64' => '0.51351', '14444' => '0.78321'}, etc.)
+  COMPUTATION_METHODS = [ { 'title' => 'intercept',
+                                  'match' => 'name', 'with' => 'Intercept', 'for' => ['B', 'F'] },
+                            { 'title' => 'brand',
+                                  'match' => 'name', 'with' => '^brand_', 'for' => ['B', 'F'] },
+                            { 'title' => 'color',
+                                  'match' => 'name', 'with' => '^color_', 'for' => ['B', 'F'] },
+                            { 'title' => 'onsale_factor',
+                                  'match' => 'name', 'with' => 'onsale_factor', 'for' => ['B', 'F'] },
+                            { 'title' => 'display_date',
+                                  'match' => 'name', 'with' => 'displayDate', 'for' => ['B', 'F'] },
+                            { 'title' => 'sale_end_date',
+                                  'match' => 'name', 'with' => 'saleEndDate', 'for' => ['B', 'F'] },
+                            { 'title' => 'binary',
+                                'match' => 'feature_type', 'with' => 'Binary', 'for' => ['B', 'F'] },
+                            { 'title' => 'categorical',
+                                'match' => 'feature_type', 'with' => 'Categorical', 'for' => ['B', 'F'] },
+                            { 'title' => 'sales_order',
+                                'match' => 'name', 'with' => 'salesOrder', 'for' => ['A'] },
+                          ]
+  
+  ## This array defines the default features. The coefficients will be calculated in this order.
+  ## To add new default features just add them to the corresponding retailer's array.
+  ## => Remember to keep them in the order the coefficients should be calculated in.
+  DEFAULT_FEATURES =  { 'B' =>  [
+                                  Facet.new(name: 'saleprice', feature_type: 'Continuous'),
+                                  Facet.new(name: 'averagePageviews', feature_type: 'Continuous'),
+                                  Facet.new(name: 'averageSales', feature_type: 'Continuous'),
+                                  Facet.new(name: 'displayDate', feature_type: 'Categorical'),
+                                  Facet.new(name: 'onsale_factor', feature_type: 'Continuous'),
+                                  Facet.new(name: 'isAdvertised', feature_type: 'Binary')
+                                ],
+                        'F' =>  [
+                                  Facet.new(name: 'saleprice', feature_type: 'Continuous'),
+                                  Facet.new(name: 'averagePageviews', feature_type: 'Continuous'),
+                                  Facet.new(name: 'averageSales', feature_type: 'Continuous'),
+                                  Facet.new(name: 'displayDate', feature_type: 'Categorical'),
+                                  Facet.new(name: 'onsale_factor', feature_type: 'Continuous'),
+                                  Facet.new(name: 'isAdvertised', feature_type: 'Binary')
+                                ],
+                      }
+  
+  ## This array defines features without maximums; maximums will be considered to be 1.0 instead.
+  FEATURES_WITHOUT_MAX =  { 'B' => ['onsale_factor', 'displayDate', 'isAdvertised'],
+                            'F' => ['onsale_factor', 'displayDate', 'isAdvertised'],
+                          }
+  
   def RuleUtility.group_computation(pids)
+    retailer = Product.find(pids[0]).retailer
+    default_features = DEFAULT_FEATURES[retailer]
+    features_without_max = FEATURES_WITHOUT_MAX[retailer]
     
-      default ="utility"
-      non_default = "lr_utility"
-      cont_activerecords = Hash.new # For bulk insert/update
-      cont_activerecords[default]=[]
-      cont_activerecords[non_default]=[]
-      records = {}
-      feature_value= 0;
-      feature_types =Hash.new
-      #flag for checking if product's brand has a coefficient in the facet table
-      br_flag = FALSE #flag for checking if product's brand has a coefficient in the facet table
-      has_brand = FALSE
-      
-      all_products = Product.where(["id IN (?) and instock = ?", pids, 1])
-      prices ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "price"]).group_by(&:product_id)
-      records["saleprice"] ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, "saleprice"]).group_by(&:product_id)
-      
-      ptype_path = Session.product_type_path 
-      #puts"path #{ptype_path.reverse}"
+    utility_specs = {DEFAULT => [], NON_DEFAULT => []}
     
-      feature_types[default] = Facet.find_all_by_used_for_and_product_type("utility","BDepartments")
-      lr_features= []
-      ptype_path.reverse.each do |path|  
-       lr_features = Facet.find_all_by_used_for_and_product_type("utility",path) if (path != "BDepartments" and path != "FDepartments")
-        break unless lr_features.empty?
+    ## Get lr_utility features by working upwards through parents until features are found (but don't go all the way to the root; those features are already covered by utility)
+    root_category = ProductCategory.where(retailer: retailer, l_id: 1).first
+    non_default_features = []
+    ptype_path = Session.product_type_path
+    ptype_path.reverse.each do |path| 
+      non_default_features = get_features(path, DEFAULT) if (path != root_category.product_type)
+      break unless non_default_features.empty?
+    end
+    
+    utilities = { DEFAULT => {}, NON_DEFAULT => {} }
+    
+    ## Compute the default coefficients that will be multiplied with feature values
+    default_coefficients = compute_default_coefficients(default_features, features_without_max)
+    ## Compute values for default utility
+    for feature in default_features
+      ## Get the values for all product IDs for this feature
+      utilities[DEFAULT][feature.name] = get_feature_values(feature, pids, DEFAULT, retailer)
+      ## Adjust the utility score with the coefficients
+      utilities[DEFAULT][feature.name].each do |pid, utility|
+        utility += 1 if utility > 0
+        utilities[DEFAULT][feature.name][pid] = utility * default_coefficients[feature.name] / 1e4
       end
-      feature_types[non_default] = lr_features unless lr_features.empty?
-      puts 'adding lr utility for ' + Session.product_type_path.to_s unless lr_features.empty?
-      
-      #compute coefficients for the default rule-based utility
-      feature_types[default].each do |f|
-        max= 0
-        unless (f.name == 'onsale_factor' || f.name == 'displayDate' || f.name =="isAdvertised")  
-         model = Customization.rule_type_to_class(f.feature_type)
-         max = model.maximum(:value, :conditions => ['name = ?', f.name])
-         f.value = max.to_f if max
-        else
-          f.value = 1 #max value for onsale_factor and displayDate and isAdvertised
+    end
+    
+    ## Compute lr utility values
+    if non_default_features.length > 0
+      ## Check if any of the features are brand features, i.e. brand_SONY, so that we can check later if a product matches any of them
+      has_brand_features = false
+      if non_default_features.find {|feature| /^brand_/ =~ feature.name}
+        has_brand_features = true
+      end
+      for feature in non_default_features
+        ## Get the values for all product IDs for this feature
+        utilities[NON_DEFAULT][feature.name] = get_feature_values(feature, pids, NON_DEFAULT, retailer)
+        ## Adjust the utility score with the precomputed coefficients from the database
+        utilities[NON_DEFAULT][feature.name].each do |pid, utility|
+          utilities[NON_DEFAULT][feature.name][pid] *= feature.value
+          
+          if has_brand_features && feature.name =~ /^brand_/
+            ## If this is a brand feature, check if the current product's brand matches it.
+            ## If it does (i.e. if compute_value_for_brand returned a value greater than 0), then the product's brand is not new.
+            ## If it is new, however, subtract 2 from the utility score.
+            new_brand = true
+            new_brand = false if utilities[NON_DEFAULT][feature.name][pid] > 0
+            utilities[NON_DEFAULT][feature.name][pid] -= 2 if new_brand
+          end
         end
       end
-      feature_types[default] = calculate_default_coefs(feature_types[default])
-      
-      #check for brand if there is any non-default utility calculation
-      Maybe(feature_types[non_default]).each do |f|
-       has_brand = TRUE if f.name=~/^brand_/
-       break if has_brand
-      end    
-      #go through utility calculation
-      all_products.each do |product| 
-       feature_types.each do |key,features|
-         br_flag=FALSE
-         utility = []  
-         Maybe(features).each  do |f|
-           feature_value = 0 
-           model = Customization.rule_type_to_class(f.feature_type)
-           if (f.name == "Intercept")
-             feature_value =1 
-           elsif (f.name =~ /^brand_/ || f.name =~ /^color_/)
-             sp_feature = f.name.split("_")
-             name = sp_feature[1]
-             name = sp_feature[1]+" "+sp_feature[2] if (sp_feature.size == 3)
-             records[sp_feature[0]] ||= model.where(["product_id IN (?) and name=? ", all_products,sp_feature[0]]).group_by(&:product_id)
-             if records[sp_feature[0]][product.id]       
-               if records[sp_feature[0]][product.id].first.value.downcase == name.downcase
-                 feature_value = 1 
-                 br_flag = TRUE if f.name=~/^brand_/
-               end     
-             elsif (f.name == "color_na")
-               feature_value = 1
-             end
-           elsif (f.name == "onsale_factor")
-             org_price = prices[product.id].first.value
-             saleprice = records["saleprice"][product.id].first.value
-             feature_value = RuleUtility.calculateFactor_sale(org_price, saleprice)
-           else
-             records[f.name] ||= model.where(["product_id IN (?) and name = ?", all_products, f.name]).group_by(&:product_id)
-             if records[f.name][product.id]
-               feature_value = records[f.name][product.id].first.value 
-           
-               if f.name == "displayDate"
-                 feature_value = RuleUtility.calculateFactor_displayDate(feature_value)
-                  if key == default 
-                    feature_value = (1/feature_value) if feature_value != 0
-                    feature_value = 1 if feature_value == 0
-                  end 
-               elsif f.name== "saleEndDate"
-                 feature_value = RuleUtility.calculateFactor_saleEndDate(feature_value)
-               elsif f.feature_type == "Binary"
-                 feature_value = 1 if feature_value
-               elsif f.feature_type == "Categorical"
-                 feature_value= 0
-               end 
-             end
-           end
-           feature_value = (feature_value + 1) if (feature_value > 0 && key == default)
-           puts "feature_value(#{feature_value})*f.value(#{f.value})=#{feature_value * f.value}"
-           utility << (feature_value* (f.value))     
-         end
-        
-         utility << (-2) if (!br_flag && has_brand && key == non_default) # The case that the product has no brand or its brand is a new one, so there is no coefficient for it in the facet table.
-         #Add the static calculated utility 
-         #puts "#{utility}"
-         utilities ||= ContSpec.where(["product_id IN (?) and name = ?", all_products, key]).group_by(&:product_id)
-         product_utility = utilities[product.id] ? utilities[product.id].first : ContSpec.new(product_id: product.id, name: key)
-         product_utility.value = (utility.sum).to_f
-         product_utility.value = (product_utility.value/1e4) if key == default
-          # puts "product_id #{product.id} sku #{product.sku} utility_name #{product_utility.name} utility_sum #{product_utility.value}"
-         cont_activerecords[key] << product_utility
-       end
-      end
-    #normalizing the default utility values  
-     #cont_activerecords[default] = normalize(cont_activerecords[default])
-    #print out put 
-     
-    # (cont_activerecords[default]+ cont_activerecords[non_default]).each do |product|
-    #      puts "product_id #{product.product_id} utility_name #{product.name} utility_sum #{product.value}"
-    # end
-     cont_activerecords[default]+ cont_activerecords[non_default]
-     
-  end
-  
-  def self.map_range (cont_activerecords)
-     values =[]
-     cont_activerecords.inject(values){|values,ele| values << ele.value}
-     a1 =  values.min
-     a2 = values.max
-     b1= -5
-     b2=5
-     m = (b2-b1)/(a2-a1)
-     cont_activerecords.each do |row|
-       row.value = b1 + (row.value - a1) * m
-     end 
-     cont_activerecords
-  end
-  
-  def self.normalize(cont_activerecords)
-    values =[]
-    cont_activerecords.inject(values){|values,ele| values << ele.value}
-    mean = (values.sum.to_f/values.size.to_f)
-    sd =  values.inject(0){|res,ele| res + (ele-mean)**2}
-    sd /= (values.size.to_f-1)
-    sd = Math.sqrt(sd)
-    cont_activerecords.each do |r|
-      r.value = (r.value-mean).to_f/sd
     end
-    cont_activerecords
-  end
-  def self.calculateFactor_sale(fVal1, fVal2)
-     fVal1 > fVal2 ? ((fVal1-fVal2)/fVal1) : 0
-  end
-  
-  def self.calculateFactor_displayDate(fVal)
-    ret = (Date.today - Date.parse(fVal))
-    ret = 0 if ret < 0
-    ret
-  end
-  
-  def self.calculateFactor_saleEndDate(fVal)
-    ret = (Date.parse(fVal) - Date.today)
-    if ret>0
-      ret = 1/ret
-    elsif ret == 0
-      ret = 1
-    else
-      ret = 0
-    end
-    ret
-  end
-  
-  def self.calculate_default_coefs (features)
-    max_f = Hash.new  
-    hash_f = Hash.new
-    features.each do |ele| 
-      max_f[ele.name] = ele.value
-      hash_f[ele.name] = ele.value
-    end 
-    hash_f['saleprice'] = (10/(max_f['saleprice']||1))
-    hash_f['averagePageviews'] = ((max_f['saleprice']||1)+2) * (hash_f['saleprice'])
-    hash_f['averageSales'] = ((max_f['averagePageviews']||1)+2) * hash_f['averagePageviews']
-    hash_f['displayDate'] =  ((max_f['averageSales']||1)+2) * hash_f['averageSales']
-    hash_f['onsale_factor'] = ((max_f['displayDate']||1)+2)*hash_f['displayDate'] # max of displayDate is 1
-    hash_f['isAdvertised'] = ((max_f['onsale_factor']||1)+2)*hash_f['onsale_factor'] # max of onsale_factor is 1
- 
-    features.each do |f|
-      f.value = hash_f[f.name]
-     # puts "#{f.name} f.value #{f.value}"
-    end
-    features
-  end
     
-
+    ## Sum and return
+    utilities.each do |utility_type, features|
+      utility_values = {}
+      features.each do |feature_name, feature_utilities|
+        feature_utilities.each do |pid, utility|
+          utility_values[pid] = 0 unless utility_values[pid]
+          utility_values[pid] += utility
+        end
+      end
+      ## Create specs
+      utility_values.each do |pid, utility|
+        utility_specs[utility_type] << ContSpec.new(product_id: pid, name: utility_type, value: utility)
+      end
+    end
+    utility_specs[DEFAULT] + utility_specs[NON_DEFAULT]
+  end
+  
+  def RuleUtility.get_feature_values( feature, pids, utility_type, retailer )
+  ## This method checks what method to call based on the feature
+    values = nil
+    for method_data in COMPUTATION_METHODS
+      next unless method_data['for'].include?(retailer)
+      ## Get the method name, the feature variable we want to check, and the regular expression to check it against
+      feature_variable_to_compare = method_data['match']
+      method_name = "compute_values_for_#{method_data['title']}"
+      regex = Regexp.new(method_data['with'])
+      
+      ## If this is the feature we're dealing with, call the method to get the feature value
+      if feature.instance_values['attributes'][feature_variable_to_compare] =~ regex
+        values = RuleUtility.method(method_name.to_sym).call(pids, feature.name, utility_type)
+        break
+      end
+    end
+    if values.nil?
+      values = {}
+      data = Customization.rule_type_to_class(feature.feature_type).where('product_id IN (?) and name = ?', pids, feature.name).group_by(&:product_id)
+      for pid in pids
+        if data[pid] ## If this feature didn't have a special case but exists for this product
+          value = data[pid].first.value
+        else
+          value = 0
+        end
+        values[pid] = value
+      end
+    end
+    values
+  end
+  
+  def RuleUtility.get_features( product_type, used_for )
+    return Facet.find_all_by_product_type_and_used_for(product_type, used_for)
+  end
+  
+  def RuleUtility.compute_default_coefficients( features, features_without_max )
+  ## Calculates the coefficients for the given features using the maximum values
+  ## If a feature doesn't have an actual maximum, 1.0 will be used instead.
+    maximums = {}
+    feature_index = 0
+    while feature_index < features.length
+      unless features_without_max.include?(features[feature_index].name)
+        maximums[features[feature_index].name] = Customization.rule_type_to_class(features[feature_index].feature_type).maximum(:value, conditions: ['name = ?', features[feature_index].name]).to_f || 0
+      else
+        maximums[features[feature_index].name] = 1.0
+      end
+      feature_index += 1
+    end
+    
+    #maximums['averagePageviews'] = 11.0 ## THIS IS WRONG! The original utility code makes use of this number because it exists in the database,
+                                        ## => so I've included it here such that comparing the results of this code versus the old code is actually possible.
+                                        ## It will be removed when sufficient testing has been done.
+    
+    default_coefficients = { features.first.name => 10/maximums[features.first.name].to_f }
+    feature_index = 1
+    while feature_index < features.length
+      default_coefficients[features[feature_index].name] = ( maximums[features[feature_index-1].name].to_f + 2) * default_coefficients[features[feature_index-1].name].to_f
+      feature_index += 1
+    end
+    return default_coefficients
+  end
+  
+  ## HELPER METHODS ##
+  private
+  def RuleUtility.compute_values_for_brand( pids, feature_name, utility_type )
+    data = CatSpec.where('product_id IN (?) and name = ?', pids, 'brand').group_by(&:product_id)
+    brand_values = {}
+    for pid in pids
+      brand_spec = data[pid]
+      feature_brand_name = feature_name.gsub(/(^brand_)(.*)/, '\2').gsub('_', ' ').downcase
+      value = 0
+      value = 1 if brand_spec && brand_spec.first.value.downcase == feature_brand_name
+      brand_values[pid] = value
+    end
+    brand_values
+  end
+  
+  def RuleUtility.compute_values_for_color( pids, feature_name, utility_type )
+    data = CatSpec.where('product_id IN (?) and name = ?', pids, 'color').group_by(&:product_id)
+    color_values = {}
+    for pid in pids
+      color_spec = data[pid]
+      feature_color_name = feature_name.split('_')[1].downcase
+      value = 0
+      value = 1 if (color_spec && color_spec.first.value.downcase == feature_color_name) || feature_name == 'color_na'
+      color_values[pid] = value
+    end
+    color_values
+  end
+  
+  def RuleUtility.compute_values_for_onsale_factor( pids, feature_name, utility_type )
+    prices = ContSpec.where('product_id IN (?) and name = ?', pids, 'price').group_by(&:product_id)
+    saleprices = ContSpec.where('product_id IN (?) and name = ?', pids, 'saleprice').group_by(&:product_id)
+    onsale_factor_values = {}
+    for pid in pids
+      original_price = prices[pid].first.value
+      sale_price = saleprices[pid].first.value
+      value = 0 
+      value = (original_price-sale_price)/(original_price) if original_price > sale_price
+      onsale_factor_values[pid] = value
+    end
+    onsale_factor_values
+  end
+  
+  # def RuleUtility.compute_value_for_display_date( cached_data, product_id, feature_name, utility_type )
+  #   date = Maybe(cached_data['displayDate'][product_id]).first.value
+  #   value = Date.today - Date.parse(date) if date  ## in case of lr_utility we just return the difference 
+  #   if utility_type == DEFAULT
+  #     Date.today <= date ? value=1 : value=1/value ## in case of general utility we return the inverse of the difference 
+  #   end
+  #   value
+  # end
+  
+  def RuleUtility.compute_values_for_display_date( pids, feature_name, utility_type )
+    data = CatSpec.where('product_id IN (?) and name = ?', pids, 'displayDate').group_by(&:product_id)
+    display_date_values = {}
+    value = 0
+    for pid in pids
+      date_spec = data[pid]
+      if date_spec
+        days = Date.today - Date.parse(date_spec.first.value)
+        case utility_type
+        when DEFAULT
+          if days > 0
+            value = 1/days
+          else
+            value = 1
+          end
+        when NON_DEFAULT
+          if days > 0
+            value = days
+          else
+            value = 0
+          end
+        end
+      end
+      display_date_values[pid] = value
+    end
+    display_date_values
+  end
+  
+  def RuleUtility.compute_values_for_sale_end_date( pids, feature_name, utility_type )
+    data = CatSpec.where('product_id IN (?) and name = ?', pids, 'saleEndDate').group_by(&:product_id)
+    sale_end_date_values = {}
+    for pid in pids
+      sale_date_spec = data[pid]
+      value = 0
+      if sale_date_spec
+        date = Date.parse(sale_date_spec.first.value)
+        days_remaining = Date.today - date
+        if days_remaining == 0
+          value = 1
+        elsif days_remaining > 0
+          value = days_remaining
+        end
+      end
+      sale_end_date_values[pid] = value
+    end
+    sale_end_date_values
+  end
+  
+  def RuleUtility.compute_values_for_binary( pids, feature_name, utility_type )
+    data = BinSpec.where('product_id IN (?) and name = ?', pids, feature_name).group_by(&:product_id)
+    binary_values = {}
+    for pid in pids
+      value = 0
+      value = 1 if data[pid]
+      binary_values[pid] = value
+    end
+    binary_values
+  end
+  
+  def RuleUtility.compute_values_for_intercept( pids, feature_name, utility_type )
+    intercept_values = {}
+    for pid in pids
+      intercept_values[pid] = 1
+    end
+    intercept_values
+  end
+  
+  def RuleUtility.compute_values_for_categorical( pids, feature_name, utility_type )
+    categorical_values = {}
+    for pid in pids
+      categorical_values[pid] = 0
+    end
+    categorical_values
+  end
 end
-
