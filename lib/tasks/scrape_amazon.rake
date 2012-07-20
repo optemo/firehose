@@ -201,10 +201,9 @@ task :destroy_amazon_products => :environment do |t,args|
 end
 
 task :scrape_amazon_data => :environment do |t,args|
-  require '/optemo/site/lib/helpers/sitespecific/amazon_scraper.rb'
-  require '/optemo/firehose/app/models/scraping_rule.rb'
   require 'amazon/aws/search'
-  include AmazonScraper
+  include Amazon::AWS
+  include Amazon::AWS::Search
   
   search_params =   [
                       ['Amovie_amazon', 'Video', {'AudienceRating' => 'G'}],
@@ -257,7 +256,7 @@ task :scrape_amazon_data => :environment do |t,args|
                     ]
   
   # Wipe Amazon from the database
-  Rake::Task['destroy_amazon_products'].execute
+  #Rake::Task['destroy_amazon_products'].execute
                
   items = []
 
@@ -272,5 +271,5 @@ task :scrape_amazon_data => :environment do |t,args|
   end
   
   puts "Download complete: #{items.length} products returned"
-  save(items)
+  #save(items)
 end
