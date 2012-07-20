@@ -118,6 +118,8 @@ def scrape(product_type, string_array)
         items[item_index]['product_type'] = product_type
         # Fix formatting
         items[item_index]['screen_type'].upcase! if items[item_index]['screen_type'] && items[item_index]['screen_type'] !~ /plasma/i
+        items[item_index]['hd_video'].downcase! if items[item_index]['hd_video']
+        items[item_index]['resolution'].downcase! if items[item_index]['resolution']
         items[item_index]['price'] = items[item_index]['price'].to_i/100.0 if items[item_index]['price']
         items[item_index]['price_new'] = items[item_index]['price_new'].to_i/100.0 if items[item_index]['price_new']
         items[item_index]['price_used'] = items[item_index]['price_used'].to_i/100.0 if items[item_index]['price_used']
