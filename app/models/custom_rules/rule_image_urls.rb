@@ -84,13 +84,10 @@ class RuleImageURLs < Customization
         end
       end
     else
-      unless (Session.retailer == 'A' and values[0] =~ /images-amazon/) # for amazon, if there is a url in the input, do nothing since finer
+      unless (Session.retailer == 'A' and values[0] =~ /images-amazon/) # for amazon, if there is a url in the input, do nothing since fine
         BinSpec.find_or_initialize_by_product_id_and_name(pid, "missingImage").update_attributes(value: true)
       end
     end
-    # else
-    #   BinSpec.find_or_initialize_by_product_id_and_name(pid, "missingImage").update_attributes(value: true)
-    # end
     res
   end
   
