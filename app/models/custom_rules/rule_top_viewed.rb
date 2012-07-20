@@ -5,6 +5,7 @@ class RuleTopViewed < Customization
   @rule_type = 'Binary'
 
   def RuleTopViewed.group_computation(pids)
+    
     today = Date.today # getting the weekday today
     lastFriday = Date.today - ((Date.today.wday - 5) % 7) # getting the date of the last friday, including today if friday
     
@@ -19,7 +20,7 @@ class RuleTopViewed < Customization
     
     sorted_specs = sorted_specs.sort_by {|pid, sum| sum}
     sorted_specs.reverse!
-    
+    return [] if sorted_specs.empty?
     index = (sorted_specs.count * 0.2).to_i
     threshold = sorted_specs[index][1]
     

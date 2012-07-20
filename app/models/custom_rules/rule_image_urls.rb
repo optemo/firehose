@@ -1,13 +1,13 @@
 require 'net/http'
 class RuleImageURLs < Customization
   @image_sizes = Hash[ "small" => 100, "medium" => 150, "large" => 250 ]
-  @product_type = ['BDepartments','FDepartments']
+  @product_type = ['BDepartments','FDepartments', 'ADepartments']
   @needed_features = [{TextSpec => 'thumbnail_url'}]
   @rule_type = 'Text'
   @size_existence = Hash[ "small" => false, "medium" => false, "large" => false ]
 
   def RuleImageURLs.compute(values, pid)
-    unless values[0] =~ /noimage/ || values[0] !~ /.*[Pp]roducts\/.*/
+    unless values[0] =~ /noimage/ || values[0] !~ /.*[Pp]roducts\/.*/ 
       /.*[Pp]roducts\/(?<thumbnail_url>.*)/ =~ values[0]
       retailer = Product.find(pid).retailer
       base_url = ""
@@ -84,8 +84,13 @@ class RuleImageURLs < Customization
         end
       end
     else
-      BinSpec.find_or_initialize_by_product_id_and_name(pid, "missingImage").update_attributes(value: true)
+      unless (Session.retailer == 'A' and values[0] =~ /images-amazon/) # for amazon, if there is a url in the input, do nothing since finer
+        BinSpec.find_or_initialize_by_product_id_and_name(pid, "missingImage").update_attributes(value: true)
+      end
     end
+    # else
+    #   BinSpec.find_or_initialize_by_product_id_and_name(pid, "missingImage").update_attributes(value: true)
+    # end
     res
   end
   

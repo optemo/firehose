@@ -66,7 +66,7 @@ Firehose::Application.routes.draw do
   resources :bestbuy, only: [:index, :show], id: /\w+/i
   resources :accessories, only: [:index, :show], id: /\w+/i
 
-  resources :product_types, path: "/", id: /[BF]\w+/i, only: [:show] do
+  resources :product_types, path: "/", id: /[BFA]\w+/i, only: [:show] do
     resources :facets, only: [:index, :new, :create, :edit, :update], id: /\w+/, path: "layout_editor"
     resources :scraping_corrections, :except => [:show, :index], id: /\d+/
     resources :scraping_rules, id: /[\d-]+/
