@@ -13,9 +13,11 @@ class Product < ActiveRecord::Base
   attr_writer :product_name
   SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
+  attr_writer :all_searchable_data
+  
   searchable(auto_index: false) do
     text :title do
-      cat_specs.find_by_name("title").try(:value)
+      text_specs.find_by_name("title").try(:value)
     end
      
     text :description do
@@ -30,6 +32,10 @@ class Product < ActiveRecord::Base
     string :product_type do
       cat_specs.find_by_name(:product_type).try(:value)
     end
+    string :product_category do
+      cat_specs.find_by_name(:product_type).try(:value)
+    end
+    text :category_of_product, :using => :get_category
     
     string :first_ancestors
     string :second_ancestors
@@ -52,7 +58,27 @@ class Product < ActiveRecord::Base
     float :lr_utility, trie: true do
       cont_specs.find_by_name(:lr_utility).try(:value)
     end
-    autosuggest :product_name, :using => :instock?                  
+    autosuggest :all_searchable_data, :using => :get_title
+    autosuggest :all_searchable_data, :using => :get_category
+    #autosuggest :product_instock_title, :using => :instock?
+  end
+  
+  def get_category
+    category = cat_specs.find_by_name(:product_type).try(:value)
+    if category.nil?  
+      value = "Unknown Category"
+    else
+      value = I18n.t "#{category}.name"
+    end
+    value
+  end
+  
+  def get_title
+    name = text_specs.find_by_name("title").try(:value)
+    if name.nil?  
+      name = "Unknown Title / Title Not In Database"
+    end
+    name
   end
   
   def first_ancestors
@@ -75,7 +101,7 @@ class Product < ActiveRecord::Base
   
   def instock?
     if (instock)
-      cat_specs.find_by_name("title").try(:value)
+      text_specs.find_by_name("title").try(:value)
     else
       false
     end
@@ -256,7 +282,7 @@ class Product < ActiveRecord::Base
   end
   
   def name
-    name = cat_specs.find_by_name("title").try(:value)
+    name = text_specs.find_by_name("title").try(:value)
     if name.nil?  
       name = "Unknown Name / Name Not In Database"
     end
