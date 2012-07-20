@@ -263,7 +263,6 @@ class RuleUtility < Customization
   #   end
   #   value
   # end
-  
   def RuleUtility.compute_values_for_display_date( pids, feature_name, utility_type )
     data = CatSpec.where('product_id IN (?) and name = ?', pids, 'displayDate').group_by(&:product_id)
     display_date_values = {}
