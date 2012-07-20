@@ -41,8 +41,6 @@ class RuleUtility < Customization
                                 'match' => 'feature_type', 'with' => 'Binary', 'for' => ['B', 'F'] },
                             { 'title' => 'categorical',
                                 'match' => 'feature_type', 'with' => 'Categorical', 'for' => ['B', 'F'] },
-                            { 'title' => 'sales_order',
-                                'match' => 'name', 'with' => 'salesOrder', 'for' => ['A'] },
                           ]
   
   ## This array defines the default features. The coefficients will be calculated in this order.
@@ -75,6 +73,7 @@ class RuleUtility < Customization
   ## This array defines features without maximums; maximums will be considered to be 1.0 instead.
   FEATURES_WITHOUT_MAX =  { 'B' => ['onsale_factor', 'displayDate', 'isAdvertised'],
                             'F' => ['onsale_factor', 'displayDate', 'isAdvertised'],
+                            'A' => ['onsale_factor', 'displayDate']
                           }
   
   def RuleUtility.group_computation(pids)
