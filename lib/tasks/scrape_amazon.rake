@@ -118,6 +118,8 @@ def scrape(product_type, string_array)
         items[item_index]['product_type'] = product_type
         # Fix formatting
         items[item_index]['screen_type'].upcase! if items[item_index]['screen_type'] && items[item_index]['screen_type'] !~ /plasma/i
+        items[item_index]['hd_video'].downcase! if items[item_index]['hd_video']
+        items[item_index]['resolution'].downcase! if items[item_index]['resolution']
         items[item_index]['price'] = items[item_index]['price'].to_i/100.0 if items[item_index]['price']
         items[item_index]['price_new'] = items[item_index]['price_new'].to_i/100.0 if items[item_index]['price_new']
         items[item_index]['price_used'] = items[item_index]['price_used'].to_i/100.0 if items[item_index]['price_used']
@@ -199,10 +201,9 @@ task :destroy_amazon_products => :environment do |t,args|
 end
 
 task :scrape_amazon_data => :environment do |t,args|
-  require '/optemo/site/lib/helpers/sitespecific/amazon_scraper.rb'
-  require '/optemo/firehose/app/models/scraping_rule.rb'
   require 'amazon/aws/search'
-  include AmazonScraper
+  include Amazon::AWS
+  include Amazon::AWS::Search
   
   search_params =   [
                       ['Amovie_amazon', 'Video', {'AudienceRating' => 'G'}],

@@ -13,8 +13,6 @@ class Product < ActiveRecord::Base
   attr_writer :product_name
   SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
-  attr_writer :all_searchable_data
-  
   searchable(auto_index: false) do
     text :title do
       text_specs.find_by_name("title").try(:value)
@@ -35,8 +33,7 @@ class Product < ActiveRecord::Base
     string :product_category do
       cat_specs.find_by_name(:product_type).try(:value)
     end
-    text :category_of_product, :using => :get_category
-    
+        
     string :first_ancestors
     string :second_ancestors
     
@@ -65,8 +62,8 @@ class Product < ActiveRecord::Base
   
   def get_category
     category = cat_specs.find_by_name(:product_type).try(:value)
-    if category.nil?  
-      value = "Unknown Category"
+    if category.nil?
+      false
     else
       value = I18n.t "#{category}.name"
     end
