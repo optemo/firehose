@@ -260,10 +260,17 @@ class Product < ActiveRecord::Base
       spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
     end
     
-    #Reindex sunspot
-    Sunspot.index(products_to_save)
-    Sunspot.index(products_to_update.values)
-    Sunspot.commit
+    # Reindex sunspot.
+    # We do the index/commit calls in batches of 50 products, as larger batches can result 
+    # in timeouts calling Solr (when running the update_parallel rake task).
+    products_to_save.each_slice(50) { |slice|
+      Sunspot.index(slice)
+      Sunspot.commit
+    }
+    products_to_update.values.each_slice(50) { |slice|
+      Sunspot.index(slice)
+      Sunspot.commit
+    }
     
     #This assumes Firehose is running with the same memcache as the Discovery Platform
     #This assumtion no longer holds

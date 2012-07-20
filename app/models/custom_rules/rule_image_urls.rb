@@ -97,7 +97,21 @@ class RuleImageURLs < Customization
   def RuleImageURLs.size_exists?(url)
     # Check for existence
     url = URI.parse(url.gsub('[', '%5B').gsub(']', '%5D'))
-    return Net::HTTP.start(url.host, url.port).head(url.request_uri).code == "200"
+    result = nil
+    tries = 0
+    begin
+      tries += 1
+      result = Net::HTTP.start(url.host, url.port).head(url.request_uri).code 
+    rescue Timeout::Error
+      if tries < 3
+        puts "Timeout retrieving image (" + url.to_s + "), will retry"
+        retry
+      else 
+        puts "Timeout retrieving image (" + url.to_s + ")"
+        raise
+      end
+    end
+    return result == "200"
   end
   
   def RuleImageURLs.makespec(pid, name, value)

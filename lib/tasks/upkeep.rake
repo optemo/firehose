@@ -118,7 +118,11 @@ task :update_parallel => :environment do
       Process.wait
       curr_child_process_count -= 1
     end
-    Process.spawn("bundle exec rake update_leaf product_type=#{node} file=#{temp_file.path}")
+    command_line = "bundle exec rake update_leaf product_type=#{node} file=#{temp_file.path}"
+    if Rake.application.options.trace
+      command_line += " --trace"
+    end
+    Process.spawn(command_line)
     curr_child_process_count += 1
     spawned_processes += 1
     puts "Spawned rake task for node " + node + " (" + spawned_processes.to_s + "/" + leaves.size.to_s + ")"
