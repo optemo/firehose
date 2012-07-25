@@ -71,11 +71,7 @@ class Product < ActiveRecord::Base
   end
   
   def get_title
-    name = text_specs.find_by_name("title").try(:value)
-    if name.nil?  
-      name = "Unknown Title / Title Not In Database"
-    end
-    name
+    text_specs.find_by_name("title").try(:value)
   end
   
   def first_ancestors
