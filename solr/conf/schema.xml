@@ -110,6 +110,40 @@
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
+    <fieldType name="autocomplete" class="solr.TextField" positionIncrementGap="100">
+  	  <analyzer type="index">
+  	    <tokenizer class="solr.KeywordTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	    <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="25" />
+  	  </analyzer>
+  	  <analyzer type="query">
+  	    <tokenizer class="solr.KeywordTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	  </analyzer>
+  	</fieldType>
+  	<fieldType name="autosuggest" class="solr.TextField" positionIncrementGap="100">
+  	  <analyzer type="index">
+  	    <tokenizer class="solr.LetterTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	    <filter class="solr.EdgeNGramFilterFactory" minGramSize="1" maxGramSize="25" />
+  	  </analyzer>
+  	  <analyzer type="query">
+  	    <tokenizer class="solr.LetterTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	  </analyzer>
+  	</fieldType>
+  	<fieldtype class="solr.TextField" name="text_pre" positionIncrementGap="100">
+  	  <analyzer type="index">
+  	    <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	    <filter class="solr.EdgeNGramFilterFactory"/>
+  	  </analyzer>
+  	  <analyzer type="query">
+  	    <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+  	    <filter class="solr.LowerCaseFilterFactory"/>
+  	  </analyzer>
+  	</fieldtype>
+    
   </types>
   <fields>
     <!-- Valid attributes for fields:
