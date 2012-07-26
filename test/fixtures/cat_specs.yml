@@ -9,13 +9,3 @@ product_type:
   product_id: 1
   name: product_type
   value: B22474
-dup_product_type_1:
-  id: 3
-  product_id: 2
-  name: product_type
-  value: B28381
-dup_product_type_2:
-  id: 4
-  product_id: 2
-  name: product_type
-  value: B28382

@@ -3,8 +3,3 @@ oneproduct:
   sku: 10159583
   instock: 1
   retailer: 'B'
-product_with_duplicate_product_type_specs:
-  id: 2 
-  sku: 333444
-  instock: 1
-  retailer: 'B'
