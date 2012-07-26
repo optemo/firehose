@@ -10,7 +10,7 @@ class Product < ActiveRecord::Base
   has_many :text_specs, :dependent=>:delete_all
   has_many :product_siblings
   has_many :product_bundles
-  attr_writer :product_name
+  
   SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
   searchable(auto_index: false) do
@@ -33,6 +33,7 @@ class Product < ActiveRecord::Base
     string :product_category do
       cat_specs.find_by_name(:product_type).try(:value)
     end
+    text :category_of_product, :using => :get_category  # needed for keyword search to match category
         
     string :first_ancestors
     string :second_ancestors
@@ -55,23 +56,15 @@ class Product < ActiveRecord::Base
     float :lr_utility, trie: true do
       cont_specs.find_by_name(:lr_utility).try(:value)
     end
-    autosuggest :all_searchable_data, :using => :get_title
-    autosuggest :all_searchable_data, :using => :get_category
-    #autosuggest :product_instock_title, :using => :instock?
+    autosuggest :all_searchable_data, :using => :instock_title
   end
   
+  # getter functions needed for solr - can't just use the solr field name corresponding to the attribute
   def get_category
     category = cat_specs.find_by_name(:product_type).try(:value)
-    if category.nil?
-      false
-    else
-      value = I18n.t "#{category}.name"
+    unless category.nil?  
+      I18n.t "#{category}.name"
     end
-    value
-  end
-  
-  def get_title
-    text_specs.find_by_name("title").try(:value)
   end
   
   def first_ancestors
@@ -92,11 +85,9 @@ class Product < ActiveRecord::Base
     Equivalence.find_by_product_id(id).try(:eq_id).to_s
   end
   
-  def instock?
+  def instock_title
     if (instock)
       text_specs.find_by_name("title").try(:value)
-    else
-      false
     end
   end
 
