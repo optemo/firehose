@@ -27,6 +27,10 @@ class ScrapingRule < ActiveRecord::Base
     ids = Array(ids) # [ids] unless ids.kind_of? Array
     rules_hash = get_rules(rules,multi)
 
+    if rules_hash.empty?
+      return {translations: translations, candidates: candidates}
+    end
+
     corrections = ScrapingCorrection.all
     ids.each do |bbproduct|
       raw_return = nil
@@ -54,7 +58,6 @@ class ScrapingRule < ActiveRecord::Base
         unless raw_info.nil?
           #Insert category id spec
           raw_info["category_id"] = bbproduct.category
-          raise ValidationError, "No rules apply to this product #{bbproduct.id}" if rules_hash.empty?
           rules_hash.each do |r|
             next unless (!r[:rule].french && language == "English") || (r[:rule].french && language=="French")
             #Traverse the hash hierarchy

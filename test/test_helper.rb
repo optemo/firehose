@@ -51,3 +51,6 @@ class ApplicationController < ActionController::Base
     true
   end
 end
+
+# Ensure mocha is loaded *after* the test libraries it modifies
+require 'mocha'

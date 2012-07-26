@@ -70,6 +70,8 @@ group :test do
   gem 'ruby-prof'
   # gem 'growl_notify'
   gem 'factory_girl_rails'
+  # Ensure mocha is loaded *after* the test libraries it modifies
+  gem 'mocha', :require => false
 end
 
 group :accessories do
