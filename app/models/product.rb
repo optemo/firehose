@@ -144,8 +144,14 @@ class Product < ActiveRecord::Base
   def self.feed_update(product_skus = nil)
     raise ValidationError unless Session.product_type
     
+    amazon = true if Session.retailer == "A"
+    
     if product_skus.nil?
-      product_skus = get_products(Session.product_type)
+      unless amazon
+        product_skus = get_products(Session.product_type)
+      else
+        product_skus = AmazonApi.get_all_products(Session.product_type)
+      end
     end
 
     #product_skus.uniq!{|a|a.id} #Uniqueness check
@@ -168,6 +174,10 @@ class Product < ActiveRecord::Base
     Product.current_type.find_each do |p|
       p.instock = false
       products_to_update[p.sku] = p
+    end
+    
+    if amazon
+      product_skus = product_skus['ids']
     end
     
     all_products_from_retailer = Product.joins(:cat_specs).where(cat_specs: {name: "product_type"}, products: {retailer: Session.retailer})

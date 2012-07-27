@@ -256,7 +256,7 @@ task :scrape_amazon_data => :environment do |t,args|
                     ]
   
   # Wipe Amazon from the database
-  #Rake::Task['destroy_amazon_products'].execute
+  Rake::Task['destroy_amazon_products'].execute
                
   items = []
 
@@ -271,5 +271,5 @@ task :scrape_amazon_data => :environment do |t,args|
   end
   
   puts "Download complete: #{items.length} products returned"
-  #save(items)
+  save(items)
 end
