@@ -10,11 +10,16 @@ class BestBuyApi
     DEBUG = false
     
     # Get BestBuy product info, given product ID.
-    def product_search(id, includeall = true, english = true)
+    def product_search(id, includeall = true, ehf = true, english = true)
       q = english ? {} : {:lang => "fr"}
       q[:id] = id
       if includeall
         q[:include] = "all"
+      end
+      if ehf
+        #q[:currentregion]="QC"
+        q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+        q[:ignoreehfdisplayrestrictions]="true"
       end
       if Rails.env.test? && (id == "100000" || id == "100001")
         JSON.parse($bb_api_response[id])
@@ -149,20 +154,27 @@ class BestBuyApi
       id = [id] unless id.class == Array
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
+      q = {} 
+      ehf = true
       id.each do |my_id|
         #Check if ProductType or feed_id
         my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
         # check if the category is an invalid one (no parents, but many products listed)
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
-        
         if (feed_category['productCount'] == root_category['productCount'] and my_id != 'Departments')
           raise BestBuyApi::RequestError, ('Invalid category ' + id.to_s)
         end
         page = 1
         totalpages = nil
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
-          res = cached_request('search',{:page => page,:categoryid => my_id, :sortby => "name"})
+          q = {:page => page,:categoryid => my_id, :sortby => "name"}
+          if ehf
+            #q[:currentregion]="QC"
+            q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+            q[:ignoreehfdisplayrestrictions]="true"
+          end
+          res = cached_request('search',q)
           totalpages ||= res["totalPages"]
           ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
           page += 1

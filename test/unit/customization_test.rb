@@ -59,6 +59,35 @@ class CustomizationTest < ActiveSupport::TestCase
   #   assert_nil saved_spec, "No usage type should be saved for a product not in any of the categories"
   # end
   
+  test "Rule Price Plus EHF" do
+    # test a product with nil EHF but a saleprice value
+    result = RulePriceplusehf.compute([15.00, nil], pid = 999)
+    result.save unless result.nil?
+    saved_spec = ContSpec.find_by_product_id_and_name(999, RulePriceplusehf.feature_name)
+    assert_not_nil saved_spec, 'Spec should have been computed for nil EHF'
+    assert_in_delta 15.0, saved_spec.value, 0.001, "derived value should be computed accurately"
+    
+    # test a product with zero EHF
+    result = RulePriceplusehf.compute([15.00, 0], pid = 999)
+    result.save unless result.nil?
+    saved_spec = ContSpec.find_by_product_id_and_name(999, RulePriceplusehf.feature_name)
+    assert_not_nil saved_spec, 'Spec should have been computed for 0 EHF'
+    assert_in_delta 15.0, saved_spec.value, 0.001, "derived value should be computed accurately"
+    
+    # test a product with a negative EHF
+    result = RulePriceplusehf.compute([15.00, -3.1], pid = 901)
+    result.save unless result.nil?
+    saved_spec = ContSpec.find_by_product_id_and_name(901, RulePriceplusehf.feature_name)
+    assert_nil saved_spec, 'Spec should not have been computed for -ve EHF'
+    
+    # test a product with a positive EHF
+    result = RulePriceplusehf.compute([15.00, 3.10], pid = 999)
+    result.save unless result.nil?
+    saved_spec = ContSpec.find_by_product_id_and_name(999, RulePriceplusehf.feature_name)
+    assert_not_nil saved_spec, 'Spec should have been computed'
+    assert_in_delta 18.10, saved_spec.value, 0.001, "derived value should be computed accurately"
+  end
+  
   test "Coming Soon Rule" do
     # preorder date < today : false
     preorderDate = Date.today - 1

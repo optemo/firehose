@@ -36,11 +36,11 @@ class ScrapingRule < ActiveRecord::Base
       # For each product, we query both English and French product information.
       ["English","French"].each do |language|
         begin
-          raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
+          raw_info = BestBuyApi.product_search(bbproduct.id, true, true, language == "English")
         rescue BestBuyApi::RequestError
           #Try the request without including extra info
           begin
-            raw_info = BestBuyApi.product_search(bbproduct.id,false, language == "English")
+            raw_info = BestBuyApi.product_search(bbproduct.id, false, true, language == "English")
           rescue BestBuyApi::RequestError
             puts 'Error in the feed: returned nil for ' + bbproduct.id
             next

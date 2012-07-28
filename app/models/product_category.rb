@@ -6,7 +6,10 @@ class ProductCategory < ActiveRecord::Base
     text :product_category do
       I18n.t "#{product_type}.name"
     end
-    autosuggest :all_searchable_data, using: :find_product_category
+    #autosuggest :all_searchable_data, using: :find_product_category
+    autosuggest :all_searchable_data do
+      I18n.t "#{product_type}.name"
+    end
   end
   
   def find_product_category
