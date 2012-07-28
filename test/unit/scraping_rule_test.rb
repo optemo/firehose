@@ -1,6 +1,12 @@
 require 'test_helper'
 
 class ScrapingRuleTest < ActiveSupport::TestCase
+  test "Get Rules" do
+    sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
+    myrules = ScrapingRule.get_rules([],false)
+    assert_equal sr, myrules.first[:rule], "Get Rules should return the singular rules in this case"
+  end
+  
   test "validations" do
     sr1 = build(:scraping_rule, :local_featurename => nil)
     assert !sr1.save, "must have local_featurename"

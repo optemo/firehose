@@ -193,11 +193,16 @@ class Product < ActiveRecord::Base
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
-          # check here whether a spec with product_type exists
-          if candidate.name == "product_type"
-            spec = spec_class.find_or_initialize_by_product_id_and_name_and_value(p.id, candidate.name, candidate.parsed)
-          else
-            spec = spec_class.find_or_initialize_by_product_id_and_name(p.id, candidate.name)
+          # Find all values for this spec. In the past, coding errors and other issues have caused 
+          # multiple values for a single local feature name, such as product_type, to appear in the database. 
+          specs = spec_class.where(product_id: p.id, name: candidate.name)
+          spec = nil
+          if specs.empty?
+            spec = spec_class.new(product_id: p.id, name: candidate.name)
+          else 
+            # If there are existing values for this spec, update the first one and delete the rest.
+            spec = specs.first
+            specs_to_delete.concat(specs[1..-1])
           end
           spec.value = candidate.parsed
           p.set_dirty if spec.changed? #Taint product for indexing

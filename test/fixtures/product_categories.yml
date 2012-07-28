@@ -14,6 +14,14 @@ point_and_shoot:
   l_id: 870
   r_id: 871
   level: 4
+ultrazoom: 
+  id: 5
+  product_type: B28381
+  feed_id: 28381
+  retailer: B
+  l_id: 872
+  r_id: 873
+  level: 4
 Flaptops:
   id: 6
   product_type: F1002

@@ -1,6 +1,5 @@
 class Equivalence < ActiveRecord::Base
   def self.fill
-    counter = (Equivalence.maximum("eq_id") || 0) + 1 #Equivalence class enumeration
     eq_ar = []
     Product.current_type.each do |prod|
       #Siblings is a symmetric and transitive relationship
@@ -14,8 +13,7 @@ class Equivalence < ActiveRecord::Base
       if sibling = eq_ar.index{|p| equivalences.include? p.product_id}
         eq.eq_id = eq_ar[sibling].eq_id
       else
-        eq.eq_id = counter
-        counter += 1
+        eq.eq_id = SecureRandom.uuid
       end
       eq_ar << eq
     end
