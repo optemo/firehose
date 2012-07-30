@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120627215455) do
+ActiveRecord::Schema.define(:version => 20120727191529) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -84,7 +84,7 @@ ActiveRecord::Schema.define(:version => 20120627215455) do
 
   create_table "equivalences", :force => true do |t|
     t.integer "product_id"
-    t.integer "eq_id"
+    t.string  "eq_id"
   end
 
   add_index "equivalences", ["eq_id"], :name => "index_equivalences_on_eq_id"

@@ -10,10 +10,8 @@ class Product < ActiveRecord::Base
   has_many :text_specs, :dependent=>:delete_all
   has_many :product_siblings
   has_many :product_bundles
-  attr_writer :product_name
-  SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
-  attr_writer :all_searchable_data
+  SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
   
   searchable(auto_index: false) do
     text :title do
@@ -35,8 +33,8 @@ class Product < ActiveRecord::Base
     string :product_category do
       cat_specs.find_by_name(:product_type).try(:value)
     end
-    text :category_of_product, :using => :get_category
-    
+    text :category_of_product, :using => :get_category  # needed for keyword search to match category
+        
     string :first_ancestors
     string :second_ancestors
     
@@ -58,27 +56,15 @@ class Product < ActiveRecord::Base
     float :lr_utility, trie: true do
       cont_specs.find_by_name(:lr_utility).try(:value)
     end
-    autosuggest :all_searchable_data, :using => :get_title
-    autosuggest :all_searchable_data, :using => :get_category
-    #autosuggest :product_instock_title, :using => :instock?
+    autosuggest :all_searchable_data, :using => :instock_title
   end
   
+  # getter functions needed for solr - can't just use the solr field name corresponding to the attribute
   def get_category
     category = cat_specs.find_by_name(:product_type).try(:value)
-    if category.nil?  
-      value = "Unknown Category"
-    else
-      value = I18n.t "#{category}.name"
+    unless category.nil?  
+      I18n.t "#{category}.name"
     end
-    value
-  end
-  
-  def get_title
-    name = text_specs.find_by_name("title").try(:value)
-    if name.nil?  
-      name = "Unknown Title / Title Not In Database"
-    end
-    name
   end
   
   def first_ancestors
@@ -99,11 +85,9 @@ class Product < ActiveRecord::Base
     Equivalence.find_by_product_id(id).try(:eq_id).to_s
   end
   
-  def instock?
+  def instock_title
     if (instock)
       text_specs.find_by_name("title").try(:value)
-    else
-      false
     end
   end
 
@@ -219,11 +203,16 @@ class Product < ActiveRecord::Base
         if p = products_to_update[candidate.sku]
           #Product is already in the database
           p.instock = true
-          # check here whether a spec with product_type exists
-          if candidate.name == "product_type"
-            spec = spec_class.find_or_initialize_by_product_id_and_name_and_value(p.id, candidate.name, candidate.parsed)
-          else
-            spec = spec_class.find_or_initialize_by_product_id_and_name(p.id, candidate.name)
+          # Find all values for this spec. In the past, coding errors and other issues have caused 
+          # multiple values for a single local feature name, such as product_type, to appear in the database. 
+          specs = spec_class.where(product_id: p.id, name: candidate.name)
+          spec = nil
+          if specs.empty?
+            spec = spec_class.new(product_id: p.id, name: candidate.name)
+          else 
+            # If there are existing values for this spec, update the first one and delete the rest.
+            spec = specs.first
+            specs_to_delete.concat(specs[1..-1])
           end
           spec.value = candidate.parsed
           p.set_dirty if spec.changed? #Taint product for indexing
@@ -243,7 +232,7 @@ class Product < ActiveRecord::Base
     end
     raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
 
-    # Bulk insert/update for efficiency, of only products that have changed
+    # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
     
     translations.each do |locale, key, value|

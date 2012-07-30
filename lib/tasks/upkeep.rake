@@ -89,7 +89,7 @@ task :update_parallel => :environment do
     raise "No leaf nodes found for specified categories"
   end
 
-  puts 'Found leaf nodes: ' + leaves.to_s
+  Rails.logger.info 'Found leaf nodes: ' + leaves.to_s
 
   start = Time.now
   # We first obtain the product list for each leaf category in series. Doing this step in parallel
@@ -125,10 +125,10 @@ task :update_parallel => :environment do
     Process.spawn(command_line)
     curr_child_process_count += 1
     spawned_processes += 1
-    puts "Spawned rake task for node " + node + " (" + spawned_processes.to_s + "/" + leaves.size.to_s + ")"
+    Rails.logger.info "Spawned rake task for node " + node + " (" + spawned_processes.to_s + "/" + leaves.size.to_s + ")"
   end
                   
-  puts "Finished spawning child processes"
+  Rails.logger.info "Finished spawning child processes"
 
   # Wait for all child processes to finish
   Process.waitall
@@ -169,8 +169,7 @@ task :update_leaf => :environment do
     Product.feed_update(products)
     puts 'update_leaf finished scraping category ' + node
   rescue BestBuyApi::RequestError => error
-    puts 'update_leaf got the following error in scraping category ' + node + ': '
-    puts error.to_s
+    puts 'update_leaf got the following error in scraping category ' + node + ': ' + error.to_s
   end
 end
 
