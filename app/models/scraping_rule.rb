@@ -22,9 +22,17 @@ class ScrapingRule < ActiveRecord::Base
   #   - raw: Raw data returned by BestBuy API for the *first* product in the list provided.
   def self.scrape(ids,ret_raw = false,rules = [], multi = nil, to_show = false) #Can accept both one or more ids, whether to return the raw json
     #Return type: Array of candidates
+    amazon = true if Session.retailer == "A"
+    
     candidates = []
     translations = []
-    ids = Array(ids) # [ids] unless ids.kind_of? Array
+    
+    unless amazon
+      ids = Array(ids) # [ids] unless ids.kind_of? Array
+    else
+      a_product_data = ids['data']
+      ids = ids['ids']
+    end
     rules_hash = get_rules(rules,multi)
 
     if rules_hash.empty?
@@ -39,9 +47,15 @@ class ScrapingRule < ActiveRecord::Base
       fr_trans = {}
       # For each product, we query both English and French product information.
       ["English","French"].each do |language|
+        next if amazon && language == "French"
         begin
-          raw_info = BestBuyApi.product_search(bbproduct.id, true, true, language == "English")
+          unless amazon
+            raw_info = BestBuyApi.product_search(bbproduct.id, true, true, language == "English")
+          else
+            raw_info = AmazonApi.product_search(bbproduct.id, a_product_data)
+          end
         rescue BestBuyApi::RequestError
+          # This will never happen for Amazon
           #Try the request without including extra info
           begin
             raw_info = BestBuyApi.product_search(bbproduct.id, false, true, language == "English")

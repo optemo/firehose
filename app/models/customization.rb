@@ -11,7 +11,7 @@ class Customization
     
     def my_subclasses
       [RuleAverageSales, RuleBestSeller, RuleCapitalizeBrand, RuleComingSoon, RuleImageURLs, RuleNew, RuleOnSale, 
-        RulePriceplusehf, RuleTopViewed, RuleUsageType, RuleUtility]
+        RulePriceplusehf, RuleTopViewed, RuleUsageType, RuleUtility, RuleAmazonPrices]
     end
     
     def find_all_by_product_type(product_types)

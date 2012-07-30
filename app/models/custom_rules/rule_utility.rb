@@ -144,7 +144,9 @@ class RuleUtility < Customization
       end
       ## Create specs
       utility_values.each do |pid, utility|
-        utility_specs[utility_type] << ContSpec.new(product_id: pid, name: utility_type, value: utility)
+        spec = ContSpec.find_or_initialize_by_product_id_and_name(pid, utility_type)
+        spec.value = utility
+        utility_specs[utility_type] << spec
       end
     end
     utility_specs[DEFAULT] + utility_specs[NON_DEFAULT]
