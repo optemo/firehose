@@ -65,6 +65,7 @@ end
 desc "Update product data in parallel"
 task :update_parallel => :environment do
   DEFAULT_CATEGORY = "B20218"
+  MAX_PARALLEL_TASKS = 3
 
   product_types = [DEFAULT_CATEGORY]
   
@@ -114,7 +115,7 @@ task :update_parallel => :environment do
     }
     temp_files << temp_file
 
-    if curr_child_process_count >= 10 
+    if curr_child_process_count >= MAX_PARALLEL_TASKS
       Process.wait
       curr_child_process_count -= 1
     end
