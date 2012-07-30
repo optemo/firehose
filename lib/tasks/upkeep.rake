@@ -23,7 +23,7 @@ task :update => :environment do
   if !ENV.include?("product_type")
     Session.new
   else
-    if /[BF]\w+/ =~ ENV["product_type"]
+    if /[BFA]\w+/ =~ ENV["product_type"]
       Session.new ENV["product_type"]
     else
       raise "usage: rake update product_type=? # where product_type is a Bestbuy hierarchy number, e.g. B20218 or F1084."
