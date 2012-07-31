@@ -65,7 +65,9 @@ end
 desc "Update product data in parallel"
 task :update_parallel => :environment do
   DEFAULT_CATEGORY = "B20218"
-  MAX_PARALLEL_TASKS = 3
+  # Parallelization disabled for now. Change this value with care. Consider it a multiplier
+  # on the traffic we generate on Best Buy's API, which is also used by their mobile apps.
+  MAX_PARALLEL_TASKS = 1
 
   product_types = [DEFAULT_CATEGORY]
   
