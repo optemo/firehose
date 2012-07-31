@@ -4,7 +4,7 @@ class ProductSibling < ActiveRecord::Base
     siblings_activerecords = []
     siblings_unchanged = []
     TextSpec.joins("INNER JOIN `cat_specs` ON `text_specs`.product_id = `cat_specs`.product_id").where(cat_specs: {name: "product_type",value: Session.product_type_leaves}, text_specs: {name: "relations"}).each do |record|
-      #Delete old siblings
+      # Delete old siblings
       ProductSibling.delete_all(product_id: record.product_id)
       ProductSibling.delete_all(sibling_id: record.product_id)
       data = JSON.parse(record.value.gsub("=>",":"))
@@ -42,38 +42,22 @@ class ProductSibling < ActiveRecord::Base
          end
       end  
     end
-    
-    # Below code takes sibling relationships and performs transitive closure.
-    # Steps: (1) Get product_id <=> matrix index hash 
-    # (2) Build up adjacency matrix
-    # (3) Run Warshall algorithm on matrix, get transitive matrix
-    # (4) Transform back to sibling relationships using hash from (1)
-    # (5) Fill out activerecords
-    
-    # (1) Build up a hash so that accessing matrix row equivalence of a product id is O(n) instead of n^2
-    relations = (siblings_activerecords + siblings_unchanged).map{|x| [x.product_id, x.sibling_id]}.sort{|a,b| a[0] <=> b[0]}
-    
-    keys = relations.map{|x|x[0]}.uniq
-    key_hash = {}
-    keys.each_with_index {|r,i|key_hash[r] = i}
-    dim = keys.length
-    # Now we have two-way lookup: key_hash[product_id] => matrix index; or keys[matrix index] => product_id
-
-    # (2) Build adjacency matrix
-    adjMatrix=Array.new(keys.length){Array.new(keys.length)}
-    relations.each_with_index do |r,i|
-      # There is a relation between r[0] and r[1].
-      adjMatrix[key_hash[r[0]]][key_hash[r[1]]] = 1
-    end
-    
-    # (3) Run algorithm
-    pathMatrix = Warshall.new(adjMatrix).getPathMatrix
-    
-    siblings_to_create = []
-    # (4) Transform back to sibling relationships
-    for i in 0...dim do
-      for j in 0...dim do
-        siblings_to_create << ProductSibling.new({:product_id => keys[i], :sibling_id => keys[j]}) if pathMatrix[i][j]
+    # make sure color relationship is transitive (R(a,b) & R(b,c)=> R(a,c) but not reflexive)
+    (siblings_unchanged + siblings_activerecords).each do |s1|
+      # list of all siblings for s1 
+      siblings = (siblings_unchanged + siblings_activerecords).map{|s| s if s.product_id == s1.product_id}.compact
+      siblings.each do |s2|
+        unless (siblings_unchanged + siblings_activerecords).inject(false){|res,sib| res || s1.sibling_id == s2.sibling_id || (sib.product_id == s1.sibling_id  && sib.sibling_id==s2.sibling_id)}
+          ps = ProductSibling.find_or_initialize_by_product_id(s1.sibling_id)
+          if ps.sibling_id != s2.sibling_id
+            ps.sibling_id = s2.sibling_id
+            ps.name = "color"
+            ps.value = s2.value
+            siblings_activerecords << ps
+          else
+            siblings_unchanged << ps
+          end
+        end
       end
     end
     #Write the new relations

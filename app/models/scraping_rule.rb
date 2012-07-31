@@ -50,7 +50,7 @@ class ScrapingRule < ActiveRecord::Base
         next if amazon && language == "French"
         begin
           unless amazon
-            raw_info = BestBuyApi.product_search(bbproduct.id, true, true, language == "English")
+            raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
           else
             raw_info = AmazonApi.product_search(bbproduct.id, a_product_data)
           end
@@ -58,7 +58,7 @@ class ScrapingRule < ActiveRecord::Base
           # This will never happen for Amazon
           #Try the request without including extra info
           begin
-            raw_info = BestBuyApi.product_search(bbproduct.id, false, true, language == "English")
+            raw_info = BestBuyApi.product_search(bbproduct.id, false, language == "English")
           rescue BestBuyApi::RequestError
             puts 'Error in the feed: returned nil for ' + bbproduct.id
             next

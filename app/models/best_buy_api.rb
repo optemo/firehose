@@ -16,8 +16,7 @@ class BestBuyApi
       if includeall
         q[:include] = "all"
       end
-      #q[:currentregion]="QC"
-      q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+      q[:currentregion]="QC"
       q[:ignoreehfdisplayrestrictions]="true"
       if Rails.env.test? && (id == "100000" || id == "100001")
         JSON.parse($bb_api_response[id])
@@ -167,8 +166,7 @@ class BestBuyApi
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
           q = {:page => page,:categoryid => my_id, :sortby => "name"}
           # add search params needed to get the EHF from QC 
-          #q[:currentregion]="QC"
-          q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+          q[:currentregion]="QC"
           q[:ignoreehfdisplayrestrictions]="true"
           res = cached_request('search',q)
           totalpages ||= res["totalPages"]
@@ -197,10 +195,9 @@ class BestBuyApi
     end
 
     def cached_request(type, params = {})
-      # 1-hour cache disabled for now, as this will interfere with more frequent runs of update task
-      #CachingMemcached.cache_lookup(type + params.to_s + Session.retailer + Time.now.strftime("%Y-%m-%d-%H")) do
+      CachingMemcached.cache_lookup(type + params.to_s + Session.retailer + Time.now.strftime("%Y-%m-%d-%H")) do
         send_request(type, params)
-      #end
+      end
     end
 
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
