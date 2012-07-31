@@ -10,17 +10,15 @@ class BestBuyApi
     DEBUG = false
     
     # Get BestBuy product info, given product ID.
-    def product_search(id, includeall = true, ehf = true, english = true)
+    def product_search(id, includeall = true, english = true)
       q = english ? {} : {:lang => "fr"}
       q[:id] = id
       if includeall
         q[:include] = "all"
       end
-      if ehf
-        #q[:currentregion]="QC"
-        q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
-        q[:ignoreehfdisplayrestrictions]="true"
-      end
+      #q[:currentregion]="QC"
+      q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+      q[:ignoreehfdisplayrestrictions]="true"
       if Rails.env.test? && (id == "100000" || id == "100001")
         JSON.parse($bb_api_response[id])
       else
@@ -155,7 +153,6 @@ class BestBuyApi
       id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       q = {} 
-      ehf = true
       id.each do |my_id|
         #Check if ProductType or feed_id
         my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
@@ -169,16 +166,14 @@ class BestBuyApi
         totalpages = nil
         while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
           q = {:page => page,:categoryid => my_id, :sortby => "name"}
-          if ehf
-            #q[:currentregion]="QC"
-            q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
-            q[:ignoreehfdisplayrestrictions]="true"
-          end
+          # add search params needed to get the EHF from QC 
+          #q[:currentregion]="QC"
+          q[:currentregion]="BC"  #FOR TESTING ONLY! FIXME: change this to QC
+          q[:ignoreehfdisplayrestrictions]="true"
           res = cached_request('search',q)
           totalpages ||= res["totalPages"]
           ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
           page += 1
-          #sleep 1 No need for waiting
         end
       end
       ids
@@ -189,7 +184,6 @@ class BestBuyApi
     end
     
     def keyword_search(query)
-      
         page = 1
         totalpages = nil
         skus = []
