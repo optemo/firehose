@@ -1,6 +1,4 @@
 require 'null_object'
-# The Warshall algorithm is required for matrix calculations in product_sibling.rb#get_relations
-require 'warshall_algorithm.rb'
 Firehose::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
