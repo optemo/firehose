@@ -159,7 +159,8 @@ class BestBuyApi
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
         if (feed_category['productCount'] == root_category['productCount'] and my_id != 'Departments')
-          raise BestBuyApi::RequestError, ('Invalid category ' + id.to_s)
+          puts "Category " + my_id + " appears to be empty"
+          return ids
         end
         page = 1
         totalpages = nil
