@@ -168,7 +168,8 @@ class BestBuyApi
           # add search params needed to get the EHF from QC 
           q[:currentregion]="QC"
           q[:ignoreehfdisplayrestrictions]="true"
-          res = cached_request('search',q)
+          # Deliberately not caching results of 'search' API, since it sometimes seems to return erroneous results.
+          res = send_request('search',q)
           totalpages ||= res["totalPages"]
           ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
           page += 1
