@@ -33,8 +33,12 @@ class Product < ActiveRecord::Base
     string :product_category do
       cat_specs.find_by_name(:product_type).try(:value)
     end
-    text :category_of_product, :using => :get_category  # needed for keyword search to match category
-        
+    text :category_of_product do # needed for keyword search to match category
+      category = cat_specs.find_by_name(:product_type).try(:value)
+      unless category.nil?  
+        I18n.t "#{category}.name"
+      end
+    end
     string :first_ancestors
     string :second_ancestors
     
@@ -56,14 +60,10 @@ class Product < ActiveRecord::Base
     float :lr_utility, trie: true do
       cont_specs.find_by_name(:lr_utility).try(:value)
     end
-    autosuggest :all_searchable_data, :using => :instock_title
-  end
-  
-  # getter functions needed for solr - can't just use the solr field name corresponding to the attribute
-  def get_category
-    category = cat_specs.find_by_name(:product_type).try(:value)
-    unless category.nil?  
-      I18n.t "#{category}.name"
+    autosuggest :all_searchable_data do
+      if (instock)
+        text_specs.find_by_name("title").try(:value)
+      end
     end
   end
   
@@ -85,12 +85,6 @@ class Product < ActiveRecord::Base
     Equivalence.find_by_product_id(id).try(:eq_id).to_s
   end
   
-  def instock_title
-    if (instock)
-      text_specs.find_by_name("title").try(:value)
-    end
-  end
-
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
   end

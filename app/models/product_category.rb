@@ -11,10 +11,6 @@ class ProductCategory < ActiveRecord::Base
     end
   end
   
-  def find_product_category
-    I18n.t "#{product_type}.name"
-  end
-  
   class << self
     def build_query(nodes, left, right, level)
       overall_search = []
