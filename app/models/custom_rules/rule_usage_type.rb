@@ -52,6 +52,7 @@ class RuleUsageType < Customization
       # delete usage types that are in the database for this product
       old_usage_types = BinSpec.find_by_sql("SELECT *  FROM `bin_specs` WHERE `product_id` = #{product.id} AND `name` REGEXP 'usageType'")
       old_usage_types.each{|spec| BinSpec.delete(spec)} # the code below doesn't delete them all, but it was missing some
+      puts 'for 10208195' + ' usage types' + usage_types.to_s if product.sku == '10208195'
       unless usage_types.nil?
         usage_types.each do |type|
           usage_label = @feature_name + '_' + type.gsub(/\s/, '')
