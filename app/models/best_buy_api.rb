@@ -137,7 +137,6 @@ class BestBuyApi
       ids = []
       while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
         res = cached_request('search',{ :page => page, :categoryid => categoryid, :filter=> "#{filter_name}|#{filter_value}" })
-        
         totalpages ||= res["totalPages"]
         ids += res["products"].map{|p| p["sku"]}
         page += 1

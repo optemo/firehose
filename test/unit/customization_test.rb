@@ -27,6 +27,11 @@ class CustomizationTest < ActiveSupport::TestCase
   end
   
   test "Usage Type Rule" do
+    # stub the API requests for the tests to be independent of the data in the usage type feed
+    BestBuyApi.stubs(:search_with_filter).with{|categoryid, filter_name, filter_value| categoryid == "1002" and filter_name == "Usage Type" and filter_value == "Everyday"}.returns(["10212690", "10208037", "10215201"])
+    BestBuyApi.stubs(:search_with_filter).with{|categoryid, filter_name, filter_value| categoryid == "1002" and filter_name == "Usage Type" and filter_value == "Microsoft Premium Collection PC"}.returns(["10208037"])
+    BestBuyApi.stubs(:search_with_filter).with{|categoryid, filter_name, filter_value| categoryid == "1002" and filter_name == "Usage Type" and !(filter_value == "Everyday" or filter_value == "Microsoft Premium Collection PC")}.returns([])
+    
     # for an sku that has a usage type in the feed
     p1 = create(:product, sku: '10212690')
     result = RuleUsageType.group_computation([p1.id])
@@ -39,16 +44,16 @@ class CustomizationTest < ActiveSupport::TestCase
     result = RuleUsageType.group_computation([p2.id])
     assert_equal 2, result.length, 'Two usage types should be present for this sku'
     result.map(&:save) unless result.nil?
-    first_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "MicrosoftPremiumCollectionPC")
-    second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "Ultrabook")
+    first_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, "usageType_MicrosoftPremiumCollectionPC")
+    second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, 'usageType_Everyday')
     assert_not_nil first_saved_spec, "Usage type should be saved as expected"
     assert_not_nil second_saved_spec, "Usage type should be saved as expected"
     # had a usage type, no longer has one
-    p3 = create(:product, sku: '10208920')
-    BinSpec.create(:product_id => p3.id, :name => 'usageType_OntheGo', :value => true)
+    p3 = create(:product, sku: '10208196')
+    BinSpec.create(:product_id => p3.id, :name => 'usageType_Everyday', :value => true)
     result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
     result.map(&:save) unless result.nil?
-    saved_spec = BinSpec.find_by_product_id_and_name(p3.id, 'usageType_OntheGo')
+    saved_spec = BinSpec.find_by_product_id_and_name(p3.id, 'usageType_Everyday')
     assert_nil saved_spec, "Usage type no longer in the feed should not be present for this product"
     # had one usage type, usage type has changed
     p4 = create(:product, sku: '10215201')
