@@ -26,38 +26,35 @@ class CustomizationTest < ActiveSupport::TestCase
     assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
   end
   
-  # test "Usage Type Rule" do
-  #   # for an sku that's in category x, run the rule computation, check that there's a spec created for that category and that product
-  #   # 10206581 is in everyday but no other category
-  #   p1 = create(:product, sku: '10208202')
-  #   #CatSpec.create(:product_id => p1.id, :name => 'product_type', :value => 'F28357')
-  #   result = RuleUsageType.group_computation([p1.id])
-  #   assert_equal 1, result.length, 'Only one usage type should be present for this sku'
-  #   result.map(&:save) unless result.nil?
-  #   
-  #   saved_spec = BinSpec.find_by_product_id_and_name(p1.id, "usageType_Everyday")
-  #   assert_not_nil saved_spec, 'BinSpec should be present'
-  #   
-  #   # for sku 10195304 that is in 2 categories (Microsoft Premium Collection PC and Ultrabook)
-  #   p2 = create(:product, sku: '10195304')
-  #   result = RuleUsageType.group_computation([p2.id])
-  #   assert_equal 2, result.length, 'Two usage types should be present for this sku'
-  #   result.map(&:save) unless result.nil?
-  #   first_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "MicrosoftPremiumCollectionPC")
-  #   second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "Ultrabook")
-  #   assert_not_nil first_saved_spec, "Usage type should be saved as expected"
-  #   assert_not_nil second_saved_spec, "Usage type should be saved as expected"
-  #   
-  #   # An sku that's in none of those categories - a macbook - 10173232 ...
-  #   p3 = create(:product, sku: '10178804')
-  #   # FIXME: look into this - removing spec if the product had a spec before!
-  #   # CatSpec.create(:product_id => p3.id, :name => RuleUsageType.feature_name, :value => "Ultrabook")
-  #   #CatSpec.create(:product_id => p3.id, :name => 'product_type', :value => 'F23016')
-  #   result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
-  #   result.map(&:save) unless result.nil?
-  #   saved_spec = BinSpec.find_by_product_id(p3.id)
-  #   assert_nil saved_spec, "No usage type should be saved for a product not in any of the categories"
-  # end
+  test "Usage Type Rule" do
+    # for an sku that's in category x, run the rule computation, check that there's a spec created for that category and that product
+    # 10206581 is in everyday but no other category
+    p1 = create(:product, sku: '10208202')
+    #CatSpec.create(:product_id => p1.id, :name => 'product_type', :value => 'F28357')
+    result = RuleUsageType.group_computation([p1.id])
+    assert_equal 1, result.length, 'Only one usage type should be present for this sku'
+    result.map(&:save) unless result.nil?
+    
+    saved_spec = BinSpec.find_by_product_id_and_name(p1.id, "usageType_Everyday")
+    assert_not_nil saved_spec, 'BinSpec should be present'
+    
+    # for sku 10195304 that is in 2 categories (Microsoft Premium Collection PC and Ultrabook)
+    p2 = create(:product, sku: '10208037')
+    result = RuleUsageType.group_computation([p2.id])
+    assert_equal 2, result.length, 'Two usage types should be present for this sku'
+    result.map(&:save) unless result.nil?
+    first_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "MicrosoftPremiumCollectionPC")
+    second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "Ultrabook")
+    assert_not_nil first_saved_spec, "Usage type should be saved as expected"
+    assert_not_nil second_saved_spec, "Usage type should be saved as expected"
+    
+    p3 = create(:product, sku: '10208920')
+    BinSpec.create(:product_id => p3.id, :name => 'usageType_OntheGo', :value => true)
+    result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
+    result.map(&:save) unless result.nil?
+    saved_spec = BinSpec.find_by_product_id_and_name(p3.id, 'usageType_OntheGo')
+    assert_nil saved_spec, "Usage type no longer in the feed should not be present for this product"
+  end
   
   test "Rule Price Plus EHF" do
     # test a product with nil EHF but a saleprice value

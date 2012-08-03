@@ -16,11 +16,12 @@ class RuleUsageType < Customization
     usage_type_node = '1002'
     filter_name = "Usage Type"
     tries = 0
+    possible_usage_types = possibleValues(usage_type_node, filter_name)
     begin
       usage = {} # hash of the usage type that applies to each sku: {sku => [usage_a, usage_b]}
       # get the list of categories for usage type
       # cache the value returned here using memcached, perhaps?
-      possibleValues(usage_type_node, filter_name).each do |filter_value|
+      possible_usage_types.each do |filter_value|
         skus = BestBuyApi.search_with_filter(usage_type_node, filter_name, filter_value)
         skus.each do |skus|
           if usage.has_key?(skus) 
@@ -48,8 +49,12 @@ class RuleUsageType < Customization
     res_specs = []
     Product.find(pids).each do |product|
       usage_types = usage[product.sku]
-      
       unless usage_types.nil?
+        # delete usage types that are in the database but not in the feed
+        old_usage_types = BinSpec.find_by_sql("SELECT *  FROM `bin_specs` WHERE `product_id` = #{product.id} AND `name` REGEXP 'usageType'")
+        usage_types_long = usage_types.map{|u| @feature_name + '_' + u.gsub(/\s/, '')}
+        to_delete = old_usage_types.select{|type| !usage_types_long.include?(type.name)}
+        to_delete.each {|spec| spec_class.delete(spec)}
         usage_types.each do |type|
           usage_label = @feature_name + '_' + type.gsub(/\s/, '')
           spec = spec_class.find_or_initialize_by_product_id_and_name(product.id, usage_label)
