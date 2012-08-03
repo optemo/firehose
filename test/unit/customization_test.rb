@@ -27,18 +27,14 @@ class CustomizationTest < ActiveSupport::TestCase
   end
   
   test "Usage Type Rule" do
-    # for an sku that's in category x, run the rule computation, check that there's a spec created for that category and that product
-    # 10206581 is in everyday but no other category
-    p1 = create(:product, sku: '10208202')
-    #CatSpec.create(:product_id => p1.id, :name => 'product_type', :value => 'F28357')
+    # for an sku that has a usage type in the feed
+    p1 = create(:product, sku: '10212690')
     result = RuleUsageType.group_computation([p1.id])
     assert_equal 1, result.length, 'Only one usage type should be present for this sku'
     result.map(&:save) unless result.nil?
-    
     saved_spec = BinSpec.find_by_product_id_and_name(p1.id, "usageType_Everyday")
     assert_not_nil saved_spec, 'BinSpec should be present'
-    
-    # for sku 10195304 that is in 2 categories (Microsoft Premium Collection PC and Ultrabook)
+    # for sku that is in 2 categories
     p2 = create(:product, sku: '10208037')
     result = RuleUsageType.group_computation([p2.id])
     assert_equal 2, result.length, 'Two usage types should be present for this sku'
@@ -47,13 +43,22 @@ class CustomizationTest < ActiveSupport::TestCase
     second_saved_spec = BinSpec.find_by_product_id_and_name(p2.id, RuleUsageType.feature_name + '_' + "Ultrabook")
     assert_not_nil first_saved_spec, "Usage type should be saved as expected"
     assert_not_nil second_saved_spec, "Usage type should be saved as expected"
-    
+    # had a usage type, no longer has one
     p3 = create(:product, sku: '10208920')
     BinSpec.create(:product_id => p3.id, :name => 'usageType_OntheGo', :value => true)
     result = RuleUsageType.group_computation([p1.id, p2.id, p3.id])
     result.map(&:save) unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(p3.id, 'usageType_OntheGo')
     assert_nil saved_spec, "Usage type no longer in the feed should not be present for this product"
+    # had one usage type, usage type has changed
+    p4 = create(:product, sku: '10215201')
+    BinSpec.create(:product_id => p4.id, :name => 'usageType_Entertainment', :value => true)
+    result = RuleUsageType.group_computation([p4.id])
+    result.map(&:save) unless result.nil?
+    saved_old = BinSpec.find_by_product_id_and_name(p4.id, 'usageType_Entertainment')
+    assert_nil saved_old, "Old usage type should not be present for this product"
+    saved_new = BinSpec.find_by_product_id_and_name(p4.id, 'usageType_Everyday')
+    assert_not_nil saved_new, "New (updated) usage type should be present for this product"
   end
   
   test "Rule Price Plus EHF" do

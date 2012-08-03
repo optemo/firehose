@@ -49,18 +49,18 @@ class RuleUsageType < Customization
     res_specs = []
     Product.find(pids).each do |product|
       usage_types = usage[product.sku]
-      # delete usage types that are in the database for this product
       old_usage_types = BinSpec.find_by_sql("SELECT *  FROM `bin_specs` WHERE `product_id` = #{product.id} AND `name` REGEXP 'usageType'")
-      old_usage_types.each{|spec| BinSpec.delete(spec)} # the code below doesn't delete them all, but it was missing some
-      puts 'for 10208195' + ' usage types' + usage_types.to_s if product.sku == '10208195'
       unless usage_types.nil?
-        usage_types.each do |type|
-          usage_label = @feature_name + '_' + type.gsub(/\s/, '')
+        usage_types_long = usage_types.map{|u| @feature_name + '_' + u.gsub(/\s/, '')}
+        old_usage_types.select!{|type| !usage_types_long.include?(type.name)}
+        # create or edit specs for usage types that are in the feed
+        usage_types_long.each do |usage_label|
           spec = spec_class.find_or_initialize_by_product_id_and_name(product.id, usage_label)
           spec.value = true
           res_specs += [spec]
         end
       end
+      old_usage_types.each{|spec| BinSpec.delete(spec)} # delete the existing usage types which are not in the feed
     end
     res_specs
   end
