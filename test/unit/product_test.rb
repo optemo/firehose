@@ -10,6 +10,8 @@ class ProductTest < ActiveSupport::TestCase
     sr = create(:scraping_rule, local_featurename: "title", remote_featurename: "name", rule_type: "Text")
     sr = create(:scraping_rule, local_featurename: "price", remote_featurename: "regularPrice", rule_type: "Continuous")
     sr = create(:scraping_rule, local_featurename: "isAdvertised", remote_featurename: "isAdvertised", rule_type: "Binary", regex: '[Tt]rue/1')
+    sr = create(:scraping_rule, local_featurename: "bundle", remote_featurename: "bundle", rule_type: "Text", regex: '(\[.+\])/\1')
+    sr = create(:scraping_rule, local_featurename: "relations", remote_featurename: "related", rule_type: "Text", regex: '(\[.+\])/\1')
 
     # Create two scraping rules for same local feature
     sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Bb]lue', priority: 0)
@@ -18,7 +20,7 @@ class ProductTest < ActiveSupport::TestCase
     # Stub out BestBuyApi methods
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}) 
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}) 
     BestBuyApi.stubs(:product_search).with{|id| id == "222"}.returns(
       {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}) 
 
@@ -131,7 +133,7 @@ class ProductTest < ActiveSupport::TestCase
 
   end
 
-  test "Instock set to false for products not in the feed" do
+  test "Products not in the feed are deleted" do
     Product.feed_update
 
     p111 = Product.find_by_sku("111")
@@ -142,6 +144,11 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_nil p222, "Product 222 was created"
     assert p222.instock, "Product 222 is instock"
 
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 1, search.results.size, "Sunspot found product 222"
+
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474")])
 
     Product.feed_update
@@ -151,11 +158,137 @@ class ProductTest < ActiveSupport::TestCase
     assert p111.instock, "Product 111 is instock"
 
     p222 = Product.find_by_sku("222")
-    assert_not_nil p222, "Product 222 exists"
-    assert !p222.instock, "Product 222 is not instock"
+    assert p222.nil?, "Product 222 no longer exists"
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 0, search.results.size, "Sunspot did not find product 222"
   end
 
-  test "Instock set to false if product_search raises error" do
+  test "Large categories are protected from empty feeds" do
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474"),
+                                             BBproduct.new(id: "333", category: "22474"), BBproduct.new(id: "444", category: "22474")])
+    ["111", "222", "333", "444"].each do |test_sku| 
+      BestBuyApi.stubs(:product_search).with{|id| id == test_sku}.returns(
+          { "sku" => test_sku, "name" => "Test Product " + test_sku, "regularPrice" => 279.99, "longDescription" => "Description of product " + test_sku}) 
+    end
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 was created"
+
+    BestBuyApi.stubs(:category_ids).returns([])
+
+    assert_raise ValidationError, "Product.feed_update throws a ValidationError" do
+      Product.feed_update
+    end
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 is still in the database"
+
+  end
+
+  test "product_bundles is cleaned up when *bundle product* is removed from feed" do
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "111-bundle", category: "22474"),
+                                             BBproduct.new(id: "222", category: "22474")])
+    BestBuyApi.stubs(:product_search).with{|id| id == "111-bundle"}.returns(
+      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, "bundle" => '[{"sku": "111"}]'}) 
+
+    Product.feed_update
+    
+    p111Bundle = Product.find_by_sku("111-bundle")
+    assert_not_nil p111Bundle, "Product 111-bundle exists"
+
+    bundles = ProductBundle.find_all_by_bundle_id(p111Bundle.id)
+
+    assert_equal 1, bundles.size, "One entry exists in product_bundles table for product 111-bundle"
+
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474")])
+
+    Product.feed_update 
+
+    bundles = ProductBundle.find_all_by_bundle_id(p111Bundle.id)
+
+    assert_equal 0, bundles.size, "Zero entries exist in product_bundles table for product 111-bundle"
+  
+  end
+
+  test "product_bundles is cleaned up when *product in bundle* is removed from feed" do
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "111-bundle", category: "22474"),
+                                             BBproduct.new(id: "222", category: "22474")])
+    BestBuyApi.stubs(:product_search).with{|id| id == "111-bundle"}.returns(
+      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, "bundle" => '[{"sku": "111"}]'}) 
+
+    Product.feed_update
+    
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 exists"
+
+    bundles = ProductBundle.find_all_by_product_id(p111.id)
+
+    assert_equal 1, bundles.size, "One entry exists in product_bundles table for product 111"
+
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111-bundle", category: "22474"), BBproduct.new(id: "222", category: "22474")])
+
+    Product.feed_update 
+
+    bundles = ProductBundle.find_all_by_product_id(p111.id)
+
+    assert_equal 0, bundles.size, "Zero entries exist in product_bundles table for product 111"
+  
+  end
+
+  test "product_siblings is cleaned up when product is removed from feed" do
+    BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, 
+        "related" => '[{"sku": "222", "type": "Variant"}]'}) 
+
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+
+    p111Siblings = ProductSibling.find_all_by_product_id(p111.id)
+
+    assert_equal 1, p111Siblings.size, "One entry exists in product_siblings table for product 111 as product"
+ 
+    p111AsSibling = ProductSibling.find_all_by_sibling_id(p111.id)
+
+    assert_equal 1, p111AsSibling.size, "One entry exists in product_siblings table for product 111 as sibling"
+
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "222", category: "22474")])
+
+    Product.feed_update
+
+    p111Siblings = ProductSibling.find_all_by_product_id(p111.id)
+
+    assert_equal 0, p111Siblings.size, "Zero entries exist in product_siblings table for product 111 as product"
+ 
+    p111AsSibling = ProductSibling.find_all_by_sibling_id(p111.id)
+
+    assert_equal 0, p111AsSibling.size, "Zero entries exist in product_siblings table for product 111 as sibling"
+
+  end
+
+  test "Equivalence is deleted when product is removed from feed" do
+    Product.feed_update
+
+    p222 = Product.find_by_sku("222")
+    equivalences = Equivalence.find_all_by_product_id(p222.id)
+
+    assert_equal 1, equivalences.size, "One equivalence row exists for product 222"
+
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474")])
+
+    Product.feed_update
+
+    equivalences = Equivalence.find_all_by_product_id(p222.id)
+
+    assert_equal 0, equivalences.size, "Zero equivalence rows exist for product 222"
+
+  end
+
+  test "Product deleted if product_search raises error" do
     Product.feed_update
 
     p111 = Product.find_by_sku("111")
@@ -175,8 +308,7 @@ class ProductTest < ActiveSupport::TestCase
     assert p111.instock, "Product 111 is instock"
 
     p222 = Product.find_by_sku("222")
-    assert_not_nil p222, "Product 222 exists"
-    assert !p222.instock, "Product 222 is not instock"
+    assert p222.nil?, "Product 222 no longer exists"
   end
 
   test "Multiple scraping rules applied in priority order" do
@@ -213,7 +345,8 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_nil product_type_spec, "product_type spec exists"
     assert_equal "B28381", product_type_spec.value, "Product type is B28381"
 
-    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474"), BBproduct.new(id: "444555", category: "22474")])
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), 
+                                             BBproduct.new(id: "222", category: "22474"), BBproduct.new(id: "444555", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "444555"}.returns(
       {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true}) 
 
@@ -233,7 +366,7 @@ class ProductTest < ActiveSupport::TestCase
     # Create product with two product_type specs
     product = create(:product, sku: "333444", instock: true, retailer: "B")
     create(:cat_spec, product: product, name: "product_type", value: "B28381")
-    create(:cat_spec, product: product, name: "product_type", value: "B28382")
+    create(:cat_spec, product: product, name: "product_type", value: "B22474")
 
     product = Product.find_by_sku("333444")
     assert_not_nil product, "Product 333444 exists"

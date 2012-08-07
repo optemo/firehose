@@ -8,10 +8,22 @@ class Product < ActiveRecord::Base
   has_many :bin_specs, :dependent=>:delete_all
   has_many :cont_specs, :dependent=>:delete_all
   has_many :text_specs, :dependent=>:delete_all
-  has_many :product_siblings
-  has_many :product_bundles
+  has_many :product_siblings, :dependent=>:delete_all
   
-  SMALL_CAT_SIZE_NOT_PROTECTED = 3 # Categories of this size or below are not protected from empty feeds
+  # product_bundles represents the bundles that this product belongs to.
+  has_many :product_bundles, :dependent=>:delete_all
+
+  has_one  :equivalence, :dependent=>:delete
+
+  # If this product *is* a bundle, then owned_bundle points to the corresponding ProductBundle.
+  # We ensure that the owned_bundle is deleted when this product is destroyed.
+  has_one :owned_bundle, :class_name=>"ProductBundle", :foreign_key=>"bundle_id", :dependent=>:delete
+
+  # Ensure rows in product_siblings where sibling_id is this product are deleted when this product
+  # is destroyed.
+  after_destroy :delete_from_siblings
+  
+  MIN_PROTECTED_CAT_SIZE = 4 # Categories of this size or greater are protected from empty feeds.
   
   searchable(auto_index: false) do
     text :title do
@@ -88,7 +100,12 @@ class Product < ActiveRecord::Base
   def self.cached(id)
     CachingMemcached.cache_lookup("Product#{id}"){find(id)}
   end
-  
+
+  # Remove rows from product_siblings where this product is the sibling.
+  def delete_from_siblings
+    ProductSibling.delete_all(sibling_id: id)
+  end
+
   #Returns an array of results
   def self.manycached(ids)
     res = CachingMemcached.cache_lookup("ManyProducts#{ids.join(',').hash}"){find(ids)}
@@ -117,68 +134,60 @@ class Product < ActiveRecord::Base
 
   # Update the specs for each product under the current product category (as specified by Session.product_type).
   #
-  # product_skus - Optional list of BBproduct instances to be updated. If this parameter is nil, the list 
+  # bb_products - Optional list of BBproduct instances to be updated. If this parameter is nil, the list 
   #                of products for the current product category will be retrieved using the BestBuyApi.
-  def self.feed_update(product_skus = nil)
+  def self.feed_update(bb_products = nil)
     raise ValidationError unless Session.product_type
     
     amazon = true if Session.retailer == "A"
     
-    if product_skus.nil?
+    if bb_products.nil?
       unless amazon
-        product_skus = get_products(Session.product_type)
+        bb_products = get_products(Session.product_type)
       else
-        product_skus = AmazonApi.get_all_products(Session.product_type)
+        bb_products = AmazonApi.get_all_products(Session.product_type)
       end
     end
 
-    #product_skus.uniq!{|a|a.id} #Uniqueness check
-    
+    existing_products = {}
     products_to_update = {}
     products_to_save = {}
     specs_to_save = {}
     specs_to_delete = []
     
     #Get the candidates from multiple remote_featurenames for one featurename sperately from the other
-
-    holding = ScrapingRule.scrape(product_skus,false,[],true,false)
+    holding = ScrapingRule.scrape(bb_products,false,[],true,false)
     candidates_multi = holding[:candidates]
     translations = holding[:translations].uniq
-    holding = ScrapingRule.scrape(product_skus,false,[],false,false)
+    holding = ScrapingRule.scrape(bb_products,false,[],false,false)
     translations += holding[:translations].uniq
     candidates = holding[:candidates] + Candidate.multi(candidates_multi,false) #bypass sorting
     
-    # Reset the instock flags
     Product.current_type.find_each do |p|
-      p.instock = false
-      products_to_update[p.sku] = p
+      existing_products[p.sku] = p
     end
     
     if amazon
-      product_skus = product_skus['ids']
+      bb_products = bb_products['ids']
     end
     
-    all_products_from_retailer = Product.joins(:cat_specs).where(cat_specs: {name: "product_type"}, products: {retailer: Session.retailer})
-    product_skus.each do |bb_product|
-      # before putting a product into products_to_save, check whether it is in the products table and has a different category
-      sku = bb_product.id
-      existing_product = products_to_update[sku]
-      if existing_product.nil?
-        same_sku_products = all_products_from_retailer.where(:sku => sku)
+    # If the product exists under a different category, we will reuse the existing row in the database.
+    # This preserves the invariant that there is only ever one product in the database for a given retailer
+    # and SKU.
+    bb_products.each do |bb_product|
+      if not existing_products.has_key?(bb_product.id)
+        # Check if the product exists under a different category.
+        same_sku_products = Product.where(retailer: Session.retailer, sku: bb_product.id)
         unless same_sku_products.empty?
-          same_sku_different_product_type = same_sku_products.first.cat_specs.where('name = ? AND value NOT IN (?)', "product_type", Session.product_type_leaves)
-          unless same_sku_different_product_type.empty?
-            #puts sku + ' is an SKU that was found to be under two different product categories'
-            products_to_update[bb_product.id] = Product.find(same_sku_different_product_type.first.product_id)
-          else
-            products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
-          end
-        else
-          products_to_save[bb_product.id] = Product.new sku: bb_product.id, instock: false, retailer: Session.retailer
+          existing_products[bb_product.id] = same_sku_products.first
         end
       end
     end
-    
+
+    # Initially, we assume that all existing products will be deleted. Only if at least one scraping rule 
+    # matched will a product be removed from this hash.
+    products_to_delete = existing_products.clone
+
     candidates.each do |candidate|
       spec_class = case candidate.model
         when "Categorical" then CatSpec
@@ -188,15 +197,26 @@ class Product < ActiveRecord::Base
         else CatSpec # This should never happen
       end
       raise ValidationError, "Failed to set candidate as delinquent" if (candidate.parsed.nil? && !candidate.delinquent)
-      if candidate.delinquent && (p = products_to_update[candidate.sku])
-        #This is a feature which was removed
-        spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
-        specs_to_delete << spec if spec && !spec.modified
+      if candidate.delinquent 
+        if (p = existing_products[candidate.sku])
+          #This is a feature which was removed
+          spec = spec_class.find_by_product_id_and_name(p.id,candidate.name)
+          specs_to_delete << spec if spec && !spec.modified
+        end
       else
         puts ("Parsed value should not be false, found for " + candidate.sku + ' ' + candidate.name) if (candidate.parsed == "false" && spec_class == BinSpec) # was: raise ValidationError
-        if p = products_to_update[candidate.sku]
+        if p = existing_products[candidate.sku]
           #Product is already in the database
           p.instock = true
+
+          # Product should not be deleted ...
+          products_to_delete.delete(candidate.sku)
+
+          # ... instead it should be updated.
+          if !products_to_update.has_key?(candidate.sku)
+            products_to_update[candidate.sku] = p
+          end
+
           # Find all values for this spec. In the past, coding errors and other issues have caused 
           # multiple values for a single local feature name, such as product_type, to appear in the database. 
           specs = spec_class.where(product_id: p.id, name: candidate.name)
@@ -209,11 +229,14 @@ class Product < ActiveRecord::Base
             specs_to_delete.concat(specs[1..-1])
           end
           spec.value = candidate.parsed
-          p.set_dirty if spec.changed? #Taint product for indexing
           specs_to_save.has_key?(spec_class) ? specs_to_save[spec_class] << spec : specs_to_save[spec_class] = [spec]
-        elsif (p = products_to_save[candidate.sku]) && !candidate.delinquent
+        else 
           #Product is new
-          p.instock = true
+          p = products_to_save[candidate.sku] 
+          if p.nil? 
+            p = Product.new sku: candidate.sku, instock: true, retailer: Session.retailer
+            products_to_save[candidate.sku] = p
+          end
           myspecs = case candidate.model
             when "Categorical" then p.cat_specs
             when "Continuous" then p.cont_specs
@@ -224,7 +247,13 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    raise ValidationError, "No products are instock" if Product.current_type.length > SMALL_CAT_SIZE_NOT_PROTECTED && (specs_to_save.values.inject(0){|count,el| count+el.count} == 0 && products_to_save.size == 0)
+
+    # We assume that if a category has at least MIN_PROTECTED_CAT_SIZE products in the database, but no products in the
+    # feed, this is an error in the feed.
+    if products_to_delete.size >= MIN_PROTECTED_CAT_SIZE and products_to_update.size == 0 and products_to_save.size == 0 
+      raise ValidationError, "Category " + Session.product_type.to_s + " has " + products_to_delete.size.to_s + 
+           " products in the database, but no products in the feed. Existing products will *not* be deleted."
+    end
 
     # Bulk insert/update for efficiency
     Product.import products_to_update.values, :on_duplicate_key_update=>[:instock]
@@ -242,6 +271,8 @@ class Product < ActiveRecord::Base
     products_to_save = products_to_save.values.select{|p| !p.cat_specs.select{|cs| cs.name == "product_type"}.empty? }
     products_to_save.map(&:save)
     
+    products_to_delete.values.each(&:destroy)
+
     ProductBundle.get_relations
     #Get the color relationships loaded
     ProductSibling.get_relations
