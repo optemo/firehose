@@ -42,4 +42,31 @@ class CandidateTest < ActiveSupport::TestCase
     c2 = build(:candidate, scraping_rule: sr1)
     assert_equal [c2], Candidate.multi([c1,c2])
   end
+
+  test "Parsed value type conversion" do
+    candidate = build(:candidate, parsed: "hop", model: "Text")
+    assert_equal "hop", candidate.value
+
+    candidate = build(:candidate, parsed: "true", model: "Binary")
+    assert_equal true, candidate.value
+
+    candidate = build(:candidate, parsed: "1", model: "Binary")
+    assert_equal true, candidate.value
+
+    candidate = build(:candidate, parsed: "abcd", model: "Binary")
+    assert_equal false, candidate.value
+
+    candidate = build(:candidate, parsed: "MyCategory", model: "Categorical")
+    assert_equal "MyCategory", candidate.value
+
+    candidate = build(:candidate, parsed: "123.22", model: "Continuous")
+    assert_equal 123.22, candidate.value
+
+    candidate = build(:candidate, parsed: "abcd", model: "Continuous")
+    assert_equal 0.0, candidate.value
+
+    candidate = build(:candidate, parsed: nil, model: "Text")
+    assert_equal nil, candidate.value
+  end
+
 end

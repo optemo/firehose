@@ -75,5 +75,16 @@ class ProductCategory < ActiveRecord::Base
         query + "AND l_id=(r_id-1)"
       end
     end
+
+    # Remove the leading retailer character from a category identifier.
+    def trim_retailer(product_category)
+      product_category_s = product_category.to_s
+      if /^[BFA]/ =~ product_category_s
+        product_category_s[1..-1] 
+      else
+        product_category
+      end
+    end
   end
 end
+

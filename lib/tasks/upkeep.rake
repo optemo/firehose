@@ -26,10 +26,16 @@ task :update => :environment do
     if /[BFA]\w+/ =~ ENV["product_type"]
       Session.new ENV["product_type"]
     else
-      raise "usage: rake update product_type=? # where product_type is a Bestbuy hierarchy number, e.g. B20218 or F1084."
+      raise "usage: rake update [shallow=true] product_type=? # where product_type is a Bestbuy hierarchy number, e.g. B20218 or F1084."
     end
   end
   
+  is_shallow = false
+  if ENV.include?("shallow")
+    env_shallow = ENV["shallow"]
+    is_shallow = (env_shallow == "true" or env_shallow == "1")
+  end
+
   start = Time.now
   leaves = Session.product_type_leaves
   if leaves.nil? || leaves.empty?
@@ -41,7 +47,10 @@ task :update => :environment do
     Session.new node
     begin 
       print 'Started scraping category ' + node.to_s
-      Product.feed_update
+      if is_shallow
+        print ' (shallow)'
+      end
+      Product.feed_update(nil, is_shallow)
       puts '...Finished'
     rescue BestBuyApi::RequestError => error
       puts 'Got the following error in scraping current category: '
@@ -49,11 +58,11 @@ task :update => :environment do
     end
   end
   Session.new ENV["product_type"] #Reset session
-  #clean up inactive scraping rules not used any more
-  Facet.check_active
-  Search.cleanup_history_data(7)
-  #Report problem with script if it finishes too fast
-  `touch tmp/r_updateproblem.txt` if (Time.now - start < 1.minute)
+  if not is_shallow
+    #clean up inactive scraping rules not used any more
+    Facet.check_active
+    Search.cleanup_history_data(7)
+  end
 end
 
 # This task takes a product category or list of product categories as an argument.
