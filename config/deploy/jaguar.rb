@@ -1,5 +1,5 @@
 set :application, "firehose"
-set :repository,  "git@jaguar:firehose.git"
+set :repository,  "ssh://jaguar:29418/firehose.git"
 set :domain, "jaguar"
 set :branch, "master"
 set :user, "#{ `whoami`.chomp.downcase }"
