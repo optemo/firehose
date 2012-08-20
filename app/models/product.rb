@@ -69,8 +69,8 @@ class Product < ActiveRecord::Base
       end
     end
    end
-    float :lr_utility, trie: true do
-      cont_specs.find_by_name(:lr_utility).try(:value)
+    float :lrutility, trie: true do
+      cont_specs.find_by_name(:lrutility).try(:value)
     end
     autosuggest :all_searchable_data do
       if (instock)

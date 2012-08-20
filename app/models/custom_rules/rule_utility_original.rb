@@ -7,7 +7,7 @@ class RuleUtilityOriginal < Customization
   def RuleUtilityOriginal.group_computation(pids)
     
       default ="utility"
-      non_default = "lr_utility"
+      non_default = "lrutility"
       cont_activerecords = Hash.new # For bulk insert/update
       cont_activerecords[default]=[]
       cont_activerecords[non_default]=[]
