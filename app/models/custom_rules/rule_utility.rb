@@ -77,6 +77,8 @@ class RuleUtility < Customization
                           }
   
   def RuleUtility.group_computation(pids)
+    return [] if pids.empty?
+
     retailer = Product.find(pids[0]).retailer
     default_features = DEFAULT_FEATURES[retailer]
     features_without_max = FEATURES_WITHOUT_MAX[retailer]

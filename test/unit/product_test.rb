@@ -64,6 +64,14 @@ class ProductTest < ActiveSupport::TestCase
     Product.feed_update(nil, true)
   end
 
+  test "Feed_update should not throw exception for empty category" do 
+    BestBuyApi.stubs(:category_ids).returns([])
+
+    assert_nothing_raised("feed_update should not throw an exception") do
+      Product.feed_update
+    end
+  end
+
   test "Instock set and specs created for new products" do
     Product.feed_update
 

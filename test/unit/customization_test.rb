@@ -468,6 +468,10 @@ class CustomizationTest < ActiveSupport::TestCase
     create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")
     create(:facet, name: "frontlcd", feature_type: "Binary", used_for: "utility", value: 0.4, product_type: "B20218")
     
+    # Ensure that an empty array is handled correctly.
+    result = RuleUtility.group_computation( [] )
+    assert_empty result, "Result for an empty pid list should be empty"
+
     result = RuleUtility.group_computation( [ adv1.id, adv2.id, adv_no_save1.id, adv_no_save2.id, unadv1.id, unadv2.id, best1.id, best2.id ] )
     
     # Test for successful computation
