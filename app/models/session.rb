@@ -30,6 +30,18 @@ class Session
     product_type[0]
   end
   
+  def self.futureshop?
+    product_type[0] == "F"
+  end
+  
+  def self.bestbuy?
+    product_type[0] == "B"
+  end
+  
+  def self.amazon?
+    product_type[0] == "A"
+  end
+ 
   def self.set_features(categories = [])
     #if an array of categories is given, dynamic features which apply only to those categories are shown
     dynamically_excluded = []

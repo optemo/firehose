@@ -32,6 +32,24 @@ class Candidate
     @delinquent = params[:delinquent]
   end
   
+  def value 
+    if parsed.nil?
+      nil
+    end
+    case model
+      when "Categorical" then parsed
+      when "Continuous" then parsed.to_f
+      when "Binary" then
+        if parsed =~ /^(True|true|TRUE|1)$/
+          true
+        else
+          false
+        end
+      when "Text" then parsed
+      else parsed
+    end
+  end
+
   def self.organize(candidates)
     rules = Hash.new{|h,k| h[k] = Hash.new} #Each of the rules that will be displayed
     multirules = Hash.new{|h,k| h[k] = Hash.new} #Which rule was used for a product when multiple rules are available

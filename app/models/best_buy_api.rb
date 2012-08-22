@@ -108,7 +108,7 @@ class BestBuyApi
       ids = []
       id.each do |my_id|
         #Check if ProductType or feed_id
-        my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
+        my_id = ProductCategory.trim_retailer(my_id)
         res = cached_request('search',{:page => 1,:categoryid => my_id, :sortby => "name", :pagesize => num})
         ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
       end
@@ -153,12 +153,12 @@ class BestBuyApi
       q = {} 
       id.each do |my_id|
         #Check if ProductType or feed_id
-        my_id = my_id.to_s[1..-1] if /^[BFA]/ =~ my_id.to_s
+        my_id = ProductCategory.trim_retailer(my_id)
         # check if the category is an invalid one (no parents, but many products listed)
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
         if (feed_category['productCount'] >= (0.95 * root_category['productCount']) and my_id != 'Departments')
-          puts "Category " + my_id + " appears to be empty"
+          puts "Category " + my_id + " invalid or empty"
           return ids
         end
         page = 1
@@ -175,6 +175,37 @@ class BestBuyApi
         end
       end
       ids
+    end
+    
+    # Gets product infos for given category id. Returns an array of hashes, one for each product in the category.
+    # This uses the BestBuy 'search' API call, so it does not return all of the product info available through
+    # the 'product' API call. 
+    def get_shallow_product_infos(category_id, english = true)
+      # Remove leading B/F/A
+      category_id = ProductCategory.trim_retailer(category_id)
+      if category_id != 'Departments'
+        # Invalid or empty categories result in the entire catalog being returned.
+        category_info = BestBuyApi.get_category(category_id)
+        root_category_info = BestBuyApi.get_category('Departments')
+        if category_info['productCount'] >= 0.95 * root_category_info['productCount']
+          puts "Category " + category_id + " invalid or empty"
+          return []
+        end
+      end
+      products = []
+      page = 1
+      total_pages = 1
+      query = {categoryid: category_id, sortby: "name", lang: (english ? "en" : "fr"),
+               currentregion: "QC", ignoreehfdisplayrestrictions: "true"}
+      while (page <= total_pages) 
+        query[:page] = page
+        # Bypass the cache to return the latest information.
+        result = send_request('search', query)
+        total_pages = result["totalPages"]
+        products.concat(result["products"])
+        page += 1
+      end
+      products
     end
     
     def search(string,page=1)

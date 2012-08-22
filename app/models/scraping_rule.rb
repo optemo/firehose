@@ -13,26 +13,53 @@ class ScrapingRule < ActiveRecord::Base
   
   # Get list of candidate scraping rules to be applied for specified array of BBproduct instances.
   # Also gathers translations for categorical feature attributes.
-  # Returns hash of {translations, candidates, raw}.
+  #
+  # bb_products - Array of BBproduct instances.
+  # ret_raw - Should we return raw data for debugging purposes?
+  # rules - Rules to be applied. If empty, rules for the category will be retrieved from the database.
+  # multi - Should we process local features with multiple rules? 
+  #           true: process only local features with multiple rules.
+  #           false: process only local features with a single rule.
+  #           nil: process all local features, regardless of rule cardinality.
+  # to_show - If true, disable translation gathering.
+  #
+  # Returns hash of {:translations, :candidates, :raw}.
   #   - translations: Array of arrays of form ['en'/'fr', key, parsed]. Key has form
-  #                   "cat_option.<retailer>.<local feature name>.<English version of parsed value>". Duplicates entries may be returned.
+  #                   "cat_option.<retailer>.<local feature name>.<English version of parsed value>". Duplicate entries may be returned.
   #                   It is also possible for multiple French translations to be returned with the same key.
   #   - candidates: Candidate scraping rules to be applied for the products provided. Multiple candidates may be returned for the same local 
   #                 feature, the decision about which candidate to apply in such cases is made later.
-  #   - raw: Raw data returned by BestBuy API for the *first* product in the list provided.
-  def self.scrape(ids,ret_raw = false,rules = [], multi = nil, to_show = false) #Can accept both one or more ids, whether to return the raw json
-    #Return type: Array of candidates
-    amazon = true if Session.retailer == "A"
-    
+  #   - raw: If ret_raw is true, contains raw data returned by BestBuy API for the *first* product in the list provided.
+  def self.scrape(bb_products, ret_raw = false, rules = [], multi = nil, to_show = false)
+    bb_products = Array(bb_products)
+
+    retailer_infos = []
+
+    bb_products.each do |bb_product|
+      sku = bb_product.id
+
+      english_info = product_search(sku, true)
+      english_info["category_id"] = bb_product.category unless english_info.nil?
+
+      french_info = product_search(sku, false)
+      french_info["category_id"] = bb_product.category unless french_info.nil?
+
+      retailer_infos << RetailerProductInfo.new(sku, english_info, french_info)
+    end
+
+    apply_rules(retailer_infos, ret_raw, rules, multi, to_show)
+  end
+
+  # Get list of candidate scraping rules to be applied for specified array of product info hashes.
+  # Also gathers translations for categorical feature attributes.
+  #
+  # product_infos - Array of RetailerProductInfo objects.
+  #
+  # For other arguments and return value, see documentation for scrape(), above.
+  def self.apply_rules(product_infos, ret_raw = false, rules = [], multi = nil, to_show = false)
     candidates = []
     translations = []
     
-    unless amazon
-      ids = Array(ids) # [ids] unless ids.kind_of? Array
-    else
-      a_product_data = ids['data']
-      ids = ids['ids']
-    end
     rules_hash = get_rules(rules,multi)
 
     if rules_hash.empty?
@@ -40,40 +67,20 @@ class ScrapingRule < ActiveRecord::Base
     end
 
     corrections = ScrapingCorrection.all
-    ids.each do |bbproduct|
+    product_infos.each do |product_info|
       raw_return = nil
       # We acquire translations of feature values for each product, duplicates are filtered later.
       en_trans = {}
       fr_trans = {}
       # For each product, we query both English and French product information.
-      ["English","French"].each do |language|
-        next if amazon && language == "French"
-        begin
-          unless amazon
-            raw_info = BestBuyApi.product_search(bbproduct.id, true, language == "English")
-          else
-            raw_info = AmazonApi.product_search(bbproduct.id, a_product_data)
-          end
-        rescue BestBuyApi::RequestError
-          # This will never happen for Amazon
-          #Try the request without including extra info
-          begin
-            raw_info = BestBuyApi.product_search(bbproduct.id, false, language == "English")
-          rescue BestBuyApi::RequestError
-            puts 'Error in the feed: returned nil for ' + bbproduct.id
-            next
-          end
-        rescue BestBuyApi::TimeoutError
-          puts "TimeoutError"
-          sleep 30
-          retry
-        end
-        
+      [:english, :french].each do |language|
+        is_english = (language == :english)
+
+        raw_info = product_info.get_info(language)
+
         unless raw_info.nil?
-          #Insert category id spec
-          raw_info["category_id"] = bbproduct.category
           rules_hash.each do |r|
-            next unless (!r[:rule].french && language == "English") || (r[:rule].french && language=="French")
+            next unless (!r[:rule].french && is_english) || (r[:rule].french && !is_english)
             #Traverse the hash hierarchy
             if r[:specs]
               if raw_info["specs"]
@@ -85,7 +92,7 @@ class ScrapingRule < ActiveRecord::Base
             else
               raw = raw_info[r[:rule].remote_featurename]
             end
-            corr = corrections.find{|c|c.product_id == bbproduct.id && c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == Digest::MD5.hexdigest(raw.to_s))}
+            corr = corrections.find{|c|c.product_id == product_info.sku && c.scraping_rule_id == r[:rule].id && (c.raw == raw.to_s || c.raw == Digest::MD5.hexdigest(raw.to_s))}
             if corr
               parsed = corr.corrected
               delinquent = false
@@ -136,7 +143,7 @@ class ScrapingRule < ActiveRecord::Base
                 parsed: (r[:rule].local_featurename == "product_type" || r[:rule].rule_type != "Categorical" ? parsed : (parsed.nil? ? nil : CGI::escape(parsed.downcase))),
                 raw: raw.to_s,
                 scraping_rule_id: r[:rule].id,
-                sku: bbproduct.id,
+                sku: product_info.sku,
                 delinquent: delinquent,
                 scraping_correction_id: (corr ? corr.id : nil),
                 model: r[:rule].rule_type,
@@ -145,16 +152,16 @@ class ScrapingRule < ActiveRecord::Base
               #Note: we really should take product_type out of scraping_rules and hard code it
             end
           end
-        end
-        #Return the raw info only on the first pass
-        raw_return = raw_info if language == "English" && ret_raw == true 
-        if language == "French" && ret_raw == true
-          raw_return["French Specs"] = raw_info["specs"]
-          ret_raw = raw_return
+          #Return the raw info only on the first pass
+          raw_return = raw_info if is_english && ret_raw == true 
+          if !is_english && ret_raw == true
+            raw_return["French Specs"] = raw_info["specs"]
+            ret_raw = raw_return
+          end
         end
       end
       if en_trans.empty?
-        Rails.logger.warn "No english translations found for product #{bbproduct.id}. Please ensure each scraping rule needing a translation has an english version." unless to_show
+        Rails.logger.warn "No english translations found for product #{product_info.sku}. Please ensure each scraping rule needing a translation has an english version." unless to_show
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first
@@ -163,12 +170,9 @@ class ScrapingRule < ActiveRecord::Base
           begin
             unless fr_trans[lf].nil? # Don't save a french translation if nothing is scraped
               translations << ['fr', key, fr_trans[lf][0]]
-            #  if fr_trans[lf][1] != en_trans[lf][1]+1
-            #    p "Product #{bbproduct.id} 's fr and en results are not scraped from the same rule for #{lf}. \nFrench priority: #{fr_trans[lf][1]}, English priority: #{en_trans[lf][1]}"
-            #  end
             end
           rescue
-            p "A french translation may have not been defined for product #{bbproduct.id} #{lf}, or its value is missing"
+            puts "A french translation may have not been defined for product #{product_info.sku} #{lf}, or its value is missing"
           end
         end
       end
@@ -176,6 +180,25 @@ class ScrapingRule < ActiveRecord::Base
     {translations: translations, candidates: candidates, raw: ret_raw}
   end
   
+  def self.product_search(sku, english)
+    RemoteUtil.do_with_retry(exceptions: BestBuyApi::TimeoutError) do |is_retry|
+      if is_retry 
+        puts "TimeoutError calling BestBuyApi.product_search for sku " + sku.to_s
+      end
+      begin
+        BestBuyApi.product_search(sku, true, english)
+      rescue BestBuyApi::RequestError
+        # Try the request without including extra info
+        begin
+          BestBuyApi.product_search(sku, false, english)
+        rescue BestBuyApi::RequestError
+          puts 'Error in the feed: returning nil for ' + sku
+          nil
+        end
+      end
+    end
+  end
+
   def self.get_rules(rules, multi)
     # return rules with the regexp objects
     rules_hash = []
