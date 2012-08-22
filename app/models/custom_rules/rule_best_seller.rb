@@ -17,6 +17,8 @@ class RuleBestSeller < Customization
       sorted_specs[pid] = set.where(:sku => prod.sku).inject(0) {|sum, spec| sum += spec.value_flt}
     end
     
+    return [] if sorted_specs.empty?
+ 
     sorted_specs = sorted_specs.sort_by {|pid, sum| sum}
     sorted_specs.reverse!
     

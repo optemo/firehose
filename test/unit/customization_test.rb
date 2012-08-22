@@ -283,6 +283,9 @@ class CustomizationTest < ActiveSupport::TestCase
     DailySpec.create(:sku => p4.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 0)
     DailySpec.create(:sku => p5.sku, :name => input_spec_name, :date => Date.today.to_s, :value_flt => 3)
     
+    result = rule_name.group_computation([])
+    assert_empty result, "Empty list of products should yield empty list of results"
+
     result = rule_name.group_computation([p6.id])
     assert_empty result, "product with no input values in DailySpecs should not be a bestseller"
     
