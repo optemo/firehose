@@ -5,7 +5,7 @@ class RuleUtility < Customization
   @rule_type = 'Continuous'
   
   DEFAULT = 'utility'
-  NON_DEFAULT = 'lr_utility'
+  NON_DEFAULT = 'lrutility'
   
   ## The following array of hashes is used to tell the code what special methods should be called in which cases
   ## The special method corresponds to the 'title' element of the hash (i.e. intercept corresponds to "compute_value_for_intercept")
@@ -83,7 +83,7 @@ class RuleUtility < Customization
     
     utility_specs = {DEFAULT => [], NON_DEFAULT => []}
     
-    ## Get lr_utility features by working upwards through parents until features are found (but don't go all the way to the root; those features are already covered by utility)
+    ## Get lrutility features by working upwards through parents until features are found (but don't go all the way to the root; those features are already covered by utility)
     root_category = ProductCategory.where(retailer: retailer, l_id: 1).first
     non_default_features = []
     ptype_path = Session.product_type_path
@@ -258,7 +258,7 @@ class RuleUtility < Customization
   
   # def RuleUtility.compute_value_for_display_date( cached_data, product_id, feature_name, utility_type )
   #   date = Maybe(cached_data['displayDate'][product_id]).first.value
-  #   value = Date.today - Date.parse(date) if date  ## in case of lr_utility we just return the difference 
+  #   value = Date.today - Date.parse(date) if date  ## in case of lrutility we just return the difference 
   #   if utility_type == DEFAULT
   #     Date.today <= date ? value=1 : value=1/value ## in case of general utility we return the inverse of the difference 
   #   end

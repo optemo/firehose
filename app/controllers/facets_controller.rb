@@ -49,6 +49,7 @@ class FacetsController < ApplicationController
     cont_rules = current_and_parents_rules.select{|sr| sr.rule_type =~ /Continuous|Categorical/}  
     results = (cont_rules.nil? or cont_rules.empty?) ? [] : cont_rules.map(&:local_featurename).uniq
     results += contcat_custom_rules
+    results += ['lrutility']
     @sr_sortby = results.nil? ? [] : results.sort
     @categories_with_order = @sr_filters.select { |f| !getOrdering(f, @p_type).empty? }
   end
