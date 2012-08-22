@@ -16,13 +16,17 @@ class ProductTest < ActiveSupport::TestCase
     sr = create(:scraping_rule, local_featurename: "relations", remote_featurename: "related", rule_type: "Text", regex: '(\[.+\])/\1')
 
     # Create two scraping rules for same local feature
-    sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Bb]lue', priority: 0)
+    sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Bb]lue', priority: 0, bilingual: 1)
+    sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Bb]leu', priority: 0, bilingual: 1,
+                                french: 1)
     sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Oo]range', priority: 1)
 
     # Stub out BestBuyApi methods
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474")])
-    BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
+    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and english}.returns(
       { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}) 
+    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and not english}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Bleu).", "isAdvertised" => true}) 
     BestBuyApi.stubs(:product_search).with{|id| id == "222"}.returns(
       {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}) 
 
@@ -100,6 +104,16 @@ class ProductTest < ActiveSupport::TestCase
     }
     assert_equal 1, search.results.size, "Sunspot found the product"
 
+  end
+
+  test "Ensure feed_update stores translations" do
+    # The following lines use Mocha to specify the calls we expect to be made to the I18n.backend.store_translations method.
+    # At the end of the test, Mocha will verify these calls occurred inside of Product.feed_update.
+    I18n.backend.expects(:store_translations).once.with { |locale, hash| locale = "en" and hash.size == 1 and hash["cat_option.B.color.blue"] == "Blue" }
+    I18n.backend.expects(:store_translations).once.with { |locale, hash| locale = "fr" and hash.size == 1 and hash["cat_option.B.color.blue"] == "Bleu" }
+    I18n.backend.expects(:store_translations).once.with { |locale, hash| locale = "en" and hash.size == 1 and hash["cat_option.B.color.orange"] == "Orange" }
+    I18n.backend.expects(:store_translations).once.with { |locale, hash| locale = "en" and hash.size == 1 and hash["cat_option.B.product_type.b22474"] == "B22474" }
+    Product.feed_update
   end
 
   test "Specs created/updated for existing products" do
