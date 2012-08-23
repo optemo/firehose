@@ -343,12 +343,13 @@ class Product < ActiveRecord::Base
       Sunspot.commit
     }
 
-    products_by_id = Set[*Product.current_type.all.map { |product| product.id }]
+    # Temporarily disable this step
+    #products_by_id = Set[*Product.current_type.all.map { |product| product.id }]
 
     # Remove from Solr products that are present in the index but not in the database.
-    Session.product_type_leaves.each do |leaf|
-      remove_missing_products_from_solr(leaf, products_by_id)
-    end
+    #Session.product_type_leaves.each do |leaf|
+    #  remove_missing_products_from_solr(leaf, products_by_id)
+    #end
   end
   
   # Get array of RetailerProductInfos for specified bb_products. If bb_products is nil,
