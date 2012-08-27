@@ -1,7 +1,7 @@
-set :application, "production"
-set :repository,  "git@jaguar:site.git"
-set :domain, "uniserve"
-set :branch, "staging"
+set :application, "firehose-pit1"
+set :repository,  "ssh://jaguar:29418/firehose.git"
+set :domain, "jaguar"
+set :branch, "pit1"
 set :user, "#{ `whoami`.chomp.downcase }"
 
 # If you aren't deploying to /u/apps/#{application} on the target
@@ -25,12 +25,12 @@ role :app, domain
 role :web, domain
 role :db,  domain, :primary => true
 
-############################################################
-#	Passenger
-#############################################################
+load 'deploy/assets'
+load 'config/deploy/recipes'
 
-task :restartmemcached do
-  run "cd #{current_path} && bundle exec rake -f #{current_path}/Rakefile cache:clear RAILS_ENV=production"
-  #Warm up server
-  run "curl -A 'Java' localhost > /dev/null"
-end
+before 'deploy:update', :set_umask
+before "deploy:assets:precompile", :serversetup
+after 'deploy:update_code', :db_migrate
+after "deploy:create_symlink", :restartmemcached
+after :restartmemcached, :redopermissions
+after "deploy:restart", :warmupserver

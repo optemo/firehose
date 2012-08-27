@@ -1,7 +1,7 @@
-set :application, "firehose"
+set :application, "firehose-production"
 set :repository,  "ssh://jaguar:29418/firehose.git"
-set :domain, "firehose"
-set :branch, "master"
+set :domain, "jaguar"
+set :branch, "production"
 set :user, "#{ `whoami`.chomp.downcase }"
 
 # If you aren't deploying to /u/apps/#{application} on the target
@@ -25,9 +25,6 @@ role :app, domain
 role :web, domain
 role :db,  domain, :primary => true
 
-############################################################
-#	Passenger
-#############################################################
 load 'deploy/assets'
 load 'config/deploy/recipes'
 
@@ -36,3 +33,4 @@ before "deploy:assets:precompile", :serversetup
 after 'deploy:update_code', :db_migrate
 after "deploy:create_symlink", :restartmemcached
 after :restartmemcached, :redopermissions
+after "deploy:restart", :warmupserver
