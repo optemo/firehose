@@ -5,6 +5,7 @@ class Customization
     attr_accessor :rule_type
     attr_accessor :product_type
     attr_accessor :only_once
+    attr_accessor :include_in_shallow_update
   
     #Require all the custom rules, so that they can be found by the subclasses file
     Dir["#{Rails.root}/app/models/custom_rules/*.rb"].each {|file| require file }
@@ -14,17 +15,21 @@ class Customization
         RulePriceplusehf, RuleTopViewed, RuleUsageType, RuleUtility, RuleAmazonPrices]
     end
     
-    def find_all_by_product_type(product_types)
+    def find_all_by_product_type(product_types, is_shallow_update)
       product_types = [product_types] unless product_types.class == Array
       # the subclasses call only returns the subclasses on its first call
       #potentialclasses = Rails.env.test? ? subclasses.reject{|r|r == RuleUtility} : subclasses
       potentialclasses = Rails.env.test? ? my_subclasses.reject{|r|r == RuleUtility} : my_subclasses
       #Don't test rule utility because it needs to be refactored and until then it won't pass the test
-      potentialclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
+      potentialclasses = potentialclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
+      if is_shallow_update 
+        potentialclasses = potentialclasses.select{ |custom_rule| custom_rule.include_in_shallow_update }
+      end
+      potentialclasses
     end
     
-    def find_all_by_product_type_and_only_once(product_types, only_once)
-      find_all_by_product_type(product_types).select{ |custom_rule| (custom_rule.only_once || false) == only_once }
+    def find_all_by_product_type_and_only_once(product_types, only_once, is_shallow_update)
+      find_all_by_product_type(product_types, is_shallow_update).select{ |custom_rule| (custom_rule.only_once || false) == only_once }
     end
     
     def rule_type_to_class(type)
@@ -36,14 +41,14 @@ class Customization
       end
     end
     
-    def run(newproducts,oldproducts = [])
+    def run(newproducts,oldproducts = [],is_shallow_update = false)
       results = Hash.new{|h,k| h[k] = []} #New values in the hash an empty array instead of nil
       # get all the customizations applicable to this product_type and ancestors that only need to be run once
-      find_all_by_product_type_and_only_once(Session.product_type_path,true).each do |rule|
+      find_all_by_product_type_and_only_once(Session.product_type_path,true,is_shallow_update).each do |rule|
         results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts)
       end
       # get all the customizations applicable to this product_type and ancestors that need to be run every time
-      find_all_by_product_type_and_only_once(Session.product_type_path,false).each do |rule|
+      find_all_by_product_type_and_only_once(Session.product_type_path,false,is_shallow_update).each do |rule|
         results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts+oldproducts)
       end
       results

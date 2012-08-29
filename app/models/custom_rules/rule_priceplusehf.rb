@@ -3,6 +3,8 @@ class RulePriceplusehf < Customization
   @needed_features = [{ContSpec => 'saleprice'}, {ContSpec => 'EHF'}]
   @product_type = ['BDepartments','FDepartments']
   @rule_type = 'Continuous'
+  # Shallow update may update prices.
+  @include_in_shallow_update = true
   
   def RulePriceplusehf.compute(values, pid)
     saleprice_val = values[0]

@@ -4,6 +4,9 @@ class RuleTemplate < Customization
   @needed_features = [{CatSpec => 'displayDate'}, {CatSpec => 'preorderReleaseDate'}] #This is data required for this computation
   @rule_type = 'Binary' #Type of the feature defines which db table to put this in
   @only_once = true #This rule should only be run once on a product, as opposed to every time update is run
+  @include_in_shallow_update = false # By default, custom rules are not included in the shallow update, but this can 
+                                     # be overridden on a per-rule basis. Note that not all specs are included in the shallow product
+                                     # info, and we do not retrieve French product info in the shallow update.
 
   #Pick one of the following to define depending on what type of rule is being created
   

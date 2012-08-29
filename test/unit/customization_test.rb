@@ -17,10 +17,8 @@ class CustomizationTest < ActiveSupport::TestCase
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 903)
     # onsale
-    CatSpec.create(:product_id => p1.id, :name => 'saleEndDate', :value => Date.today.to_s)
     ContSpec.create(:product_id => p1.id, :name => 'price', :value => 100)
     ContSpec.create(:product_id => p1.id, :name => 'saleprice', :value => 99.95)
-    CatSpec.create(:product_id => p2.id, :name => 'saleEndDate', :value => (Date.today-10).to_s)
     results = Customization.run([p1.id, p2.id])[BinSpec]
     assert_not_empty results.select{|spec| spec.name == "onsale" && spec.product_id = p1.id && spec.value == true}
     assert_empty results.select{|spec| spec.name == "onsale" && spec.product_id == p2.id}
@@ -124,45 +122,36 @@ class CustomizationTest < ActiveSupport::TestCase
   end
   
   test "Rule On Sale" do
-    # saleEndDate was not present or past (i.e. product didn't have an onsale spec),
-    # is now has saleEndDate set to future date -> onSale
-    #flunk('this test throws an error for rule_on_sale line 14 NoMethodError: undefined method > for nil:NilClass')
-    
+    # sale price less than current price -> goes from not-on-sale to on-sale
     assert_nil BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
-    saleEndDate = Date.today + 1
-    result = RuleOnSale.compute([saleEndDate.to_s, 2, 1], pid = 911)
+    result = RuleOnSale.compute([2, 1], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for true condition'
     assert saved_spec.value, 'BinSpec value should be true'
     
-    # saleEndDate was present / future and is now set to today -> onSale
+    # sale price now equal to current price -> goes from on-sale to not-on-sale
     old_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil old_spec, 'prerequisite for test'
-    saleEndDate = Date.today
-    result = RuleOnSale.compute([saleEndDate.to_s, 2, 1], pid = 911)
+    result = RuleOnSale.compute([1, 1], pid = 911)
+    result.save unless result.nil?
+    saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
+    assert_nil saved_spec, 'BinSpec should not be present for false rule value'
+    
+    # recreate on-sale spec
+    result = RuleOnSale.compute([2, 1], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil saved_spec, 'BinSpec should be saved for true condition'
     assert saved_spec.value, 'BinSpec value should be true'
     
-    # onsale was true, now sale end date in the past -> not on sale
+    # missing sale price -> goes from on-sale to not-on-sale
     old_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_not_nil old_spec, 'prerequisite for test'
-    saleEndDate = Date.today - 1
-    result = RuleOnSale.compute([saleEndDate.to_s, 2, 2], pid = 911)
+    result = RuleOnSale.compute([1], pid = 911)
     result.save unless result.nil?
     saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
     assert_nil saved_spec, 'BinSpec should not be present for false rule value'
-    
-    # no saleEndDate -> not on sale
-    result = RuleOnSale.compute([nil, 2, 2], pid = 911)
-    result.save unless result.nil?
-    saved_spec = BinSpec.find_by_product_id_and_name(911, RuleOnSale.feature_name)
-    assert_nil saved_spec, 'BinSpec should not be present for false rule value'
-    
-    saleEndDate = "2010-10-00"
-    assert_raise(ArgumentError) { RuleOnSale.compute([saleEndDate.to_s], pid = 911) }
   end
   
   test "Rule New" do

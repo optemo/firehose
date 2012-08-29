@@ -1,3 +1,11 @@
+departments:
+  id: 1
+  product_type: BDepartments
+  feed_id: Departments
+  retailer: B
+  l_id: 800
+  r_id: 900
+  level: 1
 cameras:
   id: 2
   product_type: B20218

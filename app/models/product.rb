@@ -142,10 +142,10 @@ class Product < ActiveRecord::Base
     if is_shallow
       product_infos = get_shallow_product_infos(Session.product_type)
       # If new products have appeared, "upgrade" to a deep update.
-      # Reasoning: We do not run bundles, siblings, and custom rules for shallow updates, because
+      # Reasoning: We do not run most custom rules for shallow updates, because
       # these may depend on specs which are not present in the shallow product info. But if we have
-      # a new product, we need to get deep product info and run bundles, siblings, and at least some custom rules. 
-      # Could we run these steps for the new products alone? No -- because some of these steps
+      # a new product, we need to get deep product info and run all custom rules. 
+      # Could we run all rules for the new products alone? No -- because some of these rules
       # rely on deep product info being available and up-to-date for *all* products in the category.
       if product_infos.index { |product_info| not existing_products.has_key? product_info.sku }
         puts "Upgrading to deep update for category " + Session.product_type
@@ -226,13 +226,6 @@ class Product < ActiveRecord::Base
 
           # Product should not be deleted.
           products_to_delete.delete(candidate.sku)
-
-          # Because we do not retrieve French product info for shallow update, we
-          # do not update any text or categorical specs during shallow update either.
-          # Note this means that shallow update cannot detect changes in product type.
-          if is_shallow and (spec_class == TextSpec or spec_class == CatSpec)
-            next
-          end
 
           # For shallow update, we only update products whose spec values have changed.
           # For deep update, we add all products to products_to_update, to ensure they are reindexed.
@@ -316,19 +309,19 @@ class Product < ActiveRecord::Base
       Sunspot.commit
     end
 
-    # The shallow update will not retrieve all product info, so we skip bundles, siblings, and custom rules
-    # (since these may depend on specs which are not included in the shallow product info).
+    # To save time, we skip bundles and siblings for shallow update. Note that if a new sibling or 
+    # bundle appears in the feed, we will automatically upgrade to a deep update for the category.
     if not is_shallow
       ProductBundle.get_relations
       #Get the color relationships loaded
       ProductSibling.get_relations
       Equivalence.fill
+    end
 
-      #Customizations
-      custom_specs_to_save = Customization.run(products_to_save.map(&:id),products_to_update.values.map(&:id))
-      custom_specs_to_save.each do |spec_class, spec_values|
-        spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
-      end
+    #Customizations
+    custom_specs_to_save = Customization.run(products_to_save.map(&:id),products_to_update.values.map(&:id),is_shallow)
+    custom_specs_to_save.each do |spec_class, spec_values|
+      spec_class.import spec_values, :on_duplicate_key_update=>[:product_id, :name, :value]
     end
       
     # Reindex sunspot.
@@ -343,11 +336,15 @@ class Product < ActiveRecord::Base
       Sunspot.commit
     }
 
-    products_by_id = Set[*Product.current_type.all.map { |product| product.id }]
+    # This cleanup step is only required in unusual situations where somehow Solr is
+    # out of sync with the database. Skip it for the shallow update.
+    if not is_shallow
+      products_by_id = Set[*Product.current_type.all.map { |product| product.id }]
 
-    # Remove from Solr products that are present in the index but not in the database.
-    Session.product_type_leaves.each do |leaf|
-      remove_missing_products_from_solr(leaf, products_by_id)
+      # Remove from Solr products that are present in the index but not in the database.
+      Session.product_type_leaves.each do |leaf|
+        remove_missing_products_from_solr(leaf, products_by_id)
+      end
     end
   end
   
@@ -454,12 +451,16 @@ class Product < ActiveRecord::Base
       curr_page += 1
     end
 
+    commit_needed = false
     sunspot_hits.each do |hit|
       if not db_products.include? hit.primary_key.to_i
         Sunspot.remove_by_id(Product, hit.primary_key)
+        commit_needed = true
       end
     end
-    Sunspot.commit
+    if commit_needed
+      Sunspot.commit
+    end
   end
 
   def name

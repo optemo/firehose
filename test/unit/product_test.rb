@@ -202,7 +202,7 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_nil p111, "Product 111 still exists"
     assert p111.instock, "Product 111 is instock"
 
-    # Continuous and binary specs should have been updated by the shallow update.
+    # Specs should have been created/updated by the shallow update.
     price_spec = p111.cont_specs.find_by_name("price")
     assert_not_nil price_spec, "price spec still exists"
     assert_equal 179.99, price_spec.value, "price spec was updated"
@@ -215,10 +215,31 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_nil is_advertised_spec, "isAdvertised spec was created"
     assert_equal true, is_advertised_spec.value
 
-    # Text specs are not updated.
     title_spec = p111.text_specs.find_by_name("title")
     assert_not_nil title_spec, "title spec still exists"
-    assert_equal "Test Product 111", title_spec.value
+    assert_equal "Test Product 111 (elephants)", title_spec.value, "title spec was updated"
+
+    # Verify that RuleOnSale was invoked.
+    on_sale_spec = p111.bin_specs.find_by_name("onsale")
+    assert_not_nil on_sale_spec, "onsale spec was created"
+    assert on_sale_spec.value, "onsale is true"
+  end
+
+  test "Only specified custom rules are invoked for shallow update" do
+    BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => false}) 
+
+    Product.feed_update
+
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111 (elephants)", "regularPrice" => 179.99, "salePrice" => 149.99,
+       "longDescription" => "This is the description of product 111.", "isAdvertised" => true} ])
+
+    RulePriceplusehf.expects(:compute).once
+    RuleOnSale.expects(:compute).once
+    RuleImageURLs.expects(:compute).never
+
+    Product.feed_update(nil, true)
   end
 
   test "Specs deleted if they are no longer in the feed" do
@@ -613,11 +634,16 @@ class ProductTest < ActiveSupport::TestCase
     assert_not_nil product_type_spec, "product_type spec exists"
     assert_equal "B28381", product_type_spec.value, "Product type is B28381"
 
-    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), 
-                                             BBproduct.new(id: "222", category: "22474"), BBproduct.new(id: "444555", category: "22474")])
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true},
+      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true} 
+    ])
+
     BestBuyApi.stubs(:product_search).with{|id| id == "444555"}.returns(
       {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true}) 
 
+    # Will upgrade to deep update.
     Product.feed_update(nil, true)
 
     assert_equal product_count, Product.count, "total number of products did not change"
@@ -627,7 +653,7 @@ class ProductTest < ActiveSupport::TestCase
 
     product_type_spec = product.cat_specs.find_by_name("product_type")
     assert_not_nil product_type_spec, "product_type spec exists"
-    assert_equal "B28381", product_type_spec.value, "Product type is B28381"
+    assert_equal "B22474", product_type_spec.value, "Product type is B22474"
   end
 
   test "Duplicate specs are cleaned up" do

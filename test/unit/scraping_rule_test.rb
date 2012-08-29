@@ -2,6 +2,7 @@ require 'test_helper'
 
 class ScrapingRuleTest < ActiveSupport::TestCase
   test "Get Rules" do
+    Session.new "B20218"
     sr = create(:scraping_rule, local_featurename: "longDescription", remote_featurename: "longDescription")
     myrules = ScrapingRule.get_rules([],false)
     assert_equal sr, myrules.first[:rule], "Get Rules should return the singular rules in this case"

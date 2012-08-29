@@ -1,23 +1,20 @@
 class RuleOnSale < Customization
   @feature_name = 'onsale'
   @product_type = ['BDepartments', 'FDepartments', 'ADepartments']
-  @needed_features = [{CatSpec => 'saleEndDate'}, {ContSpec => 'price'}, {ContSpec => 'saleprice'}]
+  @needed_features = [{ContSpec => 'price'}, {ContSpec => 'saleprice'}]
   @rule_type = 'Binary'
+  # Shallow update may update prices.
+  @include_in_shallow_update = true
   
   def RuleOnSale.compute(values, pid)
-    date = values[0]
-    rPrice = values[1]
-    sPrice = values[2]
+    rPrice = values[0]
+    sPrice = values[1]
     
-    if Session.retailer == 'A'
+    derived_value = false
+    if not rPrice.nil? and not sPrice.nil?
       derived_value = (rPrice - sPrice) >= 0.01
-    else
-      if date == nil
-        derived_value = false
-      else
-        derived_value = (Date.parse(date) - Date.today >= 0) && (rPrice > sPrice)
-      end
     end
+
     spec_class = Customization.rule_type_to_class(@rule_type)
     # if the value is false, we don't want to return (and store) a spec, we want to delete it, so do it here
     spec = nil
@@ -32,4 +29,3 @@ class RuleOnSale < Customization
     spec
   end
 end
-
