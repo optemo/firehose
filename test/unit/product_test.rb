@@ -293,36 +293,36 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 0, search.hits.size, "Sunspot did not find product 222"
   end
 
-#  test "Missing products are removed from Solr during full update" do
-#    Product.feed_update
-#
-#    p111 = Product.find_by_sku("111")
-#    assert_not_nil p111, "Product 111 was created"
-#
-#    p222 = Product.find_by_sku("222")
-#    assert_not_nil p222, "Product 222 was created"
-#
-#    p222.delete
-#
-#    search = Sunspot.search(Product) {
-#      keywords "222", :fields => ["sku"]
-#    }
-#    assert_equal 1, search.hits.size, "Product 222 is present in Sunspot"
-#
-#    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474")])
-#
-#    Product.feed_update
-#
-#    search = Sunspot.search(Product) {
-#      keywords "222", :fields => ["sku"]
-#    }
-#    assert_equal 0, search.hits.size, "Product 222 was removed from Sunspot"
-#
-#    search = Sunspot.search(Product) {
-#      keywords "111", :fields => ["sku"]
-#    }
-#    assert_equal 1, search.hits.size, "Product 111 is still present in Sunspot"
-#  end
+  test "Missing products are removed from Solr during full update" do
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 was created"
+
+    p222 = Product.find_by_sku("222")
+    assert_not_nil p222, "Product 222 was created"
+
+    p222.delete
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 1, search.hits.size, "Product 222 is present in Sunspot"
+
+    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474")])
+
+    Product.feed_update
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 0, search.hits.size, "Product 222 was removed from Sunspot"
+
+    search = Sunspot.search(Product) {
+      keywords "111", :fields => ["sku"]
+    }
+    assert_equal 1, search.hits.size, "Product 111 is still present in Sunspot"
+  end
 
   test "Remove missing products from Solr" do
     Product.feed_update
