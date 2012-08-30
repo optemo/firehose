@@ -1,4 +1,4 @@
-set :stages, %w(jaguar fremont uniserve firehose)
+set :stages, %w(jaguar production jaguar-pit1 jaguar-production)
 # The next two lines are needed for integration with Ruby Version Manager:
 set :rvm_type, :system
 set :rvm_ruby_string, '1.9.3'

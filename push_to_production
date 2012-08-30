@@ -1,0 +1,7 @@
+#!/bin/bash
+git fetch
+git checkout production
+git merge origin/production
+git merge origin/master
+git push origin production
+git checkout master
