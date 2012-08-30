@@ -225,6 +225,24 @@ class ProductTest < ActiveSupport::TestCase
     assert on_sale_spec.value, "onsale is true"
   end
 
+  test "Custom rules are invoked by feed_update" do
+    # Verify that each custom rule is invoked once for each new product.
+    # Deep update should run rules for which include_in_shallow_update is true.
+    RulePriceplusehf.expects(:compute).twice
+    RuleOnSale.expects(:compute).twice
+    RuleImageURLs.expects(:compute).twice
+
+    Product.feed_update
+
+    # Verify that each custom rule is invoked once for each updated product.
+    # Deep update should run rules for which include_in_shallow_update is true.
+    RulePriceplusehf.expects(:compute).twice
+    RuleOnSale.expects(:compute).twice
+    RuleImageURLs.expects(:compute).twice
+
+    Product.feed_update
+  end
+
   test "Only specified custom rules are invoked for shallow update" do
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
       { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => false}) 
