@@ -225,6 +225,24 @@ class ProductTest < ActiveSupport::TestCase
     assert on_sale_spec.value, "onsale is true"
   end
 
+  test "Shallow update only updates products whose specs have changed" do
+    # Initialize database from feed defined in setup 
+    Product.feed_update
+
+    # Change the stubbed feed -- only difference is product 111's price is lower
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 179.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}
+    ])
+
+    # We expect that during shallow update, only the product whose specs have changed will be updated
+    Product.expects(:import).once.with { |products| products.size == 1 and products[0].sku == "111" }
+
+    # If the above expectation is not satisfied by this call to feed_update, Mocha will flag the 
+    # problem on test completion.
+    Product.feed_update(nil, true)
+  end
+
   test "Custom rules are invoked by feed_update for new products" do
     # Verify that each custom rule is invoked once for each new product.
     # There are two products in the feed, so each custom rule should be invoked twice.
