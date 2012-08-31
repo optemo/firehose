@@ -34,7 +34,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
     spec = task_data[:spec]  # whether we are saving pageviews or emails
     retailers_received = []
     
-    imap = Net::IMAP.new('imap.googlemail.com')
+    imap = Net::IMAP.new('imap.gmail.com', {:ssl=>true})
     
     imap.login('auto@optemo.com', '***REMOVED***')
     search_for = ""
