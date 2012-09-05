@@ -15,30 +15,18 @@ class RuleUsageType < Customization
   def RuleUsageType.group_computation(pids)
     usage_type_node = '1002'
     filter_name = "Usage Type"
-    tries = 0
     possible_usage_types = possibleValues(usage_type_node, filter_name)
-    begin
-      usage = {} # hash of the usage type that applies to each sku: {sku => [usage_a, usage_b]}
-      # get the list of categories for usage type
-      # cache the value returned here using memcached, perhaps?
-      possible_usage_types.each do |filter_value|
-        skus = BestBuyApi.search_with_filter(usage_type_node, filter_name, filter_value)
-        skus.each do |skus|
-          if usage.has_key?(skus) 
-            usage[skus] << filter_value
-          else
-            usage[skus] = [filter_value]
-          end
+    usage = {} # hash of the usage type that applies to each sku: {sku => [usage_a, usage_b]}
+    # get the list of categories for usage type
+    # cache the value returned here using memcached, perhaps?
+    possible_usage_types.each do |filter_value|
+      skus = BestBuyApi.search_with_filter(usage_type_node, filter_name, filter_value)
+      skus.each do |skus|
+        if usage.has_key?(skus) 
+          usage[skus] << filter_value
+        else
+          usage[skus] = [filter_value]
         end
-      end
-    rescue BestBuyApi::RequestError => error
-      tries += 1
-      if tries <= 5
-        puts 'Got BestBuy Api error, will retry 5 times'
-        puts error.to_s
-        retry
-      else
-        raise error
       end
     end
     # get the list of categories for usage type

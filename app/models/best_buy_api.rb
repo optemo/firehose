@@ -1,6 +1,13 @@
+# This class is a wrapper around the Best Buy REST API. 
+# The wrapper takes care of performing necessary retries when errors occur calling the BestBuy API.
+# Clients of this class should not have to implement their own retry logic.
 class BestBuyApi
   require 'net/http'
+  require 'remote_util'
   class RequestError < StandardError; end
+  # HTTP 500 errors from BestBuy can sometimes be resolved by retrying.
+  # Therefore we throw a special exception for these cases.
+  class InternalServerError < RequestError; end
   class FeedDownError < StandardError; end
   class TimeoutError < StandardError; end
   class << self
@@ -9,7 +16,24 @@ class BestBuyApi
           }
     DEBUG = false
     
-    # Get BestBuy product info, given product ID.
+    # Get BestBuy product info, given product SKU.
+    # This method first attempts to retrieve all product attributes. If that fails,
+    # it then attempts to retrieve just the basic product attributes.
+    def get_product_info(sku, english)
+      begin
+        product_search(sku, true, english)
+      rescue RequestError
+        # Try again, without requesting extra info
+        begin
+          product_search(sku, false, english)
+        rescue RequestError
+          puts 'Error in the feed: returning nil for ' + sku
+          nil
+        end
+      end
+    end
+ 
+    # Get BestBuy product info, given product SKU.
     def product_search(id, includeall = true, english = true)
       q = english ? {} : {:lang => "fr"}
       q[:id] = id
@@ -79,8 +103,6 @@ class BestBuyApi
       
       res = cached_request('category',q)
       
-      
-      
       children = res["subCategories"].inject([]){|children, sc| children << {sc["id"] => sc["name"]}}
       
       # if children is empty, return nil
@@ -119,7 +141,6 @@ class BestBuyApi
     def get_filter_values(categoryid, filter_name, language='en')
       # search url will be like this: "http://www.futureshop.ca/api/v2/json/search?categoryid=#{categoryid}&include=facets"
       result = cached_request('search', {:categoryid => categoryid, :include => 'facets', :lang => language})
-      
       values = result["facets"].select{|p| p['name'] == filter_name}
       unless values.empty?
         return values.first['filters'].map{|r| r['name']}
@@ -234,20 +255,24 @@ class BestBuyApi
     # Generic send request to ECS REST service. You have to specify the :operation parameter.
     def send_request(type,params)
       request_url = prepare_url(type,params)
-      #puts "#{request_url}"
       log "Request URL: #{request_url}"
-      begin
-        res = Net::HTTP.get_response(URI::parse(request_url))
-      rescue Timeout::Error
-        raise BestBuyApi::TimeoutError
-      end
-      #puts "#{res.body}"
-      unless res.kind_of? Net::HTTPSuccess
-        #if res.code == 302
-        #  raise BestBuyApi::FeedDownError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
-        #else
+      res = nil
+      RemoteUtil.do_with_retry(exceptions: [TimeoutError, InternalServerError]) do |except|
+        begin
+          if not except.nil?
+            puts "Error calling BestBuy API, will retry: " + except.to_s
+          end
+          res = Net::HTTP.get_response(URI::parse(request_url))
+        rescue Timeout::Error
+          raise BestBuyApi::TimeoutError, "Timeout calling #{request_url}"
+        end
+        if res.kind_of? Net::HTTPSuccess
+          # Successful HTTP result.
+        elsif res.kind_of? Net::HTTPInternalServerError
+          raise BestBuyApi::InternalServerError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
+        else
           raise BestBuyApi::RequestError, "HTTP Response: #{res.code} #{res.message} for #{request_url}"
-        #end
+        end
       end
       begin
         JSON.parse(res.body)

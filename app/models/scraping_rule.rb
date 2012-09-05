@@ -38,10 +38,10 @@ class ScrapingRule < ActiveRecord::Base
     bb_products.each do |bb_product|
       sku = bb_product.id
 
-      english_info = product_search(sku, true)
+      english_info = BestBuyApi.get_product_info(sku, true)
       english_info["category_id"] = bb_product.category unless english_info.nil?
 
-      french_info = product_search(sku, false)
+      french_info = BestBuyApi.get_product_info(sku, false)
       french_info["category_id"] = bb_product.category unless french_info.nil?
 
       retailer_infos << RetailerProductInfo.new(sku, english_info, french_info)
@@ -180,25 +180,6 @@ class ScrapingRule < ActiveRecord::Base
     {translations: translations, candidates: candidates, raw: ret_raw}
   end
   
-  def self.product_search(sku, english)
-    RemoteUtil.do_with_retry(exceptions: BestBuyApi::TimeoutError) do |is_retry|
-      if is_retry 
-        puts "TimeoutError calling BestBuyApi.product_search for sku " + sku.to_s
-      end
-      begin
-        BestBuyApi.product_search(sku, true, english)
-      rescue BestBuyApi::RequestError
-        # Try the request without including extra info
-        begin
-          BestBuyApi.product_search(sku, false, english)
-        rescue BestBuyApi::RequestError
-          puts 'Error in the feed: returning nil for ' + sku
-          nil
-        end
-      end
-    end
-  end
-
   def self.get_rules(rules, multi)
     # return rules with the regexp objects
     rules_hash = []

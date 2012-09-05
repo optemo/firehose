@@ -1,4 +1,5 @@
 require 'net/http'
+require 'remote_util'
 class RuleImageURLs < Customization
   @image_sizes = Hash[ "small" => 100, "medium" => 150, "large" => 250 ]
   @product_type = ['BDepartments','FDepartments', 'ADepartments']
@@ -94,19 +95,11 @@ class RuleImageURLs < Customization
   def RuleImageURLs.size_exists?(url)
     # Check for existence
     url = URI.parse(url.gsub('[', '%5B').gsub(']', '%5D'))
-    result = nil
-    tries = 0
-    begin
-      tries += 1
-      result = Net::HTTP.start(url.host, url.port).head(url.request_uri).code 
-    rescue Timeout::Error
-      if tries < 3
+    result = RemoteUtil.do_with_retry(exceptions: [Timeout::Error]) do |except|
+      if not except.nil? 
         puts "Timeout retrieving image (" + url.to_s + "), will retry"
-        retry
-      else 
-        puts "Timeout retrieving image (" + url.to_s + ")"
-        raise
       end
+      Net::HTTP.start(url.host, url.port).head(url.request_uri).code 
     end
     return result == "200"
   end

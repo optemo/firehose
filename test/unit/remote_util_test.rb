@@ -11,8 +11,12 @@ class ProductTest < ActiveSupport::TestCase
     attempts = 0
     start_time = Time.now
     assert_raise(ArgumentError, "An ArgumentError was raised") {
-      RemoteUtil.do_with_retry(interval: 1) { |is_retry|
-        assert_equal (attempts != 0), is_retry, "is_retry is false for first attempt and subsequently true"
+      RemoteUtil.do_with_retry(interval: 1) { |except|
+        if attempts == 0
+          assert_nil except, "except is nil for first attempt"
+        else
+          assert except.is_a?(ArgumentError), "except is an ArgumentError for subsequent attempts"
+        end
         attempts += 1
         raise ArgumentError
       }

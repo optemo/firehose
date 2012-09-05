@@ -1,6 +1,5 @@
 require "sunspot"
 require 'sunspot_autocomplete'
-require 'remote_util.rb'
 
 class Product < ActiveRecord::Base
   require 'sunspot_autocomplete'
@@ -355,18 +354,13 @@ class Product < ActiveRecord::Base
   # the list of products for the specified product type will be retrieved using the 
   # Best Buy API.
   def self.get_product_infos(product_type, bb_products)
-    bb_products ||= RemoteUtil.do_with_retry(exceptions: BestBuyApi::TimeoutError) { |is_retry|
-        if is_retry 
-          puts "Timeout calling BestBuyApi.category_ids"
-        end
-        BestBuyApi.category_ids(product_type)
-      }
+    bb_products ||= BestBuyApi.category_ids(product_type)
     retailer_infos = []
     bb_products.each do |bb_product|
-      english_product_info = product_search(bb_product.id, true)
+      english_product_info = BestBuyApi.get_product_info(bb_product.id, true)
       english_product_info["category_id"] = bb_product.category unless english_product_info.nil?
 
-      french_product_info = product_search(bb_product.id, false)
+      french_product_info = BestBuyApi.get_product_info(bb_product.id, false)
       french_product_info["category_id"] = bb_product.category unless french_product_info.nil?
 
       if english_product_info or french_product_info
@@ -399,12 +393,8 @@ class Product < ActiveRecord::Base
   def self.get_shallow_product_infos(product_type)
     short_product_type = ProductCategory.trim_retailer(product_type)
 
-    english_product_infos = RemoteUtil.do_with_retry(exceptions: BestBuyApi::TimeoutError) do |is_retry|
-      if is_retry
-        puts "Timeout calling BestBuyApi.get_shallow_product_infos"
-      end
-      BestBuyApi.get_shallow_product_infos(product_type, true)
-    end
+    english_product_infos = BestBuyApi.get_shallow_product_infos(product_type, true)
+
     retailer_infos = []
     english_product_infos.each do |product_info|
       product_info["category_id"] = short_product_type 
@@ -414,25 +404,6 @@ class Product < ActiveRecord::Base
     retailer_infos
   end
 
-  def self.product_search(sku, english)
-    RemoteUtil.do_with_retry(exceptions: BestBuyApi::TimeoutError) { |is_retry|
-      if is_retry 
-        puts "TimeoutError calling BestBuyApi.product_search for sku " + sku.to_s
-      end
-      begin
-        BestBuyApi.product_search(sku, true, english)
-      rescue BestBuyApi::RequestError
-        # Try the request without including extra info
-        begin
-          BestBuyApi.product_search(sku, false, english)
-        rescue BestBuyApi::RequestError
-          puts 'Error in the feed: returning nil for ' + sku
-          nil
-        end
-      end
-    }
-  end
- 
   # Searches Solr for products matching the given product_type, then checks 
   # for each hit whether it is present in the db_products set. Products present
   # in the index but not in the set are removed from the index.

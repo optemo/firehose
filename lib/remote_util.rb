@@ -11,8 +11,8 @@ module RemoteUtil
   #   :exceptions - Array of exception classes that will result in retries. Other types of exceptions
   #                 will be passed to the caller (default is Exception)
   #
-  # { |is_retry| ... } - The code to be attempted. This block is invoked with a boolean is_retry
-  #                      parameter indicating whether at least one try has already occurred.
+  # { |except| ... } - The code to be attempted. If this is a retry, the block is invoked with the 
+  #                    exception that caused the retry.
   # 
   # If an attempt succeeds, returns the value of the block.
   def RemoteUtil.do_with_retry(params = {}) 
@@ -22,10 +22,12 @@ module RemoteUtil
     interval = params[:interval]
 
     tries = 0
+    last_except = nil
     begin
-      yield (tries > 0)
+      yield last_except
     rescue Exception => except
       tries += 1
+      last_except = except
       if exceptions.index { |e| except.is_a? e } and tries < max_tries
         if interval > 0 
           sleep interval
