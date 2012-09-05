@@ -15,7 +15,7 @@ class Customization
         RulePriceplusehf, RuleTopViewed, RuleUsageType, RuleUtility, RuleAmazonPrices]
     end
     
-    def find_all_by_product_type(product_types, is_shallow_update)
+    def find_all_by_product_type(product_types, is_shallow_update = false)
       product_types = [product_types] unless product_types.class == Array
       # the subclasses call only returns the subclasses on its first call
       #potentialclasses = Rails.env.test? ? subclasses.reject{|r|r == RuleUtility} : subclasses
@@ -28,7 +28,7 @@ class Customization
       potentialclasses
     end
     
-    def find_all_by_product_type_and_only_once(product_types, only_once, is_shallow_update)
+    def find_all_by_product_type_and_only_once(product_types, only_once, is_shallow_update = false)
       find_all_by_product_type(product_types, is_shallow_update).select{ |custom_rule| (custom_rule.only_once || false) == only_once }
     end
     
