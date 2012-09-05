@@ -3,7 +3,7 @@ departments:
   product_type: BDepartments
   feed_id: Departments
   retailer: B
-  l_id: 800
+  l_id: 1
   r_id: 900
   level: 1
 cameras:

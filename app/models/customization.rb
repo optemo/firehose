@@ -17,11 +17,9 @@ class Customization
     
     def find_all_by_product_type(product_types, is_shallow_update = false)
       product_types = [product_types] unless product_types.class == Array
-      # the subclasses call only returns the subclasses on its first call
-      #potentialclasses = Rails.env.test? ? subclasses.reject{|r|r == RuleUtility} : subclasses
       potentialclasses = Rails.env.test? ? my_subclasses.reject{|r|r == RuleUtility} : my_subclasses
       #Don't test rule utility because it needs to be refactored and until then it won't pass the test
-      potentialclasses = potentialclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
+      potentialclasses = my_subclasses.select{ |custom_rule| !(product_types & custom_rule.product_type).empty? }
       if is_shallow_update 
         potentialclasses = potentialclasses.select{ |custom_rule| custom_rule.include_in_shallow_update }
       end
