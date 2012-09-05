@@ -1,3 +1,5 @@
+# This rule is passing its own unit test but causing errors when called by product_test.rb. product_test is creating minimal specs for each product being passed in so rule_utility crashes when it looks for specs that don't exist. rule_utility should be changed so that it doesn't crash on missing specs but instead throws an exception.
+
 class RuleUtility < Customization
   @feature_name = 'utility'
   @product_type = ["BDepartments", "FDepartments", "ADepartments"]
