@@ -52,7 +52,7 @@ task :update => :environment do
       end
       Product.feed_update(nil, is_shallow)
       puts '...Finished'
-    rescue BestBuyApi::RequestError => error
+    rescue BestBuyApi::RequestError, Product::InvalidFeedError => error
       puts 'Got the following error in scraping current category: '
       puts error.to_s
     end

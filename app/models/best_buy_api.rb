@@ -157,7 +157,7 @@ class BestBuyApi
         # check if the category is an invalid one (no parents, but many products listed)
         feed_category = BestBuyApi.get_category(my_id)
         root_category = BestBuyApi.get_category('Departments')
-        if (feed_category['productCount'] >= (0.95 * root_category['productCount']) and my_id != 'Departments')
+        if (feed_category['productCount'] >= (0.9 * root_category['productCount']) and my_id != 'Departments')
           puts "Category " + my_id + " invalid or empty"
           return ids
         end
@@ -187,7 +187,7 @@ class BestBuyApi
         # Invalid or empty categories result in the entire catalog being returned.
         category_info = BestBuyApi.get_category(category_id)
         root_category_info = BestBuyApi.get_category('Departments')
-        if category_info['productCount'] >= 0.95 * root_category_info['productCount']
+        if category_info['productCount'] >= 0.9 * root_category_info['productCount']
           puts "Category " + category_id + " invalid or empty"
           return []
         end

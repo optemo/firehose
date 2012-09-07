@@ -481,7 +481,7 @@ class ProductTest < ActiveSupport::TestCase
 
     BestBuyApi.stubs(:category_ids).returns([])
 
-    assert_raise ValidationError, "Product.feed_update throws a ValidationError" do
+    assert_raise Product::InvalidFeedError, "Product.feed_update throws an InvalidFeedError" do
       Product.feed_update
     end
 

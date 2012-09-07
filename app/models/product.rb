@@ -4,6 +4,9 @@ require 'remote_util.rb'
 
 class Product < ActiveRecord::Base
   require 'sunspot_autocomplete'
+
+  class InvalidFeedError < StandardError; end
+
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
@@ -274,7 +277,7 @@ class Product < ActiveRecord::Base
     # We assume that if a category has at least MIN_PROTECTED_CAT_SIZE products in the database, but no products in the
     # feed, this is an error in the feed.
     if products_to_delete.size >= MIN_PROTECTED_CAT_SIZE and products_to_update.size == 0 and products_to_save.size == 0 
-      raise ValidationError, "Category " + Session.product_type.to_s + " has " + products_to_delete.size.to_s + 
+      raise InvalidFeedError, "Category " + Session.product_type.to_s + " has " + products_to_delete.size.to_s + 
            " products in the database, but no products in the feed. Existing products will *not* be deleted."
     end
 
