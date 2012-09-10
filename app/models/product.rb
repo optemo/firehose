@@ -168,6 +168,8 @@ class Product < ActiveRecord::Base
       end
     end
 
+    Rails.logger.info "Scraping " + product_infos.size.to_s + " products for category " + Session.product_type.to_s
+
     products_to_update = {}
     products_to_save = {}
     specs_to_save = {}

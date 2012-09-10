@@ -161,7 +161,7 @@ class ScrapingRule < ActiveRecord::Base
         end
       end
       if en_trans.empty?
-        Rails.logger.warn "No english translations found for product #{product_info.sku}. Please ensure each scraping rule needing a translation has an english version." unless to_show
+        Rails.logger.debug "No english translations found for product #{product_info.sku}. Please ensure each scraping rule needing a translation has an english version." unless to_show
       else
         en_trans.each_pair do |lf, data|
           parsed = data.first

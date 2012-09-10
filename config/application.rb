@@ -42,8 +42,11 @@ module Firehose
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
     
-    #config.logger = Logger.new(Rails.root.join("log",Rails.env + ".log"),3,5*1024*1024)
-    
+    config.logger = Logger.new(Rails.root.join("log", Rails.env + ".log"), 3, 5*1024*1024)
+    config.logger.formatter = proc do  |severity, datetime, progname, msg|
+        datetime.strftime("%Y-%m-%d %H:%M:%S") + ": #{msg}\n"
+    end 
+
     # Enable the asset pipeline
     config.assets.enabled = true
 
