@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120727191529) do
+ActiveRecord::Schema.define(:version => 20120910233554) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -21,20 +21,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.string   "name"
     t.string   "value"
     t.string   "acc_type"
-  end
-
-  create_table "all_daily_specs", :id => false, :force => true do |t|
-    t.integer  "id",           :default => 0, :null => false
-    t.string   "sku"
-    t.string   "name"
-    t.string   "spec_type"
-    t.string   "value_txt"
-    t.float    "value_flt"
-    t.boolean  "value_bin"
-    t.string   "product_type"
-    t.date     "date"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "bin_specs", :force => true do |t|
@@ -49,20 +35,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
   add_index "bin_specs", ["name"], :name => "index_bin_specs_on_name"
   add_index "bin_specs", ["product_id"], :name => "index_bin_specs_on_product_id"
 
-  create_table "candidates", :force => true do |t|
-    t.integer  "scraping_rule_id"
-    t.integer  "result_id"
-    t.string   "product_id"
-    t.text     "parsed"
-    t.text     "raw"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.boolean  "delinquent",             :default => false
-    t.integer  "scraping_correction_id"
-  end
-
-  add_index "candidates", ["result_id"], :name => "candidate_result"
-
   create_table "cat_specs", :force => true do |t|
     t.integer  "product_id"
     t.string   "name"
@@ -74,24 +46,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
 
   add_index "cat_specs", ["name"], :name => "index_cat_specs_on_name"
   add_index "cat_specs", ["product_id"], :name => "index_cat_specs_on_product_id"
-
-  create_table "categorical_facet_values", :force => true do |t|
-    t.integer  "facet_id"
-    t.string   "name"
-    t.float    "value"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "categorical_facet_values", ["facet_id"], :name => "index_categorical_facet_values_on_facet_id"
-
-  create_table "category_id_product_type_maps", :force => true do |t|
-    t.integer  "category_id",     :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "product_type_id"
-    t.string   "name"
-  end
 
   create_table "cont_specs", :force => true do |t|
     t.integer  "product_id"
@@ -149,44 +103,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
 
   add_index "facets", ["used_for"], :name => "index_facets_on_used_for"
 
-  create_table "features", :force => true do |t|
-    t.integer  "heading_id",                                     :null => false
-    t.string   "name",                                           :null => false
-    t.string   "feature_type",        :default => "Categorical", :null => false
-    t.string   "used_for",            :default => "show"
-    t.string   "used_for_categories"
-    t.integer  "used_for_order",      :default => 9999
-    t.boolean  "larger_is_better",    :default => true
-    t.integer  "min",                 :default => 0
-    t.integer  "max",                 :default => 0
-    t.integer  "utility_weight",      :default => 1
-    t.integer  "cluster_weight",      :default => 1
-    t.string   "prefered"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.boolean  "has_products",        :default => true
-  end
-
-  add_index "features", ["heading_id", "name"], :name => "index_features_on_heading_id_and_name", :unique => true
-
-  create_table "headings", :force => true do |t|
-    t.integer  "product_type_id",                   :null => false
-    t.string   "name",                              :null => false
-    t.integer  "show_order",      :default => 9999
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "headings", ["product_type_id", "name"], :name => "index_headings_on_product_type_id_and_name", :unique => true
-
-  create_table "keyword_searches", :force => true do |t|
-    t.string  "keyword"
-    t.integer "product_id"
-  end
-
-  add_index "keyword_searches", ["keyword"], :name => "index_keyword_searches_on_keyword"
-  add_index "keyword_searches", ["product_id"], :name => "index_keyword_searches_on_product_id"
-
   create_table "product_bundles", :force => true do |t|
     t.integer  "bundle_id"
     t.integer  "product_id"
@@ -216,35 +132,10 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
 
   add_index "product_siblings", ["product_id"], :name => "index_product_siblings_on_product_id"
 
-  create_table "product_types", :force => true do |t|
-    t.string   "name",                             :null => false
-    t.string   "layout",     :default => "assist"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "product_types", ["name"], :name => "index_product_types_on_name", :unique => true
-
   create_table "products", :force => true do |t|
     t.string  "sku"
     t.boolean "instock"
     t.string  "retailer"
-  end
-
-  create_table "results", :force => true do |t|
-    t.integer  "total"
-    t.integer  "error_count"
-    t.integer  "warning_count"
-    t.string   "product_type"
-    t.string   "category"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.integer  "nonuniq"
-  end
-
-  create_table "results_scraping_rules", :id => false, :force => true do |t|
-    t.integer "result_id"
-    t.integer "scraping_rule_id"
   end
 
   create_table "scraping_corrections", :force => true do |t|
@@ -271,14 +162,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.boolean "french",             :default => false
     t.boolean "bilingual",          :default => false
   end
-
-  create_table "search_products", :force => true do |t|
-    t.integer "search_id"
-    t.integer "product_id"
-  end
-
-  add_index "search_products", ["product_id"], :name => "index_search_products_on_product_id"
-  add_index "search_products", ["search_id"], :name => "index_search_products_on_search_id"
 
   create_table "searches", :force => true do |t|
     t.integer  "parent_id"
@@ -325,18 +208,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.datetime "updated_at"
   end
 
-  create_table "urls", :id => false, :force => true do |t|
-    t.integer  "id",              :default => 0,  :null => false
-    t.integer  "product_type_id",                 :null => false
-    t.string   "url",                             :null => false
-    t.integer  "port",            :default => 80
-    t.integer  "piwik_id",        :default => 12
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  add_index "urls", ["product_type_id", "url", "port"], :name => "index_urls_on_product_type_id_and_url_and_port"
-
   create_table "userdatabins", :force => true do |t|
     t.integer  "search_id"
     t.string   "name"
@@ -345,6 +216,8 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.datetime "updated_at"
   end
 
+  add_index "userdatabins", ["search_id"], :name => "index_userdatabins_on_search_id"
+
   create_table "userdatacats", :force => true do |t|
     t.integer  "search_id"
     t.string   "name"
@@ -352,6 +225,8 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "userdatacats", ["search_id"], :name => "index_userdatacats_on_search_id"
 
   create_table "userdataconts", :force => true do |t|
     t.integer  "search_id"
@@ -362,8 +237,6 @@ ActiveRecord::Schema.define(:version => 20120727191529) do
     t.datetime "updated_at"
   end
 
-  create_table "users", :force => true do |t|
-    t.datetime "created_at"
-  end
+  add_index "userdataconts", ["search_id"], :name => "index_userdataconts_on_search_id"
 
 end
