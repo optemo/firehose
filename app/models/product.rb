@@ -1,9 +1,8 @@
 require "sunspot"
 require 'sunspot_autocomplete'
+require 'log_util'
 
 class Product < ActiveRecord::Base
-  require 'sunspot_autocomplete'
-
   class InvalidFeedError < StandardError; end
 
   has_many :accessories, :dependent=>:delete_all
@@ -168,7 +167,7 @@ class Product < ActiveRecord::Base
       end
     end
 
-    Rails.logger.info "Scraping " + product_infos.size.to_s + " products for category " + Session.product_type.to_s
+    Rails.logger.info LogUtil.timestamp + ": scraping " + product_infos.size.to_s + " products for category " + Session.product_type.to_s
 
     products_to_update = {}
     products_to_save = {}
