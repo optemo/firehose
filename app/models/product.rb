@@ -3,8 +3,6 @@ require 'sunspot_autocomplete'
 require 'log_util'
 
 class Product < ActiveRecord::Base
-  class InvalidFeedError < StandardError; end
-
   has_many :accessories, :dependent=>:delete_all
   has_many :cat_specs, :dependent=>:delete_all
   has_many :bin_specs, :dependent=>:delete_all
@@ -24,8 +22,6 @@ class Product < ActiveRecord::Base
   # Ensure rows in product_siblings where sibling_id is this product are deleted when this product
   # is destroyed.
   after_destroy :delete_from_siblings
-  
-  MIN_PROTECTED_CAT_SIZE = 4 # Categories of this size or greater are protected from empty feeds.
   
   searchable(auto_index: false) do
     text :title do
@@ -276,8 +272,8 @@ class Product < ActiveRecord::Base
 
     # We assume that if a category has at least MIN_PROTECTED_CAT_SIZE products in the database, but no products in the
     # feed, this is an error in the feed.
-    if products_to_delete.size == existing_products.size and existing_products.size >= MIN_PROTECTED_CAT_SIZE and products_to_save.size == 0 
-      raise InvalidFeedError, "Category " + Session.product_type.to_s + " has " + existing_products.size.to_s + 
+    if products_to_delete.size == existing_products.size and existing_products.size >= BestBuyApi::MIN_PROTECTED_CAT_SIZE and products_to_save.size == 0 
+      raise BestBuyApi::InvalidFeedError, "Category " + Session.product_type.to_s + " has " + existing_products.size.to_s + 
            " products in the database, but no products in the feed. Existing products will *not* be deleted."
     end
 

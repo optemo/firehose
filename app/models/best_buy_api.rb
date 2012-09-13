@@ -10,6 +10,10 @@ class BestBuyApi
   class InternalServerError < RequestError; end
   class FeedDownError < StandardError; end
   class TimeoutError < StandardError; end
+  class InvalidFeedError < StandardError; end
+
+  MIN_PROTECTED_CAT_SIZE = 4 # Categories of this size or greater are protected from empty feeds.
+ 
   class << self
     URL = {"B" => "http://www.bestbuy.ca/api/v2",
            "F" => "http://www.futureshop.ca/api/v2",
@@ -86,10 +90,10 @@ class BestBuyApi
       end
     end
     
-    def get_category(id, english = true)
+    def get_category(id, english = true, use_cache = true)
       q = english ? {:lang => "en"} : {:lang => "fr"}
       q[:id] = id
-      res = cached_request('category',q)
+      res = use_cache ? cached_request('category', q) : send_request('category', q)
       res
     end
     
@@ -165,50 +169,32 @@ class BestBuyApi
       ids
     end
     
-    # Gets products for given category id. It returns an array of BBproduct instances, which hold the sku and the category id.
-    def category_ids(id)
+    # Gets products for given category ids. It returns an array of BBproduct instances, which hold the sku and the category id.
+    def category_ids(categories)
       #This can accept an array or a single id
-      id = [id] unless id.class == Array
-      id = id[0..0] if Rails.env.test? #Only check first category for testing
-      ids = []
-      q = {} 
-      id.each do |my_id|
-        #Check if ProductType or feed_id
-        my_id = ProductCategory.trim_retailer(my_id)
-        # check if the category is an invalid one (no parents, but many products listed)
-        feed_category = BestBuyApi.get_category(my_id)
-        root_category = BestBuyApi.get_category('Departments')
-        if (feed_category['productCount'] >= (0.9 * root_category['productCount']) and my_id != 'Departments')
-          puts "Category " + my_id + " invalid or empty"
-          return ids
-        end
-        page = 1
-        totalpages = nil
-        while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
-          q = {:page => page,:categoryid => my_id, :sortby => "name"}
-          # add search params needed to get the EHF from QC 
-          q[:currentregion]="QC"
-          q[:ignoreehfdisplayrestrictions]="true"
-          res = cached_request('search',q)
-          totalpages ||= res["totalPages"]
-          ids += res["products"].map{|p|BBproduct.new(:id => p["sku"], :category => my_id)}
-          page += 1
-        end
+      categories = [categories] unless categories.class == Array
+      categories = categories[0..0] if Rails.env.test? #Only check first category for testing
+      bb_products = []
+      categories.each do |category|
+        category = ProductCategory.trim_retailer(category)
+        product_infos = get_shallow_product_infos(category, english = true, use_cache = true)
+        bb_products += product_infos.map{ |p| BBproduct.new(:id => p["sku"], :category => category) }
       end
-      ids
+      bb_products
     end
     
     # Gets product infos for given category id. Returns an array of hashes, one for each product in the category.
     # This uses the BestBuy 'search' API call, so it does not return all of the product info available through
     # the 'product' API call. 
-    def get_shallow_product_infos(category_id, english = true)
+    def get_shallow_product_infos(category_id, english = true, use_cache = false)
       # Remove leading B/F/A
       category_id = ProductCategory.trim_retailer(category_id)
+      category_info = BestBuyApi.get_category(category_id, true, use_cache)
+      category_product_count = category_info['productCount']
       if category_id != 'Departments'
-        # Invalid or empty categories result in the entire catalog being returned.
-        category_info = BestBuyApi.get_category(category_id)
+        # Invalid or empty categories can result in the entire catalog being returned.
         root_category_info = BestBuyApi.get_category('Departments')
-        if category_info['productCount'] >= 0.9 * root_category_info['productCount']
+        if category_product_count >= 0.9 * root_category_info['productCount']
           puts "Category " + category_id + " invalid or empty"
           return []
         end
@@ -218,13 +204,17 @@ class BestBuyApi
       total_pages = 1
       query = {categoryid: category_id, sortby: "name", lang: (english ? "en" : "fr"),
                currentregion: "QC", ignoreehfdisplayrestrictions: "true"}
-      while (page <= total_pages) 
+      while (page == 1 or (page <= total_pages and not Rails.env.test?)) # Only return one page in test environment
         query[:page] = page
-        # Bypass the cache to return the latest information.
-        result = send_request('search', query)
+        result = use_cache ? cached_request('search', query) : send_request('search', query)
         total_pages = result["totalPages"]
         products.concat(result["products"])
         page += 1
+      end
+      # Sometimes empty categories have category_product_count equal to 0 or 1, while the search returns many more 
+      # "bogus" products from other categories.
+      if products.size >= MIN_PROTECTED_CAT_SIZE and category_product_count <= 0.25 * products.size
+        raise InvalidFeedError, "Search returned #{products.size} products, while category size is #{category_product_count}"
       end
       products
     end
