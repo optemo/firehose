@@ -149,7 +149,7 @@ class BestBuyApi
       unless values.empty?
         return values.first['filters'].map{|r| r['name']}
       else
-        raise 'Filter not found'
+        raise InvalidFeedError, "Filter #{filter_name} not found"
       end
     end
     
