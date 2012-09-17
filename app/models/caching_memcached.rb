@@ -21,7 +21,6 @@ module CachingMemcached
   
   #Keys should not be longer than 250 chars
   def self.cache_lookup(key)
-    # unless Rails.env.development? || Rails.env.test?
     if Rails.cache.class != ActiveSupport::Cache::FileStore # We have memcache loaded
       #Rails.cache.fetch(key) { yield }
       #Maximum key length in memcached is 250
