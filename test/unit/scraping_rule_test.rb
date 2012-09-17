@@ -40,6 +40,10 @@ class ScrapingRuleTest < ActiveSupport::TestCase
     create :scraping_rule, local_featurename: 'bi_consecutive_fr_trans', remote_featurename: 'specs.Physical Features.Colour', rule_type: 'Categorical', regex: 'Pink/Rose^^Black/Noir^^Bla/Noi', bilingual: true
     create :scraping_rule, local_featurename: 'bi_consecutive_order', remote_featurename: 'specs.Physical Features.Colour', rule_type: 'Categorical', regex: 'Pink/Rose^^Bla/Noi^^Black/Noir', bilingual: true
     
+    # Stub the product_search API call to return stored data.
+    BestBuyApi.stubs(:product_search).with{|id| id == "100000"}.returns(JSON.parse($bb_api_response["100000"]))
+    BestBuyApi.stubs(:product_search).with{|id| id == "100001"}.returns(JSON.parse($bb_api_response["100001"]))
+ 
     # Call scraping on products
     number1 = ScrapingRule.scrape((BBproduct.new id: "100000", category: "B20218"),false,[],false)
     candidates1 = number1[:candidates] # Colour: Black

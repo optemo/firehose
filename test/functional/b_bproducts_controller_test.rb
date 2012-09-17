@@ -16,7 +16,7 @@ class BBproductsControllerTest < ActionController::TestCase
   end
 
   test "should get scrape for digital elph" do
-    get :show, product_type_id: "B20243", id: "10164411"
+    get :show, product_type_id: "B22474", id: "10164410"
     assert_response :success
   end
 

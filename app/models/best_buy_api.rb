@@ -13,13 +13,13 @@ class BestBuyApi
   class InvalidFeedError < StandardError; end
 
   MIN_PROTECTED_CAT_SIZE = 4 # Categories of this size or greater are protected from empty feeds.
- 
+
   class << self
     URL = {"B" => "http://www.bestbuy.ca/api/v2",
            "F" => "http://www.futureshop.ca/api/v2",
           }
     DEBUG = false
-    
+
     # Get BestBuy product info, given product SKU.
     # This method first attempts to retrieve all product attributes. If that fails,
     # it then attempts to retrieve just the basic product attributes.
@@ -46,11 +46,9 @@ class BestBuyApi
       end
       q[:currentregion]="QC"
       q[:ignoreehfdisplayrestrictions]="true"
-      if Rails.env.test? && (id == "100000" || id == "100001")
-        JSON.parse($bb_api_response[id])
-      else
-        cached_request('product',q)
-      end
+
+      cached_request('product',q)
+
       # From the BestBuy API documentation, use &Include=media and/or any of the following: 
       # relations,description,availability,all (in comma-separated format as a URL parameter)
     end
@@ -130,7 +128,6 @@ class BestBuyApi
     def some_ids(id,num = 10)
       #This can accept an array or a single id
       id = [id] unless id.class == Array
-      id = id[0..0] if Rails.env.test? #Only check first category for testing
       ids = []
       id.each do |my_id|
         #Check if ProductType or feed_id
@@ -160,7 +157,7 @@ class BestBuyApi
       page = 1
       totalpages = nil
       ids = []
-      while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
+      while (page == 1 || page <= totalpages)
         res = cached_request('search',{ :page => page, :categoryid => categoryid, :filter=> "#{filter_name}|#{filter_value}" })
         totalpages ||= res["totalPages"]
         ids += res["products"].map{|p| p["sku"]}
@@ -173,7 +170,6 @@ class BestBuyApi
     def category_ids(categories)
       #This can accept an array or a single id
       categories = [categories] unless categories.class == Array
-      categories = categories[0..0] if Rails.env.test? #Only check first category for testing
       bb_products = []
       categories.each do |category|
         category = ProductCategory.trim_retailer(category)
@@ -204,7 +200,7 @@ class BestBuyApi
       total_pages = 1
       query = {categoryid: category_id, sortby: "name", lang: (english ? "en" : "fr"),
                currentregion: "QC", ignoreehfdisplayrestrictions: "true"}
-      while (page == 1 or (page <= total_pages and not Rails.env.test?)) # Only return one page in test environment
+      while (page <= total_pages)
         query[:page] = page
         result = use_cache ? cached_request('search', query) : send_request('search', query)
         total_pages = result["totalPages"]
@@ -223,11 +219,11 @@ class BestBuyApi
       cached_request('search',{:page => page,:name => string})
     end
     
-    def keyword_search(query)
+    def keyword_search(query, max_returned_pages = nil)
         page = 1
         totalpages = nil
         skus = []
-        while (page == 1 || page <= totalpages && !Rails.env.test?) #Only return one page in the test environment
+        while (page == 1 || (page <= totalpages && (max_returned_pages == nil || page <= max_returned_pages)))
           res = cached_request('search',{:page => page,:query => query, :sortby => "name", :pagesize=> 100})
           totalpages ||= res["totalPages"]
           skus += res["products"].inject([]){|sks, ele| sks << ele["sku"] }
