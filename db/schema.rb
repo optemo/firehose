@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120910233554) do
+ActiveRecord::Schema.define(:version => 20120912175305) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -172,7 +172,10 @@ ActiveRecord::Schema.define(:version => 20120910233554) do
     t.datetime "updated_at"
     t.string   "sortby"
     t.string   "product_type"
+    t.string   "params_hash"
   end
+
+  add_index "searches", ["params_hash"], :name => "index_searches_on_params_hash"
 
   create_table "surveys", :force => true do |t|
     t.datetime "created_at"
