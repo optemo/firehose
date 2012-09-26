@@ -1,6 +1,6 @@
 class RuleUsageType < Customization
   @feature_name = 'usageType'
-  @product_type = ['F1002']
+  @product_type = [] # Used to be ['F1002'], temporarily disabling this rule to deal with feed issue.
   @needed_features = []
   @rule_type = 'Binary'
   
