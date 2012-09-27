@@ -67,6 +67,9 @@ class Product < ActiveRecord::Base
       end
     end
    end
+   float :pricePlusEHF, trie: true do
+     cont_specs.find_by_name(:pricePlusEHF).try(:value)
+   end
     float :lrutility, trie: true do
       cont_specs.find_by_name(:lrutility).try(:value)
     end
