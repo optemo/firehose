@@ -41,11 +41,19 @@ class Customization
       results = Hash.new{|h,k| h[k] = []} #New values in the hash an empty array instead of nil
       # get all the customizations applicable to this product_type and ancestors that only need to be run once
       find_all_by_product_type_and_only_once(Session.product_type_path,true,is_shallow_update).each do |rule|
-        results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts)
+        begin
+          results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts)
+        rescue StandardError => except
+          puts "Customization rule #{rule} for product type #{Session.product_type} raised exception: #{except}"
+        end
       end
       # get all the customizations applicable to this product_type and ancestors that need to be run every time
       find_all_by_product_type_and_only_once(Session.product_type_path,false,is_shallow_update).each do |rule|
-        results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts+oldproducts)
+        begin
+          results[rule_type_to_class(rule.rule_type)] += compute_specs(rule,newproducts+oldproducts)
+        rescue StandardError => except
+          puts "Customization rule #{rule} for product type #{Session.product_type} raised exception: #{except}"
+        end
       end
       results
     end

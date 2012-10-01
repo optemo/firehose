@@ -13,6 +13,40 @@ class CustomizationTest < ActiveSupport::TestCase
     Session.new('F1127')
   end
   
+  test "Custom rule compute exceptions are handled" do
+    # Verify that exceptions raised in the compute method of custom rules are handled in 
+    # Customization.run and not thrown to the caller.
+    p1 = create(:product, sku: 901)
+
+    ContSpec.create(:product_id => p1.id, :name => 'price', :value => 100)
+    ContSpec.create(:product_id => p1.id, :name => 'saleprice', :value => 99.95)
+    RuleOnSale.stubs(:compute).raises(StandardError)
+
+    # The StandardError should be trapped and not thrown from this call.
+    results = Customization.run([p1.id])[BinSpec]
+
+    # Verify the rule did not get executed.
+    assert_empty results.select{|spec| spec.name == "onsale"}, "The onsale spec should not have been created"
+  end
+
+  test "Custom rule group_computation exceptions are handled" do
+    # Verify that exceptions raised in the group_computation method of custom rules are handled 
+    # in Customization.run and not thrown to the caller.
+    Session.new "F1002"
+    BestBuyApi.stubs(:search_with_filter).with{
+        |categoryid, filter_name, filter_value| categoryid == "1002" and filter_name == "Usage Type" and filter_value == "Everyday"}.returns(["10212690"])
+
+    RuleUsageType.stubs(:group_computation).raises(StandardError)
+
+    p1 = create(:product, sku: '10212690')
+
+    # The StandardError should be trapped and not thrown from this call.
+    results = Customization.run([p1.id])[BinSpec]
+
+    # Verify the rule did not get executed.
+    assert_empty results.select{|spec| spec.name == "usageType_Everyday"}, "The usage type spec should not have been created"
+  end
+
   test "compute specs" do
     p1 = create(:product, sku: 901)
     p2 = create(:product, sku: 903)
