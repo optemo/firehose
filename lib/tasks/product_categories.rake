@@ -1,10 +1,13 @@
 desc "Traverse the hierachy of categories from the API and store it in the database"
-task :fill_categories => :environment do
-  ['F', 'B'].each do |retailer|
+task :fill_categories, [:retailer_long] => :environment do |t, args|
+  retailer = args.retailer_long[0]
+  unless retailer == 'F' or retailer == 'B'
+    puts "Wrong retailer, use F or B"
+  else
     ENV["retailer"] = retailer
     ProductCategory.where(:retailer => retailer).delete_all
     traverse({'Departments'=>'Departments'}, 1, 1)
-    p "Done saving categories for "+ ENV["retailer"]
+    puts "Done saving categories for "+ ENV["retailer"]
   end
 end
 
