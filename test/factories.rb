@@ -73,6 +73,12 @@ FactoryGirl.define do
   factory :search do
      created_at {|d| "2011-11-#{d}"}
   end
+  factory :userdatacat do
+  end
+  factory :userdatacont do
+  end
+  factory :userdatabin do
+  end
   factory :cat_spec do
     product
   end

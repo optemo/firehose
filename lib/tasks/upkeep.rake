@@ -62,8 +62,7 @@ task :update => :environment do
     #clean up inactive scraping rules not used any more
     Facet.check_active
 
-    # Cleanup of searches is temporarily disabled
-    #Search.cleanup_history_data(7)
+    Search.cleanup_history_data(90)
   end
 end
 
