@@ -30,10 +30,10 @@ class FacetTest < ActiveSupport::TestCase
      assert Facet.find_by_name_and_used_for('saleprice', 'sortby').value > Facet.find_by_name_and_used_for('displayDate', 'sortby').value, 'order should be as defined'
      assert Facet.find_by_name_and_used_for('usb3', 'show').value > Facet.find_by_name_and_used_for('regularPrice', 'show').value, 'order should be as defined'
      
-     assert_not_nil Facet.find_by_used_for_and_name('ordering', "B20222"), "ordering facet should be created"
+     assert_not_nil Facet.find_by_feature_type_and_name('Ordering', "B20222"), "ordering facet should be created"
      filter_data[0] = ["100", "Binary", "toprated", "Top Rated", "stars", "boldlabel","true"]
      Facet.update_layout("B20218", 'filter', filter_data)
-     assert_nil Facet.find_by_used_for_and_name('ordering', "B20222"), "ordering should be cleared"
+     assert_nil Facet.find_by_feature_type_and_name('Ordering', "B20222"), "ordering should be cleared"
      
      assert_equal "stars", I18n.t('B20218.filter.toprated.unit'), 'filter unit should be stored as translation'
      assert_equal "Display Date", I18n.t('B20218.sortby.displayDate_asc.name'), 'sorby translation should be stored with its direction as translation'

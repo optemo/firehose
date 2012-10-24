@@ -48,7 +48,7 @@ class FacetsControllerTest < ActionController::TestCase
 
   test "getting feature names to add from the scraping rules" do
      # Possible addition: also test the features from applicable CUSTOM rules being in the filters
-     f4 = create(:facet, used_for: "ordering", feature_type: @cat_sr.local_featurename)
+     f4 = create(:facet, feature_type: "Ordering", used_for: @cat_sr.local_featurename)
      
      get :index, product_type_id: @pt_id
      
@@ -56,11 +56,10 @@ class FacetsControllerTest < ActionController::TestCase
      sortby = assigns("sr_sortby")
      compare = assigns("sr_compare")
      categories_with_order = assigns("categories_with_order")
-     
      assert filters.include?(@bin_sr.local_featurename), "Should get features to add for filters from scraping rules"
      assert sortby.include?(@cont_sr.local_featurename), "Should get features to add for compare from scraping rules"
      assert compare.include?(@cat_sr.local_featurename), "Should get features to add forsortby from scraping rules"
-     assert categories_with_order.include?(f4.feature_type)
+     assert categories_with_order.include?(f4.used_for)
   end
     
   test "retrieving existing facets to display" do
@@ -150,15 +149,15 @@ class FacetsControllerTest < ActionController::TestCase
     assert_equal "Top Rated", I18n.t("B20218.filter.toprated.name"), 'should save translation for facet name'
     assert_equal "stars", I18n.t("B20218.filter.toprated.unit"), 'should save translation for facet unit'
     # order saved
-    assert Facet.find_by_used_for_and_name('ordering',"B20222").value < Facet.find_by_used_for_and_name('ordering',"B24394").value, "wrong ordering"
-    assert Facet.find_by_used_for_and_name('ordering',"B24394").value < Facet.find_by_used_for_and_name('ordering',"B30118").value, "wrong ordering"
+    assert Facet.find_by_feature_type_and_name('Ordering',"B20222").value < Facet.find_by_feature_type_and_name('Ordering',"B24394").value, "wrong ordering"
+    assert Facet.find_by_feature_type_and_name('Ordering',"B24394").value < Facet.find_by_feature_type_and_name('Ordering',"B30118").value, "wrong ordering"
 
     # changing the ordering
     request_data['filter_set']['2'] = ["", "Categorical", "product_type", "Product Category", "", "true", "false", "B30118", "B24394"]
     post :create, request_data
     assert_response :success
-    assert_nil Facet.find_by_used_for_and_name('ordering',"B20222"), "wrong ordering"
-    assert Facet.find_by_used_for_and_name('ordering',"B30118").value < Facet.find_by_used_for_and_name('ordering',"B24394").value, "wrong ordering"
+    assert_nil Facet.find_by_feature_type_and_name('Ordering',"B20222"), "wrong ordering"
+    assert Facet.find_by_feature_type_and_name('Ordering',"B30118").value < Facet.find_by_feature_type_and_name('Ordering',"B24394").value, "wrong ordering"
     
     # resetting the layout
     request_data["filter_set"] = "null"
@@ -169,7 +168,7 @@ class FacetsControllerTest < ActionController::TestCase
     assert_empty Facet.find_all_by_used_for("filter"), 'facets deleted on reset'
     assert_empty Facet.find_all_by_used_for("sortby"), 'facets deleted on reset'
     assert_empty Facet.find_all_by_used_for("show"), 'facets deleted on reset'
-    assert_empty Facet.find_all_by_used_for("ordering"), 'facets deleted on reset'
+    assert_empty Facet.find_all_by_feature_type("Ordering"), 'facets deleted on reset'
   end
 
   test "adding a heading to the layout" do

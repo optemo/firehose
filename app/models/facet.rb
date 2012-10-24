@@ -33,7 +33,7 @@ class Facet < ActiveRecord::Base
      page_facet_ids = facet_set.values.map{|f|f[0].to_i} unless facet_set == "null"
      to_delete = existing_facets.select{|f| !page_facet_ids.include?(f.id)}
      to_delete.each do |d|
-       Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, d.name).each { |o| o.destroy } if used_for == 'filter'
+       Facet.find_all_by_feature_type_and_product_type_and_used_for('Ordering', product_type, d.name).each { |o| o.destroy } if used_for == 'filter'
        d.destroy
      end
      return if facet_set == "null"
@@ -68,12 +68,11 @@ class Facet < ActiveRecord::Base
           fn[:name] = fn[:feature_type] + fn.id.to_s
           fn.save()
        end
-       
        if used_for == 'filter'
          cleared = vals[6]
          
          # save the ordering of the categories, if there is a list of categories as one of the input params
-         current_order = Facet.find_all_by_used_for_and_product_type_and_feature_type('ordering', product_type, facet_name)
+         current_order = Facet.find_all_by_feature_type_and_product_type_and_used_for('Ordering', product_type, facet_name)
          categories = vals[7..-1]
          unless categories.empty?
            # delete the existing order of the categories not present in the new order
@@ -81,7 +80,7 @@ class Facet < ActiveRecord::Base
            ordering_to_delete.each {|instance| instance.destroy}
          end
          categories.each_with_index do |name, index|
-           fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, facet_name, product_type, 'ordering')
+           fn = Facet.find_or_initialize_by_name_and_feature_type_and_product_type_and_used_for(name, 'Ordering', product_type, facet_name)
            fn.value = index
            fn.active = true
            fn.save
