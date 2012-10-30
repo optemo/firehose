@@ -22,19 +22,22 @@ class ProductTest < ActiveSupport::TestCase
     sr = create(:scraping_rule, local_featurename: "color", remote_featurename: "longDescription", rule_type: "Categorical", regex: '[Oo]range', priority: 1)
 
     # Stub out BestBuyApi methods
-    BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474")])
-    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and english}.returns(
-      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}) 
-    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and not english}.returns(
-      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Bleu).", "isAdvertised" => true}) 
-    BestBuyApi.stubs(:product_search).with{|id| id == "222"}.returns(
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}) 
-
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}, 
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => true, "isVisible" => true },
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", 
+        "isAdvertised" => true, "isVisible" => true } 
     ])
 
+    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and english}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => true, "isVisible" => true }) 
+    BestBuyApi.stubs(:product_search).with{|id, includeall, english| id == "111" and not english}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Bleu).", 
+        "isAdvertised" => true, "isVisible" => true }) 
+    BestBuyApi.stubs(:product_search).with{|id| id == "222"}.returns(
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", 
+        "isAdvertised" => true, "isVisible" => true }) 
   end
   
   test "product caching" do
@@ -77,6 +80,15 @@ class ProductTest < ActiveSupport::TestCase
   end
 
   test "Instock set and specs created for new products" do
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => true, "isVisible" => true },
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", 
+        "isAdvertised" => true, "isVisible" => true }, 
+      {"sku" => "333", "name" => "Test Product 333", "regularPrice" => 379.99, "longDescription" => "Description of product 333.", 
+        "isAdvertised" => true, "isVisible" => false } 
+    ])
+
     Product.feed_update
 
     p111 = Product.find_by_sku("111")
@@ -104,6 +116,9 @@ class ProductTest < ActiveSupport::TestCase
     }
     assert_equal 1, search.results.size, "Sunspot found the product"
 
+    # If isVisible is false, the product should not be created.
+    p333 = Product.find_by_sku("333")
+    assert_nil p333, "Product 333 was not created"
   end
 
   test "Ensure feed_update stores translations" do
@@ -132,7 +147,7 @@ class ProductTest < ActiveSupport::TestCase
 
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
       {"sku" => "111", "name" => "Test Product 111 (elephants)", "regularPrice" => 179.99, "salePrice" => 149.99, 
-       "longDescription" => "This is the description of product 111.", "isAdvertised" => true}) 
+       "longDescription" => "This is the description of product 111.", "isAdvertised" => true, "isVisible" => true}) 
 
     Product.feed_update
 
@@ -158,8 +173,8 @@ class ProductTest < ActiveSupport::TestCase
   test "Upgrade to deep update if there are new products" do
     # Shallow update stubbed to *not* return isAdvertised spec.
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue)."}, 
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange)."}
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isVisible" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isVisible" => true}
     ])
 
     Product.feed_update(nil, true)
@@ -175,7 +190,8 @@ class ProductTest < ActiveSupport::TestCase
 
   test "Specs created/updated for existing products (shallow update)" do
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
-      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => false}) 
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => false, "isVisible" => true}) 
 
     Product.feed_update
 
@@ -192,7 +208,7 @@ class ProductTest < ActiveSupport::TestCase
 
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
       {"sku" => "111", "name" => "Test Product 111 (elephants)", "regularPrice" => 179.99, "salePrice" => 149.99,
-       "longDescription" => "This is the description of product 111.", "isAdvertised" => true} ])
+       "longDescription" => "This is the description of product 111.", "isAdvertised" => true, "isVisible" => true} ])
 
     Sunspot.expects(:index).once.with { |products| products.size == 1 and products[0].sku == "111" }
 
@@ -231,8 +247,8 @@ class ProductTest < ActiveSupport::TestCase
 
     # Change the stubbed feed -- only difference is product 111's price is lower
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 179.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}, 
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true}
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 179.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true, "isVisible" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true, "isVisible" => true}
     ])
 
     # We expect that during shallow update, only the product whose specs have changed will be updated
@@ -271,13 +287,14 @@ class ProductTest < ActiveSupport::TestCase
 
   test "Only specified custom rules are invoked for shallow update" do
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
-      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => false}) 
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => false, "isVisible" => true}) 
 
     Product.feed_update
 
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
       {"sku" => "111", "name" => "Test Product 111 (elephants)", "regularPrice" => 179.99, "salePrice" => 149.99,
-       "longDescription" => "This is the description of product 111.", "isAdvertised" => true} ])
+       "longDescription" => "This is the description of product 111.", "isAdvertised" => true, "isVisible" => true} ])
 
     RulePriceplusehf.expects(:compute).once
     RuleOnSale.expects(:compute).once
@@ -298,7 +315,7 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 279.99, price_spec.value
 
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
-      {"sku" => "111", "name" => "Test Product 111", "longDescription" => "This is the description of product 111.", "isAdvertised" => true}) 
+      {"sku" => "111", "name" => "Test Product 111", "longDescription" => "This is the description of product 111.", "isAdvertised" => true, "isVisible" => true}) 
 
     Product.feed_update
 
@@ -323,8 +340,8 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal true, bin_spec.value, "isAdvertised is true"
 
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue)."}, 
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange)."}
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isVisible" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isVisible" => true}
     ])
 
     Product.feed_update(nil, true)
@@ -356,6 +373,44 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 1, search.results.size, "Sunspot found product 222"
 
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474")])
+
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 exists"
+    assert p111.instock, "Product 111 is instock"
+
+    p222 = Product.find_by_sku("222")
+    assert p222.nil?, "Product 222 no longer exists"
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 0, search.hits.size, "Sunspot did not find product 222"
+  end
+
+  test "Products with isVisible set to false are deleted" do
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 was created"
+    assert p111.instock, "Product 111 is instock"
+
+    p222 = Product.find_by_sku("222")
+    assert_not_nil p222, "Product 222 was created"
+    assert p222.instock, "Product 222 is instock"
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 1, search.results.size, "Sunspot found product 222"
+
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => true, "isVisible" => true },
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", 
+        "isAdvertised" => true, "isVisible" => false } 
+    ])
 
     Product.feed_update
 
@@ -449,7 +504,50 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 1, search.results.size, "Sunspot found product 222"
 
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true, "isVisible" => true}
+    ])
+
+    Product.feed_update(nil, true)
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 exists"
+    assert p111.instock, "Product 111 is instock"
+
+    p222 = Product.find_by_sku("222")
+    assert p222.nil?, "Product 222 no longer exists"
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 0, search.hits.size, "Sunspot did not find product 222"
+  end
+
+  test "Products with isVisible set to false are deleted (shallow update)" do
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 0, search.hits.size, "Sunspot did not find product 222"
+
+    Product.feed_update
+
+    p111 = Product.find_by_sku("111")
+    assert_not_nil p111, "Product 111 was created"
+    assert p111.instock, "Product 111 is instock"
+
+    p222 = Product.find_by_sku("222")
+    assert_not_nil p222, "Product 222 was created"
+    assert p222.instock, "Product 222 is instock"
+
+    search = Sunspot.search(Product) {
+      keywords "222", :fields => ["sku"]
+    }
+    assert_equal 1, search.results.size, "Sunspot found product 222"
+
+    BestBuyApi.stubs(:get_shallow_product_infos).returns([
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", 
+        "isAdvertised" => true, "isVisible" => true },
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", 
+        "isAdvertised" => true, "isVisible" => false } 
     ])
 
     Product.feed_update(nil, true)
@@ -472,7 +570,8 @@ class ProductTest < ActiveSupport::TestCase
                                              BBproduct.new(id: "333", category: "22474"), BBproduct.new(id: "444", category: "22474")])
     ["111", "222", "333", "444"].each do |test_sku| 
       BestBuyApi.stubs(:product_search).with{|id| id == test_sku}.returns(
-          { "sku" => test_sku, "name" => "Test Product " + test_sku, "regularPrice" => 279.99, "longDescription" => "Description of product " + test_sku}) 
+          { "sku" => test_sku, "name" => "Test Product " + test_sku, "regularPrice" => 279.99, "longDescription" => "Description of product " + test_sku, 
+             "isVisible" => true}) 
     end
     Product.feed_update
 
@@ -494,7 +593,8 @@ class ProductTest < ActiveSupport::TestCase
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "111-bundle", category: "22474"),
                                              BBproduct.new(id: "222", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "111-bundle"}.returns(
-      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, "bundle" => '[{"sku": "111"}]'}) 
+      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", 
+        "isAdvertised" => true, "bundle" => '[{"sku": "111"}]', "isVisible" => true}) 
 
     Product.feed_update
     
@@ -519,7 +619,8 @@ class ProductTest < ActiveSupport::TestCase
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "111-bundle", category: "22474"),
                                              BBproduct.new(id: "222", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "111-bundle"}.returns(
-      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, "bundle" => '[{"sku": "111"}]'}) 
+      { "sku" => "111-bundle", "name" => "Bundle 111", "regularPrice" => 279.99, "longDescription" => "Description.", 
+        "isAdvertised" => true, "bundle" => '[{"sku": "111"}]', "isVisible" => true}) 
 
     Product.feed_update
     
@@ -543,7 +644,7 @@ class ProductTest < ActiveSupport::TestCase
   test "product_siblings is cleaned up when product is removed from feed" do
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
       { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, 
-        "related" => '[{"sku": "222", "type": "Variant"}]'}) 
+        "related" => '[{"sku": "222", "type": "Variant"}]', "isVisible" => true}) 
 
     Product.feed_update
 
@@ -649,7 +750,8 @@ class ProductTest < ActiveSupport::TestCase
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), 
                                              BBproduct.new(id: "222", category: "22474"), BBproduct.new(id: "444555", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "444555"}.returns(
-      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true}) 
+      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", 
+        "isAdvertised" => true, "isVisible" => true}) 
 
     Product.feed_update
 
@@ -679,13 +781,14 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal "B28381", product_type_spec.value, "Product type is B28381"
 
     BestBuyApi.stubs(:get_shallow_product_infos).returns([
-      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true}, 
-      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true},
-      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true} 
+      {"sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true, "isVisible" => true}, 
+      {"sku" => "222", "name" => "Test Product 222", "regularPrice" => 379.99, "longDescription" => "Description of product 222 (Orange).", "isAdvertised" => true, "isVisible" => true},
+      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true, "isVisible" => true} 
     ])
 
     BestBuyApi.stubs(:product_search).with{|id| id == "444555"}.returns(
-      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", "isAdvertised" => true}) 
+      {"sku" => "444555", "name" => "Test Product 444555", "regularPrice" => 379.99, "longDescription" => "Description of product 444555.", 
+        "isAdvertised" => true, "isVisible" => true}) 
 
     # Will upgrade to deep update.
     Product.feed_update(nil, true)
@@ -716,7 +819,8 @@ class ProductTest < ActiveSupport::TestCase
     BestBuyApi.stubs(:category_ids).returns([BBproduct.new(id: "111", category: "22474"), BBproduct.new(id: "222", category: "22474"), 
                                             BBproduct.new(id: "333444", category: "22474")])
     BestBuyApi.stubs(:product_search).with{|id| id == "333444"}.returns(
-      {"sku" => "333444", "name" => "Test Product 333444", "regularPrice" => 279.99, "longDescription" => "This is the description of product 333444.", "isAdvertised" => true}) 
+      {"sku" => "333444", "name" => "Test Product 333444", "regularPrice" => 279.99, "longDescription" => "This is the description of product 333444.", 
+        "isAdvertised" => true, "isVisible" => true}) 
 
     Product.feed_update
 
