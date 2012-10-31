@@ -167,7 +167,7 @@ class BestBuyApi
     end
     
     # Gets products for given category ids. It returns an array of BBproduct instances, which hold the sku and the category id.
-    # This method filters out products whose isVisible flag is not true.
+    # This method filters out products whose isVisible flag is false.
     def category_ids(categories)
       #This can accept an array or a single id
       categories = [categories] unless categories.class == Array
@@ -175,7 +175,7 @@ class BestBuyApi
       categories.each do |category|
         category = ProductCategory.trim_retailer(category)
         product_infos = get_shallow_product_infos(category, english = true, use_cache = true)
-        product_infos.select! { |product_info| product_info["isVisible"] == true } 
+        product_infos.select! { |product_info| product_info["isVisible"] != false } 
         bb_products += product_infos.map{ |p| BBproduct.new(:id => p["sku"], :category => category) }
       end
       bb_products

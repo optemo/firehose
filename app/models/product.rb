@@ -395,8 +395,8 @@ class Product < ActiveRecord::Base
 
     english_product_infos = BestBuyApi.get_shallow_product_infos(product_type, true)
 
-    # Only return products which have the isVisible attribute set to true.
-    english_product_infos.select! { |product_info| product_info["isVisible"] == true } 
+    # Only return products whose isVisible attribute is not false.
+    english_product_infos.select! { |product_info| product_info["isVisible"] != false } 
 
     retailer_infos = []
     english_product_infos.each do |product_info|
