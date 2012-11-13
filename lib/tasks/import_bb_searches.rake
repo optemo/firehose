@@ -49,6 +49,10 @@ task :import_bb_searches, [:filename] => :environment do |t, args|
           searches_to_save << search
           if searches_to_save.size >= 10000
             KeywordSearch.import(searches_to_save, :on_duplicate_key_update => [:count])
+            searches_to_save.each_slice(500) { |slice|
+              Sunspot.index(slice)
+            }
+            Sunspot.commit
             searches_to_save = []
             puts "Imported #{query_count} searches"
           end
