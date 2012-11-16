@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120912175305) do
+ActiveRecord::Schema.define(:version => 20121112172034) do
 
   create_table "accessories", :force => true do |t|
     t.integer  "product_id"
@@ -102,6 +102,15 @@ ActiveRecord::Schema.define(:version => 20120912175305) do
   end
 
   add_index "facets", ["used_for"], :name => "index_facets_on_used_for"
+
+  create_table "keyword_searches", :force => true do |t|
+    t.string   "query"
+    t.float    "count"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "keyword_searches", ["query"], :name => "index_keyword_searches_on_query"
 
   create_table "product_bundles", :force => true do |t|
     t.integer  "bundle_id"
