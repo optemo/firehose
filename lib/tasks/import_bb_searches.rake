@@ -1,9 +1,6 @@
 require 'rexml/document'
-require 'test/unit'
 
 module ImportHelper
-  extend Test::Unit::Assertions
-  
   def ImportHelper.generate_query_variations(query)
     variations = [query]
 
@@ -236,63 +233,73 @@ module ImportHelper
     nil
   end
   
+  class TestFailedException < Exception
+  end
+  
+  # Simple assertion for tests.
+  def ImportHelper.assert(condition, message = nil)
+    if not condition
+      raise TestFailedException.new(message)
+    end
+  end
+  
   # Basic tests for query import.
   def ImportHelper.run_tests
     # Verify line processing
     
     # Verify queries consisting only of numbers are skipped
     query = extract_query_info('77.,,101 102 224 999,,"40,791",,,0.1%')
-    assert_nil query
+    assert query.nil?
     
     # Verify handling of XML escape sequences.
     # Verify handling of count with comma.
     query = extract_query_info('77.,,a very harold &#38; kumar christmas,,"40,791",,,0.1%')
-    assert_not_nil query
-    assert_equal "a very harold & kumar christmas", query[:query]
-    assert_equal 40791, query[:count]
+    assert !query.nil?
+    assert "a very harold & kumar christmas" == query[:query]
+    assert 40791 == query[:count]
     
     # Verify handling of query with comma.
     # Verify removal of extra spaces between query terms.
     # Verify downcasing of query.
     # Verify stripping leading and trailing spaces.
     query = extract_query_info('77.,,"  Query  with , comma  ",,"40,791",,,0.1%')
-    assert_not_nil query
-    assert_equal "query with comma", query[:query]
-    assert_equal 40791, query[:count]
+    assert !query.nil?
+    assert "query with comma" == query[:query]
+    assert 40791 == query[:count]
 
     # Verify removal of unwanted punctuation.
     query = extract_query_info('77.,,unwanted *\ punctuation,,"40,791",,,0.1%')
-    assert_not_nil query
-    assert_equal "unwanted punctuation", query[:query]
-    assert_equal 40791, query[:count]
+    assert !query.nil?
+    assert "unwanted punctuation" == query[:query]
+    assert 40791 == query[:count]
 
     # Verify word combining
     queries = [{query: "laptop", count: 5}, {query: "lap top", count: 6}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "lap top", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "lap top" == results[0][:query]
+    assert 11 == results[0][:count]
     
     # Order of queries in the list should not matter.
     queries = [{query: "lap top", count: 6}, {query: "laptop", count: 5}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "lap top", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "lap top" == results[0][:query]
+    assert 11 == results[0][:count]
     
     # The variation with the higher count should always win.
     queries = [{query: "lap top", count: 5}, {query: "laptop", count: 6}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "laptop", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "laptop" == results[0][:query]
+    assert 11 == results[0][:count]
 
     # Verify pluralization
     queries = [{query: "foxes", count: 5}, {query: "fox", count: 6}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "fox", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "fox" == results[0][:query]
+    assert 11 == results[0][:count]
 
     # Verify word combining with punctuation.
     # Verify more than two variations.
@@ -304,41 +311,41 @@ module ImportHelper
                {query: "a.b", count: 1},
                {query: "ab", count: 2}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "ab", results[0][:query]
-    assert_equal 8, results[0][:count]
+    assert 1 == results.size
+    assert "ab" == results[0][:query]
+    assert 8 == results[0][:count]
         
     # Verify with multiple varying terms
     queries = [{query: "brown laptops bag", count: 5}, {query: "brown laptop bags", count: 6}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "brown laptop bags", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "brown laptop bags" == results[0][:query]
+    assert 11 == results[0][:count]
     
     queries = [{query: "laptop", count: 6}, {query: "laptops", count: 5}, {query: "laptop sleeve", count: 4}]
     results = prune_queries(queries)
-    assert_equal 2, results.size
+    assert 2 == results.size
     results_hash = {}
     results.each { |info| results_hash[info[:query]] = info }
-    assert_not_nil results_hash["laptop"]
-    assert_equal 11, results_hash["laptop"][:count]
-    assert_not_nil results_hash["laptop sleeve"]
-    assert_equal 4, results_hash["laptop sleeve"][:count]
+    assert !results_hash["laptop"].nil?
+    assert 11 == results_hash["laptop"][:count]
+    assert !results_hash["laptop sleeve"].nil?
+    assert 4 == results_hash["laptop sleeve"][:count]
    
     # Verify that when neither query is a direct variation of the other, we still detect
     # that they are one-step-removed variations.
     queries = [{query: "laptop", count: 5}, {query: "lap tops", count: 6}]
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "lap tops", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "lap tops" == results[0][:query]
+    assert 11 == results[0][:count]
     
     # Verify hash form of input to prune_queries.
     queries = {"laptop" => {query: "laptop", count: 5}, "lap top" => {query: "lap top", count: 6}}
     results = prune_queries(queries)
-    assert_equal 1, results.size
-    assert_equal "lap top", results[0][:query]
-    assert_equal 11, results[0][:count]
+    assert 1 == results.size
+    assert "lap top" == results[0][:query]
+    assert 11 == results[0][:count]
   end
 end
 
@@ -348,7 +355,8 @@ task :test_import_searches => :environment do
     ImportHelper.run_tests
     puts "Tests completed successfully"
   rescue Exception => e
-    puts "Error in tests: #{e} at #{e.backtrace.find { |location| location.include? __FILE__ }}"
+    location = (e.backtrace.size >= 2 ? e.backtrace[1] : "Unknown location")
+    puts "Error in tests: #{e} at #{e.backtrace[1]}"
   end
 end
 
