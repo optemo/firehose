@@ -12,10 +12,14 @@ class Facet < ActiveRecord::Base
      Facet.import facets_to_save, :on_duplicate_key_update => [:active] if facets_to_save.size > 0
    end
    
-   def self.get_display_type(f_type)
+   def self.get_display_type(f_type, ui=nil)
      case f_type
        when 'Continuous'
-         'Slider'
+         if ui.nil?
+          'Ranges'
+         else
+           ui.capitalize
+         end
        when 'Categorical'
          'Checkboxes for categories'
        when 'Binary'
@@ -30,7 +34,7 @@ class Facet < ActiveRecord::Base
    def self.update_layout(product_type, used_for, facet_set)
      existing_facets = Facet.find_all_by_used_for_and_product_type(used_for, product_type)
      page_facet_ids = []
-     page_facet_ids = facet_set.values.map{|f|f[0].to_i} unless facet_set == "null"
+     page_facet_ids = facet_set.values.map{|f|f[0].to_i} unless facet_set == "null" or facet_set.nil? or facet_set.empty?
      to_delete = existing_facets.select{|f| !page_facet_ids.include?(f.id)}
      to_delete.each do |d|
        Facet.find_all_by_feature_type_and_product_type_and_used_for('Ordering', product_type, d.name).each { |o| o.destroy } if used_for == 'filter'
@@ -49,19 +53,23 @@ class Facet < ActiveRecord::Base
        facet_name = vals[2]
        fn[:name] = facet_name
        fn[:style] = case vals[5]
-       when "true"
-         'boldlabel'
-       when "asc"
-         'asc'
-       when "desc"
-         'desc'
-       else
-         ''
+         when "true"
+           'boldlabel'
+         when "asc"
+           'asc'
+         when "desc"
+           'desc'
+         else
+           ''
        end
        fn[:product_type] = product_type
        fn[:value] = index
        fn[:used_for] = used_for
        fn[:active] = 1
+       
+       if fn[:feature_type] == 'Continuous'
+         fn[:ui] = (facet_name == "saleprice" && Session.retailer == 'F' ? 'slider' : 'ranges')
+       end
        fn.save()
        
        if fn[:feature_type] == 'Heading' or fn[:feature_type] == 'Spacer'
@@ -112,6 +120,6 @@ class Facet < ActiveRecord::Base
    end
    
    def get_display
-     Facet.get_display_type(feature_type)
+     Facet.get_display_type(feature_type, self.ui)
    end
 end

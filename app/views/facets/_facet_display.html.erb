@@ -32,7 +32,7 @@
 <% when 'Heading' -%>
   <div class='<%= f.used_for %>_box' data-id='<%= f.id %>' data-name='<%= f.name %>' data-label='<%= f.name %>' data-type='<%= f.feature_type %>'>
     <div>Name: <span class='edit-translation'><%= t(@p_type+'.'+f.used_for+'.'+f.name+'.name', :default => f.name) %></span></div>
-    <div>Display: <%= f.get_display  %></div>
+    <div>Display: <%= f.get_display %></div>
     <div class='check'><input type="checkbox" value="style" <%= "checked" unless f.style.empty? %>> boldlabel </div>
     <a class="remove_facet" href="#">Remove</a>
   </div>
