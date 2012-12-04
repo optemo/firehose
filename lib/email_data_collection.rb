@@ -28,6 +28,7 @@ end
 # end_date => when to stop looking, optional
 def save_email_data (task_data,daily_updates,start_date,end_date)
   begin
+    require 'pathname'
     require 'net/imap'
     require 'zip/zip'
     require 'orders_pageviews_saving'
@@ -146,7 +147,7 @@ def save_email_data (task_data,daily_updates,start_date,end_date)
           contspecs = []
           # TODO: the email possibly being weekly is no longer the case, test that the script would not fail without the 'weekly' variable
           weekly=false
-          if csvfile =~ /.+-.+-.+/
+          if Pathname.new(csvfile).basename.to_s =~ /.+-.+-.+/
             weekly=true
           end
         
