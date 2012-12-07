@@ -643,7 +643,7 @@ class ProductTest < ActiveSupport::TestCase
 
   test "product_siblings is cleaned up when product is removed from feed" do
     BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
-      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description.", "isAdvertised" => true, 
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true, 
         "related" => '[{"sku": "222", "type": "Variant"}]', "isVisible" => true}) 
 
     Product.feed_update
