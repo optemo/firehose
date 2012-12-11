@@ -56,23 +56,23 @@ class ProductSibling < ActiveRecord::Base
     # Recreate hash from updated list
     new_siblings_hash = new_siblings.group_by { |rec| rec.product_id }
     
-    # This next step ensures partial transitivity of the sibling relationship, but not full transitivity.  Specifically,
-    # it ensures R(a,b) & R(a,c) => R(b,c) but not R(a,b) & R(b,c) => R(a,c).  This seems to be sufficient given the
-    # current feed from BestBuy (in fact, it is not clear whether we need to ensure symmetry and transitivity at all;
-    # it looks like BestBuy may take care of it on their side).
-    new_siblings_hash.each do |product_id, recs|
-      recs.each do |rec_1|
-        recs.each do |rec_2|
-          id_1 = rec_1.sibling_id
-          id_2 = rec_2.sibling_id
-          if id_1 != id_2
-            siblings_1 = new_siblings_hash[id_1]
-            if siblings_1.nil? or siblings_1.find{ |sib| sib.sibling_id == id_2 }.nil?
-              new_siblings << ProductSibling.new(product_id: id_1, sibling_id: id_2, name: "color", value: rec_2.value)
+    # Make sure color relationship is transitive (R(a,b) & R(b,c) => R(a,c)) but not reflexive.
+    direct_siblings = new_siblings_hash.clone
+    while not direct_siblings.empty?
+      product_id, recs = direct_siblings.first 
+      all_siblings = find_all_siblings(product_id, new_siblings_hash)
+      all_siblings.each do |p1|
+        p1_sibs = new_siblings_hash[p1].map { |rec| rec.sibling_id }
+        all_siblings.each do |p2|
+          if p1 != p2 and not p1_sibs.include? p2
+            color_spec = CatSpec.find_by_product_id_and_name(p2, "color") 
+            if not color_spec.nil?
+              new_siblings << ProductSibling.new(product_id: p1, sibling_id: p2, name: "color", value: color_spec.value)
             end
           end
         end
       end
+      all_siblings.each { |product_id| direct_siblings.delete(product_id) }
     end
 
     # Gather all the existing sibling records for the current product type.
@@ -107,4 +107,23 @@ class ProductSibling < ActiveRecord::Base
       recs.each { |rec| rec.destroy }
     end
   end
+  
+  # Recursively find all siblings of the given product.
+  #   product_id - The product whose siblings are to be found
+  #   siblings_hash - A hash mapping from product ID to ProductSibling records representing direct siblings of that product.
+  #   all_siblings - Hash whose keys are all sibling ID's we have found so far (needed to avoid cycles)
+  # Returns an array of sibling ID's for the specified product. This array includes the original product ID.
+  def self.find_all_siblings(product_id, siblings_hash, all_siblings = {})
+    if all_siblings[product_id].nil? # Avoid cycles
+      all_siblings[product_id] = true
+      siblings = siblings_hash[product_id]
+      if not siblings.nil?
+        siblings.each do |rec|
+          find_all_siblings(rec.sibling_id, siblings_hash, all_siblings)
+        end
+      end
+    end
+    all_siblings.keys
+  end
+  
 end

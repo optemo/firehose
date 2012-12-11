@@ -91,7 +91,7 @@ class ProductSiblingTest < ActiveSupport::TestCase
     assert_equal rec_2.id, new_rec_2.id
   end
 
-  test "make sure color relationship is partially transitive (R(a,b) & R(a,c) => R(b,c))" do
+  test "Check transitivity: R(a,b) & R(a,c) => R(b,c)" do
     t1 = create(:text_spec, product_id:11, name:"relations", value:'[{"sku": "10159587","type": "Variant"}, {"sku": "10159586","type": "Variant"}]')
     ProductSibling.get_relations
     
@@ -112,8 +112,30 @@ class ProductSiblingTest < ActiveSupport::TestCase
     assert_equal "yellow", rec_2.value
   end
   
-  test "make sure color relationship is partially transitive (for more than two relations)" do
-    create(:text_spec, product_id:11, name:"relations", value:'[{"sku": "10159587","type": "Variant"}, {"sku": "10159586","type": "Variant"},{"sku": "10159584","type": "Variant"}]')
+  test "Check transitivity: R(a,b) & R(b,c) => R(a,c)" do
+    t1 = create(:text_spec, product_id:11, name:"relations", value:'[{"sku": "10159586","type": "Variant"}]')
+    t2 = create(:text_spec, product_id:12, name:"relations", value:'[{"sku": "10159587","type": "Variant"}]')
+    ProductSibling.get_relations
+    
+    # there should be 6 records in the ProductSibling table (11 -> 12, 11 -> 13, 12 -> 11, 13 -> 11, 12 -> 13, 13 -> 12)
+    assert_equal(6, ProductSibling.all.length)
+    
+    # there should be two records with product_id equals to 13
+    assert_equal(2, ProductSibling.count(:conditions => "product_id = 13"))
+    
+    rec_1 = ProductSibling.find_by_product_id_and_sibling_id(11, 13)
+    assert_not_nil rec_1
+    assert_equal "color", rec_1.name
+    assert_equal "green", rec_1.value
+    
+    rec_2 = ProductSibling.find_by_product_id_and_sibling_id(13, 11)
+    assert_not_nil rec_2
+    assert_equal "color", rec_2.name
+    assert_equal "red", rec_2.value
+  end
+
+  test "make sure color relationship is transitive (for more than two relations)" do
+    create(:text_spec, product_id:11, name:"relations", value:'[{"sku": "10159587","type": "Variant"}, {"sku": "10159586","type": "Variant"}, {"sku": "10159584","type": "Variant"}]')
     ProductSibling.get_relations
     # there should be 12 records in the ProductSibling table
     assert_equal(12, ProductSibling.all.length)
