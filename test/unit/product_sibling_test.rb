@@ -47,6 +47,37 @@ class ProductSiblingTest < ActiveSupport::TestCase
     assert_equal "red", rec_2.value
   end
   
+  test "check two siblings groups" do
+    t1 = create(:text_spec, product_id:10, name:"relations", value:'[{"sku": "10159585","type": "Variant"}]')
+    t2 = create(:text_spec, product_id:12, name:"relations", value:'[{"sku": "10159587","type": "Variant"}]')
+    ProductSibling.get_relations
+    assert_equal(4, ProductSibling.all.length)
+    
+    sibs = ProductSibling.find_all_by_product_id(10)
+    assert_not_nil sibs
+    assert_equal 1, sibs.size
+    assert_equal 11, sibs[0].sibling_id
+    assert_equal "red", sibs[0].value
+    
+    sibs = ProductSibling.find_all_by_product_id(11)
+    assert_not_nil sibs
+    assert_equal 1, sibs.size
+    assert_equal 10, sibs[0].sibling_id
+    assert_equal "purple", sibs[0].value
+    
+    sibs = ProductSibling.find_all_by_product_id(12)
+    assert_not_nil sibs
+    assert_equal 1, sibs.size
+    assert_equal 13, sibs[0].sibling_id
+    assert_equal "green", sibs[0].value
+
+    sibs = ProductSibling.find_all_by_product_id(13)
+    assert_not_nil sibs
+    assert_equal 1, sibs.size
+    assert_equal 12, sibs[0].sibling_id
+    assert_equal "yellow", sibs[0].value
+  end
+
   test "make sure old sibling records are used if they already exist" do
     t1 = create(:text_spec, product_id:11, name:"relations", value:'[{"sku": "10159587","type": "Variant"}]')
     ProductSibling.get_relations
