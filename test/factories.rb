@@ -58,8 +58,11 @@ FactoryGirl.define do
     retailer 'B'
   end
   factory :typed_product, :parent => :product do
+    ignore do
+      product_type false
+    end
     after(:create) do |product, evaluator|
-      FactoryGirl.create :cat_spec, {name: "product_type", value: (Session.product_type_leaves || [ProductCategory.first.product_type]).first, product: product}
+      FactoryGirl.create :cat_spec, {name: "product_type", value: evaluator.product_type || (Session.product_type_leaves || [ProductCategory.first.product_type]).first, product: product}
     end
   end
   factory :category_id_product_type_map do
