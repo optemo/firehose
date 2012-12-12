@@ -171,5 +171,58 @@ class ProductSiblingTest < ActiveSupport::TestCase
     # there should be 12 records in the ProductSibling table
     assert_equal(12, ProductSibling.all.length)
   end
+  
+  test "siblings span product types" do
+    create(:typed_product, product_type: "B22474", id: 50, sku: "100")
+    create(:typed_product, product_type: "B28381", id: 51, sku: "101")
+    create(:cat_spec, product_id: 50, name: "color", value: "purple")
+    create(:cat_spec, product_id: 51, name: "color", value: "red")
+    t1 = create(:text_spec, product_id: 50, name: "relations", value: '[{"sku": "101","type": "Variant"}]')
+    t2 = create(:text_spec, product_id: 51, name: "relations", value: '[{"sku": "100","type": "Variant"}]')
+    
+    Session.new "B22474"
+    ProductSibling.get_relations
+    
+    # One side of the relationship is created.
+    assert_equal 1, ProductSibling.all.size
+    rec_1 = ProductSibling.find_by_product_id_and_sibling_id(50, 51)
+    assert_not_nil rec_1
+    
+    Session.new "B28381"
+    ProductSibling.get_relations
+    
+    # The other side of the relationship is created.
+    assert_equal 2, ProductSibling.all.size
+    rec_1 = ProductSibling.find_by_product_id_and_sibling_id(50, 51)
+    assert_not_nil rec_1
+    rec_2 = ProductSibling.find_by_product_id_and_sibling_id(51, 50)
+    assert_not_nil rec_2
+
+    # On a second iteration, no new records created.    
+    Session.new "B22474"
+    ProductSibling.get_relations
+    Session.new "B28381"
+    ProductSibling.get_relations
+    
+    assert_equal 2, ProductSibling.all.size
+    rec_1 = ProductSibling.find_by_product_id_and_sibling_id(50, 51)
+    assert_not_nil rec_1
+    rec_2 = ProductSibling.find_by_product_id_and_sibling_id(51, 50)
+    assert_not_nil rec_2
+
+    # Break the relationship and verify records are cleaned up.
+    t1.destroy
+    t2.destroy
+        
+    Session.new "B22474"
+    ProductSibling.get_relations
+
+    assert_equal 1, ProductSibling.all.size
+
+    Session.new "B28381"
+    ProductSibling.get_relations
+    
+    assert_equal 0, ProductSibling.all.size
+  end
 end
 

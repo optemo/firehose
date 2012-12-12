@@ -79,26 +79,28 @@ class ProductSibling < ActiveRecord::Base
     join_query = "INNER JOIN cat_specs ON product_siblings.product_id = cat_specs.product_id"
     old_siblings = ProductSibling.joins(join_query).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})
     
-    # Include the records where a product in the current product type is specified as the sibling.
-    join_query = "INNER JOIN cat_specs ON product_siblings.sibling_id = cat_specs.product_id"
-    old_siblings += ProductSibling.joins(join_query).where(cat_specs: {name: "product_type", value: Session.product_type_leaves})
     old_siblings_by_product_id = old_siblings.group_by { |rec| rec.product_id }
     
+    current_type_products = Product.current_type.map { |product| product.id }
+    
     # Now import the new records which do not already exist in the database
-    new_siblings.each do |rec| 
-      found_match = false
-      old_siblings = old_siblings_by_product_id[rec.product_id]
-      if not old_siblings.nil? 
-        old_rec = old_siblings.find{ |a_rec| a_rec.sibling_id == rec.sibling_id and a_rec.name == rec.name and a_rec.value == rec.value}
-        if not old_rec.nil? 
-          # Remove it from the array so that the record will *not* be deleted from the database.
-          old_siblings.delete(old_rec)
-          found_match = true
+    new_siblings.each do |rec|
+      # If the product is not in the current type, then skip it (it should be processed when the update task reaches its type).
+      if current_type_products.include? rec.product_id 
+        found_match = false
+        old_siblings = old_siblings_by_product_id[rec.product_id]
+        if not old_siblings.nil? 
+          old_rec = old_siblings.find{ |a_rec| a_rec.sibling_id == rec.sibling_id and a_rec.name == rec.name and a_rec.value == rec.value}
+          if not old_rec.nil? 
+            # Remove it from the array so that the record will *not* be deleted from the database.
+            old_siblings.delete(old_rec)
+            found_match = true
+          end
         end
-      end
-      if not found_match 
-        # No match found so save the new record.
-        rec.save
+        if not found_match 
+          # No match found so save the new record.
+          rec.save
+        end
       end
     end
     
