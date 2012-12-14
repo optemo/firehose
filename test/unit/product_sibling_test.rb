@@ -47,6 +47,36 @@ class ProductSiblingTest < ActiveSupport::TestCase
     assert_equal "red", rec_2.value
   end
   
+  test "bundles can be siblings only with other bundles" do
+    b1 = create(:typed_product, id: 50, sku: "B01")
+    b2 = create(:typed_product, id: 51, sku: "B02")
+
+    create(:bin_spec, product_id: 50, name: "isBundle", value: true)
+    create(:bin_spec, product_id: 51, name: "isBundle", value: true)
+
+    create(:cat_spec, product_id: 50, name: "color", value: "purple")
+    create(:cat_spec, product_id: 51, name: "color", value: "red")
+    
+    # Define relationships with a bundle and a non-bundle
+    create(:text_spec, product_id: 50, name: "relations", value: '[{"sku": "B02", "type": "Variant"}, {"sku": "10159585","type": "Variant"}]')
+    ProductSibling.get_relations
+    
+    # Only two sibling records should have been created.
+    assert_equal(2, ProductSibling.all.length)
+    
+    rec_1 = ProductSibling.find_by_product_id(b1.id)
+    assert_not_nil rec_1
+    assert_equal 51, rec_1.sibling_id
+    assert_equal "color", rec_1.name
+    assert_equal "red", rec_1.value
+    
+    rec_2 = ProductSibling.find_by_sibling_id(b1.id)
+    assert_not_nil rec_2
+    assert_equal 51, rec_2.product_id
+    assert_equal "color", rec_2.name
+    assert_equal "purple", rec_2.value
+  end
+
   test "check two siblings groups" do
     t1 = create(:text_spec, product_id:10, name:"relations", value:'[{"sku": "10159585","type": "Variant"}]')
     t2 = create(:text_spec, product_id:12, name:"relations", value:'[{"sku": "10159587","type": "Variant"}]')
