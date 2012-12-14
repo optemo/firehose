@@ -313,11 +313,15 @@ class Product < ActiveRecord::Base
 
     # To save time, we skip bundles and siblings for shallow update. Note that if a new sibling or 
     # bundle appears in the feed, we will automatically upgrade to a deep update for the category.
+    foreign_products_updated = [] 
     if not is_shallow
       ProductBundle.get_relations
       #Get the color relationships loaded
       ProductSibling.get_relations
-      Equivalence.fill
+      
+      # foreign_products_updated is an array of products from other types whose equivalence ID may have changed
+      # (so they need to be reindexed).
+      foreign_products_updated = Product.find(Equivalence.fill)
     end
 
     #Customizations
@@ -329,11 +333,7 @@ class Product < ActiveRecord::Base
     # Reindex sunspot.
     # We do the index/commit calls in batches of 50 products, as larger batches can result 
     # in timeouts calling Solr (when running the update_parallel rake task).
-    products_to_save.each_slice(50) { |slice|
-      Sunspot.index(slice)
-      Sunspot.commit
-    }
-    products_to_update.values.each_slice(50) { |slice|
+    (products_to_save + products_to_update.values + foreign_products_updated).each_slice(50) { |slice|
       Sunspot.index(slice)
       Sunspot.commit
     }

@@ -671,7 +671,7 @@ class ProductTest < ActiveSupport::TestCase
     assert_equal 0, p111AsSibling.size, "Zero entries exist in product_siblings table for product 111 as sibling"
 
   end
-
+  
   test "Equivalence is deleted when product is removed from feed" do
     Product.feed_update
 
@@ -688,6 +688,37 @@ class ProductTest < ActiveSupport::TestCase
 
     assert_equal 0, equivalences.size, "Zero equivalence rows exist for product 222"
 
+  end
+
+  test "updating equivalence ID when equivalence class spans multiple types" do
+    p999 = create(:typed_product, id: 50, product_type: "B28381", sku: "999")
+    create(:cat_spec, product_id: p999.id, name: "color", value: "purple")
+
+    BestBuyApi.stubs(:product_search).with{|id| id == "111"}.returns(
+      { "sku" => "111", "name" => "Test Product 111", "regularPrice" => 279.99, "longDescription" => "Description of product 111 (Orange, Blue).", "isAdvertised" => true, 
+        "related" => '[{"sku": "999", "type": "Variant"}]', "isVisible" => true}) 
+    
+    # Updating the B22474 category.
+    Product.feed_update
+    
+    # Even though products are in separate types, same equivalence ID should have been assigned.
+    p111 = Product.find_by_sku("111")
+
+    p111_equiv = Equivalence.find_by_product_id(p111.id)
+    assert_not_nil p111_equiv
+    
+    p999_equiv = Equivalence.find_by_product_id(p999.id)
+    assert_not_nil p999_equiv
+    
+    assert_equal p111_equiv.eq_id, p999_equiv.eq_id
+    
+    # Ensure that the product in a different type was indexed with the new equivalence ID.
+    equiv_products = Product.search do 
+      with :eq_id_str, p111_equiv.eq_id
+    end
+    assert_equal 2, equiv_products.results.size
+    assert_not_nil equiv_products.results.find{ |product| product.id == p111.id }
+    assert_not_nil equiv_products.results.find{ |product| product.id == p999.id }
   end
 
   test "Product deleted if product_search raises error" do
