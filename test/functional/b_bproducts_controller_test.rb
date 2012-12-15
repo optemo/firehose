@@ -16,7 +16,8 @@ class BBproductsControllerTest < ActionController::TestCase
   end
 
   test "should get scrape for digital elph" do
-    get :show, product_type_id: "B22474", id: "10164410"
+    some_product = BestBuyApi.some_ids(id = "B28381", 1).first
+    get :show, product_type_id: "B22474", id: some_product.id
     assert_response :success
   end
 

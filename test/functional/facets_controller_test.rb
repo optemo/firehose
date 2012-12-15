@@ -114,27 +114,29 @@ class FacetsControllerTest < ActionController::TestCase
        "1"=>["", "Continuous", "saleprice", "saleprice", "", "asc", "false"],
        "2"=>["", "Continuous", "utility", "utility", "", "desc", "false"]},
      "compare_set"=>
-      {"0"=>["", "Categorical", "color", "color", "", "false", "false"]},
+      {"0"=>["", "Categorical", "color", "color", "", "false", "false"],
+      "1"=>["", "Categorical", "brand", "brand", "", "false", "false"]},
      "action"=>"create",
      "controller"=>"facets",
      "product_type_id"=>"B20218"}
 
     f4 = create(:facet, used_for: "sortby", id: 104)
 
-    original_filters = Facet.find_all_by_used_for("filter")
-    original_sorting = Facet.find_all_by_used_for("sortby")
-    original_compare = Facet.find_all_by_used_for("show")
+    pt = Session.product_type
+    original_filters = Facet.find_all_by_used_for_and_product_type("filter",pt)
+    original_sorting = Facet.find_all_by_used_for_and_product_type("sortby",pt)
+    original_compare = Facet.find_all_by_used_for_and_product_type("show",pt)
     post :create, request_data
     assert_response :success
     assert_template(nil)
 
-    updated_filters = Facet.find_all_by_used_for("filter")
-    updated_sorting = Facet.find_all_by_used_for("sortby")
-    updated_compare = Facet.find_all_by_used_for("show")
+    updated_filters = Facet.find_all_by_used_for_and_product_type("filter",pt)
+    updated_sorting = Facet.find_all_by_used_for_and_product_type("sortby",pt)
+    updated_compare = Facet.find_all_by_used_for_and_product_type("show",pt)
 
-    assert_not_equal original_filters.first, updated_filters.first, "filter facet set should be updated"
-    assert_not_equal original_sorting.count, updated_sorting.count, "sorting facet set should be updated"
-    assert_not_equal original_compare.first, updated_compare.first, "compare facet set should be updated"
+    assert_not_equal original_filters.first.name, updated_filters.first.name, "filter facet set should be updated"
+    assert_not_equal original_sorting.first.name, updated_sorting.first.name, "sorting facet set should be updated"
+    assert_not_equal original_compare.first.name, updated_compare.first.name, "compare facet set should be updated"
     assert_not_nil Facet.find_by_name_and_used_for('saleprice','sortby'), "newly added facet should be in the database"
     assert_equal "asc", Facet.find(104).style, "existing facet should be updated"
 
@@ -165,10 +167,10 @@ class FacetsControllerTest < ActionController::TestCase
     request_data["compare_set"] = "null"
     post :create, request_data
     assert_response :success
-    assert_empty Facet.find_all_by_used_for("filter"), 'facets deleted on reset'
-    assert_empty Facet.find_all_by_used_for("sortby"), 'facets deleted on reset'
-    assert_empty Facet.find_all_by_used_for("show"), 'facets deleted on reset'
-    assert_empty Facet.find_all_by_feature_type("Ordering"), 'facets deleted on reset'
+    assert_empty Facet.find_all_by_used_for_and_product_type("filter",pt), 'facets deleted on reset'
+    assert_empty Facet.find_all_by_used_for_and_product_type("sortby",pt), 'facets deleted on reset'
+    assert_empty Facet.find_all_by_used_for_and_product_type("show",pt), 'facets deleted on reset'
+    assert_empty Facet.find_all_by_feature_type_and_product_type("Ordering",pt), 'facets deleted on reset'
   end
 
   test "adding a heading to the layout" do

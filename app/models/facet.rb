@@ -40,7 +40,7 @@ class Facet < ActiveRecord::Base
        Facet.find_all_by_feature_type_and_product_type_and_used_for('Ordering', product_type, d.name).each { |o| o.destroy } if used_for == 'filter'
        d.destroy
      end
-     return if facet_set == "null"
+     return if facet_set == "null" or facet_set == ""
      # update the facets given the input from the page
      facet_set.each_pair do |index, vals|
        id = vals[0]
