@@ -18,7 +18,7 @@ class Equivalence < ActiveRecord::Base
       bundle = ProductBundle.find_by_bundle_id(p_id)
       
       if not bundle.nil?
-        main_product = Product.find(bundle.product_id)
+        main_product = Product.find_by_id(bundle.product_id)
         if not main_product.nil?
           p = main_product
           p_id = main_product.id
@@ -29,7 +29,7 @@ class Equivalence < ActiveRecord::Base
       # For each sibling we add all the bundles to the class.  And for each bundle,
       # we add all of its siblings to the class.      
       siblings = [p]
-      siblings += p.product_siblings.map{ |rec| Product.find(rec.sibling_id) }.compact
+      siblings += p.product_siblings.map{ |rec| Product.find_by_id(rec.sibling_id) }.compact
       
       equiv_prod_ids = {}
       
@@ -37,7 +37,7 @@ class Equivalence < ActiveRecord::Base
         equiv_prod_ids[product.id] = true
         product.product_bundles.each do |bundle|
           equiv_prod_ids[bundle.bundle_id] = true
-          bundle_product = Product.find(bundle.bundle_id)
+          bundle_product = Product.find_by_id(bundle.bundle_id)
           if not bundle_product.nil?
             bundle_product.product_siblings.each do |bundle_sibling|
               equiv_prod_ids[bundle_sibling.sibling_id] = true
