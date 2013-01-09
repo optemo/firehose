@@ -85,6 +85,67 @@ class ProductCategory < ActiveRecord::Base
         product_category
       end
     end
+    
+    # Updates the stored product category hierarchy from the best buy api, for a given retailer
+    def update_hierarchy(top_node, retailer)
+      @categories_to_save = []
+      @translations_to_save = []
+      @retailer = retailer
+      traverse(top_node, 1, 1)
+      
+      ActiveRecord::Base.transaction do
+        # In a transaction, i.e. all of these must complete successfully, otherwise nothing is saved or deleted:
+        # delete the old categories for this retailer
+        ProductCategory.where(:retailer => retailer).delete_all
+        # save the new categories
+        ProductCategory.import @categories_to_save
+        # save all translations
+        @translations_to_save.each do |key, english_name, french_name|
+          I18n.backend.store_translations(:en, {key => english_name})
+          I18n.backend.store_translations(:fr, {key => french_name})
+        end
+      end
+    end
+    
+    # used in updating the hierarchy: traverses the subtree of categories starting at root_node, 
+    # marks nodes in DFS order, and gets English and French names of the categories
+    def traverse(root_node, i, level)
+      name = root_node.values.first
+      catid = root_node.keys.first
+      english_name = root_node.values.first
+      
+      Session.product_type = @retailer
+      
+      #print catid + ' '
+      
+      french_name = BestBuyApi.get_category(catid, false)["name"]
+      
+      # These categories are left singular in the feed
+      # Regex is used fit file encoding (could change it to UTF 8 (according to stackoverflow post) and use the string normally with 'e' accent aigu)
+      if english_name == "Digital SLR" && /^Appareil photo reflex (?<need_accent_numerique>num.rique)$/ =~ french_name
+        english_name = "Digital SLRs"
+        french_name = "Appareils photo reflex #{need_accent_numerique}s"
+      end
+      
+      prefix = @retailer
+      
+      cat = ProductCategory.new(:product_type => prefix + catid, :feed_id => catid, :retailer => @retailer, 
+            :l_id => i, :level => level)
+            
+      i = i + 1
+      children = BestBuyApi.get_subcategories(catid).values.first
+      children.each do |child|
+        i = traverse(child, i, level+1)
+      end
+      
+      cat.r_id = i
+      @categories_to_save << cat
+      @translations_to_save << [cat.product_type, english_name, french_name]
+      
+      i = i + 1
+      return i
+    end
+    
   end
 end
 
