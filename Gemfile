@@ -85,5 +85,5 @@ group :assets do
   gem 'uglifier'
   gem 'yui-compressor'
   gem 'execjs'
-  gem 'therubyracer'
+  gem 'therubyracer', "~> 0.10.2"
 end
