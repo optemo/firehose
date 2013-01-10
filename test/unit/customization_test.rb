@@ -485,7 +485,7 @@ class CustomizationTest < ActiveSupport::TestCase
 
     # Out of stock
     create(:cont_spec, product_id: out_of_stock.id, name: "price", value: 300.99)
-    create(:cont_spec, product_id: out_of_stock, name: "saleprice", value: 280.99)
+    create(:cont_spec, product_id: out_of_stock.id, name: "saleprice", value: 280.99)
     create(:cat_spec, product_id: out_of_stock.id, name: "saleEndDate", value: "2012-03-20")
 
     create(:facet, name: "hdmi", feature_type: "Binary", used_for: "utility", value: -0.06, product_type: "B20218")

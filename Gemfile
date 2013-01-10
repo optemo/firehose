@@ -71,7 +71,7 @@ group :test do
   # gem 'growl_notify'
   gem 'factory_girl_rails'
   # Ensure mocha is loaded *after* the test libraries it modifies
-  gem 'mocha', :require => false
+  gem 'mocha', '~> 0.12.3', :require => false
 end
 
 group :accessories do
