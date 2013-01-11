@@ -11,7 +11,7 @@ gem 'mysql2', '> 0.3'
 # gem 'unicorn'
 
 # Deploy with Capistrano
-gem 'capistrano'
+gem 'capistrano', "2.13.5"
 gem 'capistrano-ext'
 gem 'rvm-capistrano'
 
@@ -43,8 +43,6 @@ gem 'i18n-active_record',
 gem "dalli", "1.0.2"
 gem 'json'
 gem 'activerecord-import'
-gem 'capistrano'
-gem 'capistrano-ext'
 gem 'rubyzip'
 gem 'jquery-rails'
 gem 'jstree-rails', :git => 'git://github.com/tristanm/jstree-rails.git'

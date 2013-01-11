@@ -70,7 +70,7 @@ GEM
       nokogiri (>= 1.4.4)
       uuidtools (~> 2.1)
     builder (3.0.4)
-    capistrano (2.14.1)
+    capistrano (2.13.5)
       highline
       net-scp (>= 1.0.0)
       net-sftp (>= 2.0.0)
@@ -236,7 +236,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord-import
   aws-sdk
-  capistrano
+  capistrano (= 2.13.5)
   capistrano-ext
   coffee-rails
   dalli (= 1.0.2)
