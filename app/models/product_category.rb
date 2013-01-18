@@ -101,8 +101,8 @@ class ProductCategory < ActiveRecord::Base
         ProductCategory.import @categories_to_save
         # save all translations
         @translations_to_save.each do |key, english_name, french_name|
-          I18n.backend.store_translations(:en, {key => english_name})
-          I18n.backend.store_translations(:fr, {key => french_name})
+          I18n.backend.store_translations(:en, { key => {"name" => english_name} })
+          I18n.backend.store_translations(:fr, { key => {"name" => french_name} })
         end
       end
     end
