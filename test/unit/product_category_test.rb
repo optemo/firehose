@@ -39,16 +39,74 @@ class ProductCategoryTest < ActiveSupport::TestCase
   
   test "get_parent method" do  
     #test a node with for its parent
-     assert_equal "B29340", ProductCategory.get_parent("B29341").first
-     #test a node that doesn't exist
-     assert_nil ProductCategory.get_parent("23456")
+    assert_equal "B29340", ProductCategory.get_parent("B29341").first
+    #test a node that doesn't exist
+    assert_nil ProductCategory.get_parent("23456")
   end
   
-   test "get_subcategories method" do  
-      #test a node for its subcategories  
-      assert_equal 2, ProductCategory.get_subcategories("B29339").uniq.count
-      #test a node that doesn't have nay subcategories
-      assert_equal [],ProductCategory.get_subcategories("B29342")
+  test "get_subcategories method" do  
+    #test a node for its subcategories  
+    assert_equal 2, ProductCategory.get_subcategories("B29339").uniq.count
+    #test a node that doesn't have nay subcategories
+    assert_equal [],ProductCategory.get_subcategories("B29342")
+  end
+
+  test "Large drop in number of categories" do
+    (1..100).each do |offset|
+      id = (20000 + offset).to_s
+      BestBuyApi.stubs(:get_category).with{ |id_param| id_param == id }.returns({"id" => id, "name" => "Category #{id}"})
+      BestBuyApi.stubs(:get_subcategories).with{ |id_param| id_param == id }.returns({"id" => id, "name" => "Category #{id}"} => [])
+    end
+    
+    cats_20 = (1..20).map do |offset| 
+      id = (20000 + offset).to_s
+      {id => "Category #{id}"}
+    end
+    cats_45 = (1..45).map do |offset| 
+      id = (20000 + offset).to_s
+      {id => "Category #{id}"}
+    end
+    cats_60 = (1..60).map do |offset| 
+      id = (20000 + offset).to_s
+      {id => "Category #{id}"}
+    end
+    result_20 = {{"Departments" => "Departments"} => cats_20} 
+    result_45 = {{"Departments" => "Departments"} => cats_45} 
+    result_60 = {{"Departments" => "Departments"} => cats_60} 
+    
+    Session.new "BDepartments"
+    
+    BestBuyApi.stubs(:get_category).with{ |id_param| id_param == "Departments" }.returns({"id" => "Departments", "name" => "Departments"})
+    
+    # Start with 45 categories
+    BestBuyApi.stubs(:get_subcategories).with{ |id_param| id_param == "Departments" }.returns(result_45)
+    ProductCategory.update_hierarchy({"Departments" => "Departments"}, "B")
+ 
+    assert_equal(46, ProductCategory.where(retailer: "B").size)
+    
+    # Drop to 20 categories -- should be no problem, since we do not check for large drop unless original number of 
+    # categories >= 50
+    BestBuyApi.stubs(:get_subcategories).with{ |id_param| id_param == "Departments" }.returns(result_20)
+    
+    ProductCategory.update_hierarchy({"Departments" => "Departments"}, "B")
+ 
+    assert_equal(21, ProductCategory.where(retailer: "B").size)
+    
+    # Start with 60 categories.
+    BestBuyApi.stubs(:get_subcategories).with{ |id_param| id_param == "Departments" }.returns(result_60)
+    
+    ProductCategory.update_hierarchy({"Departments" => "Departments"}, "B")
+ 
+    assert_equal(61, ProductCategory.where(retailer: "B").size)
+       
+    # Drop to 20 categories, now we should get an exception.
+    BestBuyApi.stubs(:get_subcategories).with{ |id_param| id_param == "Departments" }.returns(result_20)
+    
+   assert_raise BestBuyApi::InvalidFeedError, "ProductCategory.update_hierarchy throws an InvalidFeedError" do
+     ProductCategory.update_hierarchy({"Departments" => "Departments"}, "B")
    end
+    
+    assert_equal(61, ProductCategory.where(retailer: "B").size)
+  end  
   
 end

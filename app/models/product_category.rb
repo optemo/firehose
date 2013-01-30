@@ -93,8 +93,18 @@ class ProductCategory < ActiveRecord::Base
       @retailer = retailer
       traverse(top_node, 1, 1)
       
+      # In a transaction, i.e. all of these must complete successfully, otherwise nothing is saved or deleted
       ActiveRecord::Base.transaction do
-        # In a transaction, i.e. all of these must complete successfully, otherwise nothing is saved or deleted:
+        current_categories = ProductCategory.where(:retailer => retailer)
+        if current_categories.size >= 50 
+          diff = current_categories.size - @categories_to_save.size
+          if diff >= 0.5 * current_categories.size
+            # If the number of categories has dropped by more than 50%
+            raise BestBuyApi::InvalidFeedError, "Current number of categories is #{current_categories.size} " +
+                "while new number of categories is #{@categories_to_save.size}: categories will not be updated"
+          end
+        end
+        
         # delete the old categories for this retailer
         ProductCategory.where(:retailer => retailer).delete_all
         # save the new categories
