@@ -6,7 +6,7 @@ class FutureshopController < AccessoriesController
     # Laptops: F1002, Tablets: F29958, TVs: Ftvs, Fridges: F1953, Cameras: F1127, DSLRs: F22553
     product_types = ["F1002","F29958","Ftvs","F1953","F1127","F23773"]
     ids = get_products(product_types)
-    render "index", :locals => {:best_sellers => ids}
+    render "landing", :locals => {:best_sellers => ids}
   end
   
   def show

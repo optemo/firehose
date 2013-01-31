@@ -6,15 +6,15 @@
 			    <span class="num" style="background-color:#66FFFF"><%= product.store_sales.to_i %></span>
 					<%= image_tag product.img_url, :class => "productimg", title: "SKU:#{product.sku}" %> 	
 					<div class="title">		
-  					<%= product.name %>
+  					<%= "#{product.sku}" %>
   				</div>
 				</div>
 			</td>
-			<td class="accessories">
+			<td class="accessories" style="width:1000px;">
 		    <div style="margin-bottom:2px;">Recommended Accessories:</div>
         <% acc = get_accessories(product)%>
 	      <% acc.each_pair do |title,data| %>
-		      <div class="cat_name"><%= title+"  (#{data[0]})"%></div>
+		      <div class="cat_name"><%= title+"(#{data[0]})"%></div>
 		      <%= render partial: "accessory", collection: data[1] %>
 		      <br><br>
 		    <% end %>

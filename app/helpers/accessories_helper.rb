@@ -4,7 +4,7 @@ module AccessoriesHelper
   def get_accessories (product)
     acc = {}
     total_purchases = product.total_acc_sales
-    acc["Top #{@accessories_per_product_type}"] = [total_purchases,Accessory.select("value,count").where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type)]
+    acc["Top 5"] = [total_purchases,Accessory.select("value,count").where(:product_id => product.id, :name => "accessory_id").order("count DESC").limit(@accessories_per_product_type)]
     leaves_included = []
     Accessory.select("value,count").where(:name => "accessory_type", :product_id => product.id).order("count DESC").limit(@accessory_types_per_bestselling).each do |cat|
       accessories = Accessory.select("value,count").where(:acc_type => cat.value, :name => "accessory_id", :product_id => product.id).order("count DESC").limit(@accessories_per_product_type)
@@ -28,7 +28,7 @@ module AccessoriesHelper
       end
     end
 
-    acc["Top #{@accessories_per_product_type}: Limited"] = [total_purchases, get_top_limited(product)]
+    acc["Top 5: Limited"] = [total_purchases, get_top_limited(product)]
     acc
   end
   
