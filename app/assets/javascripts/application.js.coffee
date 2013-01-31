@@ -3,6 +3,7 @@
 #= require jquery.jeditable.min
 #= require jquery.validate.min
 #= require jstree
+#= require bestbuy
 
 # The ajax handler takes data from the ajax call and inserts the data into the #main part and then the #filtering part. 
 ajaxhandler = (data) ->
