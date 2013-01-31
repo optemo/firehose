@@ -10,7 +10,7 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
-  <%= render partial: 'header' %>
+  <%= render partial: 'header' unless @no_header %>
   <div id="content">
   <%= yield %>
   </div>

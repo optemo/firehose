@@ -1,5 +1,4 @@
 class AccessoriesController < ApplicationController
-  layout "plain"
 
   # Instance variables are initialized here. Change the number of accessories per product... here
   def initialize_constants

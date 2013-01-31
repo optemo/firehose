@@ -1,7 +1,6 @@
 class FutureshopController < AccessoriesController
-  layout "plain"
-    
   def index
+    @no_header = true
     initialize_constants()
     # Laptops: F1002, Tablets: F29958, TVs: Ftvs, Fridges: F1953, Cameras: F1127, DSLRs: F22553
     product_types = ["F1002","F29958","Ftvs","F1953","F1127","F23773"]
@@ -10,6 +9,7 @@ class FutureshopController < AccessoriesController
   end
   
   def show
+    @no_header = true
     initialize_constants()
     # The bestsellers do not have a count (accessories do...)
     if params.has_key?(:count)
