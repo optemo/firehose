@@ -15,8 +15,10 @@ task :error_scan => [:environment] do
   current_time = Time.new
   #get appname
   path_array = file_path.split('/')
-  if path_array[0].match('u') && path_array[1].match('apps')
-    appname = path_array[2]
+  if path_array.length > 3
+    if path_array[1].match('u') && path_array[2].match('apps')
+      appname = path_array[3]
+    end
   end
   
   #add timestamp to end of file
