@@ -21,7 +21,7 @@ task :error_scan => [:environment] do
   
   #add timestamp to end of file
   File.open(file_path, 'a') do |s|
-    s.puts "LOGSCAN: " + current_time.to_s
+    s.puts "\nLOGSCAN: " + current_time.to_s
   end
   
   #get previous timestamp
