@@ -54,7 +54,7 @@ task :error_scan => [:environment] do
       end
       #build the error message to add to the email
       unless s.nil? || reached_previous_date == false
-        if s.match('rake aborted!')
+        if s.match('rake aborted!') || s.match('Got the following error in scraping current category')
           unless most_recent_date == ""
             error_text = "An error occured in a task started at " + most_recent_date
           end
