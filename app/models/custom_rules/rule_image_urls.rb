@@ -45,15 +45,18 @@ class RuleImageURLs < Customization
       if size_exists?("#{base_url}#{@image_sizes["large"]}x#{@image_sizes["large"]}/#{sku_url}")
         @size_existence['large'] = true
       end
-      
       res = []
       @image_sizes.each do |name, size|
         /(?<size_tag>\w).*/ =~ name
         if @size_existence[name] && !sku_url.empty?
+          name = "image_url_#{size_tag}"
           # Save if URL is different from the default
           unless uses_default_url
-            res << makespec(pid, "image_url_#{size_tag}", "#{base_url}#{size}x#{size}/#{sku_url}")
+            res << makespec(pid, name, "#{base_url}#{size}x#{size}/#{sku_url}")
           end
+          #Remove old substitute sizes if they exist
+          p = TextSpec.find_or_initialize_by_product_id_and_name(pid, name)
+          p.destroy if p
         else
           # Save other image size (ideally larger) in its place
           case size_tag
