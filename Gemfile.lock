@@ -26,7 +26,7 @@ GIT
     sunspot_solr (2.0.0.pre.120720)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     POpen4 (0.1.4)
       Platform (>= 0.4.0)
@@ -70,7 +70,7 @@ GEM
       nokogiri (>= 1.4.4)
       uuidtools (~> 2.1)
     builder (3.0.4)
-    capistrano (2.13.5)
+    capistrano (2.15.4)
       highline
       net-scp (>= 1.0.0)
       net-sftp (>= 2.0.0)
@@ -119,7 +119,7 @@ GEM
     guard-test (0.7.0)
       guard (>= 1.1)
       test-unit (~> 2.2)
-    highline (1.6.15)
+    highline (1.6.18)
     hike (1.2.1)
     httparty (0.10.0)
       multi_json (~> 1.0)
@@ -145,13 +145,13 @@ GEM
     multi_json (1.7.1)
     multi_xml (0.5.1)
     mysql2 (0.3.11)
-    net-scp (1.0.4)
-      net-ssh (>= 1.99.1)
-    net-sftp (2.0.5)
-      net-ssh (>= 2.0.9)
-    net-ssh (2.6.3)
-    net-ssh-gateway (1.1.0)
-      net-ssh (>= 1.99.1)
+    net-scp (1.1.0)
+      net-ssh (>= 2.6.5)
+    net-sftp (2.1.2)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.7)
+    net-ssh-gateway (1.2.0)
+      net-ssh (>= 2.6.5)
     nokogiri (1.5.6)
     open4 (1.3.0)
     options (2.3.0)
@@ -236,7 +236,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord-import
   aws-sdk
-  capistrano (= 2.13.5)
+  capistrano
   capistrano-ext
   coffee-rails
   dalli (= 1.0.2)
