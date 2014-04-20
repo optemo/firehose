@@ -59,7 +59,7 @@ module Firehose
       :address              => "smtp.gmail.com",
       :port                 => 587,
       :user_name            => 'auto@optemo.com',
-      :password             => '***REMOVED***',
+      :password             => '**REMOVED**',
       :authentication       => 'plain',
       :enable_starttls_auto => true  }
   end
